@@ -1,0 +1,6 @@
+pnpm-lock.yaml
+.output/
+.vercel/
+dist/
+server/generated/
+prisma/migrations/
