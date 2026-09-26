@@ -68,9 +68,11 @@ src/                   # FRONT — SPA React, tourne uniquement dans le navigate
   app.tsx              # composant racine
   features/<domaine>/  # import, review, dashboard… : components/ + hooks/ du domaine
   components/          # UI partagée entre features
-  lib/                 # utilitaires front (client tRPC, formatage…)
+  lib/                 # utilitaires front : trpc.ts (client + queryClient), formatage…
 server/                # BACKEND — Nitro, mêmes conventions que le server/ de Nuxt
   api/                 # routes HTTP : server/api/health.ts → GET /api/health
+    trpc/[...path].ts  # point d'entrée HTTP de tRPC
+  trpc/                # init.ts (contexte, procédures), root.ts (appRouter), routers/<domaine>.ts
   lib/                 # db.ts (PrismaClient singleton), env.ts (validation Zod des variables)
   generated/prisma/    # client Prisma généré — gitignoré, ne pas éditer
 prisma/                # schema.prisma, migrations/, seed.ts
@@ -86,6 +88,13 @@ nitro.config.ts        # serverDir: ./server
   (ex. le type du routeur tRPC). Jamais d'import runtime (Prisma, secrets…) côté front.
 - **Données** : toujours via tRPC + TanStack Query. **Pas de `fetch` dans un `useEffect`.**
   `useEffect` est réservé à la synchro avec un système externe (oxlint le signale sinon).
+- **Pattern de lecture** : `useQuery(trpc.<domaine>.<proc>.queryOptions())` avec `trpc` de
+  `@/lib/trpc`, encapsulé dans un hook de feature ; gérer `isPending` / `isError` dans le
+  composant. Écriture : `useMutation(trpc.x.y.mutationOptions())` + invalidation ciblée.
+- **Nouvelle route tRPC** : `server/trpc/routers/<domaine>.ts` + enregistrement dans
+  `server/trpc/root.ts`. Entrées validées par `.input(zodSchema)`.
+- **Valeurs dérivées** calculées pendant le rendu (≈ `computed`), pas stockées dans un
+  `useState` ; `useMemo` seulement si le calcul est coûteux.
 - **Hooks custom** (`useXxx`) dans `features/<domaine>/hooks/` dès qu'une logique à état est
   réutilisée ou alourdit un composant (≈ composable Vue).
 - **Montants** : entiers en **centimes**, signés (négatif = débit). Jamais de float pour de
