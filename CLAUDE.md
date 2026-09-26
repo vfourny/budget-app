@@ -48,7 +48,17 @@ pnpm build          # build de prod (fait aussi en CI) → .output/ (ou .vercel/
 pnpm preview        # sert le build de prod localement
 pnpm lint:fix       # autofix oxlint
 pnpm format         # prettier --write
+
+pnpm db:migrate     # prisma migrate dev (crée + applique une migration, régénère le client)
+pnpm db:seed        # seed idempotent (comptes + catégories)
+pnpm db:studio      # Prisma Studio
 ```
+
+Premier setup : `cp .env.example .env` (URLs Neon), `pnpm install` (génère le client Prisma),
+`pnpm db:deploy && pnpm db:seed`.
+
+Déploiement Vercel : le script `vercel-build` applique les migrations (`prisma migrate deploy`)
+avant `vite build` → `DATABASE_URL` **et** `DIRECT_URL` doivent être définies sur Vercel.
 
 ## Architecture
 
@@ -61,6 +71,10 @@ src/                   # FRONT — SPA React, tourne uniquement dans le navigate
   lib/                 # utilitaires front (client tRPC, formatage…)
 server/                # BACKEND — Nitro, mêmes conventions que le server/ de Nuxt
   api/                 # routes HTTP : server/api/health.ts → GET /api/health
+  lib/                 # db.ts (PrismaClient singleton), env.ts (validation Zod des variables)
+  generated/prisma/    # client Prisma généré — gitignoré, ne pas éditer
+prisma/                # schema.prisma, migrations/, seed.ts
+prisma.config.ts       # config CLI Prisma 7 (URL directe pour les migrations)
 index.html             # page unique de la SPA
 vite.config.ts         # plugins React + Nitro, alias @/ (src) et @server/ (server)
 nitro.config.ts        # serverDir: ./server
@@ -76,6 +90,10 @@ nitro.config.ts        # serverDir: ./server
   réutilisée ou alourdit un composant (≈ composable Vue).
 - **Montants** : entiers en **centimes**, signés (négatif = débit). Jamais de float pour de
   l'argent.
+- **Prisma** : côté serveur, toujours passer par `db` de `@server/lib/db`. Toute modif de
+  `schema.prisma` s'accompagne d'une migration versionnée dans `prisma/migrations/`.
+- **Dates** : `Transaction.date` en `@db.Date` ; `month` (1-12) et `year` dénormalisés pour les
+  agrégations.
 - Validation des entrées : schémas Zod, partagés entre tRPC et formulaires.
 - UI en **français**, code/identifiants/commits en **anglais**.
 - Imports : `@/…` pour `src/`, `@server/…` pour `server/`. `import type` obligatoire pour les
@@ -121,6 +139,11 @@ Hors scope : synchro bancaire auto, multi-utilisateurs, facturation/TVA en v1.
   les conventions `server/` de Nuxt et se déploie sur Vercel sans config.
 - Nitro 3 est encore en **beta** (version épinglée exactement dans `package.json`) ; c'est
   l'approche recommandée par Vercel pour ajouter une API à un projet Vite.
+- Neon : `DATABASE_URL` = URL pooled (runtime, adapter `@prisma/adapter-neon`),
+  `DIRECT_URL` = URL directe (CLI Prisma / migrations, lue dans `prisma.config.ts`).
+- `Transaction.accountId` (FK) plutôt qu'un `accountType` : le type PERSO/PRO vient de l'Account,
+  ce qui permet plusieurs comptes par type. Supprimer un `ImportBatch` supprime ses transactions.
+- Prisma 7 stable (la 8 est en RC).
 - pnpm, une seule app (pas de monorepo).
 - TypeScript 6.0 (comme le template Vite), oxlint plutôt qu'ESLint (template Vite, plus rapide,
   règles `rules-of-hooks` / `exhaustive-deps` incluses).

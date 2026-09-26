@@ -7,8 +7,26 @@
   "rules": {
     "react/rules-of-hooks": "error",
     "react/exhaustive-deps": "error",
-    "react/only-export-components": ["warn", { "allowConstantExport": true }],
-    "no-console": ["warn", { "allow": ["warn", "error"] }]
+    "react/only-export-components": [
+      "warn",
+      {
+        "allowConstantExport": true
+      }
+    ],
+    "no-console": [
+      "warn",
+      {
+        "allow": ["warn", "error"]
+      }
+    ]
   },
-  "ignorePatterns": ["server/generated/**", ".output/**", ".vercel/**", "dist/**"]
+  "ignorePatterns": ["server/generated/**", ".output/**", ".vercel/**", "dist/**"],
+  "overrides": [
+    {
+      "files": ["prisma/**"],
+      "rules": {
+        "no-console": "off"
+      }
+    }
+  ]
 }
