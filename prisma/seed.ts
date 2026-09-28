@@ -13,7 +13,7 @@ const prisma = new PrismaClient({ adapter: new PrismaNeon({ connectionString }) 
 
 const accounts = [
   { name: "Compte courant perso", type: AccountType.PERSO, bank: "BoursoBank" },
-  { name: "Compte pro Stygma", type: AccountType.PRO, bank: null },
+  { name: "Compte pro Stygma", type: AccountType.PRO, bank: "Banque Populaire" },
 ];
 
 // Catégories perso, dans l'ordre des colonnes du Google Sheet (= sortOrder).
