@@ -1,4 +1,5 @@
 onlyBuiltDependencies:
   - "@prisma/engines"
   - esbuild
+  - lefthook
   - prisma

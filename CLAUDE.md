@@ -117,6 +117,9 @@ nitro.config.ts        # serverDir: ./server
   `/ship-pr`. Ne présenter que du vert.
 - Remplir `.github/pull_request_template.md`, section « Notes React » incluse.
 - CI GitHub Actions (`.github/workflows/ci.yml`) : lint, typecheck, format, build sur chaque PR.
+- Hook Git pre-commit (`lefthook.yml`, installé par `pnpm install`) : oxlint --fix + Prettier
+  sur les fichiers stagés, commit bloqué s'il reste une erreur. Ne pas contourner avec
+  `--no-verify` : corriger l'erreur.
 - Hook Claude Code (`.claude/hooks/check.sh`) : prettier + oxlint --fix + tsc après chaque
   édition ; corrige immédiatement ce qu'il remonte.
 - Questions de clarification : **regroupées une fois par feature**. Si ce n'est pas bloquant,
