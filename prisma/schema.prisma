@@ -9,7 +9,7 @@ datasource db {
   provider = "postgresql"
 }
 
-enum AccountType {
+enum BankAccountType {
   PERSO
   PRO
 }
@@ -24,70 +24,73 @@ enum Envelope {
   PRO
 }
 
+/// Catégorie d'une transaction (liste figée, colonnes du Google Sheet). Le libellé affiché et
+/// l'enveloppe de rattachement vivent dans `src/lib/categories.ts`.
+enum TransactionCategory {
+  ESSENCE
+  ASSURANCE
+  RESTAURANT
+  ALIMENTAIRE
+  SOIREE
+  LOISIRS
+  VETEMENTS_SOINS
+  SANTE
+  TRANSPORT
+  IMPOTS_TAXES
+  AUTRES_ABONNEMENTS
+  AUTRES
+  EPARGNE_LONG_TERME
+}
+
 enum ImportStatus {
   PENDING_REVIEW
   VALIDATED
 }
 
 /// Un compte bancaire (ex. compte courant perso, compte pro Stygma).
-model Account {
-  id            String        @id @default(cuid())
-  name          String        @unique
-  type          AccountType
+model BankAccount {
+  id            String          @id @default(cuid())
+  name          String          @unique
+  type          BankAccountType
   bank          String?
-  createdAt     DateTime      @default(now())
+  createdAt     DateTime        @default(now())
   importBatches ImportBatch[]
   transactions  Transaction[]
 }
 
-model Category {
-  id           String        @id @default(cuid())
-  /// Identifiant stable (seed idempotent, few-shot du prompt de catégorisation).
-  slug         String        @unique
-  name         String
-  envelope     Envelope
-  sortOrder    Int           @default(0)
-  archived     Boolean       @default(false)
-  createdAt    DateTime      @default(now())
-  transactions Transaction[]
-
-  @@index([envelope])
-}
-
 /// Un fichier de relevé importé. Les transactions ne sont écrites qu'à la validation.
 model ImportBatch {
-  id           String        @id @default(cuid())
-  accountId    String
-  account      Account       @relation(fields: [accountId], references: [id])
-  fileName     String
-  status       ImportStatus  @default(PENDING_REVIEW)
-  createdAt    DateTime      @default(now())
-  validatedAt  DateTime?
-  transactions Transaction[]
+  id            String        @id @default(cuid())
+  bankAccountId String
+  bankAccount   BankAccount   @relation(fields: [bankAccountId], references: [id])
+  fileName      String
+  status        ImportStatus  @default(PENDING_REVIEW)
+  createdAt     DateTime      @default(now())
+  validatedAt   DateTime?
+  transactions  Transaction[]
 
-  @@index([accountId])
+  @@index([bankAccountId])
 }
 
 model Transaction {
-  id            String       @id @default(cuid())
-  date          DateTime     @db.Date
+  id            String               @id @default(cuid())
+  date          DateTime             @db.Date
   label         String
   /// Montant en centimes, signé : négatif = débit, positif = crédit.
   amountCents   Int
   /// Dénormalisés depuis `date` pour les agrégations mois / année.
-  month         Int          @db.SmallInt
-  year          Int          @db.SmallInt
-  accountId     String
-  account       Account      @relation(fields: [accountId], references: [id])
-  categoryId    String?
-  category      Category?    @relation(fields: [categoryId], references: [id], onDelete: SetNull)
+  month         Int                  @db.SmallInt
+  year          Int                  @db.SmallInt
+  bankAccountId String
+  bankAccount   BankAccount          @relation(fields: [bankAccountId], references: [id])
+  category      TransactionCategory?
   importBatchId String?
-  importBatch   ImportBatch? @relation(fields: [importBatchId], references: [id], onDelete: Cascade)
-  createdAt     DateTime     @default(now())
-  updatedAt     DateTime     @updatedAt
+  importBatch   ImportBatch?         @relation(fields: [importBatchId], references: [id], onDelete: Cascade)
+  createdAt     DateTime             @default(now())
+  updatedAt     DateTime             @updatedAt
 
   @@index([year, month])
-  @@index([accountId, year, month])
-  @@index([categoryId])
+  @@index([bankAccountId, year, month])
+  @@index([category])
   @@index([importBatchId])
 }

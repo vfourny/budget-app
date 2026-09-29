@@ -1,14 +1,15 @@
-import { useCategoriesByEnvelope } from "@/features/categories/hooks/use-categories-by-envelope";
-import { ENVELOPE_LABELS } from "@/lib/envelopes";
+import { TRANSACTION_CATEGORIES, TRANSACTION_CATEGORY_ORDER } from "@/lib/categories";
+import { ENVELOPE_LABELS, ENVELOPE_ORDER } from "@/lib/envelopes";
 
 export function CategoryList() {
-  const { groups, isPending, isError, error } = useCategoriesByEnvelope();
-
-  // Early returns ≈ v-if / v-else-if : un composant React est une fonction, on retourne
-  // simplement le JSX adapté à chaque état.
-  if (isPending) return <p>Chargement…</p>;
-  if (isError) return <p role="alert">Erreur : {error.message}</p>;
-  if (groups.length === 0) return <p>Aucune catégorie. Lance `pnpm db:seed`.</p>;
+  // Valeurs dérivées calculées pendant le rendu (≈ computed) à partir d'une constante : pas de
+  // fetch ni d'état, la liste est figée (enum Prisma + libellés dans `@/lib/categories`).
+  const groups = ENVELOPE_ORDER.map((envelope) => ({
+    envelope,
+    categories: TRANSACTION_CATEGORY_ORDER.filter(
+      (category) => TRANSACTION_CATEGORIES[category].envelope === envelope,
+    ),
+  })).filter((group) => group.categories.length > 0);
 
   return (
     <div>
@@ -18,7 +19,7 @@ export function CategoryList() {
           <h2>{ENVELOPE_LABELS[group.envelope]}</h2>
           <ul>
             {group.categories.map((category) => (
-              <li key={category.id}>{category.name}</li>
+              <li key={category}>{TRANSACTION_CATEGORIES[category].label}</li>
             ))}
           </ul>
         </section>
