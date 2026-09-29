@@ -4,7 +4,7 @@ import type { BankCsvConfig } from "@server/lib/csv/types";
 // double (bug d'export connu côté BoursoBank) : la 1ʳᵉ occurrence (colonne 6) est en fait le
 // montant de l'opération, la 2ᵉ (colonne 10) le vrai solde courant. On mappe donc par index de
 // colonne plutôt que par nom d'en-tête.
-export const boursoConfig: BankCsvConfig = {
+export const boursobankConfig: BankCsvConfig = {
   bank: "BoursoBank",
   delimiter: ";",
   hasHeader: true,
