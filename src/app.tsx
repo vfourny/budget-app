@@ -3,6 +3,7 @@ import { Route, Routes } from "react-router";
 import { AppLayout } from "@/features/layout/components/app-layout";
 import { HomePage } from "@/pages/home-page";
 import { ImportPage } from "@/pages/import-page";
+import { ImportReviewPage } from "@/pages/import-review-page";
 import { ImportsPage } from "@/pages/imports-page";
 import { PersonalPage } from "@/pages/personal-page";
 import { ProPage } from "@/pages/pro-page";
@@ -19,6 +20,7 @@ export function App() {
         <Route path="pro" element={<ProPage />} />
         <Route path="imports" element={<ImportsPage />} />
         <Route path="imports/nouveau" element={<ImportPage />} />
+        <Route path="imports/:importId" element={<ImportReviewPage />} />
         <Route path="reglages" element={<SettingsPage />} />
       </Route>
     </Routes>

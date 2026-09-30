@@ -14,7 +14,8 @@ export const queryClient = new QueryClient({
   },
 });
 
-const trpcClient = createTRPCClient<AppRouter>({
+/** Client « brut » : pour enchaîner plusieurs appels dans une même mutation. */
+export const trpcClient = createTRPCClient<AppRouter>({
   links: [httpBatchLink({ url: "/api/trpc", transformer: superjson })],
 });
 

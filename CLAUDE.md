@@ -152,7 +152,7 @@ schéma Zod + modèle Prisma, ajout d'un widget dashboard).
 2. Thème obsidian/platine + routing client (fait : Mantine + React Router, menu latéral de la maquette)
 3. Upload CSV (parser générique, mapping de colonnes par banque) (fait)
 4. Route tRPC `categorize` (API Claude, few-shot sur transactions validées, JSON `category` (valeur de l'enum) + `confidence`) (fait)
-5. Écran de relecture (tableau éditable groupé par import, correction inline, « Valider »)
+5. Écran de relecture : historique + tableau de correction (fait) ; « Valider », « Annuler l'import » / suppression (à faire, PR suivante)
 6. Dashboard mois (par catégorie, enveloppe recommandée vs réel) + vue année
 7. Après validation du MVP perso : partie pro Stygma (TVA, facturation, prévisionnel/réel)
 
