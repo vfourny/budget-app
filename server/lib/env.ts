@@ -5,7 +5,9 @@ import { z } from "zod";
 const serverEnvSchema = z.object({
   DATABASE_URL: z.url(),
   // Optionnelle au démarrage : seule la route `categorize.run` en a besoin (erreur claire sinon).
-  ANTHROPIC_API_KEY: z.string().min(1).optional(),
+  GEMINI_API_KEY: z.string().min(1).optional(),
+  // Modèle Gemini utilisé (défaut dans `server/lib/gemini.ts`).
+  GEMINI_MODEL: z.string().min(1).optional(),
   NODE_ENV: z.enum(["development", "test", "production"]).default("development"),
 });
 

@@ -3,7 +3,7 @@
 App perso de budget (méthode des enveloppes) + suivi comptable pro de **Stygma SAS**.
 Elle remplace un Google Sheet annuel (`<année>-Comptabilité`, un onglet par mois) rempli à la main depuis les relevés bancaires.
 
-Flux cible : **upload d'un relevé CSV → catégorisation par l'API Claude → relecture / correction → validation → écriture en base → dashboards mois / année**.
+Flux cible : **upload d'un relevé CSV → catégorisation par l'IA (Gemini) → relecture / correction → validation → écriture en base → dashboards mois / année**.
 
 > Projet mono-utilisateur, fait aussi pour apprendre React (développeur venant de Vue/Nuxt).
 
@@ -17,7 +17,7 @@ Flux cible : **upload d'un relevé CSV → catégorisation par l'API Claude → 
 | DB          | Prisma 7 + PostgreSQL Neon (`@prisma/adapter-neon`)                          |
 | UI          | Mantine 9 + React Router 8, thème sombre « obsidian / platine », accent doré |
 | Auth        | Better Auth (mono-utilisateur) — pas encore en place                         |
-| IA          | API Anthropic (catégorisation des lignes de relevé)                          |
+| IA          | API Gemini (catégorisation des lignes de relevé)                             |
 | Hébergement | Vercel (Hobby) + Neon (Free)                                                 |
 | Qualité     | oxlint, Prettier, `tsc`, lefthook, GitHub Actions                            |
 
@@ -26,7 +26,7 @@ Flux cible : **upload d'un relevé CSV → catégorisation par l'API Claude → 
 Prérequis : Node ≥ 22 (voir `.nvmrc`) et pnpm 10.
 
 ```bash
-cp .env.example .env        # renseigner les URLs Neon (et la clé Anthropic plus tard)
+cp .env.example .env        # renseigner les URLs Neon (et la clé Gemini)
 pnpm install                # génère aussi le client Prisma (postinstall) + installe les hooks git
 pnpm db:deploy
 pnpm dev                    # front + API sur http://localhost:5173 (API sous /api)

@@ -93,7 +93,7 @@ Choix à connaître :
 - **State** : fondamentaux uniquement (`useState`, `useReducer`, Context, TanStack Query). **Pas de lib de state management** sans accord explicite.
 - **Validation** : schémas Zod partagés entre tRPC et formulaires.
 - **Langues** : UI en français, code / identifiants / commits en anglais.
-- Variables d'environnement serveur validées au démarrage par Zod (`server/lib/env.ts`). `ANTHROPIC_API_KEY` est optionnelle tant que la catégorisation n'est pas branchée.
+- Variables d'environnement serveur validées au démarrage par Zod (`server/lib/env.ts`). `GEMINI_API_KEY` (et `GEMINI_MODEL`, optionnelle) ne sont requises que par `categorize.run` : erreur claire sinon.
 
 ## Équivalences React ↔ Vue
 
