@@ -13,7 +13,7 @@ import {
 import { Dropzone } from "@mantine/dropzone";
 import { IconAlertTriangle, IconFileSpreadsheet, IconUpload } from "@tabler/icons-react";
 import { useState, type SubmitEvent } from "react";
-import { Link } from "react-router";
+import { Link, useNavigate } from "react-router";
 
 import { useBankAccounts } from "@/features/import/hooks/use-bank-accounts";
 import { useImportStatement } from "@/features/import/hooks/use-import-statement";
@@ -34,6 +34,7 @@ export function ImportForm() {
   const [file, setFile] = useState<File | null>(null);
   const [fileRejected, setFileRejected] = useState(false);
 
+  const navigate = useNavigate();
   const bankAccounts = useBankAccounts();
   const importStatement = useImportStatement();
 
@@ -45,7 +46,17 @@ export function ImportForm() {
     event.preventDefault(); // ≈ `@submit.prevent`
     if (!file || !bankAccountId) return;
 
-    importStatement.mutate({ bankAccountId, fileName: file.name, csvText: await file.text() });
+    importStatement.mutate(
+      { bankAccountId, fileName: file.name, csvText: await file.text() },
+      {
+        // Tout s'est bien passé → direct à la relecture. Sinon on reste ici pour montrer l'avertissement.
+        onSuccess: (data) => {
+          if (data.errors.length === 0 && data.categorizationError === null) {
+            void navigate(`/imports/${data.batchId}`);
+          }
+        },
+      },
+    );
   }
 
   if (bankAccounts.isPending) return <Loader color="gold" />;
@@ -129,8 +140,8 @@ export function ImportForm() {
 
             {!result && !importStatement.isError && (
               <Text c="dimmed">
-                Choisis un compte et un relevé CSV : les transactions sont enregistrées en attente
-                de relecture, sans catégorie.
+                Choisis un compte et un relevé CSV : les transactions sont importées puis
+                catégorisées automatiquement, avant ta relecture.
               </Text>
             )}
 
@@ -141,9 +152,20 @@ export function ImportForm() {
                     {result.importedCount}
                   </Text>
                   <Text c="dimmed" mt={6}>
-                    transaction(s) importée(s), en attente de relecture.
+                    transaction(s) importée(s).
                   </Text>
                 </div>
+
+                {result.categorizationError !== null && (
+                  <Alert
+                    color="amber"
+                    icon={<IconAlertTriangle size={18} />}
+                    title="Catégorisation automatique impossible"
+                  >
+                    {result.categorizationError} Les lignes sont importées : tu peux les catégoriser
+                    à la main.
+                  </Alert>
+                )}
 
                 {result.errors.length > 0 && (
                   <Alert
@@ -162,8 +184,8 @@ export function ImportForm() {
                 )}
 
                 <Group>
-                  <Button component={Link} to="/imports" variant="default">
-                    Voir les imports
+                  <Button component={Link} to={`/imports/${result.batchId}`}>
+                    Relire l'import
                   </Button>
                 </Group>
               </>

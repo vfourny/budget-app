@@ -76,7 +76,7 @@ Upload CSV → parsing → ImportBatch (PENDING_REVIEW) → catégorisation Clau
 1. **Upload** : l'utilisateur choisit le compte bancaire et dépose le CSV de la banque.
 2. **Parsing** (route `import.create`) : le mapping de la banque (via `BankAccount.bank`) transforme les lignes en transactions normalisées. Une ligne illisible est **écartée et signalée** (numéro de ligne + contenu brut) sans bloquer les autres.
 3. **Catégorisation** (route `categorize.run`) : l'API Claude (Haiku 4.5) propose une catégorie (valeur de l'enum) avec un score de `confidence` (0 à 1, stocké dans `Transaction.categoryConfidence`), en s'appuyant sur des exemples de transactions déjà validées du même compte (few-shot, vide au tout premier import). Sous **0,7** de confiance, la ligne ira dans « À vérifier ». Relançable : seules les lignes encore sans catégorie sont traitées ; si l'appel à l'IA échoue, rien n'est écrit.
-4. **Relecture** : tableau éditable groupé par import, correction inline, mise en avant des lignes à faible confiance ou en erreur.
+4. **Relecture** (`/imports/:id`) : la catégorisation part automatiquement juste après l'import, puis on arrive sur le tableau. Les lignes « à vérifier » (sans catégorie ou confiance < 0,7) sont surlignées ; chaque ligne a un sélecteur de catégorie (un choix manuel = « Confirmée »). Filtre Toutes / À vérifier.
 5. **Validation** : statut `VALIDATED` + `validatedAt`. Les transactions sont écrites en base **dès l'import** (sans catégorie, rattachées à l'`ImportBatch`) pour que la relecture survive à un rechargement de page ; **seuls les imports `VALIDATED` comptent dans les dashboards**.
 
 Règles :
@@ -85,7 +85,7 @@ Règles :
 - Une transaction peut ne pas avoir d'`ImportBatch` (`importBatchId` nullable, ex. saisie manuelle future).
 - Les corrections validées alimentent les exemples few-shot des imports suivants : plus l'historique grandit, plus la catégorisation est juste.
 
-> État actuel : le parseur est en place. Route d'import, catégorisation et relecture sont à venir (voir la roadmap dans [`CLAUDE.md`](../CLAUDE.md)).
+> État actuel : import, catégorisation automatique, historique et relecture (correction) sont en place ; la validation et la suppression d'un import sont à venir (voir la roadmap dans [`CLAUDE.md`](../CLAUDE.md)).
 
 ## Dashboards (à venir)
 

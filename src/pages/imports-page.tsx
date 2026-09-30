@@ -1,25 +1,23 @@
 import { Button } from "@mantine/core";
-import { IconUpload } from "@tabler/icons-react";
+import { IconPlus } from "@tabler/icons-react";
 import { Link } from "react-router";
 
-import { ComingSoon } from "@/components/coming-soon";
 import { PageHeader } from "@/components/page-header";
+import { ImportsTable } from "@/features/imports/components/imports-table";
 
 export function ImportsPage() {
   return (
     <>
       <PageHeader
-        eyebrow="Historique"
+        eyebrow="Historique des fichiers"
         title="Imports"
         actions={
-          <Button component={Link} to="/imports/nouveau" leftSection={<IconUpload size={16} />}>
-            Importer un relevé
+          <Button component={Link} to="/imports/nouveau" leftSection={<IconPlus size={16} />}>
+            Nouvel import
           </Button>
         }
       />
-      <ComingSoon>
-        L'historique des fichiers importés arrivera avec l'écran de relecture.
-      </ComingSoon>
+      <ImportsTable />
     </>
   );
 }
