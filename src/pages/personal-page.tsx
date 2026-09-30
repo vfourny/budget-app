@@ -1,11 +1,5 @@
-import { ComingSoon } from "@/components/coming-soon";
-import { PageHeader } from "@/components/page-header";
+import { PersonalDashboard } from "@/features/personal/components/personal-dashboard";
 
 export function PersonalPage() {
-  return (
-    <>
-      <PageHeader eyebrow="Budget perso" title="Perso" />
-      <ComingSoon>Le dashboard perso (mois / année, enveloppes) arrive bientôt.</ComingSoon>
-    </>
-  );
+  return <PersonalDashboard />;
 }

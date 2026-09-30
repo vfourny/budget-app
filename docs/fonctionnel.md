@@ -85,10 +85,13 @@ Règles :
 
 > État actuel : import, catégorisation automatique, historique et relecture (correction) sont en place ; validation et suppression aussi (voir la roadmap dans [`CLAUDE.md`](../CLAUDE.md)).
 
-## Dashboards (à venir)
+## Dashboard Perso (`/perso`)
 
-- **Vue mois** : dépenses par catégorie et par enveloppe, **enveloppe recommandée vs réel** (couleur ambre en cas de dépassement ou de ligne à vérifier).
-- **Vue année** : même agrégation sur douze mois — l'historique mois / année est central dans l'app.
+Ne compte que les transactions des imports **VALIDATED** du compte perso. Hypothèses V1 : tout crédit est un **revenu** ; un débit en catégorie « Épargne long terme » est de l'**épargne** (pas une dépense) ; le reste des débits sont des **dépenses**.
+
+- **Vue mois** : sélecteur de mois (et flèches) limité aux mois qui ont des données ; cartes Dépenses (avec le détail par enveloppe), Revenus, Épargne du mois (+ % des revenus) ; tableau des transactions triable ; dépenses par catégorie.
+- **Vue année** : mêmes totaux sur l'année choisie, plus la dépense moyenne par mois (mois ayant des données).
+- **À venir** : enveloppe **recommandée vs réel** (pourcentages de la méthode des 5 comptes, à configurer dans Réglages), carte Abonnements, donut par catégorie en vue année, estimation de l'IR.
 - Mockup de référence : canvas Claude Design « Budget — maquette MVP » (5 écrans : tableau de bord mois, import CSV, relecture, vue année, tokens).
 
 ## Partie pro Stygma (après validation du MVP perso)

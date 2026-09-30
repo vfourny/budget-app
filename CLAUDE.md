@@ -152,7 +152,7 @@ schéma Zod + modèle Prisma, ajout d'un widget dashboard).
 3. Upload CSV (parser générique, mapping de colonnes par banque) (fait)
 4. Route tRPC `categorize` (Gemini, few-shot sur transactions validées, JSON `category` (valeur de l'enum) + `confidence`) (fait)
 5. Écran de relecture : historique, tableau de correction, « Valider », suppression d'un import (fait)
-6. Dashboard mois (par catégorie, enveloppe recommandée vs réel) + vue année
+6. Dashboard Perso mois / année : totaux, transactions, par catégorie (fait) ; enveloppe recommandée vs réel, abonnements, IR (à faire)
 7. Après validation du MVP perso : partie pro Stygma (TVA, facturation, prévisionnel/réel)
 
 Hors scope : synchro bancaire auto, multi-utilisateurs, facturation/TVA en v1.
