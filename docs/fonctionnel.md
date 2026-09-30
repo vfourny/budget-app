@@ -23,21 +23,21 @@ Définies dans l'enum Prisma `Envelope` et les libellés dans `src/lib/envelopes
 
 Liste **figée** (enum Prisma `TransactionCategory`), reprise des colonnes de l'ancien Google Sheet. Libellé affiché et enveloppe de rattachement : `src/lib/categories.ts`.
 
-| Catégorie          | Code                 | Enveloppe          |
-| ------------------ | -------------------- | ------------------ |
-| Essence            | `ESSENCE`            | Dépenses courantes |
-| Assurance          | `ASSURANCE`          | Dépenses courantes |
-| Restaurant         | `RESTAURANT`         | Loisirs            |
-| Alimentaire        | `ALIMENTAIRE`        | Dépenses courantes |
-| Soirée             | `SOIREE`             | Loisirs            |
-| Loisirs            | `LOISIRS`            | Loisirs            |
-| Vêtements & Soins  | `VETEMENTS_SOINS`    | Dépenses courantes |
-| Santé              | `SANTE`              | Dépenses courantes |
-| Transport          | `TRANSPORT`          | Dépenses courantes |
-| Impôt et Taxes     | `IMPOTS_TAXES`       | Dépenses courantes |
-| Autres abonnements | `AUTRES_ABONNEMENTS` | Dépenses courantes |
-| Autres             | `AUTRES`             | Dépenses courantes |
-| Épargne long terme | `EPARGNE_LONG_TERME` | Épargne long terme |
+| Catégorie           | Code                 | Enveloppe          |
+| ------------------- | -------------------- | ------------------ |
+| Essence             | `ESSENCE`            | Dépenses courantes |
+| Banque et assurance | `ASSURANCE`          | Dépenses courantes |
+| Restaurant          | `RESTAURANT`         | Loisirs            |
+| Alimentaire         | `ALIMENTAIRE`        | Dépenses courantes |
+| Soirée              | `SOIREE`             | Loisirs            |
+| Loisirs             | `LOISIRS`            | Loisirs            |
+| Vêtements & Soins   | `VETEMENTS_SOINS`    | Dépenses courantes |
+| Santé               | `SANTE`              | Dépenses courantes |
+| Transport           | `TRANSPORT`          | Dépenses courantes |
+| Impôt et Taxes      | `IMPOTS_TAXES`       | Dépenses courantes |
+| Abonnements divers  | `AUTRES_ABONNEMENTS` | Dépenses courantes |
+| Autres              | `AUTRES`             | Dépenses courantes |
+| Épargne long terme  | `EPARGNE_LONG_TERME` | Épargne long terme |
 
 Points d'attention :
 
