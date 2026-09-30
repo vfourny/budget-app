@@ -3,7 +3,7 @@
 html,
 body {
   margin: 0;
-  background: #0d0e10;
+  background: var(--mantine-color-body);
   /* Chiffres de même largeur : montants alignés dans les tableaux. */
   font-variant-numeric: tabular-nums;
 }
