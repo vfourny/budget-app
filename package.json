@@ -25,6 +25,7 @@
   },
   "packageManager": "pnpm@10.28.0",
   "dependencies": {
+    "@anthropic-ai/sdk": "^0.130.0",
     "@neondatabase/serverless": "^1.1.0",
     "@prisma/adapter-neon": "7.10.0",
     "@prisma/client": "7.10.0",
