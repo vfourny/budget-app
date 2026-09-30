@@ -137,7 +137,7 @@ schéma Zod + modèle Prisma, ajout d'un widget dashboard).
 1. Scaffold (Vite + Nitro + CI + CLAUDE.md) → Prisma/Neon + schéma + seed → tRPC + TanStack Query
 2. Thème PrimeReact obsidian/platine (+ routing client quand il y aura plusieurs écrans)
 3. Upload CSV (parser générique, mapping de colonnes configurable par banque)
-4. Route tRPC `categorize` (API Claude, few-shot sur transactions validées, JSON `categoryId` + `confidence`)
+4. Route tRPC `categorize` (API Claude, few-shot sur transactions validées, JSON `category` (valeur de l'enum) + `confidence`)
 5. Écran de relecture (tableau éditable groupé par import, correction inline, « Valider »)
 6. Dashboard mois (par catégorie, enveloppe recommandée vs réel) + vue année
 7. Après validation du MVP perso : partie pro Stygma (TVA, facturation, prévisionnel/réel)
@@ -153,7 +153,7 @@ Hors scope : synchro bancaire auto, multi-utilisateurs, facturation/TVA en v1.
   l'approche recommandée par Vercel pour ajouter une API à un projet Vite.
 - Neon : `DATABASE_URL` = URL pooled (runtime, adapter `@prisma/adapter-neon`),
   `DIRECT_URL` = URL directe (CLI Prisma / migrations, lue dans `prisma.config.ts`).
-- `Transaction.accountId` (FK) plutôt qu'un `accountType` : le type PERSO/PRO vient de l'Account,
+- `Transaction.bankAccountId` (FK) plutôt qu'un `bankAccountType` : le type PERSO/PRO vient du BankAccount,
   ce qui permet plusieurs comptes par type. Supprimer un `ImportBatch` supprime ses transactions.
 - Prisma 7 stable (la 8 est en RC).
 - pnpm, une seule app (pas de monorepo).

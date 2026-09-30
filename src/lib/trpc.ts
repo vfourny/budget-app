@@ -19,7 +19,7 @@ const trpcClient = createTRPCClient<AppRouter>({
 });
 
 /**
- * Point d'accès typé à l'API : `trpc.category.list.queryOptions()` produit la clé de cache
+ * Point d'accès typé à l'API : `trpc.<domaine>.<proc>.queryOptions()` produit la clé de cache
  * et la fonction de fetch à passer à `useQuery`.
  *
  * Dans une SPA il n'y a qu'un navigateur donc qu'un client : un simple module singleton suffit,
