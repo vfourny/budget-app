@@ -1,3 +1,5 @@
+import { List, Stack, Title } from "@mantine/core";
+
 import { TRANSACTION_CATEGORIES, TRANSACTION_CATEGORY_ORDER } from "@/lib/categories";
 import { ENVELOPE_LABELS, ENVELOPE_ORDER } from "@/lib/envelopes";
 
@@ -12,18 +14,20 @@ export function CategoryList() {
   })).filter((group) => group.categories.length > 0);
 
   return (
-    <div>
+    <Stack gap={20}>
       {groups.map((group) => (
         // `key` ≈ `:key` d'un v-for : identifie chaque élément pour le diff du DOM.
         <section key={group.envelope}>
-          <h2>{ENVELOPE_LABELS[group.envelope]}</h2>
-          <ul>
+          <Title order={3} mb={8}>
+            {ENVELOPE_LABELS[group.envelope]}
+          </Title>
+          <List spacing={4} c="dimmed">
             {group.categories.map((category) => (
-              <li key={category}>{TRANSACTION_CATEGORIES[category].label}</li>
+              <List.Item key={category}>{TRANSACTION_CATEGORIES[category].label}</List.Item>
             ))}
-          </ul>
+          </List>
         </section>
       ))}
-    </div>
+    </Stack>
   );
 }

@@ -1,0 +1,15 @@
+/* Règles globales de l'app (le thème Mantine vit dans `@/lib/theme.ts`). */
+
+html,
+body {
+  margin: 0;
+  background: var(--mantine-color-body);
+  /* Chiffres de même largeur : montants alignés dans les tableaux. */
+  font-variant-numeric: tabular-nums;
+}
+
+/* Champs et boutons à 44 px (cibles tactiles de la maquette) au lieu des 42 px par défaut. */
+:root {
+  --input-height-md: calc(2.75rem * var(--mantine-scale));
+  --button-height-md: calc(2.75rem * var(--mantine-scale));
+}

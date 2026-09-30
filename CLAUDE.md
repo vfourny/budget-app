@@ -27,17 +27,17 @@ Choix délibéré : **le plus simple possible**. SPA React (pas de SSR, pas de S
 
 - un backend Nitro dans le même projet.
 
-| Couche      | Choix                                                                    |
-| ----------- | ------------------------------------------------------------------------ |
-| Front       | React 19 (SPA) + Vite 8, TypeScript 6                                    |
-| Backend     | Nitro 3 via `nitro/vite` (le moteur serveur de Nuxt) — dossier `server/` |
-| API         | tRPC 11 + Zod 4, TanStack Query 5 (`@trpc/tanstack-react-query`)         |
-| DB          | Prisma 7 + PostgreSQL Neon (driver adapter `@prisma/adapter-neon`)       |
-| UI          | PrimeReact, thème sombre « obsidian / platine », accent doré             |
-| Auth        | Better Auth (mono-utilisateur) — pas encore en place                     |
-| IA          | API Anthropic pour catégoriser les lignes de relevé                      |
-| Hébergement | Vercel (Hobby, détection Nitro automatique) + Neon (Free)                |
-| Qualité     | oxlint (règles React hooks incluses), Prettier, `tsc`                    |
+| Couche      | Choix                                                                        |
+| ----------- | ---------------------------------------------------------------------------- |
+| Front       | React 19 (SPA) + Vite 8, TypeScript 6                                        |
+| Backend     | Nitro 3 via `nitro/vite` (le moteur serveur de Nuxt) — dossier `server/`     |
+| API         | tRPC 11 + Zod 4, TanStack Query 5 (`@trpc/tanstack-react-query`)             |
+| DB          | Prisma 7 + PostgreSQL Neon (driver adapter `@prisma/adapter-neon`)           |
+| UI          | Mantine 9 + React Router 8, thème sombre « obsidian / platine », accent doré |
+| Auth        | Better Auth (mono-utilisateur) — pas encore en place                         |
+| IA          | API Anthropic pour catégoriser les lignes de relevé                          |
+| Hébergement | Vercel (Hobby, détection Nitro automatique) + Neon (Free)                    |
+| Qualité     | oxlint (règles React hooks incluses), Prettier, `tsc`                        |
 
 ## Commandes
 
@@ -64,11 +64,13 @@ avant `vite build` → `DATABASE_URL` **et** `DIRECT_URL` doivent être définie
 
 ```
 src/                   # FRONT — SPA React, tourne uniquement dans le navigateur
-  main.tsx             # point d'entrée (createRoot)
-  app.tsx              # composant racine
+  main.tsx             # point d'entrée (createRoot + providers : Query, Router, Mantine)
+  app.tsx              # table des routes (React Router)
+  pages/               # une page = un écran (assemble un header + des composants de feature)
   features/<domaine>/  # import, review, dashboard… : components/ + hooks/ du domaine
-  components/          # UI partagée entre features
-  lib/                 # utilitaires front : trpc.ts (client + queryClient), formatage…
+  components/          # UI partagée entre features (PageHeader, ComingSoon…)
+  lib/                 # utilitaires front : trpc.ts (client + queryClient), theme.ts (thème Mantine)…
+  styles/global.css    # règles CSS globales (le thème, lui, est dans lib/theme.ts)
 server/                # BACKEND — Nitro, mêmes conventions que le server/ de Nuxt
   api/                 # routes HTTP : server/api/health.ts → GET /api/health
     trpc/[...path].ts  # point d'entrée HTTP de tRPC
@@ -108,6 +110,13 @@ nitro.config.ts        # serverDir: ./server
   faute de frappe), `as const` garde les valeurs littérales (autocomplétion, unions dérivées via
   `keyof typeof X` / `(typeof X)[number]`). Pas de `as const` sans dérivation ni autocomplétion
   utile. Un tableau `as const` est readonly : typer les paramètres en `readonly T[]`.
+- **UI** : composants Mantine, thème et tokens de la maquette dans `src/lib/theme.ts` (palettes
+  `dark` / `gold` / `amber`, polices, rayons). Pas de couleur en dur dans les composants : utiliser
+  les tokens Mantine (`c="gold.6"`, `var(--mantine-color-dark-5)`…). CSS sur mesure en **CSS Modules**
+  (`xxx.module.css`, ≈ `<style scoped>` Vue). L'app est toujours sombre (pas de bascule clair).
+- **Routing** : React Router en mode « library » (`BrowserRouter` + `<Routes>` dans `app.tsx`).
+  Une nouvelle page = un fichier dans `src/pages/` + une `<Route>` ; s'il faut l'afficher dans le
+  menu, l'ajouter à `MAIN_NAV` (`features/layout/components/app-layout.tsx`).
 - Validation des entrées : schémas Zod, partagés entre tRPC et formulaires.
 - UI en **français**, code/identifiants/commits en **anglais**.
 - Imports : `@/…` pour `src/`, `@server/…` pour `server/`. `import type` obligatoire pour les
@@ -139,10 +148,10 @@ schéma Zod + modèle Prisma, ajout d'un widget dashboard).
 
 ## Roadmap MVP
 
-1. Scaffold (Vite + Nitro + CI + CLAUDE.md) → Prisma/Neon + schéma + seed → tRPC + TanStack Query
-2. Thème PrimeReact obsidian/platine (+ routing client quand il y aura plusieurs écrans)
-3. Upload CSV (parser générique, mapping de colonnes configurable par banque)
-4. Route tRPC `categorize` (API Claude, few-shot sur transactions validées, JSON `category` (valeur de l'enum) + `confidence`)
+1. Scaffold (Vite + Nitro + CI + CLAUDE.md) → Prisma/Neon + schéma + seed → tRPC + TanStack Query (fait)
+2. Thème obsidian/platine + routing client (fait : Mantine + React Router, menu latéral de la maquette)
+3. Upload CSV (parser générique, mapping de colonnes par banque) (fait)
+4. Route tRPC `categorize` (API Claude, few-shot sur transactions validées, JSON `category` (valeur de l'enum) + `confidence`) (fait)
 5. Écran de relecture (tableau éditable groupé par import, correction inline, « Valider »)
 6. Dashboard mois (par catégorie, enveloppe recommandée vs réel) + vue année
 7. Après validation du MVP perso : partie pro Stygma (TVA, facturation, prévisionnel/réel)
@@ -160,6 +169,13 @@ Hors scope : synchro bancaire auto, multi-utilisateurs, facturation/TVA en v1.
   `DIRECT_URL` = URL directe (CLI Prisma / migrations, lue dans `prisma.config.ts`).
 - `Transaction.bankAccountId` (FK) plutôt qu'un `bankAccountType` : le type PERSO/PRO vient du BankAccount,
   ce qui permet plusieurs comptes par type. Supprimer un `ImportBatch` supprime ses transactions.
+- **Mantine plutôt que PrimeReact** (décidé le 2026-10-01) : PrimeReact 11 est devenu sans style et
+  sous licence PrimeUI (clé à renouveler), la 10 (MIT) n'est plus qu'en maintenance et a des
+  couleurs codées en dur à écraser composant par composant. Mantine (MIT) se thématise par un
+  objet de thème, fournit AppShell, Select, Dropzone, et `mantine-datatable` pour le tableau
+  éditable de la relecture.
+- **React Router** (mode library, pas de framework mode) pour le routing client : le plus
+  répandu, équivalent direct de Vue Router.
 - Prisma 7 stable (la 8 est en RC).
 - pnpm, une seule app (pas de monorepo).
 - TypeScript 6.0 (comme le template Vite), oxlint plutôt qu'ESLint (template Vite, plus rapide,
