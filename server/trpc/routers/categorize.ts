@@ -1,9 +1,8 @@
-import { TRPCError } from "@trpc/server";
 import { ApiError } from "@google/genai";
+import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 
 import type { TransactionCategory } from "@server/generated/prisma/enums";
-
 import {
   LOW_CONFIDENCE_THRESHOLD,
   categorizeTransactions,

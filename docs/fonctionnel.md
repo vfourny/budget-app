@@ -67,7 +67,7 @@ Chaque import et chaque transaction porte un **type** : `PERSO` ou `PRO` (Stygma
 ## Cycle de vie d'un import
 
 ```
-Upload CSV → parsing → ImportBatch (PENDING_REVIEW) → catégorisation Claude
+Upload CSV → parsing → ImportBatch (PENDING_REVIEW) → catégorisation Gemini
           → relecture / correction inline → « Valider » → ImportBatch (VALIDATED)
 ```
 
