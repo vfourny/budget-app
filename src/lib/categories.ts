@@ -9,7 +9,7 @@ import type { Envelope, TransactionCategory } from "@server/generated/prisma/enu
  */
 export const TRANSACTION_CATEGORIES = {
   ESSENCE: { label: "Essence", envelope: "DEPENSES_COURANTES" },
-  ASSURANCE: { label: "Assurance", envelope: "DEPENSES_COURANTES" },
+  ASSURANCE: { label: "Banque et assurance", envelope: "DEPENSES_COURANTES" },
   RESTAURANT: { label: "Restaurant", envelope: "LOISIRS" },
   ALIMENTAIRE: { label: "Alimentaire", envelope: "DEPENSES_COURANTES" },
   SOIREE: { label: "Soirée", envelope: "LOISIRS" },
@@ -18,7 +18,7 @@ export const TRANSACTION_CATEGORIES = {
   SANTE: { label: "Santé", envelope: "DEPENSES_COURANTES" },
   TRANSPORT: { label: "Transport", envelope: "DEPENSES_COURANTES" },
   IMPOTS_TAXES: { label: "Impôt et Taxes", envelope: "DEPENSES_COURANTES" },
-  AUTRES_ABONNEMENTS: { label: "Autres abonnements", envelope: "DEPENSES_COURANTES" },
+  AUTRES_ABONNEMENTS: { label: "Abonnements divers", envelope: "DEPENSES_COURANTES" },
   AUTRES: { label: "Autres", envelope: "DEPENSES_COURANTES" },
   EPARGNE_LONG_TERME: { label: "Épargne long terme", envelope: "EPARGNE_LONG_TERME" },
 } as const satisfies Record<TransactionCategory, { label: string; envelope: Envelope }>;
