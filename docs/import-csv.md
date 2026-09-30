@@ -24,6 +24,14 @@ const { transactions, errors } = parseBankStatement(csvText, config);
 
 La clé de sélection du mapping est **`BankAccount.bank`** : elle doit correspondre exactement à `BankCsvConfig.bank`.
 
+## Route tRPC `import.create`
+
+Entrée : `{ bankAccountId, fileName, csvText }` (CSV lu côté navigateur, UTF-8, ≤ 2 Mo). Le serveur retrouve la banque via `BankAccount.bank`, parse, puis crée en une seule écriture un `ImportBatch` (`PENDING_REVIEW`) et ses `Transaction` **sans catégorie**. Sortie : `{ batchId, importedCount, errors }`.
+
+- Compte inconnu → `NOT_FOUND` ; banque sans mapping, ou fichier sans aucune ligne lisible → `BAD_REQUEST` (rien n'est écrit).
+- Les lignes illisibles sont renvoyées dans `errors` sans bloquer l'import.
+- Pas encore de détection de doublons : importer deux fois le même relevé (ou deux relevés qui se chevauchent) duplique les transactions. Supprimer l'import fautif (cascade) suffit en attendant.
+
 ## Sortie
 
 - `transactions` : `{ date, label, amountCents, month, year }` (date en UTC ; `bankAccountId`, `category` et `importBatchId` sont ajoutés plus tard).

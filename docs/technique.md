@@ -49,7 +49,7 @@ Pourquoi pas Next.js : app mono-utilisateur derrière une auth, sans SEO. SSR et
 2. L'enregistrer dans `server/trpc/root.ts`.
 3. Côté front, un hook dans `src/features/<domaine>/hooks/`.
 
-À ce jour `appRouter` est vide : le premier routeur (import CSV) arrive avec la PR d'import. Il n'y a qu'une `publicProcedure` ; une `protectedProcedure` arrivera avec Better Auth.
+Routeurs actuels : `bankAccount` (`list`) et `import` (`create` : parse le CSV via le mapping de la banque, puis crée l'`ImportBatch` et ses `Transaction` en une seule transaction SQL). Il n'y a qu'une `publicProcedure` ; une `protectedProcedure` arrivera avec Better Auth.
 
 ## Base de données : Prisma 7 + Neon
 

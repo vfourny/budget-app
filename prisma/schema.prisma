@@ -58,7 +58,8 @@ model BankAccount {
   transactions  Transaction[]
 }
 
-/// Un fichier de relevé importé. Les transactions ne sont écrites qu'à la validation.
+/// Un fichier de relevé importé. Ses transactions sont écrites dès l'import (sans catégorie) ;
+/// seuls les imports VALIDATED comptent dans les dashboards.
 model ImportBatch {
   id            String        @id @default(cuid())
   bankAccountId String
