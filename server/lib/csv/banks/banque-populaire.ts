@@ -2,7 +2,7 @@ import type { BankCsvConfig } from "@server/lib/csv/types";
 
 // Export Banque Populaire (compte pro Stygma) : "Relevé de compte" au format CSV. Débit et
 // crédit sont deux colonnes séparées, déjà signées dans l'export (ex. "-115,00" / "+8640,00").
-export const banquePopulaireConfig: BankCsvConfig = {
+export const banquePopulaireConfig = {
   bank: "Banque Populaire",
   delimiter: ";",
   hasHeader: true,
@@ -15,4 +15,4 @@ export const banquePopulaireConfig: BankCsvConfig = {
     label: (fields) => (fields[3] ? `${fields[1]} — ${fields[3]}` : fields[1]),
     amount: { kind: "debitCredit", debit: 5, credit: 6 },
   },
-};
+} as const satisfies BankCsvConfig;
