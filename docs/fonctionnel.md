@@ -46,18 +46,16 @@ Points d'attention :
 - La catégorie d'une transaction est **optionnelle** (`null` tant qu'elle n'est pas catégorisée / relue).
 - Ajouter ou renommer une catégorie = modifier l'enum Prisma **+ une migration versionnée + `src/lib/categories.ts`** (le typage `Record<TransactionCategory, …>` fait échouer `tsc` si l'un des deux est oublié).
 
-## Comptes bancaires
+## Type de compte
 
-Un `BankAccount` a un **type** (`PERSO` ou `PRO`) et une **banque** (`bank`). Le type vient du compte, jamais de la transaction : cela permet plusieurs comptes par type.
+Chaque import et chaque transaction porte un **type** : `PERSO` ou `PRO` (Stygma). C'est la seule notion de « compte » de l'app : il n'y a pas de table de comptes bancaires. La banque n'est pas stockée ; elle sert uniquement à choisir le **mapping CSV** à l'import (voir [import-csv.md](./import-csv.md)) et se déduit du type :
 
-Comptes créés par le seed :
+| Type    | Banque (format CSV) |
+| ------- | ------------------- |
+| `PERSO` | BoursoBank          |
+| `PRO`   | Banque Populaire    |
 
-| Nom                  | Type    | Banque           |
-| -------------------- | ------- | ---------------- |
-| Compte courant perso | `PERSO` | BoursoBank       |
-| Compte pro Stygma    | `PRO`   | Banque Populaire |
-
-Le champ `bank` sert aussi à **choisir automatiquement le mapping CSV** à l'import (voir [import-csv.md](./import-csv.md)).
+Évolution prévue (gestion des appartements) : une catégorie « appartement » et un rattachement choisi par transaction à la relecture (`apartmentId` optionnel), indépendamment du compte bancaire d'origine.
 
 ## Transactions
 
@@ -73,9 +71,9 @@ Upload CSV → parsing → ImportBatch (PENDING_REVIEW) → catégorisation Clau
           → relecture / correction inline → « Valider » → ImportBatch (VALIDATED)
 ```
 
-1. **Upload** : l'utilisateur choisit le compte bancaire et dépose le CSV de la banque.
-2. **Parsing** (route `import.create`) : le mapping de la banque (via `BankAccount.bank`) transforme les lignes en transactions normalisées. Une ligne illisible est **écartée et signalée** (numéro de ligne + contenu brut) sans bloquer les autres.
-3. **Catégorisation** (route `categorize.run`) : l'API Claude (Haiku 4.5) propose une catégorie (valeur de l'enum) avec un score de `confidence` (0 à 1, stocké dans `Transaction.categoryConfidence`), en s'appuyant sur des exemples de transactions déjà validées du même compte (few-shot, vide au tout premier import). Sous **0,7** de confiance, la ligne ira dans « À vérifier ». Relançable : seules les lignes encore sans catégorie sont traitées ; si l'appel à l'IA échoue, rien n'est écrit.
+1. **Upload** : l'utilisateur choisit le type de compte (perso / pro) et dépose le CSV de la banque.
+2. **Parsing** (route `import.create`) : le mapping de la banque (déduit du type de compte) transforme les lignes en transactions normalisées. Une ligne illisible est **écartée et signalée** (numéro de ligne + contenu brut) sans bloquer les autres.
+3. **Catégorisation** (route `categorize.run`) : l'API Claude (Haiku 4.5) propose une catégorie (valeur de l'enum) avec un score de `confidence` (0 à 1, stocké dans `Transaction.categoryConfidence`), en s'appuyant sur des exemples de transactions déjà validées du même type de compte (few-shot, vide au tout premier import). Sous **0,7** de confiance, la ligne ira dans « À vérifier ». Relançable : seules les lignes encore sans catégorie sont traitées ; si l'appel à l'IA échoue, rien n'est écrit.
 4. **Relecture** (`/imports/:id`) : la catégorisation part automatiquement juste après l'import, puis on arrive sur le tableau. Les lignes « à vérifier » (sans catégorie ou confiance < 0,7) sont surlignées ; chaque ligne a un sélecteur de catégorie (un choix manuel = « Confirmée »). Filtre Toutes / À vérifier.
 5. **Validation** : statut `VALIDATED` + `validatedAt`. Les transactions sont écrites en base **dès l'import** (sans catégorie, rattachées à l'`ImportBatch`) pour que la relecture survive à un rechargement de page ; **seuls les imports `VALIDATED` comptent dans les dashboards**.
 

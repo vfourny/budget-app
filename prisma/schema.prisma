@@ -9,7 +9,8 @@ datasource db {
   provider = "postgresql"
 }
 
-enum BankAccountType {
+/// Nature d'un relevé / d'une transaction : compte personnel ou compte pro (Stygma).
+enum AccountType {
   PERSO
   PRO
 }
@@ -47,30 +48,16 @@ enum ImportStatus {
   VALIDATED
 }
 
-/// Un compte bancaire (ex. compte courant perso, compte pro Stygma).
-model BankAccount {
-  id            String          @id @default(cuid())
-  name          String          @unique
-  type          BankAccountType
-  bank          String?
-  createdAt     DateTime        @default(now())
-  importBatches ImportBatch[]
-  transactions  Transaction[]
-}
-
 /// Un fichier de relevé importé. Ses transactions sont écrites dès l'import (sans catégorie) ;
 /// seuls les imports VALIDATED comptent dans les dashboards.
 model ImportBatch {
   id            String        @id @default(cuid())
-  bankAccountId String
-  bankAccount   BankAccount   @relation(fields: [bankAccountId], references: [id])
+  accountType   AccountType
   fileName      String
   status        ImportStatus  @default(PENDING_REVIEW)
   createdAt     DateTime      @default(now())
   validatedAt   DateTime?
   transactions  Transaction[]
-
-  @@index([bankAccountId])
 }
 
 model Transaction {
@@ -82,8 +69,7 @@ model Transaction {
   /// Dénormalisés depuis `date` pour les agrégations mois / année.
   month              Int                  @db.SmallInt
   year               Int                  @db.SmallInt
-  bankAccountId      String
-  bankAccount        BankAccount          @relation(fields: [bankAccountId], references: [id])
+  accountType        AccountType
   category           TransactionCategory?
   /// Confiance (0 à 1) de la catégorie proposée par l'IA. `null` = catégorie absente ou choisie
   /// à la main. Sert à mettre en avant les lignes « À vérifier » à la relecture.
@@ -94,7 +80,7 @@ model Transaction {
   updatedAt          DateTime             @updatedAt
 
   @@index([year, month])
-  @@index([bankAccountId, year, month])
+  @@index([accountType, year, month])
   @@index([category])
   @@index([importBatchId])
 }

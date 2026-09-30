@@ -50,12 +50,11 @@ pnpm lint:fix       # autofix oxlint
 pnpm format         # prettier --write
 
 pnpm db:migrate     # prisma migrate dev (crée + applique une migration, régénère le client)
-pnpm db:seed        # seed idempotent (comptes + catégories)
 pnpm db:studio      # Prisma Studio
 ```
 
 Premier setup : `cp .env.example .env` (URLs Neon), `pnpm install` (génère le client Prisma),
-`pnpm db:deploy && pnpm db:seed`.
+`pnpm db:deploy`.
 
 Déploiement Vercel : le script `vercel-build` applique les migrations (`prisma migrate deploy`)
 avant `vite build` → `DATABASE_URL` **et** `DIRECT_URL` doivent être définies sur Vercel.
@@ -77,7 +76,7 @@ server/                # BACKEND — Nitro, mêmes conventions que le server/ de
   trpc/                # init.ts (contexte, procédures), root.ts (appRouter), routers/<domaine>.ts
   lib/                 # db.ts (PrismaClient singleton), env.ts (validation Zod des variables)
   generated/prisma/    # client Prisma généré — gitignoré, ne pas éditer
-prisma/                # schema.prisma, migrations/, seed.ts
+prisma/                # schema.prisma, migrations/
 prisma.config.ts       # config CLI Prisma 7 (URL directe pour les migrations)
 index.html             # page unique de la SPA
 vite.config.ts         # plugins React + Nitro, alias @/ (src) et @server/ (server)
@@ -167,8 +166,11 @@ Hors scope : synchro bancaire auto, multi-utilisateurs, facturation/TVA en v1.
   l'approche recommandée par Vercel pour ajouter une API à un projet Vite.
 - Neon : `DATABASE_URL` = URL pooled (runtime, adapter `@prisma/adapter-neon`),
   `DIRECT_URL` = URL directe (CLI Prisma / migrations, lue dans `prisma.config.ts`).
-- `Transaction.bankAccountId` (FK) plutôt qu'un `bankAccountType` : le type PERSO/PRO vient du BankAccount,
-  ce qui permet plusieurs comptes par type. Supprimer un `ImportBatch` supprime ses transactions.
+- **Pas de modèle `BankAccount`** : seul compte le type **PERSO / PRO** (enum `AccountType`, porté par
+  `ImportBatch` et `Transaction`). La banque ne sert qu'à choisir le parseur CSV : elle est déduite du
+  type par la constante `BANK_BY_ACCOUNT_TYPE` (`server/lib/csv/banks`), jamais stockée. Plus tard
+  (appartements), le rattachement se fera par un `apartmentId` optionnel sur `Transaction` choisi à la
+  relecture, pas via un compte bancaire. Supprimer un `ImportBatch` supprime ses transactions.
 - **Mantine plutôt que PrimeReact** (décidé le 2026-10-01) : PrimeReact 11 est devenu sans style et
   sous licence PrimeUI (clé à renouveler), la 10 (MIT) n'est plus qu'en maintenance et a des
   couleurs codées en dur à écraser composant par composant. Mantine (MIT) se thématise par un

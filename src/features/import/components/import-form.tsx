@@ -1,22 +1,12 @@
-import {
-  Alert,
-  Button,
-  Grid,
-  Group,
-  Loader,
-  Paper,
-  Select,
-  Stack,
-  Text,
-  Title,
-} from "@mantine/core";
+import { Alert, Button, Grid, Group, Paper, Select, Stack, Text, Title } from "@mantine/core";
 import { Dropzone } from "@mantine/dropzone";
 import { IconAlertTriangle, IconFileSpreadsheet, IconUpload } from "@tabler/icons-react";
+import type { AccountType } from "@server/generated/prisma/enums";
 import { useState, type SubmitEvent } from "react";
 import { Link, useNavigate } from "react-router";
 
-import { useBankAccounts } from "@/features/import/hooks/use-bank-accounts";
 import { useImportStatement } from "@/features/import/hooks/use-import-statement";
+import { ACCOUNT_TYPE_OPTIONS } from "@/lib/account-types";
 
 // Les navigateurs annoncent un CSV sous plusieurs types MIME (Windows : application/vnd.ms-excel) :
 // on filtre donc aussi sur l'extension.
@@ -30,24 +20,22 @@ export function ImportForm() {
   // État des champs : `useState` explicite (≈ `ref()` + `v-model` en Vue). Un input « contrôlé »
   // reçoit `value` et notifie via `onChange`. Le fichier, lui, vient de la Dropzone : on garde
   // seulement le `File` choisi.
-  const [bankAccountId, setBankAccountId] = useState("");
+  const [accountType, setAccountType] = useState<AccountType | null>(null);
   const [file, setFile] = useState<File | null>(null);
   const [fileRejected, setFileRejected] = useState(false);
 
   const navigate = useNavigate();
-  const bankAccounts = useBankAccounts();
   const importStatement = useImportStatement();
 
   // Valeurs dérivées calculées pendant le rendu (≈ `computed`) : pas de `useState` en double.
-  const selectedAccount = bankAccounts.data?.find((account) => account.id === bankAccountId);
-  const canSubmit = selectedAccount !== undefined && file !== null;
+  const canSubmit = accountType !== null && file !== null;
 
   async function handleSubmit(event: SubmitEvent<HTMLFormElement>) {
     event.preventDefault(); // ≈ `@submit.prevent`
-    if (!file || !bankAccountId) return;
+    if (!file || !accountType) return;
 
     importStatement.mutate(
-      { bankAccountId, fileName: file.name, csvText: await file.text() },
+      { accountType, fileName: file.name, csvText: await file.text() },
       {
         // Tout s'est bien passé → direct à la relecture. Sinon on reste ici pour montrer l'avertissement.
         onSuccess: (data) => {
@@ -57,11 +45,6 @@ export function ImportForm() {
         },
       },
     );
-  }
-
-  if (bankAccounts.isPending) return <Loader color="gold" />;
-  if (bankAccounts.isError) {
-    return <Alert color="red" title="Impossible de charger les comptes." />;
   }
 
   const result = importStatement.data;
@@ -106,18 +89,12 @@ export function ImportForm() {
             )}
 
             <Select
-              label="Compte"
-              placeholder="Choisir un compte…"
-              data={bankAccounts.data.map((account) => ({
-                value: account.id,
-                label: account.name,
-              }))}
-              value={bankAccountId || null}
-              onChange={(value) => setBankAccountId(value ?? "")}
+              label="Type de compte"
+              placeholder="Perso ou pro…"
+              data={ACCOUNT_TYPE_OPTIONS}
+              value={accountType}
+              onChange={(value) => setAccountType(value as AccountType | null)}
               allowDeselect={false}
-              description={
-                selectedAccount?.bank ? `Format de la banque : ${selectedAccount.bank}` : undefined
-              }
             />
 
             <Button type="submit" disabled={!canSubmit} loading={importStatement.isPending}>
@@ -140,7 +117,7 @@ export function ImportForm() {
 
             {!result && !importStatement.isError && (
               <Text c="dimmed">
-                Choisis un compte et un relevé CSV : les transactions sont importées puis
+                Choisis le type de compte et un relevé CSV : les transactions sont importées puis
                 catégorisées automatiquement, avant ta relecture.
               </Text>
             )}

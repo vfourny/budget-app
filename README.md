@@ -28,7 +28,7 @@ Prérequis : Node ≥ 22 (voir `.nvmrc`) et pnpm 10.
 ```bash
 cp .env.example .env        # renseigner les URLs Neon (et la clé Anthropic plus tard)
 pnpm install                # génère aussi le client Prisma (postinstall) + installe les hooks git
-pnpm db:deploy && pnpm db:seed
+pnpm db:deploy
 pnpm dev                    # front + API sur http://localhost:5173 (API sous /api)
 ```
 
@@ -44,7 +44,6 @@ pnpm dev                    # front + API sur http://localhost:5173 (API sous /a
 | `pnpm format`     | `prettier --write`                                           |
 | `pnpm db:migrate` | `prisma migrate dev` (crée + applique une migration)         |
 | `pnpm db:deploy`  | `prisma migrate deploy` (applique les migrations existantes) |
-| `pnpm db:seed`    | Seed idempotent (comptes bancaires)                          |
 | `pnpm db:studio`  | Prisma Studio                                                |
 
 ## Documentation
@@ -60,6 +59,6 @@ Les conventions de travail (workflow PR, consignes pour Claude Code) sont dans [
 
 ## État d'avancement
 
-Fait : scaffold, Prisma/Neon + schéma + seed, tRPC + TanStack Query, parseur CSV générique avec mapping par banque.
+Fait : scaffold, Prisma/Neon + schéma, tRPC + TanStack Query, parseur CSV générique avec mapping par banque.
 À venir : écran de relecture, dashboards mois / année, puis partie pro Stygma (TVA, facturation, prévisionnel/réel).
 Hors scope v1 : synchro bancaire automatique, multi-utilisateurs, facturation / TVA.

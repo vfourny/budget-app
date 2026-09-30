@@ -44,10 +44,10 @@ export const categorizeRouter = createTRPCRouter({
         return { categorizedCount: 0, uncategorizedCount: 0, lowConfidenceCount: 0 };
       }
 
-      // Exemples few-shot : transactions déjà validées du même compte (vide au tout premier import).
+      // Exemples few-shot : transactions déjà validées du même type de compte (vide au tout premier import).
       const validated = await ctx.db.transaction.findMany({
         where: {
-          bankAccountId: batch.bankAccountId,
+          accountType: batch.accountType,
           category: { not: null },
           importBatch: { status: "VALIDATED" },
         },

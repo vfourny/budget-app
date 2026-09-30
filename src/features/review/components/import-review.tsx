@@ -15,6 +15,7 @@ import { Link } from "react-router";
 
 import { PageHeader } from "@/components/page-header";
 import { useImportReview, useSetCategory } from "@/features/review/hooks/use-import-review";
+import { ACCOUNT_TYPE_LABELS } from "@/lib/account-types";
 import { TRANSACTION_CATEGORIES, TRANSACTION_CATEGORY_ORDER } from "@/lib/categories";
 import { formatCents, formatDate } from "@/lib/format";
 import type { TransactionCategory } from "@server/generated/prisma/enums";
@@ -51,7 +52,7 @@ export function ImportReview({ importId }: { importId: string }) {
         <IconArrowLeft size={14} /> Retour aux imports
       </Text>
       <PageHeader
-        eyebrow={`Import du ${formatDate(batch.createdAt)} · ${batch.bankAccountName}`}
+        eyebrow={`Import du ${formatDate(batch.createdAt)} · ${ACCOUNT_TYPE_LABELS[batch.accountType]}`}
         title="Relecture"
         actions={
           <Group gap={12}>

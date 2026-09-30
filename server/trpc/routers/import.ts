@@ -2,6 +2,7 @@ import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 
 import { NEEDS_REVIEW_WHERE, needsReview } from "@server/lib/categorize/needs-review";
+import { AccountType } from "@server/generated/prisma/enums";
 import { getBankCsvConfig } from "@server/lib/csv/banks";
 import { parseBankStatement } from "@server/lib/csv/parse-bank-statement";
 import { createTRPCRouter, publicProcedure } from "@server/trpc/init";
@@ -9,7 +10,7 @@ import { createTRPCRouter, publicProcedure } from "@server/trpc/init";
 /** Le CSV voyage en texte dans le JSON : un relevé fait quelques centaines de lignes, loin de la
  * limite Vercel (4,5 Mo). */
 const createImportInputSchema = z.object({
-  bankAccountId: z.string().min(1),
+  accountType: z.enum(AccountType),
   fileName: z.string().min(1).max(255),
   csvText: z.string().min(1).max(2_000_000),
 });
@@ -21,20 +22,7 @@ export const importRouter = createTRPCRouter({
    * compteront que les imports VALIDATED.
    */
   create: publicProcedure.input(createImportInputSchema).mutation(async ({ ctx, input }) => {
-    const bankAccount = await ctx.db.bankAccount.findUnique({
-      where: { id: input.bankAccountId },
-    });
-    if (!bankAccount) {
-      throw new TRPCError({ code: "NOT_FOUND", message: "Compte bancaire introuvable." });
-    }
-
-    const config = bankAccount.bank ? getBankCsvConfig(bankAccount.bank) : undefined;
-    if (!config) {
-      throw new TRPCError({
-        code: "BAD_REQUEST",
-        message: `Aucun format CSV connu pour la banque « ${bankAccount.bank ?? "non renseignée"} ».`,
-      });
-    }
+    const config = getBankCsvConfig(input.accountType);
 
     const { transactions, errors } = parseBankStatement(input.csvText, config);
     if (transactions.length === 0) {
@@ -47,13 +35,13 @@ export const importRouter = createTRPCRouter({
     // Une seule transaction SQL : un import est écrit en entier ou pas du tout.
     const batch = await ctx.db.importBatch.create({
       data: {
-        bankAccountId: bankAccount.id,
+        accountType: input.accountType,
         fileName: input.fileName,
         transactions: {
           createMany: {
             data: transactions.map((transaction) => ({
               ...transaction,
-              bankAccountId: bankAccount.id,
+              accountType: input.accountType,
             })),
           },
         },
@@ -74,7 +62,7 @@ export const importRouter = createTRPCRouter({
         fileName: true,
         status: true,
         createdAt: true,
-        bankAccount: { select: { name: true } },
+        accountType: true,
         _count: {
           select: { transactions: true },
         },
@@ -92,7 +80,7 @@ export const importRouter = createTRPCRouter({
       fileName: batch.fileName,
       status: batch.status,
       createdAt: batch.createdAt,
-      bankAccountName: batch.bankAccount.name,
+      accountType: batch.accountType,
       lineCount: batch._count.transactions,
       toReviewCount: batch.status === "VALIDATED" ? 0 : (toReviewById.get(batch.id) ?? 0),
     }));
@@ -107,7 +95,7 @@ export const importRouter = createTRPCRouter({
         fileName: true,
         status: true,
         createdAt: true,
-        bankAccount: { select: { name: true, type: true } },
+        accountType: true,
         transactions: {
           orderBy: [{ date: "asc" }, { createdAt: "asc" }],
           select: {
@@ -128,8 +116,7 @@ export const importRouter = createTRPCRouter({
       fileName: batch.fileName,
       status: batch.status,
       createdAt: batch.createdAt,
-      bankAccountName: batch.bankAccount.name,
-      bankAccountType: batch.bankAccount.type,
+      accountType: batch.accountType,
       transactions: batch.transactions.map((transaction) => ({
         ...transaction,
         needsReview: needsReview(transaction),

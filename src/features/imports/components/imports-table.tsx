@@ -3,6 +3,7 @@ import { IconFileSpreadsheet } from "@tabler/icons-react";
 import { Link } from "react-router";
 
 import { useImports } from "@/features/imports/hooks/use-imports";
+import { ACCOUNT_TYPE_LABELS } from "@/lib/account-types";
 import { formatDate } from "@/lib/format";
 
 import classes from "./imports-table.module.css";
@@ -50,7 +51,7 @@ export function ImportsTable() {
                     <span>{item.fileName}</span>
                   </Link>
                 </Table.Td>
-                <Table.Td>{item.bankAccountName}</Table.Td>
+                <Table.Td>{ACCOUNT_TYPE_LABELS[item.accountType]}</Table.Td>
                 <Table.Td>{formatDate(item.createdAt)}</Table.Td>
                 <Table.Td ta="right" fw={600}>
                   {item.lineCount}
