@@ -74,10 +74,10 @@ Upload CSV → parsing → ImportBatch (PENDING_REVIEW) → catégorisation Clau
 ```
 
 1. **Upload** : l'utilisateur choisit le compte bancaire et dépose le CSV de la banque.
-2. **Parsing** : le mapping de la banque (via `BankAccount.bank`) transforme les lignes en transactions normalisées. Une ligne illisible est **écartée et signalée** (numéro de ligne + contenu brut) sans bloquer les autres.
+2. **Parsing** (route `import.create`) : le mapping de la banque (via `BankAccount.bank`) transforme les lignes en transactions normalisées. Une ligne illisible est **écartée et signalée** (numéro de ligne + contenu brut) sans bloquer les autres.
 3. **Catégorisation** : l'API Claude propose une catégorie (valeur de l'enum) avec un score de `confidence`, en s'appuyant sur des exemples de transactions déjà validées (few-shot).
 4. **Relecture** : tableau éditable groupé par import, correction inline, mise en avant des lignes à faible confiance ou en erreur.
-5. **Validation** : statut `VALIDATED` + `validatedAt`. Les transactions ne sont écrites en base qu'à cette étape.
+5. **Validation** : statut `VALIDATED` + `validatedAt`. Les transactions sont écrites en base **dès l'import** (sans catégorie, rattachées à l'`ImportBatch`) pour que la relecture survive à un rechargement de page ; **seuls les imports `VALIDATED` comptent dans les dashboards**.
 
 Règles :
 
