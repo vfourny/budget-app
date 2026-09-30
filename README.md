@@ -9,17 +9,17 @@ Flux cible : **upload d'un relevé CSV → catégorisation par l'API Claude → 
 
 ## Stack
 
-| Couche      | Choix                                                        |
-| ----------- | ------------------------------------------------------------ |
-| Front       | React 19 (SPA) + Vite 8, TypeScript 6                        |
-| Backend     | Nitro 3 (`nitro/vite`, dossier `server/`, conventions Nuxt)  |
-| API         | tRPC 11 + Zod 4, TanStack Query 5                            |
-| DB          | Prisma 7 + PostgreSQL Neon (`@prisma/adapter-neon`)          |
-| UI          | PrimeReact, thème sombre « obsidian / platine », accent doré |
-| Auth        | Better Auth (mono-utilisateur) — pas encore en place         |
-| IA          | API Anthropic (catégorisation des lignes de relevé)          |
-| Hébergement | Vercel (Hobby) + Neon (Free)                                 |
-| Qualité     | oxlint, Prettier, `tsc`, lefthook, GitHub Actions            |
+| Couche      | Choix                                                                        |
+| ----------- | ---------------------------------------------------------------------------- |
+| Front       | React 19 (SPA) + Vite 8, TypeScript 6                                        |
+| Backend     | Nitro 3 (`nitro/vite`, dossier `server/`, conventions Nuxt)                  |
+| API         | tRPC 11 + Zod 4, TanStack Query 5                                            |
+| DB          | Prisma 7 + PostgreSQL Neon (`@prisma/adapter-neon`)                          |
+| UI          | Mantine 9 + React Router 8, thème sombre « obsidian / platine », accent doré |
+| Auth        | Better Auth (mono-utilisateur) — pas encore en place                         |
+| IA          | API Anthropic (catégorisation des lignes de relevé)                          |
+| Hébergement | Vercel (Hobby) + Neon (Free)                                                 |
+| Qualité     | oxlint, Prettier, `tsc`, lefthook, GitHub Actions                            |
 
 ## Démarrage rapide
 
@@ -61,5 +61,5 @@ Les conventions de travail (workflow PR, consignes pour Claude Code) sont dans [
 ## État d'avancement
 
 Fait : scaffold, Prisma/Neon + schéma + seed, tRPC + TanStack Query, parseur CSV générique avec mapping par banque.
-À venir : route d'import + écran d'upload, catégorisation Claude, écran de relecture, thème PrimeReact, dashboards mois / année, puis partie pro Stygma (TVA, facturation, prévisionnel/réel).
+À venir : écran de relecture, dashboards mois / année, puis partie pro Stygma (TVA, facturation, prévisionnel/réel).
 Hors scope v1 : synchro bancaire automatique, multi-utilisateurs, facturation / TVA.

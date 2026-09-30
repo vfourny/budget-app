@@ -8,11 +8,13 @@ Ce que l'on doit savoir avant de toucher au code. Les règles métier sont dans 
 
 ```
 src/                   # FRONT — SPA React, tourne uniquement dans le navigateur
-  main.tsx             # point d'entrée (createRoot)
-  app.tsx              # composant racine
+  main.tsx             # point d'entrée (createRoot + providers : Query, Router, Mantine)
+  app.tsx              # table des routes (React Router)
+  pages/               # une page = un écran
   features/<domaine>/  # components/ + hooks/ propres à un domaine (import, review, dashboard…)
   components/          # UI partagée entre features
-  lib/                 # utilitaires front : trpc.ts, envelopes.ts, categories.ts…
+  lib/                 # utilitaires front : trpc.ts, theme.ts, envelopes.ts, categories.ts…
+  styles/global.css    # règles CSS globales
 server/                # BACKEND — Nitro, mêmes conventions que le server/ de Nuxt
   api/                 # routes HTTP : server/api/health.ts → GET /api/health
     trpc/[...path].ts  # point d'entrée HTTP de tRPC (/api/trpc/*)
@@ -50,6 +52,13 @@ Pourquoi pas Next.js : app mono-utilisateur derrière une auth, sans SEO. SSR et
 3. Côté front, un hook dans `src/features/<domaine>/hooks/`.
 
 Routeurs actuels : `bankAccount` (`list`), `categorize` (`run` : demande à Claude une catégorie + confiance par transaction sans catégorie d'un import en attente ; logique et prompt dans `server/lib/categorize/`) et `import` (`create` : parse le CSV via le mapping de la banque, puis crée l'`ImportBatch` et ses `Transaction` en une seule transaction SQL). Il n'y a qu'une `publicProcedure` ; une `protectedProcedure` arrivera avec Better Auth.
+
+## Interface : Mantine + React Router
+
+- **Thème** : `src/lib/theme.ts` (objet `createTheme` + `cssVariablesResolver`) porte les tokens de la maquette — palettes `dark` (obsidian / platine : fond, cartes, bordures, texte), `gold` (accent, index 6 = `#C9A45C`), `amber` (à vérifier / dépassement, index 6 = `#E0894A`), polices (Instrument Serif pour les titres, Manrope pour l'UI), rayons (16 cartes, 10 contrôles, 8 petits boutons). Champs et boutons à 44 px (`src/styles/global.css`). Toujours sombre (`forceColorScheme="dark"`).
+- **Composants** : Mantine (`@mantine/core`, `@mantine/dropzone`), icônes Tabler. CSS sur mesure en CSS Modules. Pas de couleur en dur : tokens Mantine.
+- **Routing** : `BrowserRouter` (`main.tsx`) + `<Routes>` (`app.tsx`). `AppLayout` (barre latérale, `<Outlet />`) enveloppe toutes les pages. Routes : `/` accueil, `/perso`, `/pro`, `/imports`, `/imports/nouveau`, `/reglages`. Les liens directs (rechargement de `/imports/nouveau`) marchent grâce au repli SPA de Nitro (vérifié sur `pnpm preview`).
+- **Écrans** : seuls l'import (`/imports/nouveau`) et les réglages (liste des catégories) sont réels ; les autres affichent `ComingSoon` en attendant leur PR.
 
 ## Base de données : Prisma 7 + Neon
 
