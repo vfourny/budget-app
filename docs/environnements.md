@@ -4,11 +4,11 @@
 
 Modèle : `.env.example` (`cp .env.example .env`). Le fichier `.env` n'est jamais commité.
 
-| Variable            | Usage                                                                    | Obligatoire     |
-| ------------------- | ------------------------------------------------------------------------ | --------------- |
-| `DATABASE_URL`      | URL Neon **pooled** (host `-pooler`), runtime via `@prisma/adapter-neon` | oui             |
-| `DIRECT_URL`        | URL Neon **directe**, CLI Prisma (migrations, studio)                    | oui pour la CLI |
-| `ANTHROPIC_API_KEY` | Catégorisation des lignes de relevé                                      | plus tard       |
+| Variable         | Usage                                                                    | Obligatoire     |
+| ---------------- | ------------------------------------------------------------------------ | --------------- |
+| `DATABASE_URL`   | URL Neon **pooled** (host `-pooler`), runtime via `@prisma/adapter-neon` | oui             |
+| `DIRECT_URL`     | URL Neon **directe**, CLI Prisma (migrations, studio)                    | oui pour la CLI |
+| `GEMINI_API_KEY` | Catégorisation (clé gratuite sur aistudio.google.com)                    | oui             |
 
 `DATABASE_URL` est validée au démarrage par Zod (`server/lib/env.ts`). Si `DIRECT_URL` est absente, la CLI Prisma retombe sur `DATABASE_URL`, mais les migrations exigent une connexion directe : toujours définir les deux.
 

@@ -1,16 +1,40 @@
+import { ApiError } from "@google/genai";
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 
 import type { TransactionCategory } from "@server/generated/prisma/enums";
-import { getAnthropicClient } from "@server/lib/anthropic";
 import {
   LOW_CONFIDENCE_THRESHOLD,
   categorizeTransactions,
 } from "@server/lib/categorize/categorize-transactions";
+import { getGeminiClient } from "@server/lib/gemini";
 import { createTRPCRouter, publicProcedure } from "@server/trpc/init";
 
 /** Nombre maximum d'exemples validés montrés à l'IA (un par libellé distinct, les plus récents). */
 const MAX_EXAMPLES = 60;
+
+/** Message précis selon l'erreur Gemini : inutile de « réessayer » une clé refusée. */
+function toTRPCError(error: unknown): TRPCError {
+  const status = error instanceof ApiError ? error.status : undefined;
+  if (status === 429) {
+    return new TRPCError({
+      code: "TOO_MANY_REQUESTS",
+      message:
+        "Quota Gemini atteint : réessaie dans une minute (ou demain si le quota du jour est épuisé).",
+    });
+  }
+  if (status === 400 || status === 401 || status === 403) {
+    return new TRPCError({
+      code: "PRECONDITION_FAILED",
+      message:
+        "Gemini a refusé la requête : clé API invalide ou modèle indisponible pour ce compte.",
+    });
+  }
+  return new TRPCError({
+    code: "INTERNAL_SERVER_ERROR",
+    message: "La catégorisation par l'IA a échoué, réessaie dans un instant.",
+  });
+}
 
 export const categorizeRouter = createTRPCRouter({
   /**
@@ -21,11 +45,11 @@ export const categorizeRouter = createTRPCRouter({
   run: publicProcedure
     .input(z.object({ batchId: z.string().min(1) }))
     .mutation(async ({ ctx, input }) => {
-      const client = getAnthropicClient();
+      const client = getGeminiClient();
       if (!client) {
         throw new TRPCError({
           code: "PRECONDITION_FAILED",
-          message: "ANTHROPIC_API_KEY n'est pas configurée sur le serveur.",
+          message: "GEMINI_API_KEY n'est pas configurée sur le serveur.",
         });
       }
 
@@ -65,10 +89,7 @@ export const categorizeRouter = createTRPCRouter({
         results = await categorizeTransactions(client, transactions, examples);
       } catch (error) {
         console.error("Catégorisation : échec de l'appel à l'IA", error);
-        throw new TRPCError({
-          code: "INTERNAL_SERVER_ERROR",
-          message: "La catégorisation par l'IA a échoué, réessaie dans un instant.",
-        });
+        throw toTRPCError(error);
       }
 
       // On regroupe les lignes qui reçoivent la même (catégorie, confiance arrondie à 0,01) pour

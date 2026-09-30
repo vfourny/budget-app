@@ -51,7 +51,7 @@ Pourquoi pas Next.js : app mono-utilisateur derrière une auth, sans SEO. SSR et
 2. L'enregistrer dans `server/trpc/root.ts`.
 3. Côté front, un hook dans `src/features/<domaine>/hooks/`.
 
-Routeurs actuels : `categorize` (`run` : demande à Claude une catégorie + confiance par transaction sans catégorie d'un import en attente ; logique et prompt dans `server/lib/categorize/`) `import` (`create` : parse le CSV via le mapping de la banque, puis crée l'`ImportBatch` et ses `Transaction` en une seule transaction SQL ; `list` : historique avec nombre de lignes et de lignes « à vérifier » ; `get` : un import et ses lignes pour la relecture) et `transaction` (`setCategory` : correction manuelle, `categoryConfidence` repasse à `null` = « Confirmée », refusé si l'import est validé). Une ligne est « à vérifier » si elle n'a pas de catégorie ou si sa confiance est sous 0,7 (`server/lib/categorize/needs-review.ts`). Il n'y a qu'une `publicProcedure` ; une `protectedProcedure` arrivera avec Better Auth.
+Routeurs actuels : `categorize` (`run` : demande à Gemini une catégorie + confiance par transaction sans catégorie d'un import en attente ; logique et prompt dans `server/lib/categorize/`) `import` (`create` : parse le CSV via le mapping de la banque, puis crée l'`ImportBatch` et ses `Transaction` en une seule transaction SQL ; `list` : historique avec nombre de lignes et de lignes « à vérifier » ; `get` : un import et ses lignes pour la relecture) et `transaction` (`setCategory` : correction manuelle, `categoryConfidence` repasse à `null` = « Confirmée », refusé si l'import est validé). Une ligne est « à vérifier » si elle n'a pas de catégorie ou si sa confiance est sous 0,7 (`server/lib/categorize/needs-review.ts`). Il n'y a qu'une `publicProcedure` ; une `protectedProcedure` arrivera avec Better Auth.
 
 ## Interface : Mantine + React Router
 
@@ -93,7 +93,7 @@ Choix à connaître :
 - **State** : fondamentaux uniquement (`useState`, `useReducer`, Context, TanStack Query). **Pas de lib de state management** sans accord explicite.
 - **Validation** : schémas Zod partagés entre tRPC et formulaires.
 - **Langues** : UI en français, code / identifiants / commits en anglais.
-- Variables d'environnement serveur validées au démarrage par Zod (`server/lib/env.ts`). `ANTHROPIC_API_KEY` est optionnelle tant que la catégorisation n'est pas branchée.
+- Variables d'environnement serveur validées au démarrage par Zod (`server/lib/env.ts`). `GEMINI_API_KEY` (et `GEMINI_MODEL`, optionnelle) ne sont requises que par `categorize.run` : erreur claire sinon.
 
 ## Équivalences React ↔ Vue
 

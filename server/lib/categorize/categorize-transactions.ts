@@ -1,15 +1,13 @@
-import type Anthropic from "@anthropic-ai/sdk";
+import type { GoogleGenAI } from "@google/genai";
 import { z } from "zod";
 
 import { TransactionCategory } from "@server/generated/prisma/enums";
 import { CATEGORY_HINTS } from "@server/lib/categorize/category-hints";
+import { getGeminiModel } from "@server/lib/gemini";
 
-/** Haiku : le plus rapide et le moins cher, largement suffisant pour classer des libellés. */
-export const CATEGORIZE_MODEL = "claude-haiku-4-5-20251001";
-
-/** Nombre de lignes envoyées par appel : assez petit pour une réponse courte et rapide, les
- * appels d'un même import partent en parallèle. */
-const CHUNK_SIZE = 80;
+/** Nombre de lignes envoyées par appel : peu d'appels par import (quota de requêtes par minute du
+ * palier gratuit Gemini), les appels d'un même import partent en parallèle. */
+const CHUNK_SIZE = 200;
 
 /** En dessous de cette confiance, la ligne sera proposée dans « À vérifier » à la relecture. */
 export const LOW_CONFIDENCE_THRESHOLD = 0.7;
@@ -43,7 +41,7 @@ const responseSchema = z.object({
   ),
 });
 
-/** Schéma JSON imposé à la réponse (sortie structurée). `enum` garantit une catégorie valide. */
+/** Schéma JSON imposé à la réponse (sortie structurée Gemini). `enum` garantit une catégorie valide. */
 const OUTPUT_SCHEMA = {
   type: "object",
   properties: {
@@ -57,12 +55,10 @@ const OUTPUT_SCHEMA = {
           confidence: { type: "number" },
         },
         required: ["index", "category", "confidence"],
-        additionalProperties: false,
       },
     },
   },
   required: ["results"],
-  additionalProperties: false,
 } as const;
 
 const SYSTEM_PROMPT = `Tu classes les lignes d'un relevé bancaire français dans une liste figée de catégories de budget.
@@ -94,7 +90,7 @@ function formatExamples(examples: readonly CategorizeExample[]): string {
 }
 
 async function categorizeChunk(
-  client: Anthropic,
+  client: GoogleGenAI,
   chunk: readonly CategorizeInput[],
   examples: readonly CategorizeExample[],
 ): Promise<(CategorizedLine | null)[]> {
@@ -103,23 +99,22 @@ async function categorizeChunk(
       `${index} | ${formatCents(transaction.amountCents)} | ${transaction.label}`,
   );
 
-  const response = await client.messages.create({
-    model: CATEGORIZE_MODEL,
-    max_tokens: 4096,
-    system: SYSTEM_PROMPT,
-    messages: [
-      {
-        role: "user",
-        content: `${formatExamples(examples)}Lignes à classer :\n${lines.join("\n")}`,
-      },
-    ],
-    output_config: { format: { type: "json_schema", schema: OUTPUT_SCHEMA } },
+  const response = await client.models.generateContent({
+    model: getGeminiModel(),
+    contents: `${formatExamples(examples)}Lignes à classer :\n${lines.join("\n")}`,
+    config: {
+      systemInstruction: SYSTEM_PROMPT,
+      responseMimeType: "application/json",
+      responseJsonSchema: OUTPUT_SCHEMA,
+      temperature: 0,
+    },
   });
 
-  if (response.stop_reason === "max_tokens" || response.stop_reason === "refusal") {
-    throw new Error(`Réponse de l'IA inutilisable (stop_reason : ${response.stop_reason}).`);
+  const finishReason = response.candidates?.[0]?.finishReason;
+  if (finishReason !== undefined && finishReason !== "STOP") {
+    throw new Error(`Réponse de l'IA inutilisable (finishReason : ${finishReason}).`);
   }
-  const text = response.content.find((block) => block.type === "text")?.text;
+  const text = response.text;
   if (!text) throw new Error("Réponse de l'IA vide.");
 
   const { results } = responseSchema.parse(JSON.parse(text));
@@ -143,7 +138,7 @@ async function categorizeChunk(
  * lots partent en parallèle ; si l'un échoue, tout échoue (l'appelant n'écrit rien en base).
  */
 export async function categorizeTransactions(
-  client: Anthropic,
+  client: GoogleGenAI,
   transactions: readonly CategorizeInput[],
   examples: readonly CategorizeExample[] = [],
 ): Promise<(CategorizedLine | null)[]> {

@@ -67,13 +67,13 @@ Chaque import et chaque transaction porte un **type** : `PERSO` ou `PRO` (Stygma
 ## Cycle de vie d'un import
 
 ```
-Upload CSV → parsing → ImportBatch (PENDING_REVIEW) → catégorisation Claude
+Upload CSV → parsing → ImportBatch (PENDING_REVIEW) → catégorisation Gemini
           → relecture / correction inline → « Valider » → ImportBatch (VALIDATED)
 ```
 
 1. **Upload** : l'utilisateur choisit le type de compte (perso / pro) et dépose le CSV de la banque.
 2. **Parsing** (route `import.create`) : le mapping de la banque (déduit du type de compte) transforme les lignes en transactions normalisées. Une ligne illisible est **écartée et signalée** (numéro de ligne + contenu brut) sans bloquer les autres.
-3. **Catégorisation** (route `categorize.run`) : l'API Claude (Haiku 4.5) propose une catégorie (valeur de l'enum) avec un score de `confidence` (0 à 1, stocké dans `Transaction.categoryConfidence`), en s'appuyant sur des exemples de transactions déjà validées du même type de compte (few-shot, vide au tout premier import). Sous **0,7** de confiance, la ligne ira dans « À vérifier ». Relançable : seules les lignes encore sans catégorie sont traitées ; si l'appel à l'IA échoue, rien n'est écrit.
+3. **Catégorisation** (route `categorize.run`) : l'API Gemini (Flash-Lite, palier gratuit) propose une catégorie (valeur de l'enum) avec un score de `confidence` (0 à 1, stocké dans `Transaction.categoryConfidence`), en s'appuyant sur des exemples de transactions déjà validées du même type de compte (few-shot, vide au tout premier import). Sous **0,7** de confiance, la ligne ira dans « À vérifier ». Relançable : seules les lignes encore sans catégorie sont traitées ; si l'appel à l'IA échoue, rien n'est écrit.
 4. **Relecture** (`/imports/:id`) : la catégorisation part automatiquement juste après l'import, puis on arrive sur le tableau. Les lignes « à vérifier » (sans catégorie ou confiance < 0,7) sont surlignées ; chaque ligne a un sélecteur de catégorie (un choix manuel = « Confirmée »). Filtre Toutes / À vérifier.
 5. **Validation** : statut `VALIDATED` + `validatedAt`. Les transactions sont écrites en base **dès l'import** (sans catégorie, rattachées à l'`ImportBatch`) pour que la relecture survive à un rechargement de page ; **seuls les imports `VALIDATED` comptent dans les dashboards**.
 

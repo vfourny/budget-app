@@ -4,7 +4,7 @@ App perso de budget (méthode des enveloppes) + suivi compta pro de **Stygma SAS
 Remplace un Google Sheet annuel (`<année>-Comptabilité`, un onglet par mois) rempli à la main
 depuis les relevés bancaires. L'historique mois / année est central.
 
-Flux cible : upload d'un relevé CSV → catégorisation par l'API Claude → relecture/correction
+Flux cible : upload d'un relevé CSV → catégorisation par l'IA (Gemini) → relecture/correction
 → validation → écriture en base → dashboards mois/année.
 
 ## Le développeur
@@ -35,7 +35,7 @@ Choix délibéré : **le plus simple possible**. SPA React (pas de SSR, pas de S
 | DB          | Prisma 7 + PostgreSQL Neon (driver adapter `@prisma/adapter-neon`)           |
 | UI          | Mantine 9 + React Router 8, thème sombre « obsidian / platine », accent doré |
 | Auth        | Better Auth (mono-utilisateur) — pas encore en place                         |
-| IA          | API Anthropic pour catégoriser les lignes de relevé                          |
+| IA          | API Gemini (Google AI Studio) pour catégoriser les lignes de relevé          |
 | Hébergement | Vercel (Hobby, détection Nitro automatique) + Neon (Free)                    |
 | Qualité     | oxlint (règles React hooks incluses), Prettier, `tsc`                        |
 
@@ -150,7 +150,7 @@ schéma Zod + modèle Prisma, ajout d'un widget dashboard).
 1. Scaffold (Vite + Nitro + CI + CLAUDE.md) → Prisma/Neon + schéma + seed → tRPC + TanStack Query (fait)
 2. Thème obsidian/platine + routing client (fait : Mantine + React Router, menu latéral de la maquette)
 3. Upload CSV (parser générique, mapping de colonnes par banque) (fait)
-4. Route tRPC `categorize` (API Claude, few-shot sur transactions validées, JSON `category` (valeur de l'enum) + `confidence`) (fait)
+4. Route tRPC `categorize` (Gemini, few-shot sur transactions validées, JSON `category` (valeur de l'enum) + `confidence`) (fait)
 5. Écran de relecture : historique + tableau de correction (fait) ; « Valider », « Annuler l'import » / suppression (à faire, PR suivante)
 6. Dashboard mois (par catégorie, enveloppe recommandée vs réel) + vue année
 7. Après validation du MVP perso : partie pro Stygma (TVA, facturation, prévisionnel/réel)
