@@ -2,6 +2,7 @@ import { Alert, Badge, Loader, Paper, Table, Text } from "@mantine/core";
 import { IconFileSpreadsheet } from "@tabler/icons-react";
 import { Link } from "react-router";
 
+import { DeleteImportButton } from "@/features/imports/components/delete-import-button";
 import { useImports } from "@/features/imports/hooks/use-imports";
 import { ACCOUNT_TYPE_LABELS } from "@/lib/account-types";
 import { formatDate } from "@/lib/format";
@@ -40,6 +41,7 @@ export function ImportsTable() {
               <Table.Th>Importé le</Table.Th>
               <Table.Th ta="right">Lignes</Table.Th>
               <Table.Th>Statut</Table.Th>
+              <Table.Th />
             </Table.Tr>
           </Table.Thead>
           <Table.Tbody>
@@ -66,6 +68,13 @@ export function ImportsTable() {
                       {item.toReviewCount > 0 ? `${item.toReviewCount} à vérifier` : "À valider"}
                     </Badge>
                   )}
+                </Table.Td>
+                <Table.Td ta="right">
+                  <DeleteImportButton
+                    importId={item.id}
+                    lineCount={item.lineCount}
+                    variant="icon"
+                  />
                 </Table.Td>
               </Table.Tr>
             ))}

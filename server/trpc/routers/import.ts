@@ -123,4 +123,46 @@ export const importRouter = createTRPCRouter({
       })),
     };
   }),
+
+  /**
+   * Valide un import : il compte désormais dans les dashboards et ses lignes servent d'exemples
+   * à la catégorisation. Refusé tant qu'une ligne est sans catégorie ou à faible confiance.
+   */
+  validate: publicProcedure
+    .input(z.object({ id: z.string().min(1) }))
+    .mutation(async ({ ctx, input }) => {
+      const batch = await ctx.db.importBatch.findUnique({
+        where: { id: input.id },
+        select: { status: true },
+      });
+      if (!batch) throw new TRPCError({ code: "NOT_FOUND", message: "Import introuvable." });
+      if (batch.status === "VALIDATED") {
+        throw new TRPCError({ code: "BAD_REQUEST", message: "Cet import est déjà validé." });
+      }
+
+      const remaining = await ctx.db.transaction.count({
+        where: { importBatchId: input.id, ...NEEDS_REVIEW_WHERE },
+      });
+      if (remaining > 0) {
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: `Encore ${remaining} transaction(s) à catégoriser avant de valider.`,
+        });
+      }
+
+      await ctx.db.importBatch.update({
+        where: { id: input.id },
+        data: { status: "VALIDATED", validatedAt: new Date() },
+      });
+      return { id: input.id };
+    }),
+
+  /** Supprime un import et, en cascade, toutes ses transactions (validé ou non). */
+  delete: publicProcedure
+    .input(z.object({ id: z.string().min(1) }))
+    .mutation(async ({ ctx, input }) => {
+      const { count } = await ctx.db.importBatch.deleteMany({ where: { id: input.id } });
+      if (count === 0) throw new TRPCError({ code: "NOT_FOUND", message: "Import introuvable." });
+      return { id: input.id };
+    }),
 });
