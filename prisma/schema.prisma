@@ -74,21 +74,24 @@ model ImportBatch {
 }
 
 model Transaction {
-  id            String               @id @default(cuid())
-  date          DateTime             @db.Date
-  label         String
+  id                 String               @id @default(cuid())
+  date               DateTime             @db.Date
+  label              String
   /// Montant en centimes, signé : négatif = débit, positif = crédit.
-  amountCents   Int
+  amountCents        Int
   /// Dénormalisés depuis `date` pour les agrégations mois / année.
-  month         Int                  @db.SmallInt
-  year          Int                  @db.SmallInt
-  bankAccountId String
-  bankAccount   BankAccount          @relation(fields: [bankAccountId], references: [id])
-  category      TransactionCategory?
-  importBatchId String?
-  importBatch   ImportBatch?         @relation(fields: [importBatchId], references: [id], onDelete: Cascade)
-  createdAt     DateTime             @default(now())
-  updatedAt     DateTime             @updatedAt
+  month              Int                  @db.SmallInt
+  year               Int                  @db.SmallInt
+  bankAccountId      String
+  bankAccount        BankAccount          @relation(fields: [bankAccountId], references: [id])
+  category           TransactionCategory?
+  /// Confiance (0 à 1) de la catégorie proposée par l'IA. `null` = catégorie absente ou choisie
+  /// à la main. Sert à mettre en avant les lignes « À vérifier » à la relecture.
+  categoryConfidence Float?
+  importBatchId      String?
+  importBatch        ImportBatch?         @relation(fields: [importBatchId], references: [id], onDelete: Cascade)
+  createdAt          DateTime             @default(now())
+  updatedAt          DateTime             @updatedAt
 
   @@index([year, month])
   @@index([bankAccountId, year, month])

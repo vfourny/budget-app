@@ -4,7 +4,7 @@ import { z } from "zod";
 // plutôt qu'avec une erreur de connexion obscure au premier appel.
 const serverEnvSchema = z.object({
   DATABASE_URL: z.url(),
-  // Optionnelle tant que la catégorisation (étape 3) n'est pas branchée.
+  // Optionnelle au démarrage : seule la route `categorize.run` en a besoin (erreur claire sinon).
   ANTHROPIC_API_KEY: z.string().min(1).optional(),
   NODE_ENV: z.enum(["development", "test", "production"]).default("development"),
 });
