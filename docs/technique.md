@@ -1,0 +1,118 @@
+# Spécificités techniques
+
+Ce que l'on doit savoir avant de toucher au code. Les règles métier sont dans [fonctionnel.md](./fonctionnel.md), les conventions de workflow dans [`CLAUDE.md`](../CLAUDE.md).
+
+## Vue d'ensemble
+
+**SPA React + backend Nitro dans le même projet**, un seul serveur en dev (`pnpm dev` → `http://localhost:5173`, API sous `/api`).
+
+```
+src/                   # FRONT — SPA React, tourne uniquement dans le navigateur
+  main.tsx             # point d'entrée (createRoot)
+  app.tsx              # composant racine
+  features/<domaine>/  # components/ + hooks/ propres à un domaine (import, review, dashboard…)
+  components/          # UI partagée entre features
+  lib/                 # utilitaires front : trpc.ts, envelopes.ts, categories.ts…
+server/                # BACKEND — Nitro, mêmes conventions que le server/ de Nuxt
+  api/                 # routes HTTP : server/api/health.ts → GET /api/health
+    trpc/[...path].ts  # point d'entrée HTTP de tRPC (/api/trpc/*)
+  trpc/                # init.ts (contexte, procédures), root.ts (appRouter), routers/<domaine>.ts
+  lib/                 # db.ts (PrismaClient), env.ts (validation Zod), csv/ (parseur de relevés)
+  generated/prisma/    # client Prisma généré — gitignoré, ne pas éditer
+prisma/                # schema.prisma, migrations/, seed.ts
+prisma.config.ts       # config CLI Prisma 7
+```
+
+Pourquoi pas Next.js : app mono-utilisateur derrière une auth, sans SEO. SSR et Server Components n'apportent rien et ajoutent des concepts. Nitro (le moteur serveur de Nuxt) se déploie sur Vercel sans config.
+
+## Frontière front / back
+
+- `src/**` ne peut importer de `server/**` qu'en **`import type`** (ex. le type `AppRouter`). Jamais d'import runtime (Prisma, secrets…) côté front, sinon du code serveur part dans le bundle navigateur.
+- `import type` est **obligatoire** pour les types (`verbatimModuleSyntax`).
+- Alias : `@/…` → `src/`, `@server/…` → `server/` (déclarés dans `vite.config.ts` **et** `tsconfig.json`).
+- `src/lib/categories.ts` et `envelopes.ts` importent les types de l'enum Prisma depuis `@server/generated/prisma/enums`, en `import type` uniquement.
+
+## API : tRPC + TanStack Query
+
+- Le client (`src/lib/trpc.ts`) est un **singleton de module** : dans une SPA il n'y a qu'un client, pas besoin de Context.
+- **superjson** est le transformer des deux côtés : `Date` et autres types survivent au passage serveur → navigateur.
+- Les erreurs de validation Zod sont exposées champ par champ dans `error.data.zodError` (utile pour les formulaires).
+- `staleTime` par défaut des requêtes : 30 s.
+
+**Lecture** : `useQuery(trpc.<domaine>.<proc>.queryOptions())`, encapsulé dans un hook de feature ; gérer `isPending` / `isError` dans le composant.
+**Écriture** : `useMutation(trpc.x.y.mutationOptions())` + invalidation ciblée.
+**Interdit** : `fetch` dans un `useEffect`. `useEffect` est réservé à la synchro avec un système externe (oxlint le signale sinon).
+
+**Ajouter une route tRPC** :
+
+1. Créer `server/trpc/routers/<domaine>.ts` (entrées validées par `.input(zodSchema)`).
+2. L'enregistrer dans `server/trpc/root.ts`.
+3. Côté front, un hook dans `src/features/<domaine>/hooks/`.
+
+À ce jour `appRouter` est vide : le premier routeur (import CSV) arrive avec la PR d'import. Il n'y a qu'une `publicProcedure` ; une `protectedProcedure` arrivera avec Better Auth.
+
+## Base de données : Prisma 7 + Neon
+
+- Générateur `prisma-client` (client TS sans moteur Rust) sorti dans `server/generated/prisma/` (gitignoré, régénéré par `postinstall`).
+- **Deux URLs Neon** : `DATABASE_URL` (pooled, host `-pooler`) pour le runtime via `@prisma/adapter-neon`, `DIRECT_URL` (directe) pour la CLI Prisma et les migrations (`prisma.config.ts`).
+- Côté serveur, toujours passer par `db` de `@server/lib/db` (singleton mis en cache sur `globalThis` pour survivre au hot reload).
+- **Toute modif de `schema.prisma` s'accompagne d'une migration versionnée** dans `prisma/migrations/` (`pnpm db:migrate`).
+- `prisma.config.ts` n'utilise volontairement pas `env()` : il lèverait une erreur si la variable manque, ce qui casserait `prisma generate` en CI (pas de DB nécessaire).
+- Le seed (`prisma/seed.ts`) est **idempotent** (upsert par nom de compte) et crée son propre client.
+
+### Modèle de données
+
+| Modèle        | Rôle                                                                           |
+| ------------- | ------------------------------------------------------------------------------ |
+| `BankAccount` | Compte bancaire (`name` unique, `type` PERSO/PRO, `bank`)                      |
+| `ImportBatch` | Un fichier de relevé importé (`status` PENDING_REVIEW / VALIDATED, `fileName`) |
+| `Transaction` | Une ligne validée : date, libellé, montant en centimes, catégorie, mois/année  |
+
+Enums : `BankAccountType`, `Envelope`, `TransactionCategory`, `ImportStatus`.
+
+Choix à connaître :
+
+- `Transaction.bankAccountId` (FK) plutôt qu'un type de compte : le type PERSO/PRO vient du `BankAccount`.
+- Les catégories sont un **enum figé**, pas une table : libellés et enveloppes vivent dans `src/lib/categories.ts`.
+- Supprimer un `ImportBatch` supprime ses transactions (`onDelete: Cascade`).
+- Index sur `(year, month)`, `(bankAccountId, year, month)`, `category` et `importBatchId` pour les agrégations dashboards.
+
+## Règles de code
+
+- **Montants** : entiers en **centimes**, signés (négatif = débit). Jamais de float pour de l'argent (le parseur arrondit avec `Math.round(value * 100)`).
+- **Dates** : `Transaction.date` en `@db.Date`. Le parseur construit les dates en **UTC** (`Date.UTC`) pour éviter tout décalage de fuseau ; `month` / `year` sont lus avec `getUTCMonth()` / `getUTCFullYear()`.
+- **Valeurs dérivées** calculées pendant le rendu (≈ `computed` de Vue), pas stockées dans un `useState` ; `useMemo` seulement si le calcul est coûteux.
+- **Hooks custom** dans `features/<domaine>/hooks/` dès qu'une logique à état est réutilisée ou alourdit un composant (≈ composable).
+- **State** : fondamentaux uniquement (`useState`, `useReducer`, Context, TanStack Query). **Pas de lib de state management** sans accord explicite.
+- **Validation** : schémas Zod partagés entre tRPC et formulaires.
+- **Langues** : UI en français, code / identifiants / commits en anglais.
+- Variables d'environnement serveur validées au démarrage par Zod (`server/lib/env.ts`). `ANTHROPIC_API_KEY` est optionnelle tant que la catégorisation n'est pas branchée.
+
+## Équivalences React ↔ Vue
+
+Chaque PR qui introduit un pattern React le documente dans sa section « Notes React ».
+
+| Vue / Nuxt        | React ici                                    |
+| ----------------- | -------------------------------------------- |
+| composable        | hook custom (`useXxx`)                       |
+| `v-model`         | input contrôlé (`value` + `onChange`)        |
+| réactivité auto   | `useState` / `useEffect` explicites          |
+| `computed`        | calcul direct pendant le rendu, ou `useMemo` |
+| `provide/inject`  | Context                                      |
+| `server/` de Nuxt | `server/` Nitro (même convention)            |
+
+## Qualité et workflow
+
+- **Une fonctionnalité = une branche = une PR** courte (`feat/…`, `fix/…`, `chore/…`), Conventional Commits. Trop gros → PR empilées.
+- `pnpm check` (lint + typecheck + format) puis `pnpm build` doivent être verts avant `/ship-pr`.
+- **oxlint** (pas ESLint) avec `rules-of-hooks` et `exhaustive-deps` en erreur ; `no-console` en warning sauf `warn` / `error`.
+- **lefthook** (pre-commit) : oxlint `--fix` puis Prettier sur les fichiers stagés. Ne pas contourner avec `--no-verify`.
+- **Hook Claude Code** (`.claude/hooks/check.sh`) : Prettier + oxlint `--fix` + `tsc` après chaque édition.
+- **CI GitHub Actions** : lint, typecheck, format, build sur chaque PR et push sur `main`.
+- Nitro 3 est en **beta** : version épinglée exactement dans `package.json`, ne pas la monter sans test.
+
+## Pièges connus
+
+- **Colonne « Solde » en double** dans l'export BoursoBank : on mappe par index de colonne, pas par nom d'en-tête (voir [import-csv.md](./import-csv.md)).
+- **`pnpm lint` et `pnpm build`** utilisent des binaires natifs (oxlint, esbuild) : ne pas les lancer depuis une VM Linux sur un `node_modules` installé sous macOS, et inversement.
+- **Commentaires historiques** : `prisma/schema.prisma` et `prisma/seed.ts` mentionnent encore Next / `server-only` / `src/server/db.ts` (vestiges de la version Next.js abandonnée). Le chemin réel est `server/lib/db.ts`.
