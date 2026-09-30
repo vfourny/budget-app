@@ -7,7 +7,7 @@ Modèle : `.env.example` (`cp .env.example .env`). Le fichier `.env` n'est jamai
 | Variable            | Usage                                                                    | Obligatoire     |
 | ------------------- | ------------------------------------------------------------------------ | --------------- |
 | `DATABASE_URL`      | URL Neon **pooled** (host `-pooler`), runtime via `@prisma/adapter-neon` | oui             |
-| `DIRECT_URL`        | URL Neon **directe**, CLI Prisma (migrations, seed, studio)              | oui pour la CLI |
+| `DIRECT_URL`        | URL Neon **directe**, CLI Prisma (migrations, studio)                    | oui pour la CLI |
 | `ANTHROPIC_API_KEY` | Catégorisation des lignes de relevé                                      | plus tard       |
 
 `DATABASE_URL` est validée au démarrage par Zod (`server/lib/env.ts`). Si `DIRECT_URL` est absente, la CLI Prisma retombe sur `DATABASE_URL`, mais les migrations exigent une connexion directe : toujours définir les deux.
@@ -38,7 +38,7 @@ GitHub Actions (`.github/workflows/ci.yml`) sur chaque PR et push sur `main` : i
 ```bash
 cp .env.example .env
 pnpm install                  # génère le client Prisma
-pnpm db:deploy && pnpm db:seed
+pnpm db:deploy
 ```
 
 Faire évoluer le schéma :

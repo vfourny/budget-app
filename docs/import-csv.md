@@ -18,23 +18,23 @@ server/lib/csv/
 import { getBankCsvConfig } from "@server/lib/csv/banks";
 import { parseBankStatement } from "@server/lib/csv/parse-bank-statement";
 
-const config = getBankCsvConfig(bankAccount.bank); // ex. "BoursoBank"
+const config = getBankCsvConfig(accountType); // PERSO → BoursoBank, PRO → Banque Populaire
 const { transactions, errors } = parseBankStatement(csvText, config);
 ```
 
-La clé de sélection du mapping est **`BankAccount.bank`** : elle doit correspondre exactement à `BankCsvConfig.bank`.
+Le mapping est choisi par le type de compte, via `BANK_BY_ACCOUNT_TYPE` (`banks/index.ts`) qui pointe vers une clé de `BANK_CSV_CONFIGS` (= `BankCsvConfig.bank`). La banque n'est pas stockée en base.
 
 ## Route tRPC `import.create`
 
-Entrée : `{ bankAccountId, fileName, csvText }` (CSV lu côté navigateur, UTF-8, ≤ 2 Mo). Le serveur retrouve la banque via `BankAccount.bank`, parse, puis crée en une seule écriture un `ImportBatch` (`PENDING_REVIEW`) et ses `Transaction` **sans catégorie**. Sortie : `{ batchId, importedCount, errors }`.
+Entrée : `{ accountType, fileName, csvText }` (CSV lu côté navigateur, UTF-8, ≤ 2 Mo). Le serveur déduit la banque du type de compte, parse, puis crée en une seule écriture un `ImportBatch` (`PENDING_REVIEW`) et ses `Transaction` **sans catégorie**. Sortie : `{ batchId, importedCount, errors }`.
 
-- Compte inconnu → `NOT_FOUND` ; banque sans mapping, ou fichier sans aucune ligne lisible → `BAD_REQUEST` (rien n'est écrit).
+- Fichier sans aucune ligne lisible → `BAD_REQUEST` (rien n'est écrit).
 - Les lignes illisibles sont renvoyées dans `errors` sans bloquer l'import.
 - Pas encore de détection de doublons : importer deux fois le même relevé (ou deux relevés qui se chevauchent) duplique les transactions. Supprimer l'import fautif (cascade) suffit en attendant.
 
 ## Sortie
 
-- `transactions` : `{ date, label, amountCents, month, year }` (date en UTC ; `bankAccountId`, `category` et `importBatchId` sont ajoutés plus tard).
+- `transactions` : `{ date, label, amountCents, month, year }` (date en UTC ; `accountType`, `category` et `importBatchId` sont ajoutés plus tard).
 - `errors` : `{ line, message, raw }` — `line` est le numéro de ligne dans le fichier source (1-based, en-tête compris).
 
 **Une ligne illisible (date ou montant invalide) est écartée et reportée dans `errors`** au lieu d'interrompre tout l'import. L'écran de relecture pourra la signaler pour correction manuelle.
@@ -69,7 +69,7 @@ Export « Relevé de compte » : débit et crédit sont deux colonnes séparées
 
 1. Créer `server/lib/csv/banks/<banque>.ts` exportant un `BankCsvConfig` (`bank`, `delimiter`, `hasHeader`, `dateFormat`, `decimalSeparator`, `columns`).
 2. Ajouter l'entrée dans `BANK_CSV_CONFIGS` (`banks/index.ts`).
-3. Renseigner la même valeur dans `BankAccount.bank` (seed ou saisie).
+3. Pointer le type de compte concerné vers cette banque dans `BANK_BY_ACCOUNT_TYPE` (`banks/index.ts`).
 4. Valider sur un vrai export : **0 erreur de parsing** et montants / dates cohérents avec le relevé.
 
 Ne pas toucher à `parse-bank-statement.ts` pour un besoin propre à une banque : étendre `BankCsvConfig` si le besoin est réellement générique.

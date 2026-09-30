@@ -21,7 +21,7 @@ server/                # BACKEND — Nitro, mêmes conventions que le server/ de
   trpc/                # init.ts (contexte, procédures), root.ts (appRouter), routers/<domaine>.ts
   lib/                 # db.ts (PrismaClient), env.ts (validation Zod), csv/ (parseur de relevés)
   generated/prisma/    # client Prisma généré — gitignoré, ne pas éditer
-prisma/                # schema.prisma, migrations/, seed.ts
+prisma/                # schema.prisma, migrations/
 prisma.config.ts       # config CLI Prisma 7
 ```
 
@@ -51,7 +51,7 @@ Pourquoi pas Next.js : app mono-utilisateur derrière une auth, sans SEO. SSR et
 2. L'enregistrer dans `server/trpc/root.ts`.
 3. Côté front, un hook dans `src/features/<domaine>/hooks/`.
 
-Routeurs actuels : `bankAccount` (`list`), `categorize` (`run` : demande à Claude une catégorie + confiance par transaction sans catégorie d'un import en attente ; logique et prompt dans `server/lib/categorize/`) `import` (`create` : parse le CSV via le mapping de la banque, puis crée l'`ImportBatch` et ses `Transaction` en une seule transaction SQL ; `list` : historique avec nombre de lignes et de lignes « à vérifier » ; `get` : un import et ses lignes pour la relecture) et `transaction` (`setCategory` : correction manuelle, `categoryConfidence` repasse à `null` = « Confirmée », refusé si l'import est validé). Une ligne est « à vérifier » si elle n'a pas de catégorie ou si sa confiance est sous 0,7 (`server/lib/categorize/needs-review.ts`). Il n'y a qu'une `publicProcedure` ; une `protectedProcedure` arrivera avec Better Auth.
+Routeurs actuels : `categorize` (`run` : demande à Claude une catégorie + confiance par transaction sans catégorie d'un import en attente ; logique et prompt dans `server/lib/categorize/`) `import` (`create` : parse le CSV via le mapping de la banque, puis crée l'`ImportBatch` et ses `Transaction` en une seule transaction SQL ; `list` : historique avec nombre de lignes et de lignes « à vérifier » ; `get` : un import et ses lignes pour la relecture) et `transaction` (`setCategory` : correction manuelle, `categoryConfidence` repasse à `null` = « Confirmée », refusé si l'import est validé). Une ligne est « à vérifier » si elle n'a pas de catégorie ou si sa confiance est sous 0,7 (`server/lib/categorize/needs-review.ts`). Il n'y a qu'une `publicProcedure` ; une `protectedProcedure` arrivera avec Better Auth.
 
 ## Interface : Mantine + React Router
 
@@ -67,24 +67,22 @@ Routeurs actuels : `bankAccount` (`list`), `categorize` (`run` : demande à Clau
 - Côté serveur, toujours passer par `db` de `@server/lib/db` (singleton mis en cache sur `globalThis` pour survivre au hot reload).
 - **Toute modif de `schema.prisma` s'accompagne d'une migration versionnée** dans `prisma/migrations/` (`pnpm db:migrate`).
 - `prisma.config.ts` n'utilise volontairement pas `env()` : il lèverait une erreur si la variable manque, ce qui casserait `prisma generate` en CI (pas de DB nécessaire).
-- Le seed (`prisma/seed.ts`) est **idempotent** (upsert par nom de compte) et crée son propre client.
 
 ### Modèle de données
 
 | Modèle        | Rôle                                                                           |
 | ------------- | ------------------------------------------------------------------------------ |
-| `BankAccount` | Compte bancaire (`name` unique, `type` PERSO/PRO, `bank`)                      |
 | `ImportBatch` | Un fichier de relevé importé (`status` PENDING_REVIEW / VALIDATED, `fileName`) |
 | `Transaction` | Une ligne validée : date, libellé, montant en centimes, catégorie, mois/année  |
 
-Enums : `BankAccountType`, `Envelope`, `TransactionCategory`, `ImportStatus`.
+Enums : `AccountType` (PERSO / PRO, sur `ImportBatch` et `Transaction`), `Envelope`, `TransactionCategory`, `ImportStatus`.
 
 Choix à connaître :
 
-- `Transaction.bankAccountId` (FK) plutôt qu'un type de compte : le type PERSO/PRO vient du `BankAccount`.
+- Pas de modèle `BankAccount` : `accountType` (enum PERSO/PRO) est porté directement par `ImportBatch` et `Transaction`. La banque (parseur CSV) est déduite du type (`BANK_BY_ACCOUNT_TYPE`), pas stockée.
 - Les catégories sont un **enum figé**, pas une table : libellés et enveloppes vivent dans `src/lib/categories.ts`.
 - Supprimer un `ImportBatch` supprime ses transactions (`onDelete: Cascade`).
-- Index sur `(year, month)`, `(bankAccountId, year, month)`, `category` et `importBatchId` pour les agrégations dashboards.
+- Index sur `(year, month)`, `(accountType, year, month)`, `category` et `importBatchId` pour les agrégations dashboards.
 
 ## Règles de code
 
@@ -124,4 +122,4 @@ Chaque PR qui introduit un pattern React le documente dans sa section « Notes R
 
 - **Colonne « Solde » en double** dans l'export BoursoBank : on mappe par index de colonne, pas par nom d'en-tête (voir [import-csv.md](./import-csv.md)).
 - **`pnpm lint` et `pnpm build`** utilisent des binaires natifs (oxlint, esbuild) : ne pas les lancer depuis une VM Linux sur un `node_modules` installé sous macOS, et inversement.
-- **Commentaires historiques** : `prisma/schema.prisma` et `prisma/seed.ts` mentionnent encore Next / `server-only` / `src/server/db.ts` (vestiges de la version Next.js abandonnée). Le chemin réel est `server/lib/db.ts`.
+- **Commentaires historiques** : `prisma/schema.prisma` mentionne encore Next / `server-only` / `src/server/db.ts` (vestiges de la version Next.js abandonnée). Le chemin réel est `server/lib/db.ts`.

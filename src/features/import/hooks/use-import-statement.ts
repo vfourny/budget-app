@@ -1,5 +1,7 @@
 import { useMutation } from "@tanstack/react-query";
 
+import type { AccountType } from "@server/generated/prisma/enums";
+
 import { queryClient, trpc, trpcClient } from "@/lib/trpc";
 
 /**
@@ -10,7 +12,7 @@ import { queryClient, trpc, trpcClient } from "@/lib/trpc";
  */
 export function useImportStatement() {
   return useMutation({
-    mutationFn: async (input: { bankAccountId: string; fileName: string; csvText: string }) => {
+    mutationFn: async (input: { accountType: AccountType; fileName: string; csvText: string }) => {
       const created = await trpcClient.import.create.mutate(input);
 
       let categorizationError: string | null = null;

@@ -1,5 +1,5 @@
 /** Une transaction normalisée à partir d'une ligne de relevé, avant écriture en base
- * (`bankAccountId`, `category`, `importBatchId` sont ajoutés plus tard, à la validation de
+ * (`accountType`, `category`, `importBatchId` sont ajoutés plus tard, à la validation de
  * l'import — voir `ImportBatch` dans le schéma Prisma). */
 export interface ParsedTransaction {
   date: Date;
@@ -39,7 +39,7 @@ export interface BankCsvColumns {
 /** Mapping de colonnes propre à une banque. Ajouter une banque = ajouter un fichier dans
  * `banks/` + une entrée dans `banks/index.ts`, sans toucher au parseur générique. */
 export interface BankCsvConfig {
-  /** Doit correspondre à `BankAccount.bank` pour la sélection automatique du mapping. */
+  /** Nom de la banque ; sert de clé dans `BANK_CSV_CONFIGS`. */
   bank: string;
   delimiter: string;
   hasHeader: boolean;
