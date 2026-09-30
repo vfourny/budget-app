@@ -103,6 +103,11 @@ nitro.config.ts        # serverDir: ./server
   `schema.prisma` s'accompagne d'une migration versionnée dans `prisma/migrations/`.
 - **Dates** : `Transaction.date` en `@db.Date` ; `month` (1-12) et `year` dénormalisés pour les
   agrégations.
+- **Typage des constantes** : pour un objet/tableau de config ou une liste figée, préférer
+  `as const satisfies T` à une annotation `: T` — `satisfies` vérifie la forme (clé manquante,
+  faute de frappe), `as const` garde les valeurs littérales (autocomplétion, unions dérivées via
+  `keyof typeof X` / `(typeof X)[number]`). Pas de `as const` sans dérivation ni autocomplétion
+  utile. Un tableau `as const` est readonly : typer les paramètres en `readonly T[]`.
 - Validation des entrées : schémas Zod, partagés entre tRPC et formulaires.
 - UI en **français**, code/identifiants/commits en **anglais**.
 - Imports : `@/…` pour `src/`, `@server/…` pour `server/`. `import type` obligatoire pour les
