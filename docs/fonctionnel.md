@@ -89,9 +89,10 @@ Règles :
 
 Ne compte que les transactions des imports **VALIDATED** du compte perso. Hypothèses V1 : tout crédit est un **revenu** ; un débit en catégorie « Épargne long terme » est de l'**épargne** (pas une dépense) ; le reste des débits sont des **dépenses**.
 
-- **Vue mois** : sélecteur de mois (et flèches) limité aux mois qui ont des données ; cartes Dépenses (avec le détail par enveloppe), Revenus, Épargne du mois (+ % des revenus) ; tableau des transactions triable ; dépenses par catégorie.
+- **Vue mois** : sélecteur de mois (et flèches) limité aux mois qui ont des données ; cartes Dépenses (avec, par enveloppe, une jauge **réel vs recommandé** : barre verte si on reste sous la part recommandée du revenu, ambre au-delà ; l'inverse pour l'épargne), Revenus, Épargne du mois (+ % des revenus) ; tableau des transactions triable ; dépenses par catégorie.
 - **Vue année** : mêmes totaux sur l'année choisie, plus la dépense moyenne par mois (mois ayant des données).
-- **À venir** : enveloppe **recommandée vs réel** (pourcentages de la méthode des 5 comptes, à configurer dans Réglages), carte Abonnements, donut par catégorie en vue année, estimation de l'IR.
+- Les parts recommandées (méthode des 5 comptes, 55 / 10 / 10 / 10 / 10 % par défaut) se règlent dans **Réglages**. Seules les enveloppes qui ont au moins une catégorie sont mesurées.
+- **À venir** : carte Abonnements, donut par catégorie en vue année, estimation de l'IR.
 - Mockup de référence : canvas Claude Design « Budget — maquette MVP » (5 écrans : tableau de bord mois, import CSV, relecture, vue année, tokens).
 
 ## Partie pro Stygma (après validation du MVP perso)

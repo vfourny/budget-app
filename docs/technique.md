@@ -51,7 +51,7 @@ Pourquoi pas Next.js : app mono-utilisateur derrière une auth, sans SEO. SSR et
 2. L'enregistrer dans `server/trpc/root.ts`.
 3. Côté front, un hook dans `src/features/<domaine>/hooks/`.
 
-Routeurs actuels : `categorize` (`run` : demande à Gemini une catégorie + confiance par transaction sans catégorie d'un import en attente ; logique et prompt dans `server/lib/categorize/`) `import` (`create` : parse le CSV via le mapping de la banque, puis crée l'`ImportBatch` et ses `Transaction` en une seule transaction SQL ; `list` : historique avec nombre de lignes et de lignes « à vérifier » ; `get` : un import et ses lignes pour la relecture ; `validate` : passe l'import en `VALIDATED`, refusé tant qu'il reste une ligne à vérifier ; `delete` : supprime l'import et ses lignes en cascade) `personal` (`periods` : mois ayant des données validées ; `overview` : totaux d'un mois ou d'une année, agrégation dans `server/lib/dashboard/aggregate.ts`) et `transaction` (`setCategory` : correction manuelle, `categoryConfidence` repasse à `null` = « Confirmée », refusé si l'import est validé). Une ligne est « à vérifier » si elle n'a pas de catégorie ou si sa confiance est sous 0,7 (`server/lib/categorize/needs-review.ts`). Il n'y a qu'une `publicProcedure` ; une `protectedProcedure` arrivera avec Better Auth.
+Routeurs actuels : `categorize` (`run` : demande à Gemini une catégorie + confiance par transaction sans catégorie d'un import en attente ; logique et prompt dans `server/lib/categorize/`) `import` (`create` : parse le CSV via le mapping de la banque, puis crée l'`ImportBatch` et ses `Transaction` en une seule transaction SQL ; `list` : historique avec nombre de lignes et de lignes « à vérifier » ; `get` : un import et ses lignes pour la relecture ; `validate` : passe l'import en `VALIDATED`, refusé tant qu'il reste une ligne à vérifier ; `delete` : supprime l'import et ses lignes en cascade) `settings` (`envelopeShares` / `setEnvelopeShares` : part du revenu recommandée par enveloppe, défauts dans `server/lib/settings/envelope-shares.ts`), `personal` (`periods` : mois ayant des données validées ; `overview` : totaux d'un mois ou d'une année, agrégation dans `server/lib/dashboard/aggregate.ts`) et `transaction` (`setCategory` : correction manuelle, `categoryConfidence` repasse à `null` = « Confirmée », refusé si l'import est validé). Une ligne est « à vérifier » si elle n'a pas de catégorie ou si sa confiance est sous 0,7 (`server/lib/categorize/needs-review.ts`). Il n'y a qu'une `publicProcedure` ; une `protectedProcedure` arrivera avec Better Auth.
 
 ## Interface : Mantine + React Router
 
@@ -70,10 +70,11 @@ Routeurs actuels : `categorize` (`run` : demande à Gemini une catégorie + conf
 
 ### Modèle de données
 
-| Modèle        | Rôle                                                                           |
-| ------------- | ------------------------------------------------------------------------------ |
-| `ImportBatch` | Un fichier de relevé importé (`status` PENDING_REVIEW / VALIDATED, `fileName`) |
-| `Transaction` | Une ligne validée : date, libellé, montant en centimes, catégorie, mois/année  |
+| Modèle          | Rôle                                                                                               |
+| --------------- | -------------------------------------------------------------------------------------------------- |
+| `ImportBatch`   | Un fichier de relevé importé (`status` PENDING_REVIEW / VALIDATED, `fileName`)                     |
+| `EnvelopeShare` | Part du revenu (en %) recommandée pour une enveloppe ; sans ligne, la valeur par défaut s'applique |
+| `Transaction`   | Une ligne validée : date, libellé, montant en centimes, catégorie, mois/année                      |
 
 Enums : `AccountType` (PERSO / PRO, sur `ImportBatch` et `Transaction`), `Envelope`, `TransactionCategory`, `ImportStatus`.
 
