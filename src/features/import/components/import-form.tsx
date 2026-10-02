@@ -39,7 +39,11 @@ export function ImportForm() {
       {
         // Tout s'est bien passé → direct à la relecture. Sinon on reste ici pour montrer l'avertissement.
         onSuccess: (data) => {
-          if (data.errors.length === 0 && data.categorizationError === null) {
+          if (
+            data.errors.length === 0 &&
+            data.duplicateCount === 0 &&
+            data.categorizationError === null
+          ) {
             void navigate(`/imports/${data.batchId}`);
           }
         },
@@ -132,6 +136,12 @@ export function ImportForm() {
                     transaction(s) importée(s).
                   </Text>
                 </div>
+
+                {result.duplicateCount > 0 && (
+                  <Alert color="blue" title={`${result.duplicateCount} ligne(s) déjà importée(s)`}>
+                    Ces lignes figuraient dans un import précédent : elles ne sont pas dupliquées.
+                  </Alert>
+                )}
 
                 {result.categorizationError !== null && (
                   <Alert
