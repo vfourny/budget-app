@@ -1,6 +1,7 @@
 import { categorizeRouter } from "@server/trpc/routers/categorize";
 import { importRouter } from "@server/trpc/routers/import";
 import { personalRouter } from "@server/trpc/routers/personal";
+import { settingsRouter } from "@server/trpc/routers/settings";
 import { transactionRouter } from "@server/trpc/routers/transaction";
 import { createTRPCRouter } from "@server/trpc/init";
 
@@ -9,6 +10,7 @@ export const appRouter = createTRPCRouter({
   categorize: categorizeRouter,
   import: importRouter,
   personal: personalRouter,
+  settings: settingsRouter,
   transaction: transactionRouter,
 });
 
