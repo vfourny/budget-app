@@ -51,14 +51,14 @@ Pourquoi pas Next.js : app mono-utilisateur derrière une auth, sans SEO. SSR et
 2. L'enregistrer dans `server/trpc/root.ts`.
 3. Côté front, un hook dans `src/features/<domaine>/hooks/`.
 
-Routeurs actuels : `categorize` (`run` : demande à Gemini une catégorie + confiance par transaction sans catégorie d'un import en attente ; logique et prompt dans `server/lib/categorize/`) `import` (`create` : parse le CSV via le mapping de la banque, puis crée l'`ImportBatch` et ses `Transaction` en une seule transaction SQL ; `list` : historique avec nombre de lignes et de lignes « à vérifier » ; `get` : un import et ses lignes pour la relecture ; `validate` : passe l'import en `VALIDATED`, refusé tant qu'il reste une ligne à vérifier ; `delete` : supprime l'import et ses lignes en cascade) `personal` (`periods` : mois ayant des données validées ; `overview` : totaux d'un mois ou d'une année, agrégation dans `server/lib/dashboard/aggregate.ts`) et `transaction` (`setCategory` : correction manuelle, `categoryConfidence` repasse à `null` = « Confirmée », refusé si l'import est validé). Une ligne est « à vérifier » si elle n'a pas de catégorie ou si sa confiance est sous 0,7 (`server/lib/categorize/needs-review.ts`). Il n'y a qu'une `publicProcedure` ; une `protectedProcedure` arrivera avec Better Auth.
+Routeurs actuels : `categorize` (`run` : demande à Gemini une catégorie + confiance par transaction sans catégorie d'un import en attente ; logique et prompt dans `server/lib/categorize/`) `import` (`create` : parse le CSV via le mapping de la banque, puis crée l'`ImportBatch` et ses `Transaction` en une seule transaction SQL ; `list` : historique avec nombre de lignes et de lignes « à vérifier » ; `get` : un import et ses lignes pour la relecture ; `validate` : passe l'import en `VALIDATED`, refusé tant qu'il reste une ligne à vérifier ; `delete` : supprime l'import et ses lignes en cascade) `settings` (`envelopeShares` / `setEnvelopeShares` : part du revenu recommandée par enveloppe, défauts dans `server/lib/settings/envelope-shares.ts`), `personal` (`periods` : mois ayant des données validées ; `overview` : totaux d'un mois ou d'une année, agrégation dans `server/lib/dashboard/aggregate.ts`) et `transaction` (`setCategory` : correction manuelle, `categoryConfidence` repasse à `null` = « Confirmée », refusé si l'import est validé). Une ligne est « à vérifier » si elle n'a pas de catégorie ou si sa confiance est sous 0,7 (`server/lib/categorize/needs-review.ts`). Il n'y a qu'une `publicProcedure` ; une `protectedProcedure` arrivera avec Better Auth.
 
 ## Interface : Mantine + React Router
 
 - **Thème** : `src/lib/theme.ts` (objet `createTheme` + `cssVariablesResolver`) porte les tokens de la maquette — palettes `dark` (obsidian / platine : fond, cartes, bordures, texte), `gold` (accent, index 6 = `#C9A45C`), `amber` (à vérifier / dépassement, index 6 = `#E0894A`), polices (Instrument Serif pour les titres, Manrope pour l'UI), rayons (16 cartes, 10 contrôles, 8 petits boutons). Champs et boutons à 44 px (`src/styles/global.css`). Toujours sombre (`forceColorScheme="dark"`).
 - **Composants** : Mantine (`@mantine/core`, `@mantine/dropzone`), icônes Tabler. CSS sur mesure en CSS Modules. Pas de couleur en dur : tokens Mantine.
 - **Routing** : `BrowserRouter` (`main.tsx`) + `<Routes>` (`app.tsx`). `AppLayout` (barre latérale, `<Outlet />`) enveloppe toutes les pages. Routes : `/` accueil, `/perso`, `/pro`, `/imports`, `/imports/nouveau`, `/reglages`. Les liens directs (rechargement de `/imports/nouveau`) marchent grâce au repli SPA de Nitro (vérifié sur `pnpm preview`).
-- **Écrans** : l'historique (`/imports`), l'import (`/imports/nouveau`), la relecture (`/imports/:importId`) et les réglages (liste des catégories) sont réels ; après un import, le front enchaîne `import.create` puis `categorize.run` dans une seule mutation et redirige vers la relecture ; les autres affichent `ComingSoon` en attendant leur PR.
+- **Écrans** : l'accueil (`/` : résumé du dernier mois validé + imports à vérifier, sans route dédiée), le dashboard perso (`/perso`), l'historique (`/imports`), l'import (`/imports/nouveau`), la relecture (`/imports/:importId`) et les réglages (liste des catégories) sont réels ; après un import, le front enchaîne `import.create` puis `categorize.run` dans une seule mutation et redirige vers la relecture ; les autres affichent `ComingSoon` en attendant leur PR.
 
 ## Base de données : Prisma 7 + Neon
 
@@ -70,10 +70,11 @@ Routeurs actuels : `categorize` (`run` : demande à Gemini une catégorie + conf
 
 ### Modèle de données
 
-| Modèle        | Rôle                                                                           |
-| ------------- | ------------------------------------------------------------------------------ |
-| `ImportBatch` | Un fichier de relevé importé (`status` PENDING_REVIEW / VALIDATED, `fileName`) |
-| `Transaction` | Une ligne validée : date, libellé, montant en centimes, catégorie, mois/année  |
+| Modèle          | Rôle                                                                                               |
+| --------------- | -------------------------------------------------------------------------------------------------- |
+| `ImportBatch`   | Un fichier de relevé importé (`status` PENDING_REVIEW / VALIDATED, `fileName`)                     |
+| `EnvelopeShare` | Part du revenu (en %) recommandée pour une enveloppe ; sans ligne, la valeur par défaut s'applique |
+| `Transaction`   | Une ligne validée : date, libellé, montant en centimes, catégorie, mois/année                      |
 
 Enums : `AccountType` (PERSO / PRO, sur `ImportBatch` et `Transaction`), `Envelope`, `TransactionCategory`, `ImportStatus`.
 
