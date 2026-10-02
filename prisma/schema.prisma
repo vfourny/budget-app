@@ -43,6 +43,13 @@ enum TransactionCategory {
   EPARGNE_LONG_TERME
 }
 
+/// Part du revenu mensuel recommandée pour une enveloppe (en %). Une ligne par enveloppe
+/// configurée ; sans ligne, la valeur par défaut de `server/lib/settings/envelope-shares.ts` s'applique.
+model EnvelopeShare {
+  envelope Envelope @id
+  percent  Int
+}
+
 enum ImportStatus {
   PENDING_REVIEW
   VALIDATED

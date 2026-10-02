@@ -3,6 +3,7 @@ import { z } from "zod";
 
 import { NEEDS_REVIEW_WHERE, needsReview } from "@server/lib/categorize/needs-review";
 import { AccountType } from "@server/generated/prisma/enums";
+import { removeAlreadyImported } from "@server/lib/csv/dedupe";
 import { getBankCsvConfig } from "@server/lib/csv/banks";
 import { parseBankStatement } from "@server/lib/csv/parse-bank-statement";
 import { createTRPCRouter, publicProcedure } from "@server/trpc/init";
@@ -32,6 +33,23 @@ export const importRouter = createTRPCRouter({
       });
     }
 
+    // Relevés qui se chevauchent : on n'importe pas deux fois la même ligne.
+    const times = transactions.map((transaction) => transaction.date.getTime());
+    const existing = await ctx.db.transaction.findMany({
+      where: {
+        accountType: input.accountType,
+        date: { gte: new Date(Math.min(...times)), lte: new Date(Math.max(...times)) },
+      },
+      select: { date: true, amountCents: true, label: true },
+    });
+    const { fresh, duplicateCount } = removeAlreadyImported(transactions, existing);
+    if (fresh.length === 0) {
+      throw new TRPCError({
+        code: "BAD_REQUEST",
+        message: "Toutes les lignes de ce relevé sont déjà importées.",
+      });
+    }
+
     // Une seule transaction SQL : un import est écrit en entier ou pas du tout.
     const batch = await ctx.db.importBatch.create({
       data: {
@@ -39,7 +57,7 @@ export const importRouter = createTRPCRouter({
         fileName: input.fileName,
         transactions: {
           createMany: {
-            data: transactions.map((transaction) => ({
+            data: fresh.map((transaction) => ({
               ...transaction,
               accountType: input.accountType,
             })),
@@ -50,7 +68,7 @@ export const importRouter = createTRPCRouter({
     });
 
     // Les lignes illisibles ne bloquent pas l'import : on les renvoie pour que l'UI les signale.
-    return { batchId: batch.id, importedCount: transactions.length, errors };
+    return { batchId: batch.id, importedCount: fresh.length, duplicateCount, errors };
   }),
 
   /** Historique : un import par ligne, le plus récent d'abord. */

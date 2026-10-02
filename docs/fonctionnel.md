@@ -72,7 +72,7 @@ Upload CSV → parsing → ImportBatch (PENDING_REVIEW) → catégorisation Gemi
 ```
 
 1. **Upload** : l'utilisateur choisit le type de compte (perso / pro) et dépose le CSV de la banque.
-2. **Parsing** (route `import.create`) : le mapping de la banque (déduit du type de compte) transforme les lignes en transactions normalisées. Une ligne illisible est **écartée et signalée** (numéro de ligne + contenu brut) sans bloquer les autres.
+2. **Parsing** (route `import.create`) : le mapping de la banque (déduit du type de compte) transforme les lignes en transactions normalisées. Une ligne illisible est **écartée et signalée** (numéro de ligne + contenu brut) sans bloquer les autres. Les lignes **déjà importées** (relevés qui se chevauchent) sont écartées aussi, voir [import-csv.md](./import-csv.md).
 3. **Catégorisation** (route `categorize.run`) : l'API Gemini (Flash-Lite, palier gratuit) propose une catégorie (valeur de l'enum) avec un score de `confidence` (0 à 1, stocké dans `Transaction.categoryConfidence`), en s'appuyant sur des exemples de transactions déjà validées du même type de compte (few-shot, vide au tout premier import). Sous **0,7** de confiance, la ligne ira dans « À vérifier ». Relançable : seules les lignes encore sans catégorie sont traitées ; si l'appel à l'IA échoue, rien n'est écrit.
 4. **Relecture** (`/imports/:id`) : la catégorisation part automatiquement juste après l'import, puis on arrive sur le tableau. Les lignes « à vérifier » (sans catégorie ou confiance < 0,7) sont surlignées ; chaque ligne a un sélecteur de catégorie (un choix manuel = « Confirmée »). Filtre Toutes / À vérifier.
 5. **Validation** : statut `VALIDATED` + `validatedAt`. Les transactions sont écrites en base **dès l'import** (sans catégorie, rattachées à l'`ImportBatch`) pour que la relecture survive à un rechargement de page ; **seuls les imports `VALIDATED` comptent dans les dashboards**. « Valider » reste désactivé tant qu'une ligne est sans catégorie ou à faible confiance ; après validation on revient à l'historique, où un import (validé ou non) peut être supprimé avec ses lignes. « Catégoriser avec l'IA » relance `categorize.run` si l'appel a échoué à l'import.
@@ -85,10 +85,14 @@ Règles :
 
 > État actuel : import, catégorisation automatique, historique et relecture (correction) sont en place ; validation et suppression aussi (voir la roadmap dans [`CLAUDE.md`](../CLAUDE.md)).
 
-## Dashboards (à venir)
+## Dashboard Perso (`/perso`)
 
-- **Vue mois** : dépenses par catégorie et par enveloppe, **enveloppe recommandée vs réel** (couleur ambre en cas de dépassement ou de ligne à vérifier).
-- **Vue année** : même agrégation sur douze mois — l'historique mois / année est central dans l'app.
+Ne compte que les transactions des imports **VALIDATED** du compte perso. Hypothèses V1 : tout crédit est un **revenu** ; un débit en catégorie « Épargne long terme » est de l'**épargne** (pas une dépense) ; le reste des débits sont des **dépenses**.
+
+- **Vue mois** : sélecteur de mois (et flèches) limité aux mois qui ont des données ; cartes Dépenses (avec, par enveloppe, une jauge **réel vs recommandé** : barre verte si on reste sous la part recommandée du revenu, ambre au-delà ; l'inverse pour l'épargne), Revenus, Épargne du mois (+ % des revenus) ; tableau des transactions triable ; dépenses par catégorie.
+- **Vue année** : mêmes totaux sur l'année choisie, plus la dépense moyenne par mois (mois ayant des données).
+- Les parts recommandées (méthode des 5 comptes, 55 / 10 / 10 / 10 / 10 % par défaut) se règlent dans **Réglages**. Seules les enveloppes qui ont au moins une catégorie sont mesurées.
+- **À venir** : carte Abonnements, donut par catégorie en vue année, estimation de l'IR.
 - Mockup de référence : canvas Claude Design « Budget — maquette MVP » (5 écrans : tableau de bord mois, import CSV, relecture, vue année, tokens).
 
 ## Partie pro Stygma (après validation du MVP perso)

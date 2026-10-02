@@ -30,7 +30,7 @@ Entrée : `{ accountType, fileName, csvText }` (CSV lu côté navigateur, UTF-8,
 
 - Fichier sans aucune ligne lisible → `BAD_REQUEST` (rien n'est écrit).
 - Les lignes illisibles sont renvoyées dans `errors` sans bloquer l'import.
-- Pas encore de détection de doublons : importer deux fois le même relevé (ou deux relevés qui se chevauchent) duplique les transactions. Supprimer l'import fautif (cascade) suffit en attendant.
+- **Doublons** : à l'import, une ligne (même compte, même jour, même montant, même libellé) déjà présente en base est écartée ; la comparaison est en multi-ensemble (deux achats identiques le même jour restent deux lignes). Un relevé entièrement déjà importé est refusé. Un relevé qui chevauche un précédent n'ajoute que ses nouvelles lignes (`duplicateCount` renvoyé et signalé dans l'écran d'import). Limite : si le libellé d'une même opération change d'un export à l'autre, elle n'est pas reconnue.
 
 ## Sortie
 

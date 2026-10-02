@@ -1,5 +1,5 @@
-import { ComingSoon } from "@/components/coming-soon";
 import { PageHeader, PageTitleAccent } from "@/components/page-header";
+import { HomeOverview } from "@/features/home/components/home-overview";
 
 export function HomePage() {
   return (
@@ -12,9 +12,7 @@ export function HomePage() {
           </>
         }
       />
-      <ComingSoon>
-        Les métriques du mois et les transactions à vérifier arriveront avec les dashboards.
-      </ComingSoon>
+      <HomeOverview />
     </>
   );
 }
