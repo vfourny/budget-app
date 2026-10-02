@@ -75,7 +75,7 @@ Upload CSV → parsing → ImportBatch (PENDING_REVIEW) → catégorisation Gemi
 2. **Parsing** (route `import.create`) : le mapping de la banque (déduit du type de compte) transforme les lignes en transactions normalisées. Une ligne illisible est **écartée et signalée** (numéro de ligne + contenu brut) sans bloquer les autres.
 3. **Catégorisation** (route `categorize.run`) : l'API Gemini (Flash-Lite, palier gratuit) propose une catégorie (valeur de l'enum) avec un score de `confidence` (0 à 1, stocké dans `Transaction.categoryConfidence`), en s'appuyant sur des exemples de transactions déjà validées du même type de compte (few-shot, vide au tout premier import). Sous **0,7** de confiance, la ligne ira dans « À vérifier ». Relançable : seules les lignes encore sans catégorie sont traitées ; si l'appel à l'IA échoue, rien n'est écrit.
 4. **Relecture** (`/imports/:id`) : la catégorisation part automatiquement juste après l'import, puis on arrive sur le tableau. Les lignes « à vérifier » (sans catégorie ou confiance < 0,7) sont surlignées ; chaque ligne a un sélecteur de catégorie (un choix manuel = « Confirmée »). Filtre Toutes / À vérifier.
-5. **Validation** : statut `VALIDATED` + `validatedAt`. Les transactions sont écrites en base **dès l'import** (sans catégorie, rattachées à l'`ImportBatch`) pour que la relecture survive à un rechargement de page ; **seuls les imports `VALIDATED` comptent dans les dashboards**.
+5. **Validation** : statut `VALIDATED` + `validatedAt`. Les transactions sont écrites en base **dès l'import** (sans catégorie, rattachées à l'`ImportBatch`) pour que la relecture survive à un rechargement de page ; **seuls les imports `VALIDATED` comptent dans les dashboards**. « Valider » reste désactivé tant qu'une ligne est sans catégorie ou à faible confiance ; après validation on revient à l'historique, où un import (validé ou non) peut être supprimé avec ses lignes. « Catégoriser avec l'IA » relance `categorize.run` si l'appel a échoué à l'import.
 
 Règles :
 
@@ -83,7 +83,7 @@ Règles :
 - Une transaction peut ne pas avoir d'`ImportBatch` (`importBatchId` nullable, ex. saisie manuelle future).
 - Les corrections validées alimentent les exemples few-shot des imports suivants : plus l'historique grandit, plus la catégorisation est juste.
 
-> État actuel : import, catégorisation automatique, historique et relecture (correction) sont en place ; la validation et la suppression d'un import sont à venir (voir la roadmap dans [`CLAUDE.md`](../CLAUDE.md)).
+> État actuel : import, catégorisation automatique, historique et relecture (correction) sont en place ; validation et suppression aussi (voir la roadmap dans [`CLAUDE.md`](../CLAUDE.md)).
 
 ## Dashboards (à venir)
 

@@ -1,6 +1,7 @@
 import {
   Alert,
   Badge,
+  Button,
   Group,
   Loader,
   Paper,
@@ -8,13 +9,20 @@ import {
   Select,
   Table,
   Text,
+  Tooltip,
 } from "@mantine/core";
 import { IconAlertTriangle, IconArrowLeft, IconCheck } from "@tabler/icons-react";
 import { useState } from "react";
-import { Link } from "react-router";
+import { Link, useNavigate } from "react-router";
 
 import { PageHeader } from "@/components/page-header";
-import { useImportReview, useSetCategory } from "@/features/review/hooks/use-import-review";
+import { DeleteImportButton } from "@/features/imports/components/delete-import-button";
+import {
+  useImportReview,
+  useRunCategorization,
+  useSetCategory,
+  useValidateImport,
+} from "@/features/review/hooks/use-import-review";
 import { ACCOUNT_TYPE_LABELS } from "@/lib/account-types";
 import { TRANSACTION_CATEGORIES, TRANSACTION_CATEGORY_ORDER } from "@/lib/categories";
 import { formatCents, formatDate } from "@/lib/format";
@@ -32,6 +40,9 @@ const CATEGORY_OPTIONS = TRANSACTION_CATEGORY_ORDER.map((category) => ({
 export function ImportReview({ importId }: { importId: string }) {
   const review = useImportReview(importId);
   const setCategory = useSetCategory(importId);
+  const validateImport = useValidateImport(importId);
+  const runCategorization = useRunCategorization(importId);
+  const navigate = useNavigate();
   const [filter, setFilter] = useState<Filter>("all");
 
   if (review.isPending) return <Loader color="gold" />;
@@ -43,6 +54,7 @@ export function ImportReview({ importId }: { importId: string }) {
   // Valeurs dérivées calculées pendant le rendu (≈ `computed`).
   const toReviewCount = batch.transactions.filter((row) => row.needsReview).length;
   const confidentCount = batch.transactions.length - toReviewCount;
+  const uncategorizedCount = batch.transactions.filter((row) => row.category === null).length;
   const rows =
     filter === "review" ? batch.transactions.filter((row) => row.needsReview) : batch.transactions;
 
@@ -144,12 +156,59 @@ export function ImportReview({ importId }: { importId: string }) {
           <Alert color="red" m={16} title="La correction n'a pas été enregistrée." />
         )}
 
+        {(validateImport.isError || runCategorization.isError) && (
+          <Alert color="red" m={16} title="Action impossible">
+            {validateImport.error?.message ?? runCategorization.error?.message}
+          </Alert>
+        )}
+
         <div className={classes.footer}>
-          <Text size="sm" c={toReviewCount > 0 ? "amber.4" : "dimmed"}>
-            {toReviewCount > 0
-              ? `Choisis une catégorie pour les ${toReviewCount} transactions surlignées avant de valider l'import.`
-              : "Tes corrections serviront d'exemples pour les prochaines catégorisations."}
+          <Text size="sm" c={toReviewCount > 0 && !locked ? "amber.4" : "dimmed"}>
+            {locked
+              ? "Import validé : ses lignes comptent dans les dashboards."
+              : toReviewCount > 0
+                ? `Choisis une catégorie pour les ${toReviewCount} transactions surlignées avant de valider l'import.`
+                : "Tes corrections serviront d'exemples pour les prochaines catégorisations."}
           </Text>
+
+          {!locked && (
+            <Group gap={12} wrap="nowrap">
+              {uncategorizedCount > 0 && (
+                <Button
+                  variant="default"
+                  loading={runCategorization.isPending}
+                  onClick={() => runCategorization.mutate({ batchId: importId })}
+                >
+                  Catégoriser avec l'IA
+                </Button>
+              )}
+              <DeleteImportButton
+                importId={importId}
+                lineCount={batch.transactions.length}
+                variant="button"
+                onDeleted={() => void navigate("/imports")}
+              />
+              <Tooltip
+                label={`Encore ${toReviewCount} transaction${toReviewCount > 1 ? "s" : ""} à catégoriser`}
+                disabled={toReviewCount === 0}
+              >
+                {/* `data-disabled` plutôt que `disabled` : un bouton désactivé n'affiche pas l'infobulle. */}
+                <Button
+                  data-disabled={toReviewCount > 0 || undefined}
+                  loading={validateImport.isPending}
+                  onClick={() => {
+                    if (toReviewCount > 0) return;
+                    validateImport.mutate(
+                      { id: importId },
+                      { onSuccess: () => void navigate("/imports") },
+                    );
+                  }}
+                >
+                  Valider {batch.transactions.length} transactions
+                </Button>
+              </Tooltip>
+            </Group>
+          )}
         </div>
       </Paper>
     </>
