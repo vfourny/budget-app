@@ -22,7 +22,7 @@ export function HomeOverview() {
     <Stack gap={16}>
       <SimpleGrid cols={{ base: 1, md: 2 }} spacing={16}>
         <PersonalSummary />
-        <ProSummary />
+        <ProfessionalSummary />
       </SimpleGrid>
       <ToCheck />
     </Stack>
@@ -80,7 +80,7 @@ function PersonalSummary() {
         <SectionTitle
           title="Perso"
           suffix={latest ? `${monthName(latest.month)} ${latest.year}` : undefined}
-          to="/perso"
+          to="/personal"
         />
         {periods.isPending ? (
           <Loader color="gold" size="sm" />
@@ -112,7 +112,7 @@ function LatestMonthMetrics({ year, month }: { year: number; month: number }) {
 }
 
 /** La partie pro n'existe pas encore (hors scope V1). */
-function ProSummary() {
+function ProfessionalSummary() {
   return (
     <Paper withBorder radius="lg" p={28}>
       <Stack gap={18}>

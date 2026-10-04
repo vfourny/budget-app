@@ -21,6 +21,7 @@
     "db:deploy": "prisma migrate deploy",
     "db:generate": "prisma generate",
     "db:studio": "prisma studio",
+    "db:reset": "prisma migrate reset",
     "vercel-build": "prisma migrate deploy && vite build"
   },
   "packageManager": "pnpm@10.28.0",

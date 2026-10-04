@@ -3,7 +3,7 @@ import { z } from "zod";
 
 import { TransactionCategory } from "@server/generated/prisma/enums";
 import { CATEGORY_HINTS } from "@server/lib/categorize/category-hints";
-import { getGeminiModel } from "@server/lib/gemini";
+import { env } from "@server/lib/env";
 
 /** Nombre de lignes envoyées par appel : peu d'appels par import (quota de requêtes par minute du
  * palier gratuit Gemini), les appels d'un même import partent en parallèle. */
@@ -100,7 +100,7 @@ async function categorizeChunk(
   );
 
   const response = await client.models.generateContent({
-    model: getGeminiModel(),
+    model: env.GEMINI_MODEL,
     contents: `${formatExamples(examples)}Lignes à classer :\n${lines.join("\n")}`,
     config: {
       systemInstruction: SYSTEM_PROMPT,

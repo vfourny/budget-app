@@ -60,10 +60,12 @@ function SharesFields({ initial }: { initial: Shares }) {
       ))}
 
       <Group gap={16}>
-        <Text size="sm" c={unassigned < 0 ? "red.4" : "dimmed"}>
-          {unassigned < 0
-            ? `Total : ${total} % — dépasse 100 %`
-            : `Total : ${total} % · ${unassigned} % non affecté`}
+        <Text size="sm" c={unassigned === 0 ? "dimmed" : "red.4"}>
+          {unassigned === 0
+            ? "Total : 100 %"
+            : unassigned < 0
+              ? `Total : ${total} % — dépasse 100 %`
+              : `Total : ${total} % — il reste ${unassigned} % à affecter`}
         </Text>
       </Group>
 
@@ -80,7 +82,7 @@ function SharesFields({ initial }: { initial: Shares }) {
 
       <Group>
         <Button
-          disabled={!changed || unassigned < 0}
+          disabled={!changed || unassigned !== 0}
           loading={save.isPending}
           onClick={() => save.mutate(draft)}
         >

@@ -18,13 +18,13 @@ interface Overview {
 }
 
 const EXPENSE_ENVELOPES = [
-  "DEPENSES_COURANTES",
-  "LOISIRS",
-  "FORMATION",
+  "CURRENT_EXPENSES",
+  "LEISURE",
+  "TRAINING",
 ] as const satisfies readonly BudgetEnvelope[];
 const SAVINGS_ENVELOPES = [
-  "EPARGNE_SECURITE",
-  "EPARGNE_LONG_TERME",
+  "SAFETY_SAVINGS",
+  "LONG_TERM_SAVINGS",
 ] as const satisfies readonly BudgetEnvelope[];
 
 /** Enveloppes qui ont au moins une catégorie : les autres n'ont rien à mesurer pour l'instant. */
@@ -36,10 +36,10 @@ const MAPPED_ENVELOPES = new Set<Envelope>(
 function realByEnvelope(overview: Overview): Map<Envelope, number> {
   const totals = new Map<Envelope, number>();
   for (const { category, expenseCents } of overview.byCategory) {
-    const envelope = category ? TRANSACTION_CATEGORIES[category].envelope : "DEPENSES_COURANTES";
+    const envelope = category ? TRANSACTION_CATEGORIES[category].envelope : "CURRENT_EXPENSES";
     totals.set(envelope, (totals.get(envelope) ?? 0) + expenseCents);
   }
-  totals.set("EPARGNE_LONG_TERME", overview.savingsCents);
+  totals.set("LONG_TERM_SAVINGS", overview.savingsCents);
   return totals;
 }
 

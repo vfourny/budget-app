@@ -1,12 +1,11 @@
 import type { Envelope } from "@server/generated/prisma/enums";
 
 export const ENVELOPE_LABELS = {
-  DEPENSES_COURANTES: "Dépenses courantes",
-  LOISIRS: "Loisirs",
-  FORMATION: "Formation",
-  EPARGNE_SECURITE: "Épargne sécurité",
-  EPARGNE_LONG_TERME: "Épargne long terme",
-  PRO: "Pro",
+  CURRENT_EXPENSES: "Dépenses courantes",
+  LEISURE: "Loisirs",
+  TRAINING: "Formation",
+  SAFETY_SAVINGS: "Épargne sécurité",
+  LONG_TERM_SAVINGS: "Épargne long terme",
 } as const satisfies Record<Envelope, string>;
 
 /** Ordre d'affichage des enveloppes. */

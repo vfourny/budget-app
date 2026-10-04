@@ -51,6 +51,7 @@ pnpm format         # prettier --write
 
 pnpm db:migrate     # prisma migrate dev (crée + applique une migration, régénère le client)
 pnpm db:studio      # Prisma Studio
+pnpm db:reset       # reset complet de la base dev (supprime tout, rejoue les migrations)
 ```
 
 Premier setup : `cp .env.example .env` (URLs Neon), `pnpm install` (génère le client Prisma),
@@ -166,7 +167,7 @@ Hors scope : synchro bancaire auto, multi-utilisateurs, facturation/TVA en v1.
   l'approche recommandée par Vercel pour ajouter une API à un projet Vite.
 - Neon : `DATABASE_URL` = URL pooled (runtime, adapter `@prisma/adapter-neon`),
   `DIRECT_URL` = URL directe (CLI Prisma / migrations, lue dans `prisma.config.ts`).
-- **Pas de modèle `BankAccount`** : seul compte le type **PERSO / PRO** (enum `AccountType`, porté par
+- **Pas de modèle `BankAccount`** : seul compte le type **PERSONAL / PROFESSIONAL** (enum `AccountType`, porté par
   `ImportBatch` et `Transaction`). La banque ne sert qu'à choisir le parseur CSV : elle est déduite du
   type par la constante `BANK_BY_ACCOUNT_TYPE` (`server/lib/csv/banks`), jamais stockée. Plus tard
   (appartements), le rattachement se fera par un `apartmentId` optionnel sur `Transaction` choisi à la

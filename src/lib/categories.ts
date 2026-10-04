@@ -8,19 +8,19 @@ import type { Envelope, TransactionCategory } from "@server/generated/prisma/enu
  * est en trop, tout en gardant les valeurs littérales (autocomplétion sur `label` / `envelope`).
  */
 export const TRANSACTION_CATEGORIES = {
-  ESSENCE: { label: "Essence", envelope: "DEPENSES_COURANTES" },
-  ASSURANCE: { label: "Banque et assurance", envelope: "DEPENSES_COURANTES" },
-  RESTAURANT: { label: "Restaurant", envelope: "LOISIRS" },
-  ALIMENTAIRE: { label: "Alimentaire", envelope: "DEPENSES_COURANTES" },
-  SOIREE: { label: "Soirée", envelope: "LOISIRS" },
-  LOISIRS: { label: "Loisirs", envelope: "LOISIRS" },
-  VETEMENTS_SOINS: { label: "Vêtements & Soins", envelope: "DEPENSES_COURANTES" },
-  SANTE: { label: "Santé", envelope: "DEPENSES_COURANTES" },
-  TRANSPORT: { label: "Transport", envelope: "DEPENSES_COURANTES" },
-  IMPOTS_TAXES: { label: "Impôt et Taxes", envelope: "DEPENSES_COURANTES" },
-  AUTRES_ABONNEMENTS: { label: "Abonnements divers", envelope: "DEPENSES_COURANTES" },
-  AUTRES: { label: "Autres", envelope: "DEPENSES_COURANTES" },
-  EPARGNE_LONG_TERME: { label: "Épargne long terme", envelope: "EPARGNE_LONG_TERME" },
+  FUEL: { label: "Essence", envelope: "CURRENT_EXPENSES" },
+  BANK_INSURANCE: { label: "Banque et assurance", envelope: "CURRENT_EXPENSES" },
+  RESTAURANT: { label: "Restaurant", envelope: "LEISURE" },
+  GROCERIES: { label: "Alimentaire", envelope: "CURRENT_EXPENSES" },
+  NIGHTLIFE: { label: "Soirée", envelope: "LEISURE" },
+  LEISURE: { label: "Loisirs", envelope: "LEISURE" },
+  CLOTHING_CARE: { label: "Vêtements & Soins", envelope: "CURRENT_EXPENSES" },
+  HEALTH: { label: "Santé", envelope: "CURRENT_EXPENSES" },
+  TRANSPORT: { label: "Transport", envelope: "CURRENT_EXPENSES" },
+  TAXES: { label: "Impôt et Taxes", envelope: "CURRENT_EXPENSES" },
+  OTHER_SUBSCRIPTIONS: { label: "Abonnements divers", envelope: "CURRENT_EXPENSES" },
+  OTHER: { label: "Autres", envelope: "CURRENT_EXPENSES" },
+  LONG_TERM_SAVINGS: { label: "Épargne long terme", envelope: "LONG_TERM_SAVINGS" },
 } as const satisfies Record<TransactionCategory, { label: string; envelope: Envelope }>;
 
 export const TRANSACTION_CATEGORY_ORDER = Object.keys(
