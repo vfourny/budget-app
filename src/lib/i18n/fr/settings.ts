@@ -1,4 +1,4 @@
-/** Réglages : parts du revenu par enveloppe + liste des catégories. */
+/** Réglages : parts du revenu par enveloppe. */
 export const settings = {
   eyebrow: "Configuration",
   title: "Réglages",
