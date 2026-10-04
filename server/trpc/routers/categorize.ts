@@ -6,12 +6,17 @@ import type { TransactionCategory } from "@server/generated/prisma/enums";
 import {
   LOW_CONFIDENCE_THRESHOLD,
   categorizeTransactions,
+  type CategorizeExample,
 } from "@server/lib/categorize/categorize-transactions";
+import { labelKey, normalizeLabel } from "@server/lib/categorize/normalize-label";
 import { getGeminiClient } from "@server/lib/gemini";
 import { createTRPCRouter, publicProcedure } from "@server/trpc/init";
 
-/** Nombre maximum d'exemples validés montrés à l'IA (un par libellé distinct, les plus récents). */
-const MAX_EXAMPLES = 60;
+/**
+ * Nombre maximum d'exemples validés montrés à l'IA : un par libellé distinct (hors date et n° de
+ * carte), les plus récents d'abord. ~20 tokens par exemple, soit ~6 000 tokens au plafond.
+ */
+const MAX_EXAMPLES = 300;
 
 /** Message précis selon l'erreur Gemini : inutile de « réessayer » une clé refusée. */
 function toTRPCError(error: unknown): TRPCError {
@@ -68,7 +73,9 @@ export const categorizeRouter = createTRPCRouter({
         return { categorizedCount: 0, uncategorizedCount: 0, lowConfidenceCount: 0 };
       }
 
-      // Exemples few-shot : transactions déjà validées du même type de compte (vide au tout premier import).
+      // Exemples few-shot : transactions déjà validées du même type de compte (vide au tout premier
+      // import). `distinct` SQL sur le libellé brut limite déjà les lignes lues ; le dédoublonnage
+      // sur le libellé normalisé (sans date ni n° de carte) se fait ensuite, en gardant les plus récents.
       const validated = await ctx.db.transaction.findMany({
         where: {
           accountType: batch.accountType,
@@ -77,12 +84,22 @@ export const categorizeRouter = createTRPCRouter({
         },
         distinct: ["label"],
         orderBy: { date: "desc" },
-        take: MAX_EXAMPLES,
         select: { label: true, amountCents: true, category: true },
       });
-      const examples = validated.flatMap((example) =>
-        example.category ? [{ ...example, category: example.category }] : [],
-      );
+      const seen = new Set<string>();
+      const examples: CategorizeExample[] = [];
+      for (const example of validated) {
+        if (!example.category) continue;
+        const key = labelKey(example.label);
+        if (seen.has(key)) continue;
+        seen.add(key);
+        examples.push({
+          label: normalizeLabel(example.label),
+          amountCents: example.amountCents,
+          category: example.category,
+        });
+        if (examples.length === MAX_EXAMPLES) break;
+      }
 
       let results;
       try {
