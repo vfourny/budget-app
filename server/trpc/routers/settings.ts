@@ -13,8 +13,8 @@ const envelopeSharesSchema = z
       BUDGET_ENVELOPES.map((envelope) => [envelope, z.number().int().min(0).max(100)]),
     ) as Record<BudgetEnvelope, z.ZodNumber>,
   )
-  .refine((shares) => Object.values(shares).reduce((sum, percent) => sum + percent, 0) <= 100, {
-    message: "Le total des parts ne peut pas dépasser 100 %.",
+  .refine((shares) => Object.values(shares).reduce((sum, percent) => sum + percent, 0) === 100, {
+    message: "Le total des parts doit faire exactement 100 %.",
   });
 
 export const settingsRouter = createTRPCRouter({

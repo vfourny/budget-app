@@ -19,20 +19,20 @@ interface NavItem {
 
 const MAIN_NAV = [
   { to: "/", label: "Accueil", icon: IconHome2 },
-  { to: "/perso", label: "Perso", icon: IconLayoutDashboard },
-  { to: "/pro", label: "Pro", icon: IconBriefcase },
+  { to: "/personal", label: "Perso", icon: IconLayoutDashboard },
+  { to: "/professional", label: "Pro", icon: IconBriefcase },
   { to: "/imports", label: "Imports", icon: IconInbox },
 ] as const satisfies readonly NavItem[];
 
 const SETTINGS_NAV = {
-  to: "/reglages",
+  to: "/settings",
   label: "Réglages",
   icon: IconSettings,
 } as const satisfies NavItem;
 
 function NavItemLink({ to, label, icon: IconComponent }: NavItem) {
   const { pathname } = useLocation();
-  // Actif si l'URL est la page elle-même ou l'une de ses sous-pages (/imports/nouveau).
+  // Actif si l'URL est la page elle-même ou l'une de ses sous-pages (/imports/new).
   // `/` est traité à part, sinon il serait « actif » partout.
   const active = to === "/" ? pathname === "/" : pathname === to || pathname.startsWith(`${to}/`);
 

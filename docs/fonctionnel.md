@@ -10,50 +10,54 @@ Chaque dépense est rattachée à une **catégorie**, chaque catégorie à une *
 
 Définies dans l'enum Prisma `Envelope` et les libellés dans `src/lib/envelopes.ts` (l'ordre des clés = ordre d'affichage).
 
-| Enveloppe          | Code                 |
-| ------------------ | -------------------- |
-| Dépenses courantes | `DEPENSES_COURANTES` |
-| Loisirs            | `LOISIRS`            |
-| Formation          | `FORMATION`          |
-| Épargne sécurité   | `EPARGNE_SECURITE`   |
-| Épargne long terme | `EPARGNE_LONG_TERME` |
-| Pro                | `PRO`                |
+| Enveloppe          | Code                |
+| ------------------ | ------------------- |
+| Dépenses courantes | `CURRENT_EXPENSES`  |
+| Loisirs            | `LEISURE`           |
+| Formation          | `TRAINING`          |
+| Épargne sécurité   | `SAFETY_SAVINGS`    |
+| Épargne long terme | `LONG_TERM_SAVINGS` |
 
 ### Catégories de transaction
 
 Liste **figée** (enum Prisma `TransactionCategory`), reprise des colonnes de l'ancien Google Sheet. Libellé affiché et enveloppe de rattachement : `src/lib/categories.ts`.
 
-| Catégorie           | Code                 | Enveloppe          |
-| ------------------- | -------------------- | ------------------ |
-| Essence             | `ESSENCE`            | Dépenses courantes |
-| Banque et assurance | `ASSURANCE`          | Dépenses courantes |
-| Restaurant          | `RESTAURANT`         | Loisirs            |
-| Alimentaire         | `ALIMENTAIRE`        | Dépenses courantes |
-| Soirée              | `SOIREE`             | Loisirs            |
-| Loisirs             | `LOISIRS`            | Loisirs            |
-| Vêtements & Soins   | `VETEMENTS_SOINS`    | Dépenses courantes |
-| Santé               | `SANTE`              | Dépenses courantes |
-| Transport           | `TRANSPORT`          | Dépenses courantes |
-| Impôt et Taxes      | `IMPOTS_TAXES`       | Dépenses courantes |
-| Abonnements divers  | `AUTRES_ABONNEMENTS` | Dépenses courantes |
-| Autres              | `AUTRES`             | Dépenses courantes |
-| Épargne long terme  | `EPARGNE_LONG_TERME` | Épargne long terme |
+| Catégorie           | Code                  | Enveloppe          |
+| ------------------- | --------------------- | ------------------ |
+| Loyer               | `RENT`                | Dépenses courantes |
+| Essence             | `FUEL`                | Dépenses courantes |
+| Banque et assurance | `BANK_INSURANCE`      | Dépenses courantes |
+| Restaurant          | `RESTAURANT`          | Loisirs            |
+| Alimentaire         | `GROCERIES`           | Dépenses courantes |
+| Soirée              | `NIGHTLIFE`           | Loisirs            |
+| Loisirs             | `LEISURE`             | Loisirs            |
+| Vêtements & Soins   | `CLOTHING_CARE`       | Dépenses courantes |
+| Santé               | `HEALTH`              | Dépenses courantes |
+| Transport           | `TRANSPORT`           | Dépenses courantes |
+| Impôt et Taxes      | `TAXES`               | Dépenses courantes |
+| Abonnements divers  | `OTHER_SUBSCRIPTIONS` | Dépenses courantes |
+| Autres              | `OTHER`               | Dépenses courantes |
+| Épargne long terme  | `LONG_TERM_SAVINGS`   | Épargne long terme |
+| Versement salaire   | `SALARY_PAYMENT`      | — (revenu)         |
+| Versement BNC       | `BNC_PAYMENT`         | — (revenu)         |
+| Versement vacation  | `VACATION_PAYMENT`    | — (revenu)         |
+| Remboursement       | `REFUND`              | — (crédit)         |
 
 Points d'attention :
 
 - Le rattachement catégorie → enveloppe est une **hypothèse à ajuster** dans `src/lib/categories.ts` (un seul endroit à modifier).
-- Les enveloppes `FORMATION`, `EPARGNE_SECURITE` et `PRO` n'ont **pas encore de catégorie** rattachée.
+- Les enveloppes `TRAINING` et `SAFETY_SAVINGS` n'ont **pas encore de catégorie** rattachée.
 - La catégorie d'une transaction est **optionnelle** (`null` tant qu'elle n'est pas catégorisée / relue).
 - Ajouter ou renommer une catégorie = modifier l'enum Prisma **+ une migration versionnée + `src/lib/categories.ts`** (le typage `Record<TransactionCategory, …>` fait échouer `tsc` si l'un des deux est oublié).
 
 ## Type de compte
 
-Chaque import et chaque transaction porte un **type** : `PERSO` ou `PRO` (Stygma). C'est la seule notion de « compte » de l'app : il n'y a pas de table de comptes bancaires. La banque n'est pas stockée ; elle sert uniquement à choisir le **mapping CSV** à l'import (voir [import-csv.md](./import-csv.md)) et se déduit du type :
+Chaque import et chaque transaction porte un **type** : `PERSONAL` ou `PROFESSIONAL` (Stygma). C'est la seule notion de « compte » de l'app : il n'y a pas de table de comptes bancaires. La banque n'est pas stockée ; elle sert uniquement à choisir le **mapping CSV** à l'import (voir [import-csv.md](./import-csv.md)) et se déduit du type :
 
-| Type    | Banque (format CSV) |
-| ------- | ------------------- |
-| `PERSO` | BoursoBank          |
-| `PRO`   | Banque Populaire    |
+| Type           | Banque (format CSV) |
+| -------------- | ------------------- |
+| `PERSONAL`     | BoursoBank          |
+| `PROFESSIONAL` | Banque Populaire    |
 
 Évolution prévue (gestion des appartements) : une catégorie « appartement » et un rattachement choisi par transaction à la relecture (`apartmentId` optionnel), indépendamment du compte bancaire d'origine.
 
@@ -85,13 +89,13 @@ Règles :
 
 > État actuel : import, catégorisation automatique, historique et relecture (correction) sont en place ; validation et suppression aussi (voir la roadmap dans [`CLAUDE.md`](../CLAUDE.md)).
 
-## Dashboard Perso (`/perso`)
+## Dashboard Perso (`/personal`)
 
 Ne compte que les transactions des imports **VALIDATED** du compte perso. Hypothèses V1 : tout crédit est un **revenu** ; un débit en catégorie « Épargne long terme » est de l'**épargne** (pas une dépense) ; le reste des débits sont des **dépenses**.
 
 - **Vue mois** : sélecteur de mois (et flèches) limité aux mois qui ont des données ; cartes Dépenses (avec, par enveloppe, une jauge **réel vs recommandé** : barre verte si on reste sous la part recommandée du revenu, ambre au-delà ; l'inverse pour l'épargne), Revenus, Épargne du mois (+ % des revenus) ; tableau des transactions triable ; dépenses par catégorie.
 - **Vue année** : mêmes totaux sur l'année choisie, plus la dépense moyenne par mois (mois ayant des données).
-- Les parts recommandées (méthode des 5 comptes, 55 / 10 / 10 / 10 / 10 % par défaut) se règlent dans **Réglages**. Seules les enveloppes qui ont au moins une catégorie sont mesurées.
+- Les parts recommandées (méthode des 5 comptes, 60 / 10 / 10 / 10 / 10 % par défaut) se règlent dans **Réglages** (le total doit faire exactement 100 %). Seules les enveloppes qui ont au moins une catégorie sont mesurées.
 - **À venir** : carte Abonnements, donut par catégorie en vue année, estimation de l'IR.
 - Mockup de référence : canvas Claude Design « Budget — maquette MVP » (5 écrans : tableau de bord mois, import CSV, relecture, vue année, tokens).
 

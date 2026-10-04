@@ -4,20 +4,30 @@ import type { TransactionCategory } from "@server/generated/prisma/enums";
  * viennent de l'ancien Google Sheet ; ajuster ici pour affiner les propositions de l'IA.
  * `satisfies Record<TransactionCategory, string>` : erreur TS si une catégorie de l'enum manque. */
 export const CATEGORY_HINTS = {
-  ESSENCE: "Carburant, stations-service, recharge de véhicule électrique.",
-  ASSURANCE: "Frais bancaires, cotisations de carte, assurances (auto, habitation, mutuelle…).",
+  RENT: "Loyer du logement et charges locatives (virement ou prélèvement au propriétaire / à l'agence).",
+  FUEL: "Carburant, stations-service, recharge de véhicule électrique.",
+  BANK_INSURANCE:
+    "Frais bancaires, cotisations de carte, assurances (auto, habitation, mutuelle…).",
   RESTAURANT: "Restaurants, fast-food, cafés, livraison de repas.",
-  ALIMENTAIRE: "Courses alimentaires : supermarchés, boulangerie, marché, drive.",
-  SOIREE: "Bars, boîtes de nuit, soirées entre amis.",
-  LOISIRS: "Sorties, cinéma, jeux vidéo, sport, culture, voyages, achats plaisir.",
-  VETEMENTS_SOINS: "Vêtements, chaussures, coiffeur, cosmétiques.",
-  SANTE: "Médecin, pharmacie, dentiste, optique, analyses.",
+  GROCERIES: "Courses alimentaires : supermarchés, boulangerie, marché, drive.",
+  NIGHTLIFE: "Bars, boîtes de nuit, soirées entre amis.",
+  LEISURE: "Sorties, cinéma, jeux vidéo, sport, culture, voyages, achats plaisir.",
+  CLOTHING_CARE: "Vêtements, chaussures, coiffeur, cosmétiques.",
+  HEALTH: "Médecin, pharmacie, dentiste, optique, analyses.",
   TRANSPORT: "Train, bus, péages, parking, taxi/VTC, abonnements de transport.",
-  IMPOTS_TAXES: "Impôts, taxes, amendes, prélèvements fiscaux ou sociaux.",
-  AUTRES_ABONNEMENTS:
+  TAXES: "Impôts, taxes, amendes, prélèvements fiscaux ou sociaux.",
+  OTHER_SUBSCRIPTIONS:
     "Abonnements récurrents : streaming, téléphonie, internet, logiciels, salle de sport.",
-  AUTRES:
-    "Tout ce qui ne rentre dans aucune autre catégorie (dont les crédits reçus : salaire, virements entrants, remboursements).",
-  EPARGNE_LONG_TERME:
+  OTHER:
+    "Tout ce qui ne rentre dans aucune autre catégorie (dont les crédits reçus qui ne sont ni un salaire, ni un versement BNC ou de vacation, ni un remboursement : virements entrants divers).",
+  LONG_TERM_SAVINGS:
     "Virements vers l'épargne ou l'investissement (livret, PEA, assurance-vie, bourse, crypto).",
+  SALARY_PAYMENT:
+    "Crédit : salaire versé par un employeur (virement mensuel de paie, libellé SALAIRE / PAIE).",
+  BNC_PAYMENT:
+    "Crédit : revenus d'activité libérale / freelance (BNC), par ex. virements de sa propre société (STYGMA) ou de clients.",
+  VACATION_PAYMENT:
+    "Crédit : paiement de vacations d'enseignement (établissement d'enseignement, université, IUT), souvent à la fin d'un semestre.",
+  REFUND:
+    "Crédit : remboursement reçu (achat retourné, mutuelle / Sécurité sociale, avoir, virement d'un proche pour une dépense avancée).",
 } as const satisfies Record<TransactionCategory, string>;

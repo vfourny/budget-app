@@ -57,8 +57,8 @@ Routeurs actuels : `categorize` (`run` : demande à Gemini une catégorie + conf
 
 - **Thème** : `src/lib/theme.ts` (objet `createTheme` + `cssVariablesResolver`) porte les tokens de la maquette — palettes `dark` (obsidian / platine : fond, cartes, bordures, texte), `gold` (accent, index 6 = `#C9A45C`), `amber` (à vérifier / dépassement, index 6 = `#E0894A`), polices (Instrument Serif pour les titres, Manrope pour l'UI), rayons (16 cartes, 10 contrôles, 8 petits boutons). Champs et boutons à 44 px (`src/styles/global.css`). Toujours sombre (`forceColorScheme="dark"`).
 - **Composants** : Mantine (`@mantine/core`, `@mantine/dropzone`), icônes Tabler. CSS sur mesure en CSS Modules. Pas de couleur en dur : tokens Mantine.
-- **Routing** : `BrowserRouter` (`main.tsx`) + `<Routes>` (`app.tsx`). `AppLayout` (barre latérale, `<Outlet />`) enveloppe toutes les pages. Routes : `/` accueil, `/perso`, `/pro`, `/imports`, `/imports/nouveau`, `/reglages`. Les liens directs (rechargement de `/imports/nouveau`) marchent grâce au repli SPA de Nitro (vérifié sur `pnpm preview`).
-- **Écrans** : l'accueil (`/` : résumé du dernier mois validé + imports à vérifier, sans route dédiée), le dashboard perso (`/perso`), l'historique (`/imports`), l'import (`/imports/nouveau`), la relecture (`/imports/:importId`) et les réglages (liste des catégories) sont réels ; après un import, le front enchaîne `import.create` puis `categorize.run` dans une seule mutation et redirige vers la relecture ; les autres affichent `ComingSoon` en attendant leur PR.
+- **Routing** : `BrowserRouter` (`main.tsx`) + `<Routes>` (`app.tsx`). `AppLayout` (barre latérale, `<Outlet />`) enveloppe toutes les pages. Routes : `/` accueil, `/personal`, `/professional`, `/imports`, `/imports/new`, `/settings`. Les liens directs (rechargement de `/imports/new`) marchent grâce au repli SPA de Nitro (vérifié sur `pnpm preview`).
+- **Écrans** : l'accueil (`/` : résumé du dernier mois validé + imports à vérifier, sans route dédiée), le dashboard perso (`/personal`), l'historique (`/imports`), l'import (`/imports/new`), la relecture (`/imports/:importId`) et les réglages (liste des catégories) sont réels ; après un import, le front enchaîne `import.create` puis `categorize.run` dans une seule mutation et redirige vers la relecture ; les autres affichent `ComingSoon` en attendant leur PR.
 
 ## Base de données : Prisma 7 + Neon
 
@@ -76,11 +76,11 @@ Routeurs actuels : `categorize` (`run` : demande à Gemini une catégorie + conf
 | `EnvelopeShare` | Part du revenu (en %) recommandée pour une enveloppe ; sans ligne, la valeur par défaut s'applique |
 | `Transaction`   | Une ligne validée : date, libellé, montant en centimes, catégorie, mois/année                      |
 
-Enums : `AccountType` (PERSO / PRO, sur `ImportBatch` et `Transaction`), `Envelope`, `TransactionCategory`, `ImportStatus`.
+Enums : `AccountType` (PERSONAL / PROFESSIONAL, sur `ImportBatch` et `Transaction`), `Envelope`, `TransactionCategory`, `ImportStatus`.
 
 Choix à connaître :
 
-- Pas de modèle `BankAccount` : `accountType` (enum PERSO/PRO) est porté directement par `ImportBatch` et `Transaction`. La banque (parseur CSV) est déduite du type (`BANK_BY_ACCOUNT_TYPE`), pas stockée.
+- Pas de modèle `BankAccount` : `accountType` (enum PERSONAL/PROFESSIONAL) est porté directement par `ImportBatch` et `Transaction`. La banque (parseur CSV) est déduite du type (`BANK_BY_ACCOUNT_TYPE`), pas stockée.
 - Les catégories sont un **enum figé**, pas une table : libellés et enveloppes vivent dans `src/lib/categories.ts`.
 - Supprimer un `ImportBatch` supprime ses transactions (`onDelete: Cascade`).
 - Index sur `(year, month)`, `(accountType, year, month)`, `category` et `importBatchId` pour les agrégations dashboards.
@@ -94,7 +94,7 @@ Choix à connaître :
 - **State** : fondamentaux uniquement (`useState`, `useReducer`, Context, TanStack Query). **Pas de lib de state management** sans accord explicite.
 - **Validation** : schémas Zod partagés entre tRPC et formulaires.
 - **Langues** : UI en français, code / identifiants / commits en anglais.
-- Variables d'environnement serveur validées au démarrage par Zod (`server/lib/env.ts`). `GEMINI_API_KEY` (et `GEMINI_MODEL`, optionnelle) ne sont requises que par `categorize.run` : erreur claire sinon.
+- Variables d'environnement serveur validées au démarrage par Zod (`server/lib/env.ts`). `GEMINI_API_KEY` est obligatoire ; `GEMINI_MODEL` est optionnelle (défaut `gemini-3.5-flash-lite`).
 
 ## Équivalences React ↔ Vue
 

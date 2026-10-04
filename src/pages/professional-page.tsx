@@ -1,7 +1,7 @@
 import { ComingSoon } from "@/components/coming-soon";
 import { PageHeader } from "@/components/page-header";
 
-export function ProPage() {
+export function ProfessionalPage() {
   return (
     <>
       <PageHeader eyebrow="Stygma SAS" title="Pro" />

@@ -16,8 +16,8 @@ export type SupportedBank = keyof typeof BANK_CSV_CONFIGS;
 /** Banque (donc format CSV) de chaque type de compte. La banque n'est pas stockée en base : elle ne
  * sert qu'à choisir le parseur à l'import. `satisfies` impose une entrée par `AccountType`. */
 export const BANK_BY_ACCOUNT_TYPE = {
-  PERSO: "BoursoBank",
-  PRO: "Banque Populaire",
+  PERSONAL: "BoursoBank",
+  PROFESSIONAL: "Banque Populaire",
 } as const satisfies Record<AccountType, SupportedBank>;
 
 /** Mapping CSV à utiliser pour un type de compte. */

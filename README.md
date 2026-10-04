@@ -34,17 +34,18 @@ pnpm dev                    # front + API sur http://localhost:5173 (API sous /a
 
 ## Commandes
 
-| Commande          | Rôle                                                         |
-| ----------------- | ------------------------------------------------------------ |
-| `pnpm dev`        | Front + API sur un seul serveur                              |
-| `pnpm check`      | lint + typecheck + format:check (avant toute PR)             |
-| `pnpm build`      | Build de prod (`.output/`, ou `.vercel/output` sur Vercel)   |
-| `pnpm preview`    | Sert le build de prod localement                             |
-| `pnpm lint:fix`   | Autofix oxlint                                               |
-| `pnpm format`     | `prettier --write`                                           |
-| `pnpm db:migrate` | `prisma migrate dev` (crée + applique une migration)         |
-| `pnpm db:deploy`  | `prisma migrate deploy` (applique les migrations existantes) |
-| `pnpm db:studio`  | Prisma Studio                                                |
+| Commande          | Rôle                                                          |
+| ----------------- | ------------------------------------------------------------- |
+| `pnpm dev`        | Front + API sur un seul serveur                               |
+| `pnpm check`      | lint + typecheck + format:check (avant toute PR)              |
+| `pnpm build`      | Build de prod (`.output/`, ou `.vercel/output` sur Vercel)    |
+| `pnpm preview`    | Sert le build de prod localement                              |
+| `pnpm lint:fix`   | Autofix oxlint                                                |
+| `pnpm format`     | `prettier --write`                                            |
+| `pnpm db:migrate` | `prisma migrate dev` (crée + applique une migration)          |
+| `pnpm db:deploy`  | `prisma migrate deploy` (applique les migrations existantes)  |
+| `pnpm db:studio`  | Prisma Studio                                                 |
+| `pnpm db:reset`   | `prisma migrate reset` (supprime tout, rejoue les migrations) |
 
 ## Documentation
 

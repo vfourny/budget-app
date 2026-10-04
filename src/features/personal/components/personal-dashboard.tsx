@@ -46,7 +46,7 @@ export function PersonalDashboard() {
             <span>
               Aucun import validé pour le moment : le dashboard se remplit à la validation.
             </span>
-            <Button component={Link} to="/imports/nouveau" variant="default">
+            <Button component={Link} to="/imports/new" variant="default">
               Importer un relevé
             </Button>
           </Group>

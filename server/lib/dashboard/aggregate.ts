@@ -19,7 +19,7 @@ export interface PeriodTotals {
 
 /**
  * Totaux d'une période (hypothèses V1 : tout crédit est un revenu ; un débit en
- * `EPARGNE_LONG_TERME` est de l'épargne, pas une dépense). Que des entiers en centimes.
+ * `LONG_TERM_SAVINGS` est de l'épargne, pas une dépense). Que des entiers en centimes.
  */
 export function aggregatePeriod(rows: readonly AggregatedRow[]): PeriodTotals {
   let revenueCents = 0;
@@ -30,7 +30,7 @@ export function aggregatePeriod(rows: readonly AggregatedRow[]): PeriodTotals {
   for (const row of rows) {
     if (row.amountCents > 0) {
       revenueCents += row.amountCents;
-    } else if (row.category === "EPARGNE_LONG_TERME") {
+    } else if (row.category === "LONG_TERM_SAVINGS") {
       savingsCents -= row.amountCents;
     } else {
       expenseCents -= row.amountCents;

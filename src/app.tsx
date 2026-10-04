@@ -6,7 +6,7 @@ import { ImportPage } from "@/pages/import-page";
 import { ImportReviewPage } from "@/pages/import-review-page";
 import { ImportsPage } from "@/pages/imports-page";
 import { PersonalPage } from "@/pages/personal-page";
-import { ProPage } from "@/pages/pro-page";
+import { ProfessionalPage } from "@/pages/professional-page";
 import { SettingsPage } from "@/pages/settings-page";
 
 // Table des routes ≈ `routes: [...]` de Vue Router. La route sans `path` (AppLayout) est un
@@ -16,12 +16,12 @@ export function App() {
     <Routes>
       <Route element={<AppLayout />}>
         <Route index element={<HomePage />} />
-        <Route path="perso" element={<PersonalPage />} />
-        <Route path="pro" element={<ProPage />} />
+        <Route path="personal" element={<PersonalPage />} />
+        <Route path="professional" element={<ProfessionalPage />} />
         <Route path="imports" element={<ImportsPage />} />
-        <Route path="imports/nouveau" element={<ImportPage />} />
+        <Route path="imports/new" element={<ImportPage />} />
         <Route path="imports/:importId" element={<ImportReviewPage />} />
-        <Route path="reglages" element={<SettingsPage />} />
+        <Route path="settings" element={<SettingsPage />} />
       </Route>
     </Routes>
   );
