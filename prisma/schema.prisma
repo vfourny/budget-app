@@ -40,6 +40,9 @@ enum TransactionCategory {
   OTHER_SUBSCRIPTIONS // Abonnements divers
   OTHER // Autres
   LONG_TERM_SAVINGS // Épargne long terme
+  SALARY_PAYMENT // Versement salaire (revenu)
+  BNC_PAYMENT // Versement BNC (revenu)
+  REFUND // Remboursement (crédit)
 }
 
 /// Part du revenu mensuel recommandée pour une enveloppe (en %). Une ligne par enveloppe

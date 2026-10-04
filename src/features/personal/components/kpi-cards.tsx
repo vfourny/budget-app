@@ -29,14 +29,16 @@ const SAVINGS_ENVELOPES = [
 
 /** Enveloppes qui ont au moins une catégorie : les autres n'ont rien à mesurer pour l'instant. */
 const MAPPED_ENVELOPES = new Set<Envelope>(
-  Object.values(TRANSACTION_CATEGORIES).map((category) => category.envelope),
+  Object.values(TRANSACTION_CATEGORIES).flatMap((category) =>
+    category.envelope ? [category.envelope] : [],
+  ),
 );
 
 /** Montant réel par enveloppe : dépenses via la table des catégories, épargne long terme à part. */
 function realByEnvelope(overview: Overview): Map<Envelope, number> {
   const totals = new Map<Envelope, number>();
   for (const { category, expenseCents } of overview.byCategory) {
-    const envelope = category ? TRANSACTION_CATEGORIES[category].envelope : "CURRENT_EXPENSES";
+    const envelope = (category && TRANSACTION_CATEGORIES[category].envelope) || "CURRENT_EXPENSES";
     totals.set(envelope, (totals.get(envelope) ?? 0) + expenseCents);
   }
   totals.set("LONG_TERM_SAVINGS", overview.savingsCents);

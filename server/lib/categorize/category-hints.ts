@@ -18,7 +18,13 @@ export const CATEGORY_HINTS = {
   OTHER_SUBSCRIPTIONS:
     "Abonnements récurrents : streaming, téléphonie, internet, logiciels, salle de sport.",
   OTHER:
-    "Tout ce qui ne rentre dans aucune autre catégorie (dont les crédits reçus : salaire, virements entrants, remboursements).",
+    "Tout ce qui ne rentre dans aucune autre catégorie (dont les crédits reçus qui ne sont ni un salaire, ni un versement BNC, ni un remboursement : virements entrants divers).",
   LONG_TERM_SAVINGS:
     "Virements vers l'épargne ou l'investissement (livret, PEA, assurance-vie, bourse, crypto).",
+  SALARY_PAYMENT:
+    "Crédit : salaire versé par un employeur (virement mensuel de paie, libellé SALAIRE / PAIE).",
+  BNC_PAYMENT:
+    "Crédit : revenus d'activité libérale / freelance (BNC), par ex. virements de sa propre société (STYGMA) ou de clients.",
+  REFUND:
+    "Crédit : remboursement reçu (achat retourné, mutuelle / Sécurité sociale, avoir, virement d'un proche pour une dépense avancée).",
 } as const satisfies Record<TransactionCategory, string>;

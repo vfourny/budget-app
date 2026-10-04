@@ -37,6 +37,9 @@ Liste **figée** (enum Prisma `TransactionCategory`), reprise des colonnes de l'
 | Abonnements divers  | `OTHER_SUBSCRIPTIONS` | Dépenses courantes |
 | Autres              | `OTHER`               | Dépenses courantes |
 | Épargne long terme  | `LONG_TERM_SAVINGS`   | Épargne long terme |
+| Versement salaire   | `SALARY_PAYMENT`      | — (revenu)         |
+| Versement BNC       | `BNC_PAYMENT`         | — (revenu)         |
+| Remboursement       | `REFUND`              | — (crédit)         |
 
 Points d'attention :
 
