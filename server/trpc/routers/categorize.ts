@@ -1,8 +1,8 @@
 import { ApiError } from "@google/genai";
-import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 
 import type { TransactionCategory } from "@server/generated/prisma/enums";
+import { appError } from "@server/lib/app-error";
 import {
   LOW_CONFIDENCE_THRESHOLD,
   categorizeTransactions,
@@ -10,7 +10,7 @@ import {
 } from "@server/lib/categorize/categorize-transactions";
 import { labelKey, normalizeLabel } from "@server/lib/categorize/normalize-label";
 import { gemini } from "@server/lib/gemini";
-import { createTRPCRouter, publicProcedure } from "@server/trpc/init";
+import { createTRPCRouter, protectedProcedure } from "@server/trpc/init";
 
 /**
  * Nombre maximum d'exemples validés montrés à l'IA : un par libellé distinct (hors date et n° de
@@ -18,27 +18,14 @@ import { createTRPCRouter, publicProcedure } from "@server/trpc/init";
  */
 const MAX_EXAMPLES = 300;
 
-/** Message précis selon l'erreur Gemini : inutile de « réessayer » une clé refusée. */
-function toTRPCError(error: unknown): TRPCError {
+/** Code précis selon l'erreur Gemini : inutile de « réessayer » une clé refusée. */
+function toTRPCError(error: unknown) {
   const status = error instanceof ApiError ? error.status : undefined;
-  if (status === 429) {
-    return new TRPCError({
-      code: "TOO_MANY_REQUESTS",
-      message:
-        "Quota Gemini atteint : réessaie dans une minute (ou demain si le quota du jour est épuisé).",
-    });
-  }
+  if (status === 429) return appError("TOO_MANY_REQUESTS", "GEMINI_QUOTA_EXCEEDED");
   if (status === 400 || status === 401 || status === 403) {
-    return new TRPCError({
-      code: "PRECONDITION_FAILED",
-      message:
-        "Gemini a refusé la requête : clé API invalide ou modèle indisponible pour ce compte.",
-    });
+    return appError("PRECONDITION_FAILED", "GEMINI_REFUSED");
   }
-  return new TRPCError({
-    code: "INTERNAL_SERVER_ERROR",
-    message: "La catégorisation par l'IA a échoué, réessaie dans un instant.",
-  });
+  return appError("INTERNAL_SERVER_ERROR", "CATEGORIZATION_FAILED");
 }
 
 export const categorizeRouter = createTRPCRouter({
@@ -47,13 +34,13 @@ export const categorizeRouter = createTRPCRouter({
    * attente de relecture. Relançable : seules les lignes encore sans catégorie sont traitées, et
    * rien n'est écrit si l'appel à l'IA échoue.
    */
-  run: publicProcedure
+  run: protectedProcedure
     .input(z.object({ batchId: z.string().min(1) }))
     .mutation(async ({ ctx, input }) => {
       const batch = await ctx.db.importBatch.findUnique({ where: { id: input.batchId } });
-      if (!batch) throw new TRPCError({ code: "NOT_FOUND", message: "Import introuvable." });
+      if (!batch) throw appError("NOT_FOUND", "IMPORT_NOT_FOUND");
       if (batch.status !== "PENDING_REVIEW") {
-        throw new TRPCError({ code: "BAD_REQUEST", message: "Cet import est déjà validé." });
+        throw appError("BAD_REQUEST", "IMPORT_ALREADY_VALIDATED");
       }
 
       const transactions = await ctx.db.transaction.findMany({

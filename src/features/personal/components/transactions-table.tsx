@@ -1,8 +1,8 @@
 import { Badge, Paper, Table, Text, UnstyledButton } from "@mantine/core";
 import { useState } from "react";
 
-import { TRANSACTION_CATEGORIES } from "@/lib/categories";
 import { formatCents, formatDate } from "@/lib/format";
+import { LOCALE, fr } from "@/lib/i18n/fr";
 import type { TransactionCategory } from "@server/generated/prisma/enums";
 
 interface TransactionRow {
@@ -15,21 +15,20 @@ interface TransactionRow {
 
 type SortKey = "date" | "label" | "category" | "amount";
 
-const categoryLabel = (row: TransactionRow) =>
-  row.category ? TRANSACTION_CATEGORIES[row.category].label : "";
+const categoryLabel = (row: TransactionRow) => (row.category ? fr.categories[row.category] : "");
 
 const COMPARATORS = {
   date: (a, b) => a.date.getTime() - b.date.getTime(),
-  label: (a, b) => a.label.localeCompare(b.label),
-  category: (a, b) => categoryLabel(a).localeCompare(categoryLabel(b)),
+  label: (a, b) => a.label.localeCompare(b.label, LOCALE),
+  category: (a, b) => categoryLabel(a).localeCompare(categoryLabel(b), LOCALE),
   amount: (a, b) => a.amountCents - b.amountCents,
 } as const satisfies Record<SortKey, (a: TransactionRow, b: TransactionRow) => number>;
 
 const COLUMNS = [
-  { key: "date", label: "Date" },
-  { key: "label", label: "Libellé" },
-  { key: "category", label: "Catégorie" },
-  { key: "amount", label: "Montant" },
+  { key: "date", label: fr.common.date },
+  { key: "label", label: fr.common.label },
+  { key: "category", label: fr.common.category },
+  { key: "amount", label: fr.common.amount },
 ] as const satisfies { key: SortKey; label: string }[];
 
 export function TransactionsTable({ transactions }: { transactions: readonly TransactionRow[] }) {
@@ -52,16 +51,16 @@ export function TransactionsTable({ transactions }: { transactions: readonly Tra
   }
 
   return (
-    <Paper withBorder radius="lg" mb={16} style={{ overflow: "hidden" }}>
+    <Paper withBorder radius="lg" style={{ overflow: "hidden" }}>
       <Text fw={600} p="20px 24px" style={{ borderBottom: "1px solid var(--app-border)" }}>
-        Transactions{" "}
+        {fr.personal.transactions.title}{" "}
         <Text span c="dimmed" fw={400}>
           · {transactions.length}
         </Text>
       </Text>
       {rows.length === 0 ? (
         <Text c="dimmed" p={28}>
-          Aucune transaction pour ce mois.
+          {fr.personal.transactions.empty}
         </Text>
       ) : (
         <Table verticalSpacing="sm" horizontalSpacing="lg">

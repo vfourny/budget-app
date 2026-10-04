@@ -1,11 +1,8 @@
 import { z } from "zod";
 
-import {
-  BUDGET_ENVELOPES,
-  DEFAULT_ENVELOPE_PERCENTS,
-  type BudgetEnvelope,
-} from "@server/lib/settings/envelope-shares";
-import { createTRPCRouter, publicProcedure } from "@server/trpc/init";
+import { BUDGET_ENVELOPES, type BudgetEnvelope } from "@server/lib/settings/envelope-shares";
+import { DEFAULT_ENVELOPE_PERCENTS } from "@/lib/budget-rules";
+import { createTRPCRouter, protectedProcedure } from "@server/trpc/init";
 
 const envelopeSharesSchema = z
   .object(
@@ -14,12 +11,12 @@ const envelopeSharesSchema = z
     ) as Record<BudgetEnvelope, z.ZodNumber>,
   )
   .refine((shares) => Object.values(shares).reduce((sum, percent) => sum + percent, 0) === 100, {
-    message: "Le total des parts doit faire exactement 100 %.",
+    message: "Envelope shares must sum to exactly 100.",
   });
 
 export const settingsRouter = createTRPCRouter({
   /** Part du revenu recommandée par enveloppe (valeurs par défaut si jamais configurée). */
-  envelopeShares: publicProcedure.query(async ({ ctx }) => {
+  envelopeShares: protectedProcedure.query(async ({ ctx }) => {
     const rows = await ctx.db.envelopeShare.findMany();
     const shares: Record<BudgetEnvelope, number> = { ...DEFAULT_ENVELOPE_PERCENTS };
     for (const row of rows) {
@@ -29,7 +26,7 @@ export const settingsRouter = createTRPCRouter({
   }),
 
   /** Enregistre les 5 parts d'un coup (une seule transaction SQL). */
-  setEnvelopeShares: publicProcedure
+  setEnvelopeShares: protectedProcedure
     .input(envelopeSharesSchema)
     .mutation(async ({ ctx, input }) => {
       await ctx.db.$transaction(

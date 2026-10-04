@@ -1,8 +1,8 @@
-import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 
 import { TransactionCategory } from "@server/generated/prisma/enums";
-import { createTRPCRouter, publicProcedure } from "@server/trpc/init";
+import { appError } from "@server/lib/app-error";
+import { createTRPCRouter, protectedProcedure } from "@server/trpc/init";
 
 export const transactionRouter = createTRPCRouter({
   /**
@@ -10,7 +10,7 @@ export const transactionRouter = createTRPCRouter({
    * catégorie choisie par l'utilisateur = « Confirmée » (plus « à vérifier »). Refusé une fois
    * l'import validé.
    */
-  setCategory: publicProcedure
+  setCategory: protectedProcedure
     .input(z.object({ id: z.string().min(1), category: z.enum(TransactionCategory) }))
     .mutation(async ({ ctx, input }) => {
       const transaction = await ctx.db.transaction.findUnique({
@@ -18,10 +18,10 @@ export const transactionRouter = createTRPCRouter({
         select: { importBatch: { select: { status: true } } },
       });
       if (!transaction) {
-        throw new TRPCError({ code: "NOT_FOUND", message: "Transaction introuvable." });
+        throw appError("NOT_FOUND", "TRANSACTION_NOT_FOUND");
       }
       if (transaction.importBatch?.status === "VALIDATED") {
-        throw new TRPCError({ code: "BAD_REQUEST", message: "Cet import est déjà validé." });
+        throw appError("BAD_REQUEST", "IMPORT_ALREADY_VALIDATED");
       }
       await ctx.db.transaction.update({
         where: { id: input.id },

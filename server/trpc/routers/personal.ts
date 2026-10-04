@@ -1,7 +1,7 @@
 import { z } from "zod";
 
 import { aggregatePeriod } from "@server/lib/dashboard/aggregate";
-import { createTRPCRouter, publicProcedure } from "@server/trpc/init";
+import { createTRPCRouter, protectedProcedure } from "@server/trpc/init";
 
 /** Seules les transactions des imports VALIDATED du compte perso comptent dans le dashboard. */
 const PERSONAL_VALIDATED = {
@@ -11,7 +11,7 @@ const PERSONAL_VALIDATED = {
 
 export const personalRouter = createTRPCRouter({
   /** Mois ayant des données (du plus récent au plus ancien) : alimente le sélecteur de période. */
-  periods: publicProcedure.query(async ({ ctx }) => {
+  periods: protectedProcedure.query(async ({ ctx }) => {
     const periods = await ctx.db.transaction.groupBy({
       by: ["year", "month"],
       where: PERSONAL_VALIDATED,
@@ -24,7 +24,7 @@ export const personalRouter = createTRPCRouter({
    * Totaux d'un mois (`month` renseigné, avec le détail des transactions) ou d'une année entière
    * (`month` absent, avec la moyenne mensuelle sur les mois ayant des données).
    */
-  overview: publicProcedure
+  overview: protectedProcedure
     .input(z.object({ year: z.number().int(), month: z.number().int().min(1).max(12).optional() }))
     .query(async ({ ctx, input }) => {
       const rows = await ctx.db.transaction.findMany({

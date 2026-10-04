@@ -34,7 +34,7 @@ Choix délibéré : **le plus simple possible**. SPA React (pas de SSR, pas de S
 | API         | tRPC 11 + Zod 4, TanStack Query 5 (`@trpc/tanstack-react-query`)             |
 | DB          | Prisma 7 + PostgreSQL Neon (driver adapter `@prisma/adapter-neon`)           |
 | UI          | Mantine 9 + React Router 8, thème sombre « obsidian / platine », accent doré |
-| Auth        | Better Auth (mono-utilisateur) — pas encore en place                         |
+| Auth        | Better Auth (email + mot de passe, mono-utilisateur, sessions en base)       |
 | IA          | API Gemini (Google AI Studio) pour catégoriser les lignes de relevé          |
 | Hébergement | Vercel (Hobby, détection Nitro automatique) + Neon (Free)                    |
 | Qualité     | oxlint (règles React hooks incluses), Prettier, `tsc`                        |
@@ -70,6 +70,7 @@ src/                   # FRONT — SPA React, tourne uniquement dans le navigate
   features/<domaine>/  # import, review, dashboard… : components/ + hooks/ du domaine
   components/          # UI partagée entre features (PageHeader, ComingSoon…)
   lib/                 # utilitaires front : trpc.ts (client + queryClient), theme.ts (thème Mantine)…
+    i18n/fr/           # TOUS les textes de l'UI (dictionnaires typés) + plural.ts (accord en nombre)
   styles/global.css    # règles CSS globales (le thème, lui, est dans lib/theme.ts)
 server/                # BACKEND — Nitro, mêmes conventions que le server/ de Nuxt
   api/                 # routes HTTP : server/api/health.ts → GET /api/health
@@ -88,13 +89,23 @@ nitro.config.ts        # serverDir: ./server
 
 - **Frontière front / back** : `src/**` ne peut importer de `server/**` qu'en `import type`
   (ex. le type du routeur tRPC). Jamais d'import runtime (Prisma, secrets…) côté front.
+  Exception dans l'autre sens : `src/lib/budget-rules.ts` (pur, sans dépendance) est importé par le
+  serveur, pour que front et dashboard partagent les mêmes règles.
+- **Règles du budget** (catégories → enveloppes, épargne, catégories de la card « Par catégorie »,
+  lignes de revenus, par `key`) : uniquement dans `src/lib/budget-rules.ts`, jamais en dur ailleurs. Aucun libellé dedans :
+  les textes sont dans `@/lib/i18n/fr`.
 - **Données** : toujours via tRPC + TanStack Query. **Pas de `fetch` dans un `useEffect`.**
   `useEffect` est réservé à la synchro avec un système externe (oxlint le signale sinon).
 - **Pattern de lecture** : `useQuery(trpc.<domaine>.<proc>.queryOptions())` avec `trpc` de
   `@/lib/trpc`, encapsulé dans un hook de feature ; gérer `isPending` / `isError` dans le
   composant. Écriture : `useMutation(trpc.x.y.mutationOptions())` + invalidation ciblée.
 - **Nouvelle route tRPC** : `server/trpc/routers/<domaine>.ts` + enregistrement dans
-  `server/trpc/root.ts`. Entrées validées par `.input(zodSchema)`.
+  `server/trpc/root.ts`. Entrées validées par `.input(zodSchema)`. **Toujours `protectedProcedure`**
+  (`server/trpc/init.ts`, 401 sans session) ; `publicProcedure` seulement pour du contenu public.
+- **Auth** : Better Auth (`server/lib/auth.ts`, monté sur `/api/auth/*`). Inscription publique
+  **désactivée** ; l'unique compte est créé par le seed (`pnpm db:seed`, rejoué par `pnpm db:reset`) depuis `SEED_USER_EMAIL` / `SEED_USER_PASSWORD`. Front : `authClient`
+  (`@/lib/auth-client`), routes privées sous `RequireAuth` dans `app.tsx`. Pas de `userId` sur les
+  données métier (un seul utilisateur) : à revoir si le multi-utilisateurs devient un besoin.
 - **Valeurs dérivées** calculées pendant le rendu (≈ `computed`), pas stockées dans un
   `useState` ; `useMemo` seulement si le calcul est coûteux.
 - **Hooks custom** (`useXxx`) dans `features/<domaine>/hooks/` dès qu'une logique à état est
@@ -110,6 +121,8 @@ nitro.config.ts        # serverDir: ./server
   faute de frappe), `as const` garde les valeurs littérales (autocomplétion, unions dérivées via
   `keyof typeof X` / `(typeof X)[number]`). Pas de `as const` sans dérivation ni autocomplétion
   utile. Un tableau `as const` est readonly : typer les paramètres en `readonly T[]`.
+- **Appartenance à une liste `as const`** : `LIST.some((item) => item === value)` plutôt que
+  `(LIST as readonly T[]).includes(value)` : même résultat, sans cast.
 - **UI** : composants Mantine, thème et tokens de la maquette dans `src/lib/theme.ts` (palettes
   `dark` / `gold` / `amber`, polices, rayons). Pas de couleur en dur dans les composants : utiliser
   les tokens Mantine (`c="gold.6"`, `var(--mantine-color-dark-5)`…). CSS sur mesure en **CSS Modules**
@@ -119,6 +132,19 @@ nitro.config.ts        # serverDir: ./server
   menu, l'ajouter à `MAIN_NAV` (`features/layout/components/app-layout.tsx`).
 - Validation des entrées : schémas Zod, partagés entre tRPC et formulaires.
 - UI en **français**, code/identifiants/commits en **anglais**.
+- **Textes de l'UI** : jamais en dur dans un composant ni dans `budget-rules.ts` : ils viennent du
+  dictionnaire `fr` de `@/lib/i18n/fr` (`fr.nav.home`, `fr.categories[category]`…), un fichier par
+  domaine (`common`, `nav`, `home`, `imports`, `review`, `personal`, `settings`, `enums`, `errors`).
+  Pas de lib i18n pour l'instant (une seule langue) : de simples objets `as const`. Texte avec
+  variable = fonction (`fr.imports.confirmDelete(n)`) ; pluriels via `plural` / `pluralize`
+  (`@/lib/i18n/plural`), jamais de `n > 1 ? "s" : ""` à la main. Libellés d'un enum Prisma :
+  `as const satisfies Record<Enum, string>` dans `fr/enums.ts` (`tsc` échoue si une valeur manque).
+  `pnpm i18n:check` (inclus dans `pnpm check`) échoue s'il reste du texte en dur dans le JSX.
+- **Erreurs serveur** : le serveur n'envoie jamais de texte d'UI, seulement un **code**
+  (`throw appError("NOT_FOUND", "IMPORT_NOT_FOUND")`, `server/lib/app-error.ts` ; pour les lignes
+  CSV écartées, un `CsvLineErrorCode`). Le front le traduit via `fr.errors` / `fr.csvErrors`, avec
+  `errorMessage(error)` (`@/lib/errors`). Nouveau code = l'ajouter à `AppErrorCode` **et** à
+  `fr/errors.ts` (exhaustif).
 - Imports : `@/…` pour `src/`, `@server/…` pour `server/`. `import type` obligatoire pour les
   types (`verbatimModuleSyntax`).
 

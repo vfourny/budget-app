@@ -1,21 +1,9 @@
-import {
-  Alert,
-  Badge,
-  Button,
-  Group,
-  Loader,
-  Paper,
-  SimpleGrid,
-  Stack,
-  Text,
-  Title,
-} from "@mantine/core";
-import { IconAlertTriangle } from "@tabler/icons-react";
+import { Group, Loader, Paper, SimpleGrid, Stack, Text, Title } from "@mantine/core";
 import { Link } from "react-router";
 
-import { useImports } from "@/features/imports/hooks/use-imports";
 import { useOverview, usePeriods } from "@/features/personal/hooks/use-personal";
-import { formatCents, formatDate, monthName } from "@/lib/format";
+import { formatCents, monthName } from "@/lib/format";
+import { fr } from "@/lib/i18n/fr";
 
 export function HomeOverview() {
   return (
@@ -24,7 +12,6 @@ export function HomeOverview() {
         <PersonalSummary />
         <ProfessionalSummary />
       </SimpleGrid>
-      <ToCheck />
     </Stack>
   );
 }
@@ -49,7 +36,7 @@ function SectionTitle({ title, suffix, to }: { title: string; suffix?: string; t
           c="gold.6"
           style={{ textDecoration: "none" }}
         >
-          Voir le détail →
+          {fr.common.seeDetails}
         </Text>
       )}
     </Group>
@@ -78,18 +65,18 @@ function PersonalSummary() {
     <Paper withBorder radius="lg" p={28}>
       <Stack gap={18}>
         <SectionTitle
-          title="Perso"
+          title={fr.nav.personal}
           suffix={latest ? `${monthName(latest.month)} ${latest.year}` : undefined}
           to="/personal"
         />
         {periods.isPending ? (
           <Loader color="gold" size="sm" />
         ) : periods.isError ? (
-          <Text c="red.4">Chargement impossible.</Text>
+          <Text c="red.4">{fr.common.loadingFailed}</Text>
         ) : latest ? (
           <LatestMonthMetrics year={latest.year} month={latest.month} />
         ) : (
-          <Text c="dimmed">Aucun import validé pour le moment.</Text>
+          <Text c="dimmed">{fr.home.noValidatedImport}</Text>
         )}
       </Stack>
     </Paper>
@@ -100,13 +87,21 @@ function LatestMonthMetrics({ year, month }: { year: number; month: number }) {
   const overview = useOverview(year, month);
 
   if (overview.isPending) return <Loader color="gold" size="sm" />;
-  if (overview.isError) return <Text c="red.4">Chargement impossible.</Text>;
+  if (overview.isError) return <Text c="red.4">{fr.common.loadingFailed}</Text>;
 
   return (
     <SimpleGrid cols={3}>
-      <Metric label="Dépenses" value={formatCents(overview.data.expenseCents)} />
-      <Metric label="Revenus" value={formatCents(overview.data.revenueCents)} color="blue.3" />
-      <Metric label="Épargne" value={formatCents(overview.data.savingsCents)} color="gold.6" />
+      <Metric label={fr.common.expenses} value={formatCents(overview.data.expenseCents)} />
+      <Metric
+        label={fr.common.revenues}
+        value={formatCents(overview.data.revenueCents)}
+        color="blue.3"
+      />
+      <Metric
+        label={fr.common.savings}
+        value={formatCents(overview.data.savingsCents)}
+        color="gold.6"
+      />
     </SimpleGrid>
   );
 }
@@ -116,56 +111,8 @@ function ProfessionalSummary() {
   return (
     <Paper withBorder radius="lg" p={28}>
       <Stack gap={18}>
-        <SectionTitle title="Stygma SAS" />
-        <Text c="dimmed">Le suivi pro (CA, résultat, TVA) arrivera après le MVP perso.</Text>
-      </Stack>
-    </Paper>
-  );
-}
-
-/** Imports en attente : lignes à catégoriser ou import prêt à valider. */
-function ToCheck() {
-  const imports = useImports();
-  const pending = imports.data?.filter((item) => item.status === "PENDING_REVIEW") ?? [];
-
-  return (
-    <Paper withBorder radius="lg" p={28}>
-      <Stack gap={16}>
-        <Group justify="space-between">
-          <Title order={2}>À vérifier</Title>
-          {pending.length > 0 && (
-            <Badge color="amber" variant="light" size="lg">
-              {pending.length}
-            </Badge>
-          )}
-        </Group>
-
-        {imports.isPending && <Loader color="gold" size="sm" />}
-        {imports.isError && <Alert color="red" title="Impossible de charger les imports." />}
-        {imports.isSuccess && pending.length === 0 && (
-          <Text c="dimmed">Rien à vérifier : tous tes imports sont validés.</Text>
-        )}
-
-        {pending.map((item) => (
-          <Paper key={item.id} radius="md" p={16} withBorder>
-            <Group wrap="nowrap" gap={16}>
-              <IconAlertTriangle size={20} color="var(--mantine-color-amber-4)" />
-              <div style={{ flexGrow: 1, minWidth: 0 }}>
-                <Text fw={600}>
-                  {item.toReviewCount > 0
-                    ? `${item.toReviewCount} transaction${item.toReviewCount > 1 ? "s" : ""} à vérifier`
-                    : "Import prêt à valider"}
-                </Text>
-                <Text size="sm" c="dimmed" truncate>
-                  Import du {formatDate(item.createdAt)} · {item.fileName}
-                </Text>
-              </div>
-              <Button component={Link} to={`/imports/${item.id}`} variant="default">
-                Relire
-              </Button>
-            </Group>
-          </Paper>
-        ))}
+        <SectionTitle title={fr.home.professionalTitle} />
+        <Text c="dimmed">{fr.home.professionalSoon}</Text>
       </Stack>
     </Paper>
   );

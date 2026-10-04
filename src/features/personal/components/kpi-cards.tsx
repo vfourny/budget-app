@@ -3,108 +3,80 @@ import type { ReactNode } from "react";
 
 import { EnvelopeGauge } from "@/features/personal/components/envelope-gauge";
 import { useEnvelopeShares } from "@/features/settings/hooks/use-envelope-shares";
-import { TRANSACTION_CATEGORIES } from "@/lib/categories";
-import { ENVELOPE_LABELS } from "@/lib/envelopes";
+import { SAVINGS_ENVELOPES, isSavingsEnvelope } from "@/lib/budget-rules";
+import { ENVELOPE_ORDER, envelopeSourceText } from "@/lib/envelopes";
 import { formatCents } from "@/lib/format";
+import { fr } from "@/lib/i18n/fr";
 import type { Envelope } from "@server/generated/prisma/enums";
-import type { BudgetEnvelope } from "@server/lib/settings/envelope-shares";
+import type { PeriodTotals } from "@server/lib/dashboard/aggregate";
 
-interface Overview {
-  revenueCents: number;
-  expenseCents: number;
-  savingsCents: number;
-  monthsWithData: number;
-  byCategory: { category: keyof typeof TRANSACTION_CATEGORIES | null; expenseCents: number }[];
-}
+type Overview = PeriodTotals & { monthsWithData: number };
 
-const EXPENSE_ENVELOPES = [
-  "CURRENT_EXPENSES",
-  "LEISURE",
-  "TRAINING",
-] as const satisfies readonly BudgetEnvelope[];
-const SAVINGS_ENVELOPES = [
-  "SAFETY_SAVINGS",
-  "LONG_TERM_SAVINGS",
-] as const satisfies readonly BudgetEnvelope[];
-
-/** Enveloppes qui ont au moins une catégorie : les autres n'ont rien à mesurer pour l'instant. */
-const MAPPED_ENVELOPES = new Set<Envelope>(
-  Object.values(TRANSACTION_CATEGORIES).flatMap((category) =>
-    category.envelope ? [category.envelope] : [],
-  ),
-);
-
-/** Montant réel par enveloppe : dépenses via la table des catégories, épargne long terme à part. */
-function realByEnvelope(overview: Overview): Map<Envelope, number> {
-  const totals = new Map<Envelope, number>();
-  for (const { category, expenseCents } of overview.byCategory) {
-    const envelope = (category && TRANSACTION_CATEGORIES[category].envelope) || "CURRENT_EXPENSES";
-    totals.set(envelope, (totals.get(envelope) ?? 0) + expenseCents);
-  }
-  totals.set("LONG_TERM_SAVINGS", overview.savingsCents);
-  return totals;
-}
+/** Enveloppes de dépense = toutes sauf l'épargne (voir `SAVINGS_ENVELOPES` dans budget-rules). */
+const EXPENSE_ENVELOPES = ENVELOPE_ORDER.filter((envelope) => !isSavingsEnvelope(envelope));
 
 export function KpiCards({ view, overview }: { view: "month" | "year"; overview: Overview }) {
   // Sans les parts (chargement / erreur), les cartes restent utiles : on affiche le réel seul.
   const shares = useEnvelopeShares().data;
-  const real = realByEnvelope(overview);
   const months = Math.max(1, overview.monthsWithData);
   const savingsRate =
     overview.revenueCents > 0
       ? Math.round((overview.savingsCents / overview.revenueCents) * 100)
       : 0;
 
-  function gauges(envelopes: readonly BudgetEnvelope[], kind: "expense" | "savings") {
-    return envelopes
-      .filter((envelope) => MAPPED_ENVELOPES.has(envelope) || (real.get(envelope) ?? 0) > 0)
-      .map((envelope) => {
-        const realCents = real.get(envelope) ?? 0;
-        if (!shares) {
-          return (
-            <Line key={envelope} name={ENVELOPE_LABELS[envelope]} value={formatCents(realCents)} />
-          );
-        }
-        return (
-          <EnvelopeGauge
-            key={envelope}
-            name={ENVELOPE_LABELS[envelope]}
-            realCents={realCents}
-            recommendedCents={Math.round((overview.revenueCents * shares[envelope]) / 100)}
-            kind={kind}
-          />
-        );
-      });
+  function gauges(envelopes: readonly Envelope[], kind: "expense" | "savings") {
+    // Toutes les enveloppes sont affichées, même à 0 € : on veut voir la jauge et le conseillé.
+    return envelopes.map((envelope) => {
+      const realCents = overview.byEnvelope[envelope];
+      if (!shares) {
+        return <Line key={envelope} name={fr.envelopes[envelope]} value={formatCents(realCents)} />;
+      }
+      return (
+        <EnvelopeGauge
+          key={envelope}
+          name={fr.envelopes[envelope]}
+          realCents={realCents}
+          recommendedCents={Math.round((overview.revenueCents * shares[envelope]) / 100)}
+          recommendedPercent={shares[envelope]}
+          sourceText={envelopeSourceText(envelope)}
+          kind={kind}
+        />
+      );
+    });
   }
 
   return (
     <SimpleGrid cols={{ base: 1, md: view === "month" ? 3 : 4 }} spacing={16} mb={16}>
       <Kpi
-        label={view === "month" ? "Dépenses" : "Dépensé sur la période"}
+        label={view === "month" ? fr.personal.kpi.expensesMonth : fr.personal.kpi.expensesYear}
         value={formatCents(overview.expenseCents)}
-        hint="Hors épargne"
+        hint={fr.personal.kpi.expensesHint}
       >
         {gauges(EXPENSE_ENVELOPES, "expense")}
       </Kpi>
       <Kpi
-        label="Revenus"
+        label={fr.common.revenues}
         value={formatCents(overview.revenueCents)}
         color="blue.3"
-        hint="Tous les crédits"
-      />
+        hint={fr.personal.kpi.revenuesHint}
+      >
+        {overview.revenueLines.map((line) => (
+          <Line key={line.key} name={fr.revenueLines[line.key]} value={formatCents(line.cents)} />
+        ))}
+      </Kpi>
       <Kpi
-        label={view === "month" ? "Épargne du mois" : "Épargné"}
+        label={view === "month" ? fr.personal.kpi.savingsMonth : fr.personal.kpi.savingsYear}
         value={formatCents(overview.savingsCents)}
         color="gold.6"
-        hint={`${savingsRate} % des revenus`}
+        hint={fr.personal.kpi.savingsHint(savingsRate)}
       >
         {gauges(SAVINGS_ENVELOPES, "savings")}
       </Kpi>
       {view === "year" && (
         <Kpi
-          label="Dépense moyenne / mois"
+          label={fr.personal.kpi.averageExpense}
           value={formatCents(Math.round(overview.expenseCents / months))}
-          hint={`${overview.monthsWithData} mois avec données`}
+          hint={fr.personal.kpi.monthsWithData(overview.monthsWithData)}
         />
       )}
     </SimpleGrid>

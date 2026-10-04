@@ -32,7 +32,7 @@ Pourquoi pas Next.js : app mono-utilisateur derrière une auth, sans SEO. SSR et
 - `src/**` ne peut importer de `server/**` qu'en **`import type`** (ex. le type `AppRouter`). Jamais d'import runtime (Prisma, secrets…) côté front, sinon du code serveur part dans le bundle navigateur.
 - `import type` est **obligatoire** pour les types (`verbatimModuleSyntax`).
 - Alias : `@/…` → `src/`, `@server/…` → `server/` (déclarés dans `vite.config.ts` **et** `tsconfig.json`).
-- `src/lib/categories.ts` et `envelopes.ts` importent les types de l'enum Prisma depuis `@server/generated/prisma/enums`, en `import type` uniquement.
+- `src/lib/i18n/fr/enums.ts` (libellés des enums), `budget-rules.ts` et `envelopes.ts` importent les types de l'enum Prisma depuis `@server/generated/prisma/enums`, en `import type` uniquement.
 
 ## API : tRPC + TanStack Query
 
@@ -51,14 +51,14 @@ Pourquoi pas Next.js : app mono-utilisateur derrière une auth, sans SEO. SSR et
 2. L'enregistrer dans `server/trpc/root.ts`.
 3. Côté front, un hook dans `src/features/<domaine>/hooks/`.
 
-Routeurs actuels : `categorize` (`run` : demande à Gemini une catégorie + confiance par transaction sans catégorie d'un import en attente ; logique et prompt dans `server/lib/categorize/`) `import` (`create` : parse le CSV via le mapping de la banque, puis crée l'`ImportBatch` et ses `Transaction` en une seule transaction SQL ; `list` : historique avec nombre de lignes et de lignes « à vérifier » ; `get` : un import et ses lignes pour la relecture ; `validate` : passe l'import en `VALIDATED`, refusé tant qu'il reste une ligne à vérifier ; `delete` : supprime l'import et ses lignes en cascade) `settings` (`envelopeShares` / `setEnvelopeShares` : part du revenu recommandée par enveloppe, défauts dans `server/lib/settings/envelope-shares.ts`), `personal` (`periods` : mois ayant des données validées ; `overview` : totaux d'un mois ou d'une année, agrégation dans `server/lib/dashboard/aggregate.ts`) et `transaction` (`setCategory` : correction manuelle, `categoryConfidence` repasse à `null` = « Confirmée », refusé si l'import est validé). Une ligne est « à vérifier » si elle n'a pas de catégorie ou si sa confiance est sous 0,7 (`server/lib/categorize/needs-review.ts`). Il n'y a qu'une `publicProcedure` ; une `protectedProcedure` arrivera avec Better Auth.
+Routeurs actuels : `categorize` (`run` : demande à Gemini une catégorie + confiance par transaction sans catégorie d'un import en attente ; logique et prompt dans `server/lib/categorize/`) `import` (`create` : parse le CSV via le mapping de la banque, puis crée l'`ImportBatch` et ses `Transaction` en une seule transaction SQL ; `list` : historique avec nombre de lignes et de lignes « à vérifier » ; `get` : un import et ses lignes pour la relecture ; `validate` : passe l'import en `VALIDATED`, refusé tant qu'il reste une ligne à vérifier ; `delete` : supprime l'import et ses lignes en cascade) `settings` (`envelopeShares` / `setEnvelopeShares` : part du revenu recommandée par enveloppe, défauts dans `DEFAULT_ENVELOPE_PERCENTS` de `src/lib/budget-rules.ts`), `personal` (`periods` : mois ayant des données validées ; `overview` : totaux d'un mois ou d'une année, agrégation dans `server/lib/dashboard/aggregate.ts`) et `transaction` (`setCategory` : correction manuelle, `categoryConfidence` repasse à `null` = « Confirmée », refusé si l'import est validé). Une ligne est « à vérifier » si elle n'a pas de catégorie ou si sa confiance est sous 0,7 (`server/lib/categorize/needs-review.ts`). Tous les routeurs utilisent `protectedProcedure` (session Better Auth lue dans le contexte, `UNAUTHORIZED` / code `NOT_AUTHENTICATED` sans session). L'inscription HTTP est désactivée : le compte unique est créé par le seed Prisma (`prisma/seed.ts`, lancé par `pnpm db:seed` et après `pnpm db:reset`) depuis `SEED_USER_EMAIL` / `SEED_USER_PASSWORD`.
 
 ## Interface : Mantine + React Router
 
 - **Thème** : `src/lib/theme.ts` (objet `createTheme` + `cssVariablesResolver`) porte les tokens de la maquette — palettes `dark` (obsidian / platine : fond, cartes, bordures, texte), `gold` (accent, index 6 = `#C9A45C`), `amber` (à vérifier / dépassement, index 6 = `#E0894A`), polices (Instrument Serif pour les titres, Manrope pour l'UI), rayons (16 cartes, 10 contrôles, 8 petits boutons). Champs et boutons à 44 px (`src/styles/global.css`). Toujours sombre (`forceColorScheme="dark"`).
 - **Composants** : Mantine (`@mantine/core`, `@mantine/dropzone`), icônes Tabler. CSS sur mesure en CSS Modules. Pas de couleur en dur : tokens Mantine.
 - **Routing** : `BrowserRouter` (`main.tsx`) + `<Routes>` (`app.tsx`). `AppLayout` (barre latérale, `<Outlet />`) enveloppe toutes les pages. Routes : `/` accueil, `/personal`, `/professional`, `/imports`, `/imports/new`, `/settings`. Les liens directs (rechargement de `/imports/new`) marchent grâce au repli SPA de Nitro (vérifié sur `pnpm preview`).
-- **Écrans** : l'accueil (`/` : résumé du dernier mois validé + imports à vérifier, sans route dédiée), le dashboard perso (`/personal`), l'historique (`/imports`), l'import (`/imports/new`), la relecture (`/imports/:importId`) et les réglages (liste des catégories) sont réels ; après un import, le front enchaîne `import.create` puis `categorize.run` dans une seule mutation et redirige vers la relecture ; les autres affichent `ComingSoon` en attendant leur PR.
+- **Écrans** : l'accueil (`/` : résumé du dernier mois validé, sans route dédiée), le dashboard perso (`/personal`), l'historique (`/imports`), l'import (`/imports/new`), la relecture (`/imports/:importId`) et les réglages (parts du revenu par enveloppe) sont réels ; après un import, le front enchaîne `import.create` puis `categorize.run` dans une seule mutation et redirige vers la relecture ; les autres affichent `ComingSoon` en attendant leur PR.
 
 ## Base de données : Prisma 7 + Neon
 
@@ -81,7 +81,7 @@ Enums : `AccountType` (PERSONAL / PROFESSIONAL, sur `ImportBatch` et `Transactio
 Choix à connaître :
 
 - Pas de modèle `BankAccount` : `accountType` (enum PERSONAL/PROFESSIONAL) est porté directement par `ImportBatch` et `Transaction`. La banque (parseur CSV) est déduite du type (`BANK_BY_ACCOUNT_TYPE`), pas stockée.
-- Les catégories sont un **enum figé**, pas une table : libellés et enveloppes vivent dans `src/lib/categories.ts`.
+- Les catégories sont un **enum figé**, pas une table : libellés dans `src/lib/i18n/fr/enums.ts`, enveloppes dans `src/lib/budget-rules.ts`.
 - Supprimer un `ImportBatch` supprime ses transactions (`onDelete: Cascade`).
 - Index sur `(year, month)`, `(accountType, year, month)`, `category` et `importBatchId` pour les agrégations dashboards.
 

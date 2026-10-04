@@ -1,4 +1,6 @@
-const dateFormat = new Intl.DateTimeFormat("fr-FR", {
+import { LOCALE, fr } from "@/lib/i18n/fr";
+
+const dateFormat = new Intl.DateTimeFormat(LOCALE, {
   day: "2-digit",
   month: "2-digit",
   year: "numeric",
@@ -10,31 +12,16 @@ export function formatDate(date: Date): string {
   return dateFormat.format(date);
 }
 
-const euroFormat = new Intl.NumberFormat("fr-FR", { style: "currency", currency: "EUR" });
+const euroFormat = new Intl.NumberFormat(LOCALE, { style: "currency", currency: "EUR" });
 
 /** Affichage seul : les montants restent des entiers en centimes partout ailleurs. */
 export function formatCents(amountCents: number): string {
   return euroFormat.format(amountCents / 100);
 }
 
-const MONTH_NAMES = [
-  "janvier",
-  "février",
-  "mars",
-  "avril",
-  "mai",
-  "juin",
-  "juillet",
-  "août",
-  "septembre",
-  "octobre",
-  "novembre",
-  "décembre",
-];
-
 /** 9 → "septembre" (mois 1-12). */
 export function monthName(month: number): string {
-  return MONTH_NAMES[month - 1] ?? String(month);
+  return fr.months[month - 1] ?? String(month);
 }
 
 /** 9 → "Septembre". */
