@@ -27,6 +27,7 @@ enum Envelope {
 /// Catégorie d'une transaction (liste figée, colonnes du Google Sheet). Le libellé affiché et
 /// l'enveloppe de rattachement vivent dans `src/lib/categories.ts`.
 enum TransactionCategory {
+  RENT // Loyer
   FUEL // Essence
   BANK_INSURANCE // Banque et assurance
   RESTAURANT // Restaurant
@@ -42,6 +43,7 @@ enum TransactionCategory {
   LONG_TERM_SAVINGS // Épargne long terme
   SALARY_PAYMENT // Versement salaire (revenu)
   BNC_PAYMENT // Versement BNC (revenu)
+  VACATION_PAYMENT // Versement vacation (revenu)
   REFUND // Remboursement (crédit)
 }
 

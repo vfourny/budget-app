@@ -24,6 +24,7 @@ Liste **figée** (enum Prisma `TransactionCategory`), reprise des colonnes de l'
 
 | Catégorie           | Code                  | Enveloppe          |
 | ------------------- | --------------------- | ------------------ |
+| Loyer               | `RENT`                | Dépenses courantes |
 | Essence             | `FUEL`                | Dépenses courantes |
 | Banque et assurance | `BANK_INSURANCE`      | Dépenses courantes |
 | Restaurant          | `RESTAURANT`          | Loisirs            |
@@ -39,6 +40,7 @@ Liste **figée** (enum Prisma `TransactionCategory`), reprise des colonnes de l'
 | Épargne long terme  | `LONG_TERM_SAVINGS`   | Épargne long terme |
 | Versement salaire   | `SALARY_PAYMENT`      | — (revenu)         |
 | Versement BNC       | `BNC_PAYMENT`         | — (revenu)         |
+| Versement vacation  | `VACATION_PAYMENT`    | — (revenu)         |
 | Remboursement       | `REFUND`              | — (crédit)         |
 
 Points d'attention :
