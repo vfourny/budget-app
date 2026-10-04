@@ -1,33 +1,35 @@
-import type { Envelope, TransactionCategory } from "@server/generated/prisma/enums";
+import type { TransactionCategory } from "@server/generated/prisma/enums";
 
 /**
- * Libellé et enveloppe de chaque catégorie (liste figée, alignée sur l'enum Prisma).
- * L'ordre des clés = ordre d'affichage (colonnes du Google Sheet).
- * L'enveloppe de rattachement est une hypothèse, à ajuster ici si besoin ; `null` pour les
- * catégories de revenu (salaire, BNC, vacation, remboursement), qui n'appartiennent à aucune enveloppe de dépense.
+ * Libellé de chaque catégorie (liste figée, alignée sur l'enum Prisma).
+ * L'ordre des clés = ordre d'affichage (colonnes du Google Sheet, listes de choix).
+ * Le rattachement aux enveloppes et l'affichage dans les cards : `@/lib/budget-rules`.
  * `satisfies Record<TransactionCategory, …>` : erreur TS si une catégorie de l'enum manque ou
- * est en trop, tout en gardant les valeurs littérales (autocomplétion sur `label` / `envelope`).
+ * est en trop, tout en gardant les valeurs littérales (autocomplétion sur `label`).
  */
 export const TRANSACTION_CATEGORIES = {
-  RENT: { label: "Loyer", envelope: "CURRENT_EXPENSES" },
-  FUEL: { label: "Essence", envelope: "CURRENT_EXPENSES" },
-  BANK_INSURANCE: { label: "Banque et assurance", envelope: "CURRENT_EXPENSES" },
-  RESTAURANT: { label: "Restaurant", envelope: "LEISURE" },
-  GROCERIES: { label: "Alimentaire", envelope: "CURRENT_EXPENSES" },
-  NIGHTLIFE: { label: "Soirée", envelope: "LEISURE" },
-  LEISURE: { label: "Loisirs", envelope: "LEISURE" },
-  CLOTHING_CARE: { label: "Vêtements & Soins", envelope: "CURRENT_EXPENSES" },
-  HEALTH: { label: "Santé", envelope: "CURRENT_EXPENSES" },
-  TRANSPORT: { label: "Transport", envelope: "CURRENT_EXPENSES" },
-  TAXES: { label: "Impôt et Taxes", envelope: "CURRENT_EXPENSES" },
-  OTHER_SUBSCRIPTIONS: { label: "Abonnements divers", envelope: "CURRENT_EXPENSES" },
-  OTHER: { label: "Autres", envelope: "CURRENT_EXPENSES" },
-  LONG_TERM_SAVINGS: { label: "Épargne long terme", envelope: "LONG_TERM_SAVINGS" },
-  SALARY_PAYMENT: { label: "Versement salaire", envelope: null },
-  BNC_PAYMENT: { label: "Versement BNC", envelope: null },
-  VACATION_PAYMENT: { label: "Versement vacation", envelope: null },
-  REFUND: { label: "Remboursement", envelope: null },
-} as const satisfies Record<TransactionCategory, { label: string; envelope: Envelope | null }>;
+  RENT: { label: "Loyer" },
+  FUEL: { label: "Essence" },
+  BANK_INSURANCE: { label: "Banque et assurance" },
+  RESTAURANT: { label: "Restaurant" },
+  GROCERIES: { label: "Alimentaire" },
+  NIGHTLIFE: { label: "Soirée" },
+  LEISURE: { label: "Loisirs" },
+  TRAINING: { label: "Formation" },
+  CLOTHING_CARE: { label: "Vêtements & Soins" },
+  HEALTH: { label: "Santé" },
+  TRANSPORT: { label: "Transport" },
+  TAXES: { label: "Impôt et Taxes" },
+  OTHER_SUBSCRIPTIONS: { label: "Abonnements divers" },
+  OTHER: { label: "Autres" },
+  SHORT_TERM_SAVINGS: { label: "Épargne court terme" },
+  LONG_TERM_SAVINGS: { label: "Épargne long terme" },
+  SALARY_PAYMENT: { label: "Versement salaire" },
+  BNC_PAYMENT: { label: "Versement BNC" },
+  VACATION_PAYMENT: { label: "Versement vacation" },
+  REFUND: { label: "Autre remboursement" },
+  PROFESSIONAL_REFUND: { label: "Remboursement pro" },
+} as const satisfies Record<TransactionCategory, { label: string }>;
 
 export const TRANSACTION_CATEGORY_ORDER = Object.keys(
   TRANSACTION_CATEGORIES,

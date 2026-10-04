@@ -2,6 +2,7 @@ import {
   ActionIcon,
   Alert,
   Button,
+  Grid,
   Group,
   Loader,
   Paper,
@@ -163,8 +164,16 @@ function PeriodContent({ view, period }: { view: View; period: Period }) {
   return (
     <>
       <KpiCards view={view} overview={overview.data} />
-      {view === "month" && <TransactionsTable transactions={overview.data.transactions} />}
-      <CategoryBreakdown overview={overview.data} />
+      <Grid mt={16} gap={16}>
+        {view === "month" && (
+          <Grid.Col span={{ base: 12, lg: 8 }}>
+            <TransactionsTable transactions={overview.data.transactions} />
+          </Grid.Col>
+        )}
+        <Grid.Col span={{ base: 12, lg: view === "month" ? 4 : 12 }}>
+          <CategoryBreakdown overview={overview.data} />
+        </Grid.Col>
+      </Grid>
     </>
   );
 }

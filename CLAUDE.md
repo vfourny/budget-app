@@ -88,6 +88,10 @@ nitro.config.ts        # serverDir: ./server
 
 - **Frontière front / back** : `src/**` ne peut importer de `server/**` qu'en `import type`
   (ex. le type du routeur tRPC). Jamais d'import runtime (Prisma, secrets…) côté front.
+  Exception dans l'autre sens : `src/lib/budget-rules.ts` (pur, sans dépendance) est importé par le
+  serveur, pour que front et dashboard partagent les mêmes règles.
+- **Règles du budget** (catégories → enveloppes, épargne, catégories de la card « Par catégorie »,
+  lignes de revenus) : uniquement dans `src/lib/budget-rules.ts`, jamais en dur ailleurs.
 - **Données** : toujours via tRPC + TanStack Query. **Pas de `fetch` dans un `useEffect`.**
   `useEffect` est réservé à la synchro avec un système externe (oxlint le signale sinon).
 - **Pattern de lecture** : `useQuery(trpc.<domaine>.<proc>.queryOptions())` avec `trpc` de
@@ -110,6 +114,8 @@ nitro.config.ts        # serverDir: ./server
   faute de frappe), `as const` garde les valeurs littérales (autocomplétion, unions dérivées via
   `keyof typeof X` / `(typeof X)[number]`). Pas de `as const` sans dérivation ni autocomplétion
   utile. Un tableau `as const` est readonly : typer les paramètres en `readonly T[]`.
+- **Appartenance à une liste `as const`** : `LIST.some((item) => item === value)` plutôt que
+  `(LIST as readonly T[]).includes(value)` : même résultat, sans cast.
 - **UI** : composants Mantine, thème et tokens de la maquette dans `src/lib/theme.ts` (palettes
   `dark` / `gold` / `amber`, polices, rayons). Pas de couleur en dur dans les composants : utiliser
   les tokens Mantine (`c="gold.6"`, `var(--mantine-color-dark-5)`…). CSS sur mesure en **CSS Modules**

@@ -52,7 +52,7 @@ export function TransactionsTable({ transactions }: { transactions: readonly Tra
   }
 
   return (
-    <Paper withBorder radius="lg" mb={16} style={{ overflow: "hidden" }}>
+    <Paper withBorder radius="lg" style={{ overflow: "hidden" }}>
       <Text fw={600} p="20px 24px" style={{ borderBottom: "1px solid var(--app-border)" }}>
         Transactions{" "}
         <Text span c="dimmed" fw={400}>

@@ -1,4 +1,5 @@
-import { Group, Text } from "@mantine/core";
+import { ActionIcon, Group, Text, Tooltip } from "@mantine/core";
+import { IconInfoCircle } from "@tabler/icons-react";
 
 import { formatCents } from "@/lib/format";
 
@@ -8,12 +9,23 @@ interface EnvelopeGaugeProps {
   name: string;
   realCents: number;
   recommendedCents: number;
+  /** Part recommandée du revenu (en %), pour expliquer le trait dans le tooltip. */
+  recommendedPercent: number;
+  /** D'où vient le montant réel (liste des catégories comptées). */
+  sourceText: string;
   /** Dépense : « bien » si on reste sous le recommandé. Épargne : « bien » si on l'atteint. */
   kind: "expense" | "savings";
 }
 
 /** Jauge réel vs recommandé : la barre = le réel, le trait = le recommandé. */
-export function EnvelopeGauge({ name, realCents, recommendedCents, kind }: EnvelopeGaugeProps) {
+export function EnvelopeGauge({
+  name,
+  realCents,
+  recommendedCents,
+  recommendedPercent,
+  sourceText,
+  kind,
+}: EnvelopeGaugeProps) {
   const scale = Math.max(realCents, recommendedCents, 1) * 1.1;
   const onTrack =
     kind === "savings" ? realCents >= recommendedCents : realCents <= recommendedCents;
@@ -21,9 +33,28 @@ export function EnvelopeGauge({ name, realCents, recommendedCents, kind }: Envel
   return (
     <div>
       <Group justify="space-between" mb={4} wrap="nowrap">
-        <Text size="sm" c="dimmed">
-          {name}
-        </Text>
+        <Group gap={4} wrap="nowrap">
+          <Text size="sm" c="dimmed">
+            {name}
+          </Text>
+          <Tooltip
+            multiline
+            w={260}
+            withArrow
+            label={`${sourceText} Recommandé : ${recommendedPercent} % des revenus de la période.`}
+            events={{ hover: true, focus: true, touch: true }}
+          >
+            <ActionIcon
+              variant="subtle"
+              color="gray"
+              size="xs"
+              radius="xl"
+              aria-label={`Comment est calculé « ${name} » ?`}
+            >
+              <IconInfoCircle size={14} />
+            </ActionIcon>
+          </Tooltip>
+        </Group>
         <Text size="sm" fw={600}>
           {formatCents(realCents)}
           <Text span size="xs" c="dimmed" fw={400}>

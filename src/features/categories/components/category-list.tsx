@@ -1,16 +1,15 @@
 import { List, Stack, Title } from "@mantine/core";
 
-import { TRANSACTION_CATEGORIES, TRANSACTION_CATEGORY_ORDER } from "@/lib/categories";
+import { ENVELOPE_CATEGORIES } from "@/lib/budget-rules";
+import { TRANSACTION_CATEGORIES } from "@/lib/categories";
 import { ENVELOPE_LABELS, ENVELOPE_ORDER } from "@/lib/envelopes";
 
 export function CategoryList() {
   // Valeurs dérivées calculées pendant le rendu (≈ computed) à partir d'une constante : pas de
-  // fetch ni d'état, la liste est figée (enum Prisma + libellés dans `@/lib/categories`).
+  // fetch ni d'état : rattachement dans `@/lib/budget-rules`, libellés dans `@/lib/categories`.
   const groups = ENVELOPE_ORDER.map((envelope) => ({
     envelope,
-    categories: TRANSACTION_CATEGORY_ORDER.filter(
-      (category) => TRANSACTION_CATEGORIES[category].envelope === envelope,
-    ),
+    categories: ENVELOPE_CATEGORIES[envelope],
   })).filter((group) => group.categories.length > 0);
 
   return (

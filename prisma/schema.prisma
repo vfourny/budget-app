@@ -44,7 +44,10 @@ enum TransactionCategory {
   SALARY_PAYMENT // Versement salaire (revenu)
   BNC_PAYMENT // Versement BNC (revenu)
   VACATION_PAYMENT // Versement vacation (revenu)
-  REFUND // Remboursement (crédit)
+  REFUND // Autre remboursement (crédit)
+  PROFESSIONAL_REFUND // Remboursement pro : frais mixtes perso/pro remboursés par Stygma (crédit)
+  TRAINING // Formation
+  SHORT_TERM_SAVINGS // Épargne court terme
 }
 
 /// Part du revenu mensuel recommandée pour une enveloppe (en %). Une ligne par enveloppe

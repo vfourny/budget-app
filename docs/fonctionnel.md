@@ -8,15 +8,15 @@ Chaque dépense est rattachée à une **catégorie**, chaque catégorie à une *
 
 ### Enveloppes
 
-Définies dans l'enum Prisma `Envelope` et les libellés dans `src/lib/envelopes.ts` (l'ordre des clés = ordre d'affichage).
+Définies dans l'enum Prisma `Envelope` et les libellés dans `src/lib/envelopes.ts` (l'ordre des clés = ordre d'affichage). Les libellés sont préfixés « Enveloppe » pour ne pas les confondre avec une catégorie du même nom (Loisirs, Formation).
 
-| Enveloppe          | Code                |
-| ------------------ | ------------------- |
-| Dépenses courantes | `CURRENT_EXPENSES`  |
-| Loisirs            | `LEISURE`           |
-| Formation          | `TRAINING`          |
-| Épargne sécurité   | `SAFETY_SAVINGS`    |
-| Épargne long terme | `LONG_TERM_SAVINGS` |
+| Enveloppe                    | Code                |
+| ---------------------------- | ------------------- |
+| Enveloppe dépenses courantes | `CURRENT_EXPENSES`  |
+| Enveloppe loisirs            | `LEISURE`           |
+| Enveloppe formation          | `TRAINING`          |
+| Enveloppe épargne sécurité   | `SAFETY_SAVINGS`    |
+| Enveloppe épargne long terme | `LONG_TERM_SAVINGS` |
 
 ### Catégories de transaction
 
@@ -31,24 +31,26 @@ Liste **figée** (enum Prisma `TransactionCategory`), reprise des colonnes de l'
 | Alimentaire         | `GROCERIES`           | Dépenses courantes |
 | Soirée              | `NIGHTLIFE`           | Loisirs            |
 | Loisirs             | `LEISURE`             | Loisirs            |
+| Formation           | `TRAINING`            | Formation          |
 | Vêtements & Soins   | `CLOTHING_CARE`       | Dépenses courantes |
 | Santé               | `HEALTH`              | Dépenses courantes |
 | Transport           | `TRANSPORT`           | Dépenses courantes |
 | Impôt et Taxes      | `TAXES`               | Dépenses courantes |
 | Abonnements divers  | `OTHER_SUBSCRIPTIONS` | Dépenses courantes |
 | Autres              | `OTHER`               | Dépenses courantes |
+| Épargne court terme | `SHORT_TERM_SAVINGS`  | Épargne sécurité   |
 | Épargne long terme  | `LONG_TERM_SAVINGS`   | Épargne long terme |
 | Versement salaire   | `SALARY_PAYMENT`      | — (revenu)         |
 | Versement BNC       | `BNC_PAYMENT`         | — (revenu)         |
 | Versement vacation  | `VACATION_PAYMENT`    | — (revenu)         |
-| Remboursement       | `REFUND`              | — (crédit)         |
+| Autre remboursement | `REFUND`              | — (crédit)         |
+| Remboursement pro   | `PROFESSIONAL_REFUND` | — (crédit)         |
 
 Points d'attention :
 
-- Le rattachement catégorie → enveloppe est une **hypothèse à ajuster** dans `src/lib/categories.ts` (un seul endroit à modifier).
-- Les enveloppes `TRAINING` et `SAFETY_SAVINGS` n'ont **pas encore de catégorie** rattachée.
+- **Toutes les règles modifiables** sont dans `src/lib/budget-rules.ts` : catégories cumulées dans chaque enveloppe (`ENVELOPE_CATEGORIES`), enveloppes d'épargne, catégories affichées dans la card « Par catégorie » (`CATEGORY_CARD_CATEGORIES`), lignes de la card Revenus (`REVENUE_LINES`). Une règle modifiée s'applique à tout l'historique (rien n'est stocké en base). La colonne « Enveloppe » du tableau ci-dessus est indicative : la source de vérité est ce fichier.
 - La catégorie d'une transaction est **optionnelle** (`null` tant qu'elle n'est pas catégorisée / relue).
-- Ajouter ou renommer une catégorie = modifier l'enum Prisma **+ une migration versionnée + `src/lib/categories.ts`** (le typage `Record<TransactionCategory, …>` fait échouer `tsc` si l'un des deux est oublié).
+- Ajouter ou renommer une catégorie = modifier l'enum Prisma **+ une migration versionnée + `src/lib/categories.ts` + `server/lib/categorize/category-hints.ts`**, puis la ranger dans `src/lib/budget-rules.ts` (le typage `Record<TransactionCategory, …>` fait échouer `tsc` si l'un des deux est oublié).
 
 ## Type de compte
 
@@ -91,11 +93,11 @@ Règles :
 
 ## Dashboard Perso (`/personal`)
 
-Ne compte que les transactions des imports **VALIDATED** du compte perso. Hypothèses V1 : tout crédit est un **revenu** ; un débit en catégorie « Épargne long terme » est de l'**épargne** (pas une dépense) ; le reste des débits sont des **dépenses**.
+Ne compte que les transactions des imports **VALIDATED** du compte perso. Hypothèses V1 : tout crédit est un **revenu** ; un débit en catégorie « Épargne court terme » ou « Épargne long terme » est de l'**épargne** (pas une dépense) ; le reste des débits sont des **dépenses**.
 
-- **Vue mois** : sélecteur de mois (et flèches) limité aux mois qui ont des données ; cartes Dépenses (avec, par enveloppe, une jauge **réel vs recommandé** : barre verte si on reste sous la part recommandée du revenu, ambre au-delà ; l'inverse pour l'épargne), Revenus, Épargne du mois (+ % des revenus) ; tableau des transactions triable ; dépenses par catégorie.
+- **Vue mois** : sélecteur de mois (et flèches) limité aux mois qui ont des données ; cartes Dépenses (avec, par enveloppe, une jauge **réel vs recommandé** : barre verte si on reste sous la part recommandée du revenu, ambre au-delà ; l'inverse pour l'épargne), Revenus (détail : Salaire = `SALARY_PAYMENT` + `BNC_PAYMENT`, Vacations, Remboursement pro, Autre remboursement, + « Autres » s'il reste des crédits non rangés), Épargne du mois (+ % des revenus) ; tableau des transactions triable ; dépenses par catégorie.
 - **Vue année** : mêmes totaux sur l'année choisie, plus la dépense moyenne par mois (mois ayant des données).
-- Les parts recommandées (méthode des 5 comptes, 60 / 10 / 10 / 10 / 10 % par défaut) se règlent dans **Réglages** (le total doit faire exactement 100 %). Seules les enveloppes qui ont au moins une catégorie sont mesurées.
+- Les parts recommandées (méthode des 5 comptes, 60 / 10 / 10 / 10 / 10 % par défaut) se règlent dans **Réglages** (le total doit faire exactement 100 %). Les 5 enveloppes sont toujours affichées avec leur jauge, même à 0 €.
 - **À venir** : carte Abonnements, donut par catégorie en vue année, estimation de l'IR.
 - Mockup de référence : canvas Claude Design « Budget — maquette MVP » (5 écrans : tableau de bord mois, import CSV, relecture, vue année, tokens).
 
