@@ -1,4 +1,9 @@
-import { REVENUE_LINES, envelopeOf, isSavingsEnvelope } from "@/lib/budget-rules";
+import {
+  REVENUE_LINES,
+  envelopeOf,
+  isSavingsEnvelope,
+  type RevenueLineKey,
+} from "@/lib/budget-rules";
 import type { Envelope, TransactionCategory } from "@server/generated/prisma/enums";
 
 export interface AggregatedRow {
@@ -10,8 +15,8 @@ export interface AggregatedRow {
 export interface PeriodTotals {
   /** Somme des crédits. */
   revenueCents: number;
-  /** Détail des crédits selon `REVENUE_LINES` (+ « Autres » s'il reste un montant) : somme = `revenueCents`. */
-  revenueLines: { label: string; cents: number }[];
+  /** Détail des crédits selon `REVENUE_LINES` (+ `"other"` s'il reste un montant) : somme = `revenueCents`. */
+  revenueLines: { key: RevenueLineKey; cents: number }[];
   /** Somme des débits hors enveloppes d'épargne (positive). */
   expenseCents: number;
   /** Somme des débits des enveloppes d'épargne (positive). */
@@ -57,11 +62,11 @@ export function aggregatePeriod(rows: readonly AggregatedRow[]): PeriodTotals {
   }
 
   const revenueLines: PeriodTotals["revenueLines"] = REVENUE_LINES.map((line) => ({
-    label: line.label,
+    key: line.key,
     cents: line.categories.reduce((sum, category) => sum + (credits.get(category) ?? 0), 0),
   }));
   const otherCents = revenueCents - revenueLines.reduce((sum, line) => sum + line.cents, 0);
-  if (otherCents !== 0) revenueLines.push({ label: "Autres", cents: otherCents });
+  if (otherCents !== 0) revenueLines.push({ key: "other", cents: otherCents });
 
   const debitsByCategory = [...debits.entries()]
     .map(([category, cents]) => ({ category, cents }))

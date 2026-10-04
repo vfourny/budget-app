@@ -3,6 +3,7 @@ import { IconTrash } from "@tabler/icons-react";
 import { useState } from "react";
 
 import { useDeleteImport } from "@/features/imports/hooks/use-delete-import";
+import { fr } from "@/lib/i18n/fr";
 
 interface DeleteImportButtonProps {
   importId: string;
@@ -27,11 +28,11 @@ export function DeleteImportButton({
 
   if (!confirming) {
     return variant === "icon" ? (
-      <Tooltip label="Supprimer l'import">
+      <Tooltip label={fr.imports.deleteImport}>
         <ActionIcon
           variant="subtle"
           color="gray"
-          aria-label="Supprimer l'import"
+          aria-label={fr.imports.deleteImport}
           onClick={() => setConfirming(true)}
         >
           <IconTrash size={16} />
@@ -39,7 +40,7 @@ export function DeleteImportButton({
       </Tooltip>
     ) : (
       <Button variant="default" onClick={() => setConfirming(true)}>
-        Annuler l'import
+        {fr.imports.cancelImport}
       </Button>
     );
   }
@@ -47,7 +48,7 @@ export function DeleteImportButton({
   return (
     <Group gap={10} justify="flex-end" wrap="nowrap">
       <Text size="sm" c="amber.4" style={{ whiteSpace: "nowrap" }}>
-        Supprimer {lineCount} ligne{lineCount > 1 ? "s" : ""} ?
+        {fr.imports.confirmDelete(lineCount)}
       </Text>
       <Button
         size="compact-sm"
@@ -55,7 +56,7 @@ export function DeleteImportButton({
         disabled={deleteImport.isPending}
         onClick={() => setConfirming(false)}
       >
-        Annuler
+        {fr.common.cancel}
       </Button>
       <Button
         size="compact-sm"
@@ -63,7 +64,7 @@ export function DeleteImportButton({
         loading={deleteImport.isPending}
         onClick={() => deleteImport.mutate({ id: importId }, { onSuccess: onDeleted })}
       >
-        Confirmer
+        {fr.common.confirm}
       </Button>
     </Group>
   );

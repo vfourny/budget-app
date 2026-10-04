@@ -2,6 +2,7 @@ import { useMutation } from "@tanstack/react-query";
 
 import type { AccountType } from "@server/generated/prisma/enums";
 
+import { errorMessage } from "@/lib/errors";
 import { queryClient, trpc, trpcClient } from "@/lib/trpc";
 
 /**
@@ -19,7 +20,7 @@ export function useImportStatement() {
       try {
         await trpcClient.categorize.run.mutate({ batchId: created.batchId });
       } catch (error) {
-        categorizationError = error instanceof Error ? error.message : "Catégorisation échouée.";
+        categorizationError = errorMessage(error);
       }
       return { ...created, categorizationError };
     },

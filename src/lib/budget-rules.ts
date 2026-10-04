@@ -6,7 +6,8 @@ import type { Envelope, TransactionCategory } from "@server/generated/prisma/enu
  * Partagé front + serveur (fichier pur, sans dépendance runtime) : les totaux, les jauges, les
  * tooltips et la page Catégories suivent après redéploiement. Rien n'est stocké en base : une
  * règle modifiée s'applique à tout l'historique.
- * Libellés des catégories : `@/lib/categories`. Libellés des enveloppes : `@/lib/envelopes`.
+ * Aucun texte affiché ici : tous les libellés (catégories, enveloppes, lignes de revenus) vivent
+ * dans `@/lib/i18n/fr`.
  */
 
 /**
@@ -63,14 +64,17 @@ export const CATEGORY_CARD_CATEGORIES = [
 
 /**
  * Lignes du détail de la card Revenus (dans cet ordre, toujours affichées même à 0 €).
- * Les crédits d'une autre catégorie ou sans catégorie vont dans une ligne « Autres ».
+ * Les crédits d'une autre catégorie ou sans catégorie vont dans la ligne `"other"`.
  */
 export const REVENUE_LINES = [
-  { label: "Salaire", categories: ["SALARY_PAYMENT", "BNC_PAYMENT"] },
-  { label: "Vacations", categories: ["VACATION_PAYMENT"] },
-  { label: "Remboursement pro", categories: ["PROFESSIONAL_REFUND"] },
-  { label: "Autre remboursement", categories: ["REFUND"] },
-] as const satisfies readonly { label: string; categories: readonly TransactionCategory[] }[];
+  { key: "salary", categories: ["SALARY_PAYMENT", "BNC_PAYMENT"] },
+  { key: "vacations", categories: ["VACATION_PAYMENT"] },
+  { key: "professionalRefund", categories: ["PROFESSIONAL_REFUND"] },
+  { key: "otherRefund", categories: ["REFUND"] },
+] as const satisfies readonly { key: string; categories: readonly TransactionCategory[] }[];
+
+/** Clé d'une ligne de revenus (`"other"` = le reste). Libellés : `@/lib/i18n/fr`. */
+export type RevenueLineKey = (typeof REVENUE_LINES)[number]["key"] | "other";
 
 // ---------------------------------------------------------------------------------------------
 // Dérivé des règles ci-dessus : rien à modifier en dessous.

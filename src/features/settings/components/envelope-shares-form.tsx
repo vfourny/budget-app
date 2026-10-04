@@ -5,7 +5,8 @@ import {
   useEnvelopeShares,
   useSetEnvelopeShares,
 } from "@/features/settings/hooks/use-envelope-shares";
-import { ENVELOPE_LABELS } from "@/lib/envelopes";
+import { errorMessage } from "@/lib/errors";
+import { fr } from "@/lib/i18n/fr";
 import type { BudgetEnvelope } from "@server/lib/settings/envelope-shares";
 
 type Shares = Record<BudgetEnvelope, number>;
@@ -14,7 +15,7 @@ export function EnvelopeSharesForm() {
   const shares = useEnvelopeShares();
 
   if (shares.isPending) return <Loader color="gold" />;
-  if (shares.isError) return <Alert color="red" title="Impossible de charger les parts." />;
+  if (shares.isError) return <Alert color="red" title={fr.settings.shares.loadFailed} />;
 
   // Le formulaire est monté une fois les données chargées : `useState` s'initialise avec elles
   // (≈ copier la valeur serveur dans un `ref` local, éditable avant d'enregistrer).
@@ -33,17 +34,16 @@ function SharesFields({ initial }: { initial: Shares }) {
   return (
     <Stack gap={16}>
       <div>
-        <Title order={3}>Parts du revenu par enveloppe</Title>
+        <Title order={3}>{fr.settings.shares.title}</Title>
         <Text size="sm" c="dimmed">
-          Méthode des 5 comptes : le dashboard Perso compare tes dépenses réelles à ces parts de ton
-          revenu du mois.
+          {fr.settings.shares.description}
         </Text>
       </div>
 
       {envelopes.map((envelope) => (
         <NumberInput
           key={envelope}
-          label={ENVELOPE_LABELS[envelope]}
+          label={fr.envelopes[envelope]}
           suffix=" %"
           min={0}
           max={100}
@@ -62,21 +62,21 @@ function SharesFields({ initial }: { initial: Shares }) {
       <Group gap={16}>
         <Text size="sm" c={unassigned === 0 ? "dimmed" : "red.4"}>
           {unassigned === 0
-            ? "Total : 100 %"
+            ? fr.settings.shares.totalOk
             : unassigned < 0
-              ? `Total : ${total} % — dépasse 100 %`
-              : `Total : ${total} % — il reste ${unassigned} % à affecter`}
+              ? fr.settings.shares.totalOver(total)
+              : fr.settings.shares.totalRemaining(total, unassigned)}
         </Text>
       </Group>
 
       {save.isError && (
-        <Alert color="red" title="Enregistrement impossible">
-          {save.error.message}
+        <Alert color="red" title={fr.settings.shares.saveFailed}>
+          {errorMessage(save.error)}
         </Alert>
       )}
       {save.isSuccess && !changed && (
         <Text size="sm" c="teal.4">
-          Enregistré.
+          {fr.common.saved}
         </Text>
       )}
 
@@ -86,7 +86,7 @@ function SharesFields({ initial }: { initial: Shares }) {
           loading={save.isPending}
           onClick={() => save.mutate(draft)}
         >
-          Enregistrer
+          {fr.common.save}
         </Button>
       </Group>
     </Stack>

@@ -2,6 +2,7 @@ import { initTRPC } from "@trpc/server";
 import superjson from "superjson";
 import { ZodError, z } from "zod";
 
+import { AppErrorCause } from "@server/lib/app-error";
 import { db } from "@server/lib/db";
 
 /** Contexte disponible dans toutes les procédures (`ctx`), recréé à chaque requête. */
@@ -19,6 +20,11 @@ const t = initTRPC.context<typeof createTRPCContext>().create({
         ...shape.data,
         // Erreurs de validation Zod exposées champ par champ (pour les formulaires).
         zodError: error.cause instanceof ZodError ? z.flattenError(error.cause) : null,
+        // Erreur métier : code + paramètres, traduits côté front (voir `server/lib/app-error.ts`).
+        appError:
+          error.cause instanceof AppErrorCause
+            ? { code: error.cause.code, params: error.cause.params }
+            : null,
       },
     };
   },

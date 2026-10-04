@@ -1,6 +1,6 @@
-import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 
+import { appError } from "@server/lib/app-error";
 import { NEEDS_REVIEW_WHERE, needsReview } from "@server/lib/categorize/needs-review";
 import { AccountType } from "@server/generated/prisma/enums";
 import { removeAlreadyImported } from "@server/lib/csv/dedupe";
@@ -27,10 +27,7 @@ export const importRouter = createTRPCRouter({
 
     const { transactions, errors } = parseBankStatement(input.csvText, config);
     if (transactions.length === 0) {
-      throw new TRPCError({
-        code: "BAD_REQUEST",
-        message: "Aucune transaction lisible dans ce fichier : format de banque incorrect ?",
-      });
+      throw appError("BAD_REQUEST", "NO_READABLE_TRANSACTIONS");
     }
 
     // Relevés qui se chevauchent : on n'importe pas deux fois la même ligne.
@@ -44,10 +41,7 @@ export const importRouter = createTRPCRouter({
     });
     const { fresh, duplicateCount } = removeAlreadyImported(transactions, existing);
     if (fresh.length === 0) {
-      throw new TRPCError({
-        code: "BAD_REQUEST",
-        message: "Toutes les lignes de ce relevé sont déjà importées.",
-      });
+      throw appError("BAD_REQUEST", "ALL_ROWS_ALREADY_IMPORTED");
     }
 
     // Une seule transaction SQL : un import est écrit en entier ou pas du tout.
@@ -127,7 +121,7 @@ export const importRouter = createTRPCRouter({
         },
       },
     });
-    if (!batch) throw new TRPCError({ code: "NOT_FOUND", message: "Import introuvable." });
+    if (!batch) throw appError("NOT_FOUND", "IMPORT_NOT_FOUND");
 
     return {
       id: batch.id,
@@ -153,19 +147,16 @@ export const importRouter = createTRPCRouter({
         where: { id: input.id },
         select: { status: true },
       });
-      if (!batch) throw new TRPCError({ code: "NOT_FOUND", message: "Import introuvable." });
+      if (!batch) throw appError("NOT_FOUND", "IMPORT_NOT_FOUND");
       if (batch.status === "VALIDATED") {
-        throw new TRPCError({ code: "BAD_REQUEST", message: "Cet import est déjà validé." });
+        throw appError("BAD_REQUEST", "IMPORT_ALREADY_VALIDATED");
       }
 
       const remaining = await ctx.db.transaction.count({
         where: { importBatchId: input.id, ...NEEDS_REVIEW_WHERE },
       });
       if (remaining > 0) {
-        throw new TRPCError({
-          code: "BAD_REQUEST",
-          message: `Encore ${remaining} transaction(s) à catégoriser avant de valider.`,
-        });
+        throw appError("BAD_REQUEST", "REMAINING_TO_REVIEW", { remaining });
       }
 
       await ctx.db.importBatch.update({
@@ -180,7 +171,7 @@ export const importRouter = createTRPCRouter({
     .input(z.object({ id: z.string().min(1) }))
     .mutation(async ({ ctx, input }) => {
       const { count } = await ctx.db.importBatch.deleteMany({ where: { id: input.id } });
-      if (count === 0) throw new TRPCError({ code: "NOT_FOUND", message: "Import introuvable." });
+      if (count === 0) throw appError("NOT_FOUND", "IMPORT_NOT_FOUND");
       return { id: input.id };
     }),
 });

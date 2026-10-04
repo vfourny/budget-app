@@ -1,8 +1,8 @@
 import { Group, Paper, Progress, Stack, Text, Title } from "@mantine/core";
 
 import { CATEGORY_CARD_CATEGORIES } from "@/lib/budget-rules";
-import { TRANSACTION_CATEGORIES } from "@/lib/categories";
 import { formatCents } from "@/lib/format";
+import { fr } from "@/lib/i18n/fr";
 import type { TransactionCategory } from "@server/generated/prisma/enums";
 
 interface CategoryBreakdownProps {
@@ -25,18 +25,16 @@ export function CategoryBreakdown({ overview }: CategoryBreakdownProps) {
   return (
     <Paper withBorder radius="lg" p={28}>
       <Title order={2} mb={20}>
-        Par catégorie
+        {fr.personal.breakdown.title}
       </Title>
       {rows.length === 0 ? (
-        <Text c="dimmed">Aucune dépense sur cette période.</Text>
+        <Text c="dimmed">{fr.personal.breakdown.empty}</Text>
       ) : (
         <Stack gap={16}>
           {rows.map(({ category, cents }) => (
             <div key={category ?? "none"}>
               <Group justify="space-between" mb={6}>
-                <Text size="sm">
-                  {category ? TRANSACTION_CATEGORIES[category].label : "Sans catégorie"}
-                </Text>
+                <Text size="sm">{category ? fr.categories[category] : fr.common.noCategory}</Text>
                 <Text size="sm" fw={600}>
                   {formatCents(cents)}
                   <Text span size="xs" c="dimmed" ml={8}>

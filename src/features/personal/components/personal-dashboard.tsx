@@ -19,6 +19,7 @@ import { KpiCards } from "@/features/personal/components/kpi-cards";
 import { TransactionsTable } from "@/features/personal/components/transactions-table";
 import { useOverview, usePeriods } from "@/features/personal/hooks/use-personal";
 import { capitalizedMonthName, monthName } from "@/lib/format";
+import { fr } from "@/lib/i18n/fr";
 
 type View = "month" | "year";
 interface Period {
@@ -36,19 +37,17 @@ export function PersonalDashboard() {
   const [chosen, setChosen] = useState<Period | null>(null);
 
   if (periods.isPending) return <Loader color="gold" />;
-  if (periods.isError) return <Alert color="red" title="Impossible de charger le dashboard." />;
+  if (periods.isError) return <Alert color="red" title={fr.personal.loadFailed} />;
 
   if (periods.data.length === 0) {
     return (
       <>
-        <PageHeader eyebrow="Budget perso" title="Perso" />
+        <PageHeader eyebrow={fr.personal.eyebrow} title={fr.nav.personal} />
         <Paper withBorder radius="lg" p={28}>
           <Group justify="space-between">
-            <span>
-              Aucun import validé pour le moment : le dashboard se remplit à la validation.
-            </span>
+            <span>{fr.personal.empty}</span>
             <Button component={Link} to="/imports/new" variant="default">
-              Importer un relevé
+              {fr.importForm.title}
             </Button>
           </Group>
         </Paper>
@@ -74,7 +73,7 @@ export function PersonalDashboard() {
   return (
     <>
       <PageHeader
-        eyebrow={view === "month" ? "Vue du mois" : "Vue de l'année"}
+        eyebrow={view === "month" ? fr.personal.eyebrowMonth : fr.personal.eyebrowYear}
         title={
           <>
             {view === "month" && `${capitalizedMonthName(selected.month)} `}
@@ -87,8 +86,8 @@ export function PersonalDashboard() {
               value={view}
               onChange={(value) => setView(value as View)}
               data={[
-                { value: "month", label: "Mois" },
-                { value: "year", label: "Année" },
+                { value: "month", label: fr.personal.views.month },
+                { value: "year", label: fr.personal.views.year },
               ]}
             />
             {view === "month" ? (
@@ -96,14 +95,14 @@ export function PersonalDashboard() {
                 <ActionIcon
                   variant="default"
                   size="lg"
-                  aria-label="Mois précédent"
+                  aria-label={fr.personal.previousMonth}
                   disabled={!previousMonth}
                   onClick={() => previousMonth && setChosen(previousMonth)}
                 >
                   <IconChevronLeft size={16} />
                 </ActionIcon>
                 <Select
-                  aria-label="Mois"
+                  aria-label={fr.personal.month}
                   w={190}
                   allowDeselect={false}
                   data={periods.data.map((period) => ({
@@ -118,7 +117,7 @@ export function PersonalDashboard() {
                 <ActionIcon
                   variant="default"
                   size="lg"
-                  aria-label="Mois suivant"
+                  aria-label={fr.personal.nextMonth}
                   disabled={!nextMonth}
                   onClick={() => nextMonth && setChosen(nextMonth)}
                 >
@@ -130,7 +129,7 @@ export function PersonalDashboard() {
                 <ActionIcon
                   variant="default"
                   size="lg"
-                  aria-label="Année précédente"
+                  aria-label={fr.personal.previousYear}
                   disabled={yearIndex <= 0}
                   onClick={() => selectYear(years[yearIndex - 1])}
                 >
@@ -139,7 +138,7 @@ export function PersonalDashboard() {
                 <ActionIcon
                   variant="default"
                   size="lg"
-                  aria-label="Année suivante"
+                  aria-label={fr.personal.nextYear}
                   disabled={yearIndex >= years.length - 1}
                   onClick={() => selectYear(years[yearIndex + 1])}
                 >
@@ -159,7 +158,7 @@ function PeriodContent({ view, period }: { view: View; period: Period }) {
   const overview = useOverview(period.year, view === "month" ? period.month : undefined);
 
   if (overview.isPending) return <Loader color="gold" />;
-  if (overview.isError) return <Alert color="red" title="Impossible de charger la période." />;
+  if (overview.isError) return <Alert color="red" title={fr.personal.loadPeriodFailed} />;
 
   return (
     <>

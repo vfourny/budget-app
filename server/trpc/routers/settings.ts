@@ -14,7 +14,7 @@ const envelopeSharesSchema = z
     ) as Record<BudgetEnvelope, z.ZodNumber>,
   )
   .refine((shares) => Object.values(shares).reduce((sum, percent) => sum + percent, 0) === 100, {
-    message: "Le total des parts doit faire exactement 100 %.",
+    message: "Envelope shares must sum to exactly 100.",
   });
 
 export const settingsRouter = createTRPCRouter({

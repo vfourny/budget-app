@@ -70,6 +70,7 @@ src/                   # FRONT — SPA React, tourne uniquement dans le navigate
   features/<domaine>/  # import, review, dashboard… : components/ + hooks/ du domaine
   components/          # UI partagée entre features (PageHeader, ComingSoon…)
   lib/                 # utilitaires front : trpc.ts (client + queryClient), theme.ts (thème Mantine)…
+    i18n/fr/           # TOUS les textes de l'UI (dictionnaires typés) + plural.ts (accord en nombre)
   styles/global.css    # règles CSS globales (le thème, lui, est dans lib/theme.ts)
 server/                # BACKEND — Nitro, mêmes conventions que le server/ de Nuxt
   api/                 # routes HTTP : server/api/health.ts → GET /api/health
@@ -91,7 +92,8 @@ nitro.config.ts        # serverDir: ./server
   Exception dans l'autre sens : `src/lib/budget-rules.ts` (pur, sans dépendance) est importé par le
   serveur, pour que front et dashboard partagent les mêmes règles.
 - **Règles du budget** (catégories → enveloppes, épargne, catégories de la card « Par catégorie »,
-  lignes de revenus) : uniquement dans `src/lib/budget-rules.ts`, jamais en dur ailleurs.
+  lignes de revenus, par `key`) : uniquement dans `src/lib/budget-rules.ts`, jamais en dur ailleurs. Aucun libellé dedans :
+  les textes sont dans `@/lib/i18n/fr`.
 - **Données** : toujours via tRPC + TanStack Query. **Pas de `fetch` dans un `useEffect`.**
   `useEffect` est réservé à la synchro avec un système externe (oxlint le signale sinon).
 - **Pattern de lecture** : `useQuery(trpc.<domaine>.<proc>.queryOptions())` avec `trpc` de
@@ -125,6 +127,19 @@ nitro.config.ts        # serverDir: ./server
   menu, l'ajouter à `MAIN_NAV` (`features/layout/components/app-layout.tsx`).
 - Validation des entrées : schémas Zod, partagés entre tRPC et formulaires.
 - UI en **français**, code/identifiants/commits en **anglais**.
+- **Textes de l'UI** : jamais en dur dans un composant ni dans `budget-rules.ts` : ils viennent du
+  dictionnaire `fr` de `@/lib/i18n/fr` (`fr.nav.home`, `fr.categories[category]`…), un fichier par
+  domaine (`common`, `nav`, `home`, `imports`, `review`, `personal`, `settings`, `enums`, `errors`).
+  Pas de lib i18n pour l'instant (une seule langue) : de simples objets `as const`. Texte avec
+  variable = fonction (`fr.imports.confirmDelete(n)`) ; pluriels via `plural` / `pluralize`
+  (`@/lib/i18n/plural`), jamais de `n > 1 ? "s" : ""` à la main. Libellés d'un enum Prisma :
+  `as const satisfies Record<Enum, string>` dans `fr/enums.ts` (`tsc` échoue si une valeur manque).
+  `pnpm i18n:check` (inclus dans `pnpm check`) échoue s'il reste du texte en dur dans le JSX.
+- **Erreurs serveur** : le serveur n'envoie jamais de texte d'UI, seulement un **code**
+  (`throw appError("NOT_FOUND", "IMPORT_NOT_FOUND")`, `server/lib/app-error.ts` ; pour les lignes
+  CSV écartées, un `CsvLineErrorCode`). Le front le traduit via `fr.errors` / `fr.csvErrors`, avec
+  `errorMessage(error)` (`@/lib/errors`). Nouveau code = l'ajouter à `AppErrorCode` **et** à
+  `fr/errors.ts` (exhaustif).
 - Imports : `@/…` pour `src/`, `@server/…` pour `server/`. `import type` obligatoire pour les
   types (`verbatimModuleSyntax`).
 

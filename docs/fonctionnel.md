@@ -8,7 +8,7 @@ Chaque dépense est rattachée à une **catégorie**, chaque catégorie à une *
 
 ### Enveloppes
 
-Définies dans l'enum Prisma `Envelope` et les libellés dans `src/lib/envelopes.ts` (l'ordre des clés = ordre d'affichage). Les libellés sont préfixés « Enveloppe » pour ne pas les confondre avec une catégorie du même nom (Loisirs, Formation).
+Définies dans l'enum Prisma `Envelope` et les libellés dans `src/lib/i18n/fr/enums.ts` (`envelopes` : l'ordre des clés = ordre d'affichage). Les libellés sont préfixés « Enveloppe » pour ne pas les confondre avec une catégorie du même nom (Loisirs, Formation).
 
 | Enveloppe                    | Code                |
 | ---------------------------- | ------------------- |
@@ -20,7 +20,7 @@ Définies dans l'enum Prisma `Envelope` et les libellés dans `src/lib/envelopes
 
 ### Catégories de transaction
 
-Liste **figée** (enum Prisma `TransactionCategory`), reprise des colonnes de l'ancien Google Sheet. Libellé affiché et enveloppe de rattachement : `src/lib/categories.ts`.
+Liste **figée** (enum Prisma `TransactionCategory`), reprise des colonnes de l'ancien Google Sheet. Libellé affiché : `src/lib/i18n/fr/enums.ts` ; enveloppe de rattachement : `src/lib/budget-rules.ts`.
 
 | Catégorie           | Code                  | Enveloppe          |
 | ------------------- | --------------------- | ------------------ |
@@ -50,7 +50,7 @@ Points d'attention :
 
 - **Toutes les règles modifiables** sont dans `src/lib/budget-rules.ts` : catégories cumulées dans chaque enveloppe (`ENVELOPE_CATEGORIES`), enveloppes d'épargne, catégories affichées dans la card « Par catégorie » (`CATEGORY_CARD_CATEGORIES`), lignes de la card Revenus (`REVENUE_LINES`). Une règle modifiée s'applique à tout l'historique (rien n'est stocké en base). La colonne « Enveloppe » du tableau ci-dessus est indicative : la source de vérité est ce fichier.
 - La catégorie d'une transaction est **optionnelle** (`null` tant qu'elle n'est pas catégorisée / relue).
-- Ajouter ou renommer une catégorie = modifier l'enum Prisma **+ une migration versionnée + `src/lib/categories.ts` + `server/lib/categorize/category-hints.ts`**, puis la ranger dans `src/lib/budget-rules.ts` (le typage `Record<TransactionCategory, …>` fait échouer `tsc` si l'un des deux est oublié).
+- Ajouter ou renommer une catégorie = modifier l'enum Prisma **+ une migration versionnée + `src/lib/i18n/fr/enums.ts` + `server/lib/categorize/category-hints.ts`**, puis la ranger dans `src/lib/budget-rules.ts` (le typage `Record<TransactionCategory, …>` fait échouer `tsc` si l'un des deux est oublié).
 
 ## Type de compte
 

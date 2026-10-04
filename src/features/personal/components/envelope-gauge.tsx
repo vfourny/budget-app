@@ -2,6 +2,7 @@ import { ActionIcon, Group, Text, Tooltip } from "@mantine/core";
 import { IconInfoCircle } from "@tabler/icons-react";
 
 import { formatCents } from "@/lib/format";
+import { fr } from "@/lib/i18n/fr";
 
 import classes from "./envelope-gauge.module.css";
 
@@ -41,7 +42,7 @@ export function EnvelopeGauge({
             multiline
             w={260}
             withArrow
-            label={`${sourceText} Recommandé : ${recommendedPercent} % des revenus de la période.`}
+            label={fr.personal.gauge.tooltip(sourceText, recommendedPercent)}
             events={{ hover: true, focus: true, touch: true }}
           >
             <ActionIcon
@@ -49,7 +50,7 @@ export function EnvelopeGauge({
               color="gray"
               size="xs"
               radius="xl"
-              aria-label={`Comment est calculé « ${name} » ?`}
+              aria-label={fr.personal.gauge.howComputed(name)}
             >
               <IconInfoCircle size={14} />
             </ActionIcon>
@@ -66,7 +67,11 @@ export function EnvelopeGauge({
       <div
         className={classes.track}
         role="img"
-        aria-label={`${name} : ${formatCents(realCents)} sur ${formatCents(recommendedCents)} recommandés`}
+        aria-label={fr.personal.gauge.aria(
+          name,
+          formatCents(realCents),
+          formatCents(recommendedCents),
+        )}
       >
         <div
           className={classes.fill}

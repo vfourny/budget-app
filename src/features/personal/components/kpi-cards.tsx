@@ -4,8 +4,9 @@ import type { ReactNode } from "react";
 import { EnvelopeGauge } from "@/features/personal/components/envelope-gauge";
 import { useEnvelopeShares } from "@/features/settings/hooks/use-envelope-shares";
 import { SAVINGS_ENVELOPES, isSavingsEnvelope } from "@/lib/budget-rules";
-import { ENVELOPE_LABELS, ENVELOPE_ORDER, envelopeSourceText } from "@/lib/envelopes";
+import { ENVELOPE_ORDER, envelopeSourceText } from "@/lib/envelopes";
 import { formatCents } from "@/lib/format";
+import { fr } from "@/lib/i18n/fr";
 import type { Envelope } from "@server/generated/prisma/enums";
 import type { PeriodTotals } from "@server/lib/dashboard/aggregate";
 
@@ -28,14 +29,12 @@ export function KpiCards({ view, overview }: { view: "month" | "year"; overview:
     return envelopes.map((envelope) => {
       const realCents = overview.byEnvelope[envelope];
       if (!shares) {
-        return (
-          <Line key={envelope} name={ENVELOPE_LABELS[envelope]} value={formatCents(realCents)} />
-        );
+        return <Line key={envelope} name={fr.envelopes[envelope]} value={formatCents(realCents)} />;
       }
       return (
         <EnvelopeGauge
           key={envelope}
-          name={ENVELOPE_LABELS[envelope]}
+          name={fr.envelopes[envelope]}
           realCents={realCents}
           recommendedCents={Math.round((overview.revenueCents * shares[envelope]) / 100)}
           recommendedPercent={shares[envelope]}
@@ -49,35 +48,35 @@ export function KpiCards({ view, overview }: { view: "month" | "year"; overview:
   return (
     <SimpleGrid cols={{ base: 1, md: view === "month" ? 3 : 4 }} spacing={16} mb={16}>
       <Kpi
-        label={view === "month" ? "Dépenses" : "Dépensé sur la période"}
+        label={view === "month" ? fr.personal.kpi.expensesMonth : fr.personal.kpi.expensesYear}
         value={formatCents(overview.expenseCents)}
-        hint="Hors épargne"
+        hint={fr.personal.kpi.expensesHint}
       >
         {gauges(EXPENSE_ENVELOPES, "expense")}
       </Kpi>
       <Kpi
-        label="Revenus"
+        label={fr.common.revenues}
         value={formatCents(overview.revenueCents)}
         color="blue.3"
-        hint="Tous les crédits"
+        hint={fr.personal.kpi.revenuesHint}
       >
         {overview.revenueLines.map((line) => (
-          <Line key={line.label} name={line.label} value={formatCents(line.cents)} />
+          <Line key={line.key} name={fr.revenueLines[line.key]} value={formatCents(line.cents)} />
         ))}
       </Kpi>
       <Kpi
-        label={view === "month" ? "Épargne du mois" : "Épargné"}
+        label={view === "month" ? fr.personal.kpi.savingsMonth : fr.personal.kpi.savingsYear}
         value={formatCents(overview.savingsCents)}
         color="gold.6"
-        hint={`${savingsRate} % des revenus`}
+        hint={fr.personal.kpi.savingsHint(savingsRate)}
       >
         {gauges(SAVINGS_ENVELOPES, "savings")}
       </Kpi>
       {view === "year" && (
         <Kpi
-          label="Dépense moyenne / mois"
+          label={fr.personal.kpi.averageExpense}
           value={formatCents(Math.round(overview.expenseCents / months))}
-          hint={`${overview.monthsWithData} mois avec données`}
+          hint={fr.personal.kpi.monthsWithData(overview.monthsWithData)}
         />
       )}
     </SimpleGrid>

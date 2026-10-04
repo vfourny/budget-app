@@ -25,7 +25,7 @@ enum Envelope {
 }
 
 /// Catégorie d'une transaction (liste figée, colonnes du Google Sheet). Le libellé affiché et
-/// l'enveloppe de rattachement vivent dans `src/lib/categories.ts`.
+/// l'enveloppe de rattachement vivent dans `src/lib/i18n/fr/enums.ts` et `src/lib/budget-rules.ts`.
 enum TransactionCategory {
   RENT // Loyer
   FUEL // Essence

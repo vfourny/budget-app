@@ -1,10 +1,21 @@
 import type {
   AmountColumns,
   BankCsvConfig,
+  CsvLineErrorCode,
   CsvParseError,
   ParsedBankStatement,
   ParsedTransaction,
 } from "@server/lib/csv/types";
+
+/** Erreur de lecture d'une ligne : un code (pas de texte) + la valeur fautive éventuelle. */
+class CsvLineError extends Error {
+  constructor(
+    readonly code: CsvLineErrorCode,
+    readonly value = "",
+  ) {
+    super(code);
+  }
+}
 
 /** Découpe une ligne CSV en respectant les champs entre guillemets : un délimiteur ou un
  * guillemet à l'intérieur d'un champ cité ne coupe pas la ligne, et `""` à l'intérieur d'un
@@ -54,7 +65,7 @@ function parseAmountToCents(
 
   const normalized = decimalSeparator === "," ? cleaned.replace(",", ".") : cleaned;
   const value = Number(normalized);
-  if (Number.isNaN(value)) throw new Error(`Montant invalide : "${raw}"`);
+  if (Number.isNaN(value)) throw new CsvLineError("INVALID_AMOUNT", raw);
 
   return Math.round(value * 100);
 }
@@ -62,7 +73,7 @@ function parseAmountToCents(
 function parseDate(raw: string, format: BankCsvConfig["dateFormat"]): Date {
   const parts = format === "yyyy-mm-dd" ? raw.split("-") : raw.split("/").reverse();
   const [year, month, day] = parts.map(Number);
-  if (!year || !month || !day) throw new Error(`Date invalide : "${raw}"`);
+  if (!year || !month || !day) throw new CsvLineError("INVALID_DATE", raw);
   return new Date(Date.UTC(year, month - 1, day));
 }
 
@@ -73,14 +84,14 @@ function extractAmountCents(
 ): number {
   if (amount.kind === "signed") {
     const value = parseAmountToCents(fields[amount.column], decimalSeparator);
-    if (value === null) throw new Error("Montant manquant");
+    if (value === null) throw new CsvLineError("MISSING_AMOUNT");
     return value;
   }
 
   const debit = parseAmountToCents(fields[amount.debit], decimalSeparator);
   const credit = parseAmountToCents(fields[amount.credit], decimalSeparator);
   const value = debit ?? credit;
-  if (value === null) throw new Error("Débit et crédit vides");
+  if (value === null) throw new CsvLineError("EMPTY_DEBIT_CREDIT");
   return value;
 }
 
@@ -120,7 +131,8 @@ export function parseBankStatement(csvText: string, config: BankCsvConfig): Pars
     } catch (error) {
       errors.push({
         line: lineNumber,
-        message: error instanceof Error ? error.message : "Erreur inconnue",
+        code: error instanceof CsvLineError ? error.code : "UNKNOWN",
+        value: error instanceof CsvLineError ? error.value : "",
         raw: line,
       });
     }

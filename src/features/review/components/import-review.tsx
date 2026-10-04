@@ -23,18 +23,19 @@ import {
   useSetCategory,
   useValidateImport,
 } from "@/features/review/hooks/use-import-review";
-import { ACCOUNT_TYPE_LABELS } from "@/lib/account-types";
-import { TRANSACTION_CATEGORIES, TRANSACTION_CATEGORY_ORDER } from "@/lib/categories";
+import { errorMessage } from "@/lib/errors";
 import { formatCents, formatDate } from "@/lib/format";
+import { fr } from "@/lib/i18n/fr";
 import type { TransactionCategory } from "@server/generated/prisma/enums";
 
 import classes from "./import-review.module.css";
 
 type Filter = "all" | "review";
 
-const CATEGORY_OPTIONS = TRANSACTION_CATEGORY_ORDER.map((category) => ({
+// Ordre des options = ordre des clés de `fr.categories` (colonnes du Google Sheet).
+const CATEGORY_OPTIONS = (Object.keys(fr.categories) as TransactionCategory[]).map((category) => ({
   value: category,
-  label: TRANSACTION_CATEGORIES[category].label,
+  label: fr.categories[category],
 }));
 
 export function ImportReview({ importId }: { importId: string }) {
@@ -46,7 +47,7 @@ export function ImportReview({ importId }: { importId: string }) {
   const [filter, setFilter] = useState<Filter>("all");
 
   if (review.isPending) return <Loader color="gold" />;
-  if (review.isError) return <Alert color="red" title="Impossible de charger cet import." />;
+  if (review.isError) return <Alert color="red" title={fr.review.loadFailed} />;
 
   const batch = review.data;
   const locked = batch.status === "VALIDATED";
@@ -61,11 +62,11 @@ export function ImportReview({ importId }: { importId: string }) {
   return (
     <>
       <Text component={Link} to="/imports" size="sm" c="dimmed" className={classes.back}>
-        <IconArrowLeft size={14} /> Retour aux imports
+        <IconArrowLeft size={14} /> {fr.review.back}
       </Text>
       <PageHeader
-        eyebrow={`Import du ${formatDate(batch.createdAt)} · ${ACCOUNT_TYPE_LABELS[batch.accountType]}`}
-        title="Relecture"
+        eyebrow={fr.review.eyebrow(formatDate(batch.createdAt), fr.accountTypes[batch.accountType])}
+        title={fr.review.title}
         actions={
           <Group gap={12}>
             <Paper withBorder radius="md" px={18} py={12}>
@@ -73,7 +74,7 @@ export function ImportReview({ importId }: { importId: string }) {
                 {confidentCount}
               </Text>
               <Text size="xs" c="dimmed">
-                catégorisées avec confiance
+                {fr.review.confidentTile}
               </Text>
             </Paper>
             <Paper radius="md" px={18} py={12} className={classes.alertTile}>
@@ -81,7 +82,7 @@ export function ImportReview({ importId }: { importId: string }) {
                 {toReviewCount}
               </Text>
               <Text size="xs" c="amber.3">
-                à vérifier
+                {fr.review.toReviewTile}
               </Text>
             </Paper>
           </Group>
@@ -94,8 +95,8 @@ export function ImportReview({ importId }: { importId: string }) {
             value={filter}
             onChange={(value) => setFilter(value as Filter)}
             data={[
-              { value: "all", label: `Toutes · ${batch.transactions.length}` },
-              { value: "review", label: `À vérifier · ${toReviewCount}` },
+              { value: "all", label: fr.review.filterAll(batch.transactions.length) },
+              { value: "review", label: fr.review.filterToReview(toReviewCount) },
             ]}
           />
           <Text size="xs" c="dimmed" ff="monospace">
@@ -106,11 +107,11 @@ export function ImportReview({ importId }: { importId: string }) {
         <Table verticalSpacing="sm" horizontalSpacing="lg">
           <Table.Thead>
             <Table.Tr>
-              <Table.Th>Date</Table.Th>
-              <Table.Th>Libellé</Table.Th>
-              <Table.Th ta="right">Montant</Table.Th>
-              <Table.Th>Catégorie</Table.Th>
-              <Table.Th ta="right">Confiance</Table.Th>
+              <Table.Th>{fr.common.date}</Table.Th>
+              <Table.Th>{fr.common.label}</Table.Th>
+              <Table.Th ta="right">{fr.common.amount}</Table.Th>
+              <Table.Th>{fr.common.category}</Table.Th>
+              <Table.Th ta="right">{fr.review.columns.confidence}</Table.Th>
             </Table.Tr>
           </Table.Thead>
           <Table.Tbody>
@@ -124,8 +125,8 @@ export function ImportReview({ importId }: { importId: string }) {
                 </Table.Td>
                 <Table.Td>
                   <Select
-                    aria-label={`Catégorie de ${row.label}`}
-                    placeholder="Choisir…"
+                    aria-label={fr.review.categoryOf(row.label)}
+                    placeholder={fr.review.categoryPlaceholder}
                     size="sm"
                     w={210}
                     data={CATEGORY_OPTIONS}
@@ -158,7 +159,7 @@ export function ImportReview({ importId }: { importId: string }) {
                         loading={setCategory.isPending && setCategory.variables?.id === row.id}
                         onClick={() => setCategory.mutate({ id: row.id, category: row.category! })}
                       >
-                        Confirmer
+                        {fr.common.confirm}
                       </Button>
                     )}
                   </Group>
@@ -168,23 +169,21 @@ export function ImportReview({ importId }: { importId: string }) {
           </Table.Tbody>
         </Table>
 
-        {setCategory.isError && (
-          <Alert color="red" m={16} title="La correction n'a pas été enregistrée." />
-        )}
+        {setCategory.isError && <Alert color="red" m={16} title={fr.review.correctionFailed} />}
 
         {(validateImport.isError || runCategorization.isError) && (
-          <Alert color="red" m={16} title="Action impossible">
-            {validateImport.error?.message ?? runCategorization.error?.message}
+          <Alert color="red" m={16} title={fr.review.actionFailed}>
+            {errorMessage(validateImport.error ?? runCategorization.error)}
           </Alert>
         )}
 
         <div className={classes.footer}>
           <Text size="sm" c={toReviewCount > 0 && !locked ? "amber.4" : "dimmed"}>
             {locked
-              ? "Import validé : ses lignes comptent dans les dashboards."
+              ? fr.review.lockedNote
               : toReviewCount > 0
-                ? `Confirme ou corrige la catégorie des ${toReviewCount} transactions surlignées avant de valider l'import.`
-                : "Tes corrections serviront d'exemples pour les prochaines catégorisations."}
+                ? fr.review.toReviewNote(toReviewCount)
+                : fr.review.doneNote}
           </Text>
 
           {!locked && (
@@ -195,7 +194,7 @@ export function ImportReview({ importId }: { importId: string }) {
                   loading={runCategorization.isPending}
                   onClick={() => runCategorization.mutate({ batchId: importId })}
                 >
-                  Catégoriser avec l'IA
+                  {fr.review.categorizeWithAi}
                 </Button>
               )}
               <DeleteImportButton
@@ -205,7 +204,7 @@ export function ImportReview({ importId }: { importId: string }) {
                 onDeleted={() => void navigate("/imports")}
               />
               <Tooltip
-                label={`Encore ${toReviewCount} transaction${toReviewCount > 1 ? "s" : ""} à confirmer ou catégoriser`}
+                label={fr.review.validateTooltip(toReviewCount)}
                 disabled={toReviewCount === 0}
               >
                 {/* `data-disabled` plutôt que `disabled` : un bouton désactivé n'affiche pas l'infobulle. */}
@@ -220,7 +219,7 @@ export function ImportReview({ importId }: { importId: string }) {
                     );
                   }}
                 >
-                  Valider {batch.transactions.length} transactions
+                  {fr.review.validate(batch.transactions.length)}
                 </Button>
               </Tooltip>
             </Group>
@@ -243,14 +242,14 @@ function ConfidenceBadge({
   if (category === null) {
     return (
       <Badge color="amber" variant="light" leftSection={<IconAlertTriangle size={12} />}>
-        À catégoriser
+        {fr.review.toCategorize}
       </Badge>
     );
   }
   if (confidence === null) {
     return (
       <Badge color="teal" variant="light" leftSection={<IconCheck size={12} />}>
-        Confirmée
+        {fr.review.confirmed}
       </Badge>
     );
   }
