@@ -37,11 +37,14 @@ Liste **figée** (enum Prisma `TransactionCategory`), reprise des colonnes de l'
 | Soirée              | `NIGHTLIFE`           | Loisirs            |
 | Loisirs             | `LEISURE`             | Loisirs            |
 | Formation           | `TRAINING`            | Formation          |
-| Vêtements & Soins   | `CLOTHING_CARE`       | Dépenses courantes |
+| Vêtements & Soins   | `CLOTHING_CARE`       | Loisirs            |
 | Santé               | `HEALTH`              | Dépenses courantes |
 | Transport           | `TRANSPORT`           | Dépenses courantes |
 | Impôt et Taxes      | `TAXES`               | Dépenses courantes |
-| Abonnements divers  | `OTHER_SUBSCRIPTIONS` | Dépenses courantes |
+| Abonnements divers  | `OTHER_SUBSCRIPTIONS` | Loisirs            |
+| Énergie             | `ENERGY`              | Dépenses courantes |
+| Télécom             | `TELECOM`             | Dépenses courantes |
+| Internet            | `INTERNET`            | Dépenses courantes |
 | Autres              | `OTHER`               | Dépenses courantes |
 | Épargne court terme | `SHORT_TERM_SAVINGS`  | Épargne sécurité   |
 | Épargne long terme  | `LONG_TERM_SAVINGS`   | Épargne long terme |
@@ -131,11 +134,14 @@ reste des débits sont des **dépenses**.
   enveloppe, une jauge **réel vs recommandé** : barre verte si on reste sous la part recommandée du revenu, ambre
   au-delà ; l'inverse pour l'épargne), Revenus (détail : Salaire = `SALARY_PAYMENT` + `BNC_PAYMENT`, Vacations,
   Remboursement pro, Autre remboursement, + « Autres » s'il reste des crédits non rangés), Épargne du mois (+ % des
-  revenus) ; tableau des transactions triable ; dépenses par catégorie.
+  revenus) ; tableau des transactions triable ; dépenses par catégorie (toutes les catégories de la liste, même à 0 €).
 - **Vue année** : mêmes totaux sur l'année choisie, plus la dépense moyenne par mois (mois ayant des données).
 - Les parts recommandées (méthode des 5 comptes) se règlent dans **Réglages** (le total doit faire exactement 100 %).
   Les 5 enveloppes sont toujours affichées avec leur jauge, même à 0 €.
-- **À venir** : carte Abonnements, donut par catégorie en vue année, estimation de l'IR.
+- **Card Charges fixes** (bandeau entre les cartes KPI et le tableau) : débits de la période pour Loyer, Énergie, Télécom
+  et Internet (`FIXED_CHARGES_CATEGORIES` dans budget-rules), toujours affichés même à 0 €, + leur total ; mensuel en vue mois,
+  cumulé en vue année.
+- **À venir** : donut par catégorie en vue année, estimation de l'IR.
 - Mockup de référence : canvas Claude Design « Budget — maquette MVP » (5 écrans : tableau de bord mois, import CSV,
   relecture, vue année, tokens).
 

@@ -16,6 +16,7 @@ import { Link } from "react-router";
 import { PageHeader, PageTitleAccent } from "@/components/page-header";
 import { CategoryBreakdown } from "@/features/personal/components/category-breakdown";
 import { KpiCards } from "@/features/personal/components/kpi-cards";
+import { FixedChargesCard } from "@/features/personal/components/fixed-charges-card";
 import { TransactionsTable } from "@/features/personal/components/transactions-table";
 import { useOverview, usePeriods } from "@/features/personal/hooks/use-personal";
 import { capitalizedMonthName, monthName } from "@/lib/format";
@@ -163,6 +164,7 @@ function PeriodContent({ view, period }: { view: View; period: Period }) {
   return (
     <>
       <KpiCards view={view} overview={overview.data} />
+      <FixedChargesCard fixedCharges={overview.data.fixedCharges} />
       <Grid mt={16} gap={16}>
         {view === "month" && (
           <Grid.Col span={{ base: 12, lg: 8 }}>

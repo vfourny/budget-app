@@ -22,14 +22,15 @@ export const ENVELOPE_CATEGORIES = {
     "FUEL",
     "BANK_INSURANCE",
     "GROCERIES",
-    "CLOTHING_CARE",
     "HEALTH",
     "TRANSPORT",
     "TAXES",
-    "OTHER_SUBSCRIPTIONS",
+    "ENERGY",
+    "TELECOM",
+    "INTERNET",
     "OTHER",
   ],
-  LEISURE: ["RESTAURANT", "NIGHTLIFE", "LEISURE"],
+  LEISURE: ["RESTAURANT", "NIGHTLIFE", "LEISURE", "CLOTHING_CARE", "OTHER_SUBSCRIPTIONS"],
   TRAINING: ["TRAINING"],
   SAFETY_SAVINGS: ["SHORT_TERM_SAVINGS"],
   LONG_TERM_SAVINGS: ["LONG_TERM_SAVINGS"],
@@ -55,23 +56,32 @@ export const SAVINGS_ENVELOPES = [
 
 /**
  * Catégories affichées dans la card « Par catégorie » de la page Perso (triées par montant à
- * l'affichage, seules celles qui ont des débits apparaissent). Retirer une ligne la masque.
+ * l'affichage ; toutes sont affichées, même à 0 €). Retirer une ligne la masque.
  */
 export const CATEGORY_CARD_CATEGORIES = [
-  "RENT",
   "FUEL",
   "BANK_INSURANCE",
   "RESTAURANT",
   "GROCERIES",
   "NIGHTLIFE",
   "LEISURE",
-  "TRAINING",
   "CLOTHING_CARE",
   "HEALTH",
   "TRANSPORT",
   "TAXES",
   "OTHER_SUBSCRIPTIONS",
   "OTHER",
+] as const satisfies readonly TransactionCategory[];
+
+/**
+ * Catégories détaillées dans la card « Charges fixes » de la page Perso (dans cet ordre, toujours
+ * affichées même à 0 €). Le total de la card est la somme de ces catégories.
+ */
+export const FIXED_CHARGES_CATEGORIES = [
+  "RENT",
+  "ENERGY",
+  "TELECOM",
+  "INTERNET",
 ] as const satisfies readonly TransactionCategory[];
 
 /**

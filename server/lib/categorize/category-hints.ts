@@ -18,7 +18,11 @@ export const CATEGORY_HINTS = {
   TRANSPORT: "Train, bus, péages, parking, taxi/VTC, abonnements de transport.",
   TAXES: "Impôts, taxes, amendes, prélèvements fiscaux ou sociaux.",
   OTHER_SUBSCRIPTIONS:
-    "Abonnements récurrents : streaming, téléphonie, internet, logiciels, salle de sport.",
+    "Abonnements récurrents autres que énergie, télécom et internet : streaming, logiciels, salle de sport.",
+  ENERGY:
+    "Fournisseur d'électricité ou de gaz (EDF, Engie, TotalEnergies électricité/gaz, Ekwateur…). Hors carburant.",
+  TELECOM: "Forfait téléphone mobile (Orange, SFR, Bouygues, Free Mobile, Sosh, B&You…).",
+  INTERNET: "Abonnement internet / box fixe (fibre, ADSL).",
   OTHER:
     "Tout ce qui ne rentre dans aucune autre catégorie (dont les crédits reçus qui ne sont ni un salaire, ni un versement BNC ou de vacation, ni un remboursement : virements entrants divers).",
   SHORT_TERM_SAVINGS:

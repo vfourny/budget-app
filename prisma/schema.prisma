@@ -38,7 +38,10 @@ enum TransactionCategory {
   HEALTH // Santé
   TRANSPORT // Transport
   TAXES // Impôts et taxes
-  OTHER_SUBSCRIPTIONS // Abonnements divers
+  OTHER_SUBSCRIPTIONS // Abonnements divers (streaming, logiciels…)
+  ENERGY // Énergie (électricité, gaz)
+  TELECOM // Télécom (forfait téléphone)
+  INTERNET // Internet (box)
   OTHER // Autres
   LONG_TERM_SAVINGS // Épargne long terme
   SALARY_PAYMENT // Versement salaire (revenu)

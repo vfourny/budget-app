@@ -40,9 +40,12 @@ export const personal = {
     savings: (labels: readonly string[]) =>
       `Total des virements d'épargne des catégories : ${labels.join(", ")}.`,
   },
+  fixedCharges: {
+    title: "Charges fixes",
+    total: "Total",
+  },
   breakdown: {
     title: "Par catégorie",
-    empty: "Aucune dépense sur cette période.",
   },
   transactions: {
     title: "Transactions",
