@@ -18,7 +18,7 @@ server/lib/csv/
 import { getBankCsvConfig } from "@server/lib/csv/banks";
 import { parseBankStatement } from "@server/lib/csv/parse-bank-statement";
 
-const config = getBankCsvConfig(accountType); // PERSO → BoursoBank, PRO → Banque Populaire
+const config = getBankCsvConfig(accountType); // PERSONAL → BoursoBank, PROFESSIONAL → Banque Populaire
 const { transactions, errors } = parseBankStatement(csvText, config);
 ```
 

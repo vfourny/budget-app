@@ -7,7 +7,7 @@ import {
   LOW_CONFIDENCE_THRESHOLD,
   categorizeTransactions,
 } from "@server/lib/categorize/categorize-transactions";
-import { getGeminiClient } from "@server/lib/gemini";
+import { gemini } from "@server/lib/gemini";
 import { createTRPCRouter, publicProcedure } from "@server/trpc/init";
 
 /** Nombre maximum d'exemples validés montrés à l'IA (un par libellé distinct, les plus récents). */
@@ -45,14 +45,6 @@ export const categorizeRouter = createTRPCRouter({
   run: publicProcedure
     .input(z.object({ batchId: z.string().min(1) }))
     .mutation(async ({ ctx, input }) => {
-      const client = getGeminiClient();
-      if (!client) {
-        throw new TRPCError({
-          code: "PRECONDITION_FAILED",
-          message: "GEMINI_API_KEY n'est pas configurée sur le serveur.",
-        });
-      }
-
       const batch = await ctx.db.importBatch.findUnique({ where: { id: input.batchId } });
       if (!batch) throw new TRPCError({ code: "NOT_FOUND", message: "Import introuvable." });
       if (batch.status !== "PENDING_REVIEW") {
@@ -86,7 +78,7 @@ export const categorizeRouter = createTRPCRouter({
 
       let results;
       try {
-        results = await categorizeTransactions(client, transactions, examples);
+        results = await categorizeTransactions(gemini, transactions, examples);
       } catch (error) {
         console.error("Catégorisation : échec de l'appel à l'IA", error);
         throw toTRPCError(error);

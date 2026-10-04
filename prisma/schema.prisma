@@ -11,36 +11,40 @@ datasource db {
 
 /// Nature d'un relevé / d'une transaction : compte personnel ou compte pro (Stygma).
 enum AccountType {
-  PERSO
-  PRO
+  PERSONAL // Perso
+  PROFESSIONAL // Pro (Stygma)
 }
 
 /// Enveloppes budgétaires (méthode des « comptes » / enveloppes).
 enum Envelope {
-  DEPENSES_COURANTES
-  LOISIRS
-  FORMATION
-  EPARGNE_SECURITE
-  EPARGNE_LONG_TERME
-  PRO
+  CURRENT_EXPENSES // Dépenses courantes
+  LEISURE // Loisirs
+  TRAINING // Formation
+  SAFETY_SAVINGS // Épargne sécurité
+  LONG_TERM_SAVINGS // Épargne long terme
 }
 
 /// Catégorie d'une transaction (liste figée, colonnes du Google Sheet). Le libellé affiché et
 /// l'enveloppe de rattachement vivent dans `src/lib/categories.ts`.
 enum TransactionCategory {
-  ESSENCE
-  ASSURANCE
-  RESTAURANT
-  ALIMENTAIRE
-  SOIREE
-  LOISIRS
-  VETEMENTS_SOINS
-  SANTE
-  TRANSPORT
-  IMPOTS_TAXES
-  AUTRES_ABONNEMENTS
-  AUTRES
-  EPARGNE_LONG_TERME
+  RENT // Loyer
+  FUEL // Essence
+  BANK_INSURANCE // Banque et assurance
+  RESTAURANT // Restaurant
+  GROCERIES // Alimentaire
+  NIGHTLIFE // Soirée
+  LEISURE // Loisirs
+  CLOTHING_CARE // Vêtements & Soins
+  HEALTH // Santé
+  TRANSPORT // Transport
+  TAXES // Impôts et taxes
+  OTHER_SUBSCRIPTIONS // Abonnements divers
+  OTHER // Autres
+  LONG_TERM_SAVINGS // Épargne long terme
+  SALARY_PAYMENT // Versement salaire (revenu)
+  BNC_PAYMENT // Versement BNC (revenu)
+  VACATION_PAYMENT // Versement vacation (revenu)
+  REFUND // Remboursement (crédit)
 }
 
 /// Part du revenu mensuel recommandée pour une enveloppe (en %). Une ligne par enveloppe
@@ -51,8 +55,8 @@ model EnvelopeShare {
 }
 
 enum ImportStatus {
-  PENDING_REVIEW
-  VALIDATED
+  PENDING_REVIEW // En attente de relecture
+  VALIDATED // Validé
 }
 
 /// Un fichier de relevé importé. Ses transactions sont écrites dès l'import (sans catégorie) ;

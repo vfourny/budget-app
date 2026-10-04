@@ -141,11 +141,27 @@ export function ImportReview({ importId }: { importId: string }) {
                   />
                 </Table.Td>
                 <Table.Td ta="right">
-                  <ConfidenceBadge
-                    category={row.category}
-                    confidence={row.categoryConfidence}
-                    needsReview={row.needsReview}
-                  />
+                  <Group gap={8} justify="flex-end" wrap="nowrap">
+                    <ConfidenceBadge
+                      category={row.category}
+                      confidence={row.categoryConfidence}
+                      needsReview={row.needsReview}
+                    />
+                    {/* Le `Select` ne déclenche pas `onChange` si on re-choisit la même valeur :
+                        il faut donc une action dédiée pour confirmer la catégorie proposée par l'IA. */}
+                    {row.category !== null && row.needsReview && !locked && (
+                      <Button
+                        size="compact-xs"
+                        variant="light"
+                        color="teal"
+                        leftSection={<IconCheck size={12} />}
+                        loading={setCategory.isPending && setCategory.variables?.id === row.id}
+                        onClick={() => setCategory.mutate({ id: row.id, category: row.category! })}
+                      >
+                        Confirmer
+                      </Button>
+                    )}
+                  </Group>
                 </Table.Td>
               </Table.Tr>
             ))}
@@ -167,7 +183,7 @@ export function ImportReview({ importId }: { importId: string }) {
             {locked
               ? "Import validé : ses lignes comptent dans les dashboards."
               : toReviewCount > 0
-                ? `Choisis une catégorie pour les ${toReviewCount} transactions surlignées avant de valider l'import.`
+                ? `Confirme ou corrige la catégorie des ${toReviewCount} transactions surlignées avant de valider l'import.`
                 : "Tes corrections serviront d'exemples pour les prochaines catégorisations."}
           </Text>
 
@@ -189,7 +205,7 @@ export function ImportReview({ importId }: { importId: string }) {
                 onDeleted={() => void navigate("/imports")}
               />
               <Tooltip
-                label={`Encore ${toReviewCount} transaction${toReviewCount > 1 ? "s" : ""} à catégoriser`}
+                label={`Encore ${toReviewCount} transaction${toReviewCount > 1 ? "s" : ""} à confirmer ou catégoriser`}
                 disabled={toReviewCount === 0}
               >
                 {/* `data-disabled` plutôt que `disabled` : un bouton désactivé n'affiche pas l'infobulle. */}

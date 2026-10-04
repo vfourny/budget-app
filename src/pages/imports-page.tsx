@@ -12,7 +12,7 @@ export function ImportsPage() {
         eyebrow="Historique des fichiers"
         title="Imports"
         actions={
-          <Button component={Link} to="/imports/nouveau" leftSection={<IconPlus size={16} />}>
+          <Button component={Link} to="/imports/new" leftSection={<IconPlus size={16} />}>
             Nouvel import
           </Button>
         }

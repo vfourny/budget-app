@@ -5,7 +5,7 @@ import { createTRPCRouter, publicProcedure } from "@server/trpc/init";
 
 /** Seules les transactions des imports VALIDATED du compte perso comptent dans le dashboard. */
 const PERSONAL_VALIDATED = {
-  accountType: "PERSO",
+  accountType: "PERSONAL",
   importBatch: { status: "VALIDATED" },
 } as const;
 
