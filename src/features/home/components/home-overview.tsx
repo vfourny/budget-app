@@ -1,21 +1,8 @@
-import {
-  Alert,
-  Badge,
-  Button,
-  Group,
-  Loader,
-  Paper,
-  SimpleGrid,
-  Stack,
-  Text,
-  Title,
-} from "@mantine/core";
-import { IconAlertTriangle } from "@tabler/icons-react";
+import { Group, Loader, Paper, SimpleGrid, Stack, Text, Title } from "@mantine/core";
 import { Link } from "react-router";
 
-import { useImports } from "@/features/imports/hooks/use-imports";
 import { useOverview, usePeriods } from "@/features/personal/hooks/use-personal";
-import { formatCents, formatDate, monthName } from "@/lib/format";
+import { formatCents, monthName } from "@/lib/format";
 import { fr } from "@/lib/i18n/fr";
 
 export function HomeOverview() {
@@ -25,7 +12,6 @@ export function HomeOverview() {
         <PersonalSummary />
         <ProfessionalSummary />
       </SimpleGrid>
-      <ToCheck />
     </Stack>
   );
 }
@@ -127,54 +113,6 @@ function ProfessionalSummary() {
       <Stack gap={18}>
         <SectionTitle title={fr.home.professionalTitle} />
         <Text c="dimmed">{fr.home.professionalSoon}</Text>
-      </Stack>
-    </Paper>
-  );
-}
-
-/** Imports en attente : lignes à catégoriser ou import prêt à valider. */
-function ToCheck() {
-  const imports = useImports();
-  const pending = imports.data?.filter((item) => item.status === "PENDING_REVIEW") ?? [];
-
-  return (
-    <Paper withBorder radius="lg" p={28}>
-      <Stack gap={16}>
-        <Group justify="space-between">
-          <Title order={2}>{fr.home.toCheckTitle}</Title>
-          {pending.length > 0 && (
-            <Badge color="amber" variant="light" size="lg">
-              {pending.length}
-            </Badge>
-          )}
-        </Group>
-
-        {imports.isPending && <Loader color="gold" size="sm" />}
-        {imports.isError && <Alert color="red" title={fr.home.loadImportsFailed} />}
-        {imports.isSuccess && pending.length === 0 && (
-          <Text c="dimmed">{fr.home.nothingToCheck}</Text>
-        )}
-
-        {pending.map((item) => (
-          <Paper key={item.id} radius="md" p={16} withBorder>
-            <Group wrap="nowrap" gap={16}>
-              <IconAlertTriangle size={20} color="var(--mantine-color-amber-4)" />
-              <div style={{ flexGrow: 1, minWidth: 0 }}>
-                <Text fw={600}>
-                  {item.toReviewCount > 0
-                    ? fr.home.transactionsToCheck(item.toReviewCount)
-                    : fr.home.readyToValidate}
-                </Text>
-                <Text size="sm" c="dimmed" truncate>
-                  {fr.home.importedOn(formatDate(item.createdAt), item.fileName)}
-                </Text>
-              </div>
-              <Button component={Link} to={`/imports/${item.id}`} variant="default">
-                {fr.home.review}
-              </Button>
-            </Group>
-          </Paper>
-        ))}
       </Stack>
     </Paper>
   );

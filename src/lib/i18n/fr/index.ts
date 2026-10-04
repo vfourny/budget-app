@@ -1,3 +1,4 @@
+import { auth } from "./auth";
 import { common } from "./common";
 import { accountTypes, categories, envelopes, importStatus, revenueLines } from "./enums";
 import { csvErrors, errors } from "./errors";
@@ -33,6 +34,7 @@ const months = [
  * vérifiés par `satisfies Record<Enum, string>` (voir `enums.ts`).
  */
 export const fr = {
+  auth,
   common,
   nav,
   home,

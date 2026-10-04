@@ -8,6 +8,8 @@ export default defineConfig({
   schema: "prisma/schema.prisma",
   migrations: {
     path: "prisma/migrations",
+    // Exécuté par `prisma db seed` et automatiquement après `prisma migrate reset`.
+    seed: "tsx prisma/seed.ts",
   },
   datasource: {
     // Pas de `env()` ici : il throw si la variable est absente, ce qui casserait

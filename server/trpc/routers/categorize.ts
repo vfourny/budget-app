@@ -10,7 +10,7 @@ import {
 } from "@server/lib/categorize/categorize-transactions";
 import { labelKey, normalizeLabel } from "@server/lib/categorize/normalize-label";
 import { gemini } from "@server/lib/gemini";
-import { createTRPCRouter, publicProcedure } from "@server/trpc/init";
+import { createTRPCRouter, protectedProcedure } from "@server/trpc/init";
 
 /**
  * Nombre maximum d'exemples validés montrés à l'IA : un par libellé distinct (hors date et n° de
@@ -34,7 +34,7 @@ export const categorizeRouter = createTRPCRouter({
    * attente de relecture. Relançable : seules les lignes encore sans catégorie sont traitées, et
    * rien n'est écrit si l'appel à l'IA échoue.
    */
-  run: publicProcedure
+  run: protectedProcedure
     .input(z.object({ batchId: z.string().min(1) }))
     .mutation(async ({ ctx, input }) => {
       const batch = await ctx.db.importBatch.findUnique({ where: { id: input.batchId } });

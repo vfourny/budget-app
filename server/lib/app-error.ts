@@ -6,6 +6,7 @@ import { TRPCError } from "@trpc/server";
  * (dictionnaire exhaustif : un code ajouté ici sans traduction casse `tsc`).
  */
 export type AppErrorCode =
+  | "NOT_AUTHENTICATED"
   | "IMPORT_NOT_FOUND"
   | "IMPORT_ALREADY_VALIDATED"
   | "TRANSACTION_NOT_FOUND"

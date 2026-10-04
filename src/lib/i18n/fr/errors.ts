@@ -15,6 +15,7 @@ type ErrorMessages = {
  * `satisfies` : `tsc` échoue si un code serveur n'a pas de traduction.
  */
 export const errors = {
+  NOT_AUTHENTICATED: "Session expirée : reconnecte-toi.",
   IMPORT_NOT_FOUND: "Import introuvable.",
   IMPORT_ALREADY_VALIDATED: "Cet import est déjà validé.",
   TRANSACTION_NOT_FOUND: "Transaction introuvable.",

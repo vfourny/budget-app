@@ -34,7 +34,7 @@ Choix délibéré : **le plus simple possible**. SPA React (pas de SSR, pas de S
 | API         | tRPC 11 + Zod 4, TanStack Query 5 (`@trpc/tanstack-react-query`)             |
 | DB          | Prisma 7 + PostgreSQL Neon (driver adapter `@prisma/adapter-neon`)           |
 | UI          | Mantine 9 + React Router 8, thème sombre « obsidian / platine », accent doré |
-| Auth        | Better Auth (mono-utilisateur) — pas encore en place                         |
+| Auth        | Better Auth (email + mot de passe, mono-utilisateur, sessions en base)       |
 | IA          | API Gemini (Google AI Studio) pour catégoriser les lignes de relevé          |
 | Hébergement | Vercel (Hobby, détection Nitro automatique) + Neon (Free)                    |
 | Qualité     | oxlint (règles React hooks incluses), Prettier, `tsc`                        |
@@ -100,7 +100,12 @@ nitro.config.ts        # serverDir: ./server
   `@/lib/trpc`, encapsulé dans un hook de feature ; gérer `isPending` / `isError` dans le
   composant. Écriture : `useMutation(trpc.x.y.mutationOptions())` + invalidation ciblée.
 - **Nouvelle route tRPC** : `server/trpc/routers/<domaine>.ts` + enregistrement dans
-  `server/trpc/root.ts`. Entrées validées par `.input(zodSchema)`.
+  `server/trpc/root.ts`. Entrées validées par `.input(zodSchema)`. **Toujours `protectedProcedure`**
+  (`server/trpc/init.ts`, 401 sans session) ; `publicProcedure` seulement pour du contenu public.
+- **Auth** : Better Auth (`server/lib/auth.ts`, monté sur `/api/auth/*`). Inscription publique
+  **désactivée** ; l'unique compte est créé par le seed (`pnpm db:seed`, rejoué par `pnpm db:reset`) depuis `SEED_USER_EMAIL` / `SEED_USER_PASSWORD`. Front : `authClient`
+  (`@/lib/auth-client`), routes privées sous `RequireAuth` dans `app.tsx`. Pas de `userId` sur les
+  données métier (un seul utilisateur) : à revoir si le multi-utilisateurs devient un besoin.
 - **Valeurs dérivées** calculées pendant le rendu (≈ `computed`), pas stockées dans un
   `useState` ; `useMemo` seulement si le calcul est coûteux.
 - **Hooks custom** (`useXxx`) dans `features/<domaine>/hooks/` dès qu'une logique à état est

@@ -2,7 +2,7 @@ import { z } from "zod";
 
 import { TransactionCategory } from "@server/generated/prisma/enums";
 import { appError } from "@server/lib/app-error";
-import { createTRPCRouter, publicProcedure } from "@server/trpc/init";
+import { createTRPCRouter, protectedProcedure } from "@server/trpc/init";
 
 export const transactionRouter = createTRPCRouter({
   /**
@@ -10,7 +10,7 @@ export const transactionRouter = createTRPCRouter({
    * catégorie choisie par l'utilisateur = « Confirmée » (plus « à vérifier »). Refusé une fois
    * l'import validé.
    */
-  setCategory: publicProcedure
+  setCategory: protectedProcedure
     .input(z.object({ id: z.string().min(1), category: z.enum(TransactionCategory) }))
     .mutation(async ({ ctx, input }) => {
       const transaction = await ctx.db.transaction.findUnique({

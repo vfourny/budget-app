@@ -35,6 +35,18 @@ export const ENVELOPE_CATEGORIES = {
   LONG_TERM_SAVINGS: ["LONG_TERM_SAVINGS"],
 } as const satisfies Record<Envelope, readonly TransactionCategory[]>;
 
+/**
+ * Parts du revenu mensuel recommandées par enveloppe, en % (100 % du revenu affecté). Valeurs
+ * utilisées tant que rien n'est configuré dans Réglages, et par le bouton « Valeurs par défaut ».
+ */
+export const DEFAULT_ENVELOPE_PERCENTS = {
+  CURRENT_EXPENSES: 60,
+  LEISURE: 10,
+  TRAINING: 10,
+  SAFETY_SAVINGS: 10,
+  LONG_TERM_SAVINGS: 10,
+} as const satisfies Record<Envelope, number>;
+
 /** Enveloppes d'épargne : leurs débits comptent en « Épargne », pas en « Dépenses ». */
 export const SAVINGS_ENVELOPES = [
   "SAFETY_SAVINGS",

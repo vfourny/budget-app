@@ -5,6 +5,7 @@ import {
   useEnvelopeShares,
   useSetEnvelopeShares,
 } from "@/features/settings/hooks/use-envelope-shares";
+import { DEFAULT_ENVELOPE_PERCENTS } from "@/lib/budget-rules";
 import { errorMessage } from "@/lib/errors";
 import { fr } from "@/lib/i18n/fr";
 import type { BudgetEnvelope } from "@server/lib/settings/envelope-shares";
@@ -29,6 +30,9 @@ function SharesFields({ initial }: { initial: Shares }) {
   const envelopes = Object.keys(initial) as BudgetEnvelope[];
   const total = envelopes.reduce((sum, envelope) => sum + draft[envelope], 0);
   const unassigned = 100 - total;
+  const isDefault = envelopes.every(
+    (envelope) => draft[envelope] === DEFAULT_ENVELOPE_PERCENTS[envelope],
+  );
   const changed = envelopes.some((envelope) => draft[envelope] !== initial[envelope]);
 
   return (
@@ -87,6 +91,14 @@ function SharesFields({ initial }: { initial: Shares }) {
           onClick={() => save.mutate(draft)}
         >
           {fr.common.save}
+        </Button>
+        {/* Remplit seulement le formulaire : rien n'est enregistré avant « Enregistrer ». */}
+        <Button
+          variant="default"
+          disabled={isDefault}
+          onClick={() => setDraft({ ...DEFAULT_ENVELOPE_PERCENTS })}
+        >
+          {fr.settings.shares.resetDefaults}
         </Button>
       </Group>
     </Stack>

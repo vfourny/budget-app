@@ -6,7 +6,7 @@ import { AccountType } from "@server/generated/prisma/enums";
 import { removeAlreadyImported } from "@server/lib/csv/dedupe";
 import { getBankCsvConfig } from "@server/lib/csv/banks";
 import { parseBankStatement } from "@server/lib/csv/parse-bank-statement";
-import { createTRPCRouter, publicProcedure } from "@server/trpc/init";
+import { createTRPCRouter, protectedProcedure } from "@server/trpc/init";
 
 /** Le CSV voyage en texte dans le JSON : un relevé fait quelques centaines de lignes, loin de la
  * limite Vercel (4,5 Mo). */
@@ -22,7 +22,7 @@ export const importRouter = createTRPCRouter({
    * sans catégorie. La catégorisation IA et la relecture viennent ensuite ; les dashboards ne
    * compteront que les imports VALIDATED.
    */
-  create: publicProcedure.input(createImportInputSchema).mutation(async ({ ctx, input }) => {
+  create: protectedProcedure.input(createImportInputSchema).mutation(async ({ ctx, input }) => {
     const config = getBankCsvConfig(input.accountType);
 
     const { transactions, errors } = parseBankStatement(input.csvText, config);
@@ -66,7 +66,7 @@ export const importRouter = createTRPCRouter({
   }),
 
   /** Historique : un import par ligne, le plus récent d'abord. */
-  list: publicProcedure.query(async ({ ctx }) => {
+  list: protectedProcedure.query(async ({ ctx }) => {
     const batches = await ctx.db.importBatch.findMany({
       orderBy: { createdAt: "desc" },
       select: {
@@ -99,48 +99,50 @@ export const importRouter = createTRPCRouter({
   }),
 
   /** Un import et ses lignes (ordre du relevé), pour l'écran de relecture. */
-  get: publicProcedure.input(z.object({ id: z.string().min(1) })).query(async ({ ctx, input }) => {
-    const batch = await ctx.db.importBatch.findUnique({
-      where: { id: input.id },
-      select: {
-        id: true,
-        fileName: true,
-        status: true,
-        createdAt: true,
-        accountType: true,
-        transactions: {
-          orderBy: [{ date: "asc" }, { createdAt: "asc" }],
-          select: {
-            id: true,
-            date: true,
-            label: true,
-            amountCents: true,
-            category: true,
-            categoryConfidence: true,
+  get: protectedProcedure
+    .input(z.object({ id: z.string().min(1) }))
+    .query(async ({ ctx, input }) => {
+      const batch = await ctx.db.importBatch.findUnique({
+        where: { id: input.id },
+        select: {
+          id: true,
+          fileName: true,
+          status: true,
+          createdAt: true,
+          accountType: true,
+          transactions: {
+            orderBy: [{ date: "asc" }, { createdAt: "asc" }],
+            select: {
+              id: true,
+              date: true,
+              label: true,
+              amountCents: true,
+              category: true,
+              categoryConfidence: true,
+            },
           },
         },
-      },
-    });
-    if (!batch) throw appError("NOT_FOUND", "IMPORT_NOT_FOUND");
+      });
+      if (!batch) throw appError("NOT_FOUND", "IMPORT_NOT_FOUND");
 
-    return {
-      id: batch.id,
-      fileName: batch.fileName,
-      status: batch.status,
-      createdAt: batch.createdAt,
-      accountType: batch.accountType,
-      transactions: batch.transactions.map((transaction) => ({
-        ...transaction,
-        needsReview: needsReview(transaction),
-      })),
-    };
-  }),
+      return {
+        id: batch.id,
+        fileName: batch.fileName,
+        status: batch.status,
+        createdAt: batch.createdAt,
+        accountType: batch.accountType,
+        transactions: batch.transactions.map((transaction) => ({
+          ...transaction,
+          needsReview: needsReview(transaction),
+        })),
+      };
+    }),
 
   /**
    * Valide un import : il compte désormais dans les dashboards et ses lignes servent d'exemples
    * à la catégorisation. Refusé tant qu'une ligne est sans catégorie ou à faible confiance.
    */
-  validate: publicProcedure
+  validate: protectedProcedure
     .input(z.object({ id: z.string().min(1) }))
     .mutation(async ({ ctx, input }) => {
       const batch = await ctx.db.importBatch.findUnique({
@@ -167,7 +169,7 @@ export const importRouter = createTRPCRouter({
     }),
 
   /** Supprime un import et, en cascade, toutes ses transactions (validé ou non). */
-  delete: publicProcedure
+  delete: protectedProcedure
     .input(z.object({ id: z.string().min(1) }))
     .mutation(async ({ ctx, input }) => {
       const { count } = await ctx.db.importBatch.deleteMany({ where: { id: input.id } });

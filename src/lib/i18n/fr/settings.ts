@@ -12,6 +12,7 @@ export const settings = {
     totalRemaining: (total: number, remaining: number) =>
       `Total : ${total} % — il reste ${remaining} % à affecter`,
     saveFailed: "Enregistrement impossible",
+    resetDefaults: "Valeurs par défaut",
   },
 } as const;
 

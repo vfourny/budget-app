@@ -1,7 +1,9 @@
 import { Route, Routes } from "react-router";
 
+import { RequireAuth } from "@/features/auth/components/require-auth";
 import { AppLayout } from "@/features/layout/components/app-layout";
 import { HomePage } from "@/pages/home-page";
+import { LoginPage } from "@/pages/login-page";
 import { ImportPage } from "@/pages/import-page";
 import { ImportReviewPage } from "@/pages/import-review-page";
 import { ImportsPage } from "@/pages/imports-page";
@@ -9,19 +11,23 @@ import { PersonalPage } from "@/pages/personal-page";
 import { ProfessionalPage } from "@/pages/professional-page";
 import { SettingsPage } from "@/pages/settings-page";
 
-// Table des routes ≈ `routes: [...]` de Vue Router. La route sans `path` (AppLayout) est un
-// layout : elle affiche la barre latérale et rend la page enfant à la place de `<Outlet />`.
+// Table des routes ≈ `routes: [...]` de Vue Router. Les routes sans `path` sont des layouts :
+// `RequireAuth` ne laisse passer que les utilisateurs connectés (sinon → /login), puis
+// `AppLayout` affiche la barre latérale et rend la page enfant à la place de `<Outlet />`.
 export function App() {
   return (
     <Routes>
-      <Route element={<AppLayout />}>
-        <Route index element={<HomePage />} />
-        <Route path="personal" element={<PersonalPage />} />
-        <Route path="professional" element={<ProfessionalPage />} />
-        <Route path="imports" element={<ImportsPage />} />
-        <Route path="imports/new" element={<ImportPage />} />
-        <Route path="imports/:importId" element={<ImportReviewPage />} />
-        <Route path="settings" element={<SettingsPage />} />
+      <Route path="login" element={<LoginPage />} />
+      <Route element={<RequireAuth />}>
+        <Route element={<AppLayout />}>
+          <Route index element={<HomePage />} />
+          <Route path="personal" element={<PersonalPage />} />
+          <Route path="professional" element={<ProfessionalPage />} />
+          <Route path="imports" element={<ImportsPage />} />
+          <Route path="imports/new" element={<ImportPage />} />
+          <Route path="imports/:importId" element={<ImportReviewPage />} />
+          <Route path="settings" element={<SettingsPage />} />
+        </Route>
       </Route>
     </Routes>
   );

@@ -51,7 +51,7 @@ enum TransactionCategory {
 }
 
 /// Part du revenu mensuel recommandée pour une enveloppe (en %). Une ligne par enveloppe
-/// configurée ; sans ligne, la valeur par défaut de `server/lib/settings/envelope-shares.ts` s'applique.
+/// configurée ; sans ligne, la valeur par défaut de `DEFAULT_ENVELOPE_PERCENTS` (`src/lib/budget-rules.ts`) s'applique.
 model EnvelopeShare {
   envelope Envelope @id
   percent  Int
@@ -97,4 +97,71 @@ model Transaction {
   @@index([accountType, year, month])
   @@index([category])
   @@index([importBatchId])
+}
+
+// ─── Authentification (Better Auth) ──────────────────────────────────────────────────────────
+// Modèles imposés par Better Auth (adapter Prisma) : ne pas renommer les champs. App
+// mono-utilisateur : un seul `User`, créé par le seed (`prisma/seed.ts`, inscription publique
+// désactivée), donc les données métier ne portent pas de `userId`.
+
+model User {
+  id            String    @id
+  name          String
+  email         String    @unique
+  emailVerified Boolean   @default(false)
+  image         String?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  sessions      Session[]
+  accounts      Account[]
+
+  @@map("user")
+}
+
+model Session {
+  id        String   @id
+  expiresAt DateTime
+  token     String   @unique
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  ipAddress String?
+  userAgent String?
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@map("session")
+}
+
+/// Identifiants d'un user : pour l'email + mot de passe, `providerId = "credential"` et `password` = hash.
+model Account {
+  id                    String    @id
+  accountId             String
+  providerId            String
+  userId                String
+  user                  User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  accessToken           String?
+  refreshToken          String?
+  idToken               String?
+  accessTokenExpiresAt  DateTime?
+  refreshTokenExpiresAt DateTime?
+  scope                 String?
+  password              String?
+  createdAt             DateTime  @default(now())
+  updatedAt             DateTime  @updatedAt
+
+  @@index([userId])
+  @@map("account")
+}
+
+model Verification {
+  id         String   @id
+  identifier String
+  value      String
+  expiresAt  DateTime
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@index([identifier])
+  @@map("verification")
 }
