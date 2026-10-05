@@ -136,8 +136,8 @@ nitro.config.ts        # serverDir: ./server
   `dark` / `gold` / `amber`, polices, rayons). Pas de couleur en dur dans les composants : utiliser
   les tokens Mantine (`c="gold.6"`, `var(--mantine-color-text)`, `c="dimmed"`…) ou les variables
   `--app-*` (`--app-border`, `--app-hover`, `--app-caption`…). CSS sur mesure en **CSS Modules**
-  (`xxx.module.css`, ≈ `<style scoped>` Vue). Thèmes **clair et sombre** (sombre par défaut, bascule
-  dans la barre latérale, choix mémorisé par Mantine) : jamais `dark.N` / `--mantine-color-dark-N`
+  (`xxx.module.css`, ≈ `<style scoped>` Vue). Thèmes **clair et sombre** (suit le système par défaut,
+  bouton Système → Clair → Sombre dans la barre latérale, choix mémorisé par Mantine) : jamais `dark.N` / `--mantine-color-dark-N`
   dans un composant (figé en sombre) ; une couleur qui dépend du thème = une variable dans
   `cssVariablesResolver` (`light` + `dark`).
 - **Routing** : React Router en mode « library » (`BrowserRouter` + `<Routes>` dans `app.tsx`).
