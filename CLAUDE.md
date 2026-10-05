@@ -43,7 +43,8 @@ Choix délibéré : **le plus simple possible**. SPA React (pas de SSR, pas de S
 
 ```bash
 pnpm dev            # front + API sur un seul serveur (http://localhost:5173, API sous /api)
-pnpm check          # lint + typecheck + format:check (à lancer avant toute PR)
+pnpm check          # lint + typecheck + format:check + i18n:check (à lancer avant toute PR)
+pnpm test           # Vitest : calculs purs (server/lib/pro, shared)
 pnpm build          # build de prod (fait aussi en CI) → .output/ (ou .vercel/output sur Vercel)
 pnpm preview        # sert le build de prod localement
 pnpm lint:fix       # autofix oxlint
@@ -72,12 +73,13 @@ src/                   # FRONT — SPA React, tourne uniquement dans le navigate
   lib/                 # utilitaires front : trpc.ts (client + queryClient), theme.ts (thème Mantine)…
     i18n/fr/           # TOUS les textes de l'UI (dictionnaires typés) + plural.ts (accord en nombre)
   styles/global.css    # règles CSS globales (le thème, lui, est dans lib/theme.ts)
-shared/                # code pur partagé front + back (budget-rules.ts), alias @shared/
+shared/                # code pur partagé front + back (budget-rules.ts, pro-rules.ts, account-categories.ts), alias @shared/
 server/                # BACKEND — Nitro, mêmes conventions que le server/ de Nuxt
   api/                 # routes HTTP : server/api/health.ts → GET /api/health
     trpc/[...path].ts  # point d'entrée HTTP de tRPC
   trpc/                # init.ts (contexte, procédures), root.ts (appRouter), routers/<domaine>.ts
   lib/                 # db.ts (PrismaClient singleton), env.ts (validation Zod des variables)
+    pro/               # dashboard Pro : load-year (requêtes) + compute-month (calcul pur, testé) + regimes/
   generated/prisma/    # client Prisma généré — gitignoré, ne pas éditer
 prisma/                # schema.prisma, migrations/
 prisma.config.ts       # config CLI Prisma 7 (URL directe pour les migrations)
@@ -95,7 +97,10 @@ nitro.config.ts        # serverDir: ./server
   `shared/` n'importe jamais de `src/` ni de `server/` (sauf `import type`).
 - **Règles du budget** (catégories → enveloppes, épargne, catégories de la card « Par catégorie »,
   lignes de revenus, par `key`) : uniquement dans `shared/budget-rules.ts`, jamais en dur ailleurs. Aucun libellé dedans :
-  les textes sont dans `@/lib/i18n/fr`.
+  les textes sont dans `@/lib/i18n/fr`. Équivalent pro : `shared/pro-rules.ts` (TVA par charge, frais mixtes, groupes
+  du prévisionnel) et `shared/account-categories.ts` (catégories proposées par type de compte).
+- **Calculs du dashboard Pro** : fonctions **pures** dans `server/lib/pro/` (aucun accès base), testées avec Vitest ;
+  les requêtes restent dans `load-year.ts`. Un statut juridique = un `ProRegime` (`server/lib/pro/regimes/`).
 - **Données** : toujours via tRPC + TanStack Query. **Pas de `fetch` dans un `useEffect`.**
   `useEffect` est réservé à la synchro avec un système externe (oxlint le signale sinon).
 - **Pattern de lecture** : `useQuery(trpc.<domaine>.<proc>.queryOptions())` avec `trpc` de
@@ -161,10 +166,10 @@ nitro.config.ts        # serverDir: ./server
 - **Une fonctionnalité = une branche = une PR**, diff court (relisible en quelques minutes).
   Branches : `feat/…`, `fix/…`, `chore/…`. Commits : Conventional Commits.
 - Si une étape est trop grosse, découpe en **PR empilées** (la PR N+1 cible la branche N).
-- Avant toute PR : self-review du diff, `pnpm check` + `pnpm build` verts, puis
+- Avant toute PR : self-review du diff, `pnpm check` + `pnpm test` + `pnpm build` verts, puis
   `/ship-pr`. Ne présenter que du vert.
 - Remplir `.github/pull_request_template.md`, section « Notes React » incluse.
-- CI GitHub Actions (`.github/workflows/ci.yml`) : lint, typecheck, format, build sur chaque PR.
+- CI GitHub Actions (`.github/workflows/ci.yml`) : lint, typecheck, format, tests, build sur chaque PR.
 - Hook Git pre-commit (`lefthook.yml`, installé par `pnpm install`) : oxlint --fix + Prettier
   sur les fichiers stagés, commit bloqué s'il reste une erreur. Ne pas contourner avec
   `--no-verify` : corriger l'erreur.
@@ -188,9 +193,11 @@ schéma Zod + modèle Prisma, ajout d'un widget dashboard).
 4. Route tRPC `categorize` (Gemini, few-shot sur transactions validées, JSON `category` (valeur de l'enum) + `confidence`) (fait)
 5. Écran de relecture : historique, tableau de correction, « Valider », suppression d'un import (fait)
 6. Dashboard Perso mois / année : totaux, transactions, par catégorie (fait) ; parts recommandées par enveloppe dans Réglages + jauges réel vs recommandé (fait) ; abonnements, IR (à faire)
-7. Après validation du MVP perso : partie pro Stygma (TVA, facturation, prévisionnel/réel)
+7. Partie pro Stygma (fait, voir `docs/plan-pro.md`) : catégories pro, règles par année et clients dans Réglages,
+   dashboard mois / année (CA, TVA, bénéfice, facturation & encaissements, catégories, frais mixtes, km), éditeur du
+   prévisionnel ; à venir : régimes IS / EURL, TVA à l'encaissement
 
-Hors scope : synchro bancaire auto, multi-utilisateurs, facturation/TVA en v1.
+Hors scope : synchro bancaire auto, multi-utilisateurs, émission de factures.
 
 ## Décisions
 
@@ -217,3 +224,7 @@ Hors scope : synchro bancaire auto, multi-utilisateurs, facturation/TVA en v1.
 - pnpm, une seule app (pas de monorepo).
 - TypeScript 6.0 (comme le template Vite), oxlint plutôt qu'ESLint (template Vite, plus rapide,
   règles `rules-of-hooks` / `exhaustive-deps` incluses).
+- **Pro (2026-10-06)** : catégories pro dans l'enum `TransactionCategory` (filtrées par type de compte) plutôt qu'un
+  2e enum ; prévisionnel sans saisie = réel du même mois N-1 ; salaire et cotisations calculés depuis les règles de
+  l'année (les prélèvements URSSAF / PAS… ne comptent pas dans les charges) ; encaissements rapprochés par mot-clé
+  client (FIFO, factures des mois antérieurs) ; graphiques en CSS (pas de lib) ; Vitest pour les calculs purs.
