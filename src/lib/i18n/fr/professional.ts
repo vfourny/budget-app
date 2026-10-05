@@ -246,6 +246,24 @@ export const professional = {
       mileageSub: (km: string, left: string) =>
         `${km} km sur l'année · frais mixtes restant dus : ${left}`,
     },
+    statement: {
+      title: "Compte de résultat simplifié",
+      subtitle:
+        "en € HT · mois à venir = prévisionnel (italique) · « Final » = réel + prévisionnel restant",
+      line: "Poste",
+      final: "Final",
+      rows: {
+        forecastRevenue: "CA HT · prévu d'origine",
+        revenue: "CA HT · final",
+        charges: "Charges pro",
+        payroll: "Salaires + cotisations patronales",
+        socialCharges: "Charges sociales sur bénéfice",
+        profit: "Bénéfice",
+        bnc: "Revenus BNC prélevés",
+        vat: "TVA à reverser",
+        mileage: "Frais km à déclarer",
+      },
+    },
     chart: {
       title: "CA HT · réel et prévisionnel",
       actual: "Réel",

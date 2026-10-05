@@ -17,6 +17,7 @@ import { MixedCostsCard } from "@/features/professional/components/month/mixed-c
 import { ProfitCard } from "@/features/professional/components/month/profit-card";
 import { RevenueKpiCard } from "@/features/professional/components/month/revenue-kpi-card";
 import { VatCard } from "@/features/professional/components/month/vat-card";
+import { IncomeStatement } from "@/features/professional/components/year/income-statement";
 import { RevenueChart } from "@/features/professional/components/year/revenue-chart";
 import { YearKpis } from "@/features/professional/components/year/year-kpis";
 import {
@@ -181,6 +182,7 @@ function YearContent({ year }: { year: number }) {
     <>
       <YearKpis months={months.data} />
       <RevenueChart year={year} months={months.data} />
+      <IncomeStatement months={months.data} />
     </>
   );
 }
