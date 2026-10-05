@@ -1,8 +1,7 @@
-import { Route, Routes } from "react-router";
+import { Navigate, Route, Routes } from "react-router";
 
 import { RequireAuth } from "@/features/auth/components/require-auth";
 import { AppLayout } from "@/features/layout/components/app-layout";
-import { HomePage } from "@/pages/home-page";
 import { LoginPage } from "@/pages/login-page";
 import { ImportPage } from "@/pages/import-page";
 import { ImportReviewPage } from "@/pages/import-review-page";
@@ -20,7 +19,8 @@ export function App() {
       <Route path="login" element={<LoginPage />} />
       <Route element={<RequireAuth />}>
         <Route element={<AppLayout />}>
-          <Route index element={<HomePage />} />
+          {/* Pas d'accueil : `/` redirige vers le dashboard Perso. */}
+          <Route index element={<Navigate to="/personal" replace />} />
           <Route path="personal" element={<PersonalPage />} />
           <Route path="professional" element={<ProfessionalPage />} />
           <Route path="imports" element={<ImportsPage />} />

@@ -60,6 +60,17 @@ model EnvelopeShare {
   percent  Int
 }
 
+/// Tranche du barème de l'IR (1 part) en vigueur une année donnée (`year` = année affichée dans le
+/// dashboard). `fromCents` = seuil bas de la tranche, `ratePercent` = taux marginal. Une année sans
+/// ligne = barème non renseigné (le dashboard demande de le saisir dans Réglages).
+model IncomeTaxBracket {
+  year        Int @db.SmallInt
+  fromCents   Int
+  ratePercent Int @db.SmallInt
+
+  @@id([year, fromCents])
+}
+
 enum ImportStatus {
   PENDING_REVIEW // En attente de relecture
   VALIDATED // Validé
@@ -117,8 +128,6 @@ model User {
   updatedAt     DateTime  @updatedAt
   sessions      Session[]
   accounts      Account[]
-
-  @@map("user")
 }
 
 model Session {
@@ -133,7 +142,6 @@ model Session {
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId])
-  @@map("session")
 }
 
 /// Identifiants d'un user : pour l'email + mot de passe, `providerId = "credential"` et `password` = hash.
@@ -154,7 +162,6 @@ model Account {
   updatedAt             DateTime  @updatedAt
 
   @@index([userId])
-  @@map("account")
 }
 
 model Verification {
@@ -166,5 +173,4 @@ model Verification {
   updatedAt  DateTime @updatedAt
 
   @@index([identifier])
-  @@map("verification")
 }

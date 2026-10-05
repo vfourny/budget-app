@@ -14,6 +14,21 @@ const envelopeSharesSchema = z
     message: "Envelope shares must sum to exactly 100.",
   });
 
+const incomeTaxBracketsSchema = z
+  .array(
+    z.object({
+      fromCents: z.number().int().min(0),
+      ratePercent: z.number().int().min(0).max(100),
+    }),
+  )
+  .min(1)
+  .refine(
+    (brackets) =>
+      brackets[0].fromCents === 0 &&
+      brackets.every((b, i) => i === 0 || b.fromCents > brackets[i - 1].fromCents),
+    { message: "Brackets must start at 0 and have strictly increasing thresholds." },
+  );
+
 export const settingsRouter = createTRPCRouter({
   /** Part du revenu recommandée par enveloppe (valeurs par défaut si jamais configurée). */
   envelopeShares: protectedProcedure.query(async ({ ctx }) => {
@@ -38,6 +53,30 @@ export const settingsRouter = createTRPCRouter({
           }),
         ),
       );
+      return input;
+    }),
+
+  /** Barème de l'IR d'une année, trié par seuil ; tableau vide si jamais renseigné. */
+  incomeTaxBrackets: protectedProcedure
+    .input(z.object({ year: z.number().int() }))
+    .query(({ ctx, input }) =>
+      ctx.db.incomeTaxBracket.findMany({
+        where: { year: input.year },
+        orderBy: { fromCents: "asc" },
+        select: { fromCents: true, ratePercent: true },
+      }),
+    ),
+
+  /** Remplace le barème d'une année (suppression + création en une seule transaction SQL). */
+  setIncomeTaxBrackets: protectedProcedure
+    .input(z.object({ year: z.number().int(), brackets: incomeTaxBracketsSchema }))
+    .mutation(async ({ ctx, input }) => {
+      await ctx.db.$transaction([
+        ctx.db.incomeTaxBracket.deleteMany({ where: { year: input.year } }),
+        ctx.db.incomeTaxBracket.createMany({
+          data: input.brackets.map((bracket) => ({ year: input.year, ...bracket })),
+        }),
+      ]);
       return input;
     }),
 });

@@ -163,7 +163,7 @@ function PeriodContent({ view, period }: { view: View; period: Period }) {
 
   return (
     <>
-      <KpiCards view={view} overview={overview.data} />
+      <KpiCards view={view} year={period.year} overview={overview.data} />
       <FixedChargesCard fixedCharges={overview.data.fixedCharges} />
       <Grid mt={16} gap={16}>
         {view === "month" && (

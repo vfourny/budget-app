@@ -133,8 +133,8 @@ nitro.config.ts        # serverDir: ./server
 - Validation des entrées : schémas Zod, partagés entre tRPC et formulaires.
 - UI en **français**, code/identifiants/commits en **anglais**.
 - **Textes de l'UI** : jamais en dur dans un composant ni dans `budget-rules.ts` : ils viennent du
-  dictionnaire `fr` de `@/lib/i18n/fr` (`fr.nav.home`, `fr.categories[category]`…), un fichier par
-  domaine (`common`, `nav`, `home`, `imports`, `review`, `personal`, `settings`, `enums`, `errors`).
+  dictionnaire `fr` de `@/lib/i18n/fr` (`fr.nav.personal`, `fr.categories[category]`…), un fichier par
+  domaine (`common`, `nav`, `imports`, `review`, `personal`, `settings`, `enums`, `errors`).
   Pas de lib i18n pour l'instant (une seule langue) : de simples objets `as const`. Texte avec
   variable = fonction (`fr.imports.confirmDelete(n)`) ; pluriels via `plural` / `pluralize`
   (`@/lib/i18n/plural`), jamais de `n > 1 ? "s" : ""` à la main. Libellés d'un enum Prisma :
@@ -179,7 +179,7 @@ schéma Zod + modèle Prisma, ajout d'un widget dashboard).
 3. Upload CSV (parser générique, mapping de colonnes par banque) (fait)
 4. Route tRPC `categorize` (Gemini, few-shot sur transactions validées, JSON `category` (valeur de l'enum) + `confidence`) (fait)
 5. Écran de relecture : historique, tableau de correction, « Valider », suppression d'un import (fait)
-6. Dashboard Perso mois / année : totaux, transactions, par catégorie (fait) ; Accueil (résumé du mois + imports à vérifier) (fait) ; parts recommandées par enveloppe dans Réglages + jauges réel vs recommandé (fait) ; abonnements, IR (à faire)
+6. Dashboard Perso mois / année : totaux, transactions, par catégorie (fait) ; parts recommandées par enveloppe dans Réglages + jauges réel vs recommandé (fait) ; abonnements, IR (à faire)
 7. Après validation du MVP perso : partie pro Stygma (TVA, facturation, prévisionnel/réel)
 
 Hors scope : synchro bancaire auto, multi-utilisateurs, facturation/TVA en v1.

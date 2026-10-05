@@ -135,13 +135,15 @@ reste des débits sont des **dépenses**.
   au-delà ; l'inverse pour l'épargne), Revenus (détail : Salaire = `SALARY_PAYMENT` + `BNC_PAYMENT`, Vacations,
   Remboursement pro, Autre remboursement, + « Autres » s'il reste des crédits non rangés), Épargne du mois (+ % des
   revenus) ; tableau des transactions triable ; dépenses par catégorie (toutes les catégories de la liste, même à 0 €).
-- **Vue année** : mêmes totaux sur l'année choisie, plus la dépense moyenne par mois (mois ayant des données).
+- **Ordre des cartes** (mois et année) : Revenus, Dépenses, Épargne.
+- **Vue année** : mêmes totaux sur l'année choisie, sur deux lignes (3 + 2) : plus la dépense moyenne par mois (mois ayant des données) et l'**IR estimé** (barème progressif 1 part de l'année affichée, appliqué au revenu annualisé = cumul / mois avec données × 12, sans abattement ni réductions). Le barème est stocké en base (table `IncomeTaxBracket`, une ligne par tranche et par année) et se saisit dans **Réglages** ; le barème de chaque année est inséré par le seed (`prisma/seed.ts`, `INCOME_TAX_BRACKETS_BY_YEAR`, 2025 et 2026 pour l'instant) : **il faudra y ajouter chaque nouvelle année** puis relancer `pnpm db:seed` (sur develop et production), ou le saisir dans Réglages. Si l'année affichée n'a pas de barème, la card affiche « Barème de l'IR <année> non renseigné » avec un lien vers Réglages.
+
 - Les parts recommandées (méthode des 5 comptes) se règlent dans **Réglages** (le total doit faire exactement 100 %).
   Les 5 enveloppes sont toujours affichées avec leur jauge, même à 0 €.
 - **Card Charges fixes** (bandeau entre les cartes KPI et le tableau) : débits de la période pour Loyer, Énergie, Télécom
   et Internet (`FIXED_CHARGES_CATEGORIES` dans budget-rules), toujours affichés même à 0 €, + leur total ; mensuel en vue mois,
   cumulé en vue année.
-- **À venir** : donut par catégorie en vue année, estimation de l'IR.
+- **À venir** : donut par catégorie en vue année.
 - Mockup de référence : canvas Claude Design « Budget — maquette MVP » (5 écrans : tableau de bord mois, import CSV,
   relecture, vue année, tokens).
 

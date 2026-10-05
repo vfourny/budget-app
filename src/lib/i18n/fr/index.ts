@@ -2,7 +2,6 @@ import { auth } from "./auth";
 import { common } from "./common";
 import { accountTypes, categories, envelopes, importStatus, revenueLines } from "./enums";
 import { csvErrors, errors } from "./errors";
-import { home } from "./home";
 import { importForm, imports } from "./imports";
 import { nav } from "./nav";
 import { personal } from "./personal";
@@ -37,7 +36,6 @@ export const fr = {
   auth,
   common,
   nav,
-  home,
   imports,
   importForm,
   review,
