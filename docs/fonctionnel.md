@@ -144,9 +144,77 @@ reste des débits sont des **dépenses**.
   et Internet (`FIXED_CHARGES_CATEGORIES` dans budget-rules), toujours affichés même à 0 €, + leur total ; mensuel en vue mois,
   cumulé en vue année.
 - **À venir** : donut par catégorie en vue année.
-- Mockup de référence : canvas Claude Design « Budget — maquette MVP » (5 écrans : tableau de bord mois, import CSV,
-  relecture, vue année, tokens).
 
-## Partie pro Stygma (après validation du MVP perso)
+### Tableau des transactions (Perso et Pro)
 
-Suivi compta du compte pro : TVA, facturation, prévisionnel / réel. **Hors scope de la v1.**
+Composant partagé : résumé (nombre, crédits, débits), filtres Toutes / Crédits / Débits / À vérifier, tri par colonne.
+« À vérifier » = sans catégorie ou « Autres » / « Autres charges pro » (`TO_CHECK_CATEGORIES`).
+
+- Mockup de référence : canvas Claude Design « Budget — maquette MVP ».
+
+## Catégories du compte pro
+
+Un relevé **pro** ne propose (relecture) et ne demande à Gemini que les catégories pro ; un relevé perso, toutes les
+autres (`PRO_CATEGORIES` dans `shared/account-categories.ts`, refus `CATEGORY_NOT_ALLOWED` sinon).
+
+| Groupe        | Catégories                                                                                                                                                                         |
+| ------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Encaissements | Encaissement client `CLIENT_PAYMENT`, Autre crédit pro `PRO_OTHER_CREDIT`                                                                                                          |
+| Charges pro   | RC Pro & assurances, Comptable, Frais bancaires, Petit matériel, Logiciels & abonnements, Restauration, Voyages et déplacements, Impôts et taxes pro, Autres charges pro (`PRO_*`) |
+| Rémunération  | Salaire net versé `NET_SALARY_TRANSFER`, Revenus BNC prélevés `BNC_WITHDRAWAL`, Remboursement frais mixtes `MIXED_COSTS_REFUND`                                                    |
+| Cotisations   | URSSAF, Retraite complémentaire, Complémentaire santé, Prévoyance, Prélèvement à la source                                                                                         |
+| Fiscalité     | TVA `VAT_PAYMENT`                                                                                                                                                                  |
+
+Taux de TVA déductible par charge, frais mixtes et répartition des cotisations : `shared/pro-rules.ts` (le
+« budget-rules » du pro).
+
+## Dashboard Pro Stygma (`/professional`)
+
+Prévisionnel et réel côte à côte, mois par mois. Un mois **a un réel** s'il est commencé ou passé ; au-delà, seul le
+prévisionnel s'affiche (bandeau « Mois à venir »). Ne comptent que les transactions des imports **VALIDATED**.
+
+### Règles de l'année (Réglages › Pro)
+
+Un jeu de règles **par année** (`ProYearSettings`) : régime (seule la **SAS à l'IR** est calculée ; IS et EURL
+« Bientôt »), première année de l'option IR (5 exercices max), salaire brut mensuel, taux patronal, salarial, net
+imposable, PAS, charges sociales sur la quote-part de bénéfice, surfaces bureau / logement, clé n/d des autres frais
+mixtes, barème km. Une année non configurée reprend la dernière année configurée avant elle, sinon les valeurs par
+défaut (`DEFAULT_PRO_YEAR_SETTINGS`). Les **clients** (nom, mot-clé bancaire, TJM par défaut) se gèrent au même endroit.
+
+### Règles de calcul (SAS à l'IR)
+
+- **CA HT** = jours × TJM des lignes de facturation, saisies en **prévu** et en **réel** (à la main : jours et TJM ne
+  sont pas sur le relevé), rattaché au mois de la prestation.
+- **Encaissements** : un virement « Encaissement client » dont le libellé contient le mot-clé du client paie ses
+  factures des **mois antérieurs**, de la plus ancienne à la plus récente. Statuts : À facturer (mois à venir), Non
+  facturé, En attente, Encaissée (à 1 € près).
+- **Charges pro** : débits TTC du relevé ramenés en HT au taux de leur catégorie ; la différence est la **TVA
+  déductible**. Frais mixtes : remboursements versés (pas de TVA déductible).
+- **TVA à reverser** = 20 % du CA HT − TVA déductible, par mois. La TVA payée un mois (catégorie TVA) est comparée à
+  la TVA due du mois précédent.
+- **Salaire et cotisations** : calculés depuis les règles de l'année (brut × taux). Les prélèvements URSSAF,
+  retraite, santé, prévoyance et PAS sont catégorisés mais **n'entrent pas dans les charges** (pas de double
+  comptage) ; le détail « dont URSSAF… » utilise une répartition indicative.
+- **Bénéfice** = CA HT − charges pro − salaires bruts − cotisations patronales. **Reste en trésorerie** = bénéfice −
+  BNC prélevés. **Charges sociales sur bénéfice** = taux × max(0, bénéfice), réglées en perso.
+- **Frais mixtes** : dû = dépense **perso** du mois (Loyer, Internet, Télécom, Énergie) × quote-part (loyer : surface
+  bureau / logement ; autres : clé n/d). Les remboursements reçus sont répartis dans l'ordre loyer → internet →
+  téléphone → énergie.
+- **Frais km** : km réels = somme des trajets du journal ; montant = km × barème de l'année.
+
+### Prévisionnel (« Éditer le prévisionnel »)
+
+Quatre onglets : Facturation (prévu / réel, une ligne par client), Charges & rémunération (charges HT + BNC prévu),
+Frais mixtes (dépenses perso prévues), Frais km. **Sans saisie, un montant prévu vaut le réel du même mois l'année
+précédente** (charges, BNC, frais mixtes, km). « Appliquer aux mois suivants » recopie les valeurs du mois sur la fin
+de l'année.
+
+### Écran
+
+- **Vue mois** : CA HT (facturé, encaissé, reste à encaisser, jours), TVA à reverser, Bénéfice (équation, répartition
+  du CA, BNC, reste en trésorerie, charges sociales), Facturation & encaissements, Prévisionnel vs réel par catégorie,
+  Frais mixtes, Frais km (+ journal des trajets), Transactions du mois (même tableau que le Perso).
+- **Vue année** : CA HT final (réel + prévu restant), bénéfice final, TVA réelle cumulée, frais km ; histogramme du CA ;
+  compte de résultat simplifié (12 mois + Final) ; catégories, frais mixtes et km cumulés.
+- Mockup de référence : artboard « Dashboard pro — Stygma SAS » du canvas Claude Design. Plan de réalisation :
+  [plan-pro.md](./plan-pro.md).

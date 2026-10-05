@@ -4,6 +4,23 @@
 > **Pro** et **Réglages**), de `CLAUDE.md`, `docs/` et du code de `main` (023ccda).
 > Objectif : livrer l'écran `/professional` en **PR courtes empilées**, en réutilisant au maximum l'existant.
 
+## État (2026-10-06)
+
+**Réalisé** en 22 PR empilées, dans l'ordre du § 5. Les questions du § 7 ont été tranchées avec l'hypothèse par défaut
+(toutes reportées dans les PR et dans `CLAUDE.md` › Décisions) :
+
+1. Catégories pro du § 3, avec « Logiciels & abonnements » (TVA déductible 0 % : services facturés depuis l'étranger).
+2. Cotisations calculées depuis Réglages ; les prélèvements URSSAF / retraite / santé / prévoyance / PAS sont catégorisés mais hors charges.
+3. Prévu des charges sans saisie = réel HT du même mois N-1 (même règle que frais mixtes et km).
+4. Table `Client` (nom, mot-clé bancaire, TJM par défaut), gérée dans Réglages › Pro.
+5. « À vérifier » = sans catégorie ou « Autres » / « Autres charges pro ».
+6. Vitest ajouté pour `server/lib/pro/` (`pnpm test`, en CI).
+7. Années du régime : années configurées + année précédente, en cours et suivante.
+
+Écarts assumés avec la maquette : enregistrement explicite dans l'éditeur (bouton) au lieu d'un enregistrement à chaque
+frappe ; un virement client ne paie que les factures des mois **antérieurs** ; le tableau des catégories de la vue année
+compare prévu et réel sur les mois avec réel (prévu de l'année en sous-titre).
+
 ---
 
 ## 1. Ce que montre la maquette

@@ -61,5 +61,5 @@ Les conventions de travail (workflow PR, consignes pour Claude Code) sont dans [
 ## État d'avancement
 
 Fait : scaffold, Prisma/Neon + schéma, tRPC + TanStack Query, parseur CSV générique avec mapping par banque.
-À venir : écran de relecture, dashboards mois / année, puis partie pro Stygma (TVA, facturation, prévisionnel/réel).
+En place : import et relecture, dashboard Perso et dashboard Pro Stygma (mois / année, prévisionnel vs réel). Détails : `docs/fonctionnel.md`.
 Hors scope v1 : synchro bancaire automatique, multi-utilisateurs, facturation / TVA.
