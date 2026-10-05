@@ -61,7 +61,6 @@ Routeurs actuels : `categorize` (`run` : demande à Gemini une catégorie + conf
 - Reste à encaisser : `load-year.ts` calcule le solde d'ouverture de l'année (facturé TTC réel − encaissements depuis le premier mois facturé), `compute-year.ts` le reporte de mois en mois (`openingReceivablesCents`), `compute-month.ts` l'applique (plancher à 0).
 - `allocate-refunds.ts` (remboursements de frais mixtes ligne par ligne), `forecast-values.ts` (valeurs de l'éditeur : saisie, défaut N-1, mois précédent).
 - Règles modifiables (TVA par charge, frais mixtes, groupes de l'éditeur, répartition des cotisations) : `shared/pro-rules.ts` ; catégories pro : `shared/account-categories.ts`.
-- **Tests** : `pnpm test` (Vitest, config `vitest.config.ts`) sur les calculs purs (`server/**/*.test.ts`, `shared/**/*.test.ts`), lancés en CI.
 
 ## Interface : Mantine + React Router
 
@@ -132,7 +131,7 @@ Chaque PR qui introduit un pattern React le documente dans sa section « Notes R
 ## Qualité et workflow
 
 - **Une fonctionnalité = une branche = une PR** courte (`feat/…`, `fix/…`, `chore/…`), Conventional Commits. Trop gros → PR empilées.
-- `pnpm check` (lint + typecheck + format + i18n), `pnpm test` puis `pnpm build` doivent être verts avant `/ship-pr`.
+- `pnpm check` (lint + typecheck + format + i18n), puis `pnpm build` doivent être verts avant `/ship-pr`.
 - **oxlint** (pas ESLint) avec `rules-of-hooks` et `exhaustive-deps` en erreur ; `no-console` en warning sauf `warn` / `error`.
 - **lefthook** (pre-commit) : oxlint `--fix` puis Prettier sur les fichiers stagés. Ne pas contourner avec `--no-verify`.
 - **Hook Claude Code** (`.claude/hooks/check.sh`) : Prettier + oxlint `--fix` + `tsc` après chaque édition.

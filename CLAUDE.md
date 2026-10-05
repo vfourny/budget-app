@@ -44,7 +44,6 @@ Choix délibéré : **le plus simple possible**. SPA React (pas de SSR, pas de S
 ```bash
 pnpm dev            # front + API sur un seul serveur (http://localhost:5173, API sous /api)
 pnpm check          # lint + typecheck + format:check + i18n:check (à lancer avant toute PR)
-pnpm test           # Vitest : calculs purs (server/lib/pro, shared)
 pnpm build          # build de prod (fait aussi en CI) → .output/ (ou .vercel/output sur Vercel)
 pnpm preview        # sert le build de prod localement
 pnpm lint:fix       # autofix oxlint
@@ -79,7 +78,7 @@ server/                # BACKEND — Nitro, mêmes conventions que le server/ de
     trpc/[...path].ts  # point d'entrée HTTP de tRPC
   trpc/                # init.ts (contexte, procédures), root.ts (appRouter), routers/<domaine>.ts
   lib/                 # db.ts (PrismaClient singleton), env.ts (validation Zod des variables)
-    pro/               # dashboard Pro : load-year (requêtes) + compute-month (calcul pur, testé) + regimes/
+    pro/               # dashboard Pro : load-year (requêtes) + compute-month (calcul pur) + regimes/
   generated/prisma/    # client Prisma généré — gitignoré, ne pas éditer
 prisma/                # schema/ (un .prisma par domaine), migrations/, seed.ts + seeds/ (un fichier par domaine)
 prisma.config.ts       # config CLI Prisma 7 (URL directe pour les migrations)
@@ -99,7 +98,7 @@ nitro.config.ts        # serverDir: ./server
   lignes de revenus, par `key`) : uniquement dans `shared/budget-rules.ts`, jamais en dur ailleurs. Aucun libellé dedans :
   les textes sont dans `@/lib/i18n/fr`. Équivalent pro : `shared/pro-rules.ts` (TVA par charge, frais mixtes, groupes
   du prévisionnel) et `shared/account-categories.ts` (catégories proposées par type de compte).
-- **Calculs du dashboard Pro** : fonctions **pures** dans `server/lib/pro/` (aucun accès base), testées avec Vitest ;
+- **Calculs du dashboard Pro** : fonctions **pures** dans `server/lib/pro/` (aucun accès base) ;
   les requêtes restent dans `load-year.ts`. Un statut juridique = un `ProRegime` (`server/lib/pro/regimes/`).
 - **Données** : toujours via tRPC + TanStack Query. **Pas de `fetch` dans un `useEffect`.**
   `useEffect` est réservé à la synchro avec un système externe (oxlint le signale sinon).
@@ -166,10 +165,10 @@ nitro.config.ts        # serverDir: ./server
 - **Une fonctionnalité = une branche = une PR**, diff court (relisible en quelques minutes).
   Branches : `feat/…`, `fix/…`, `chore/…`. Commits : Conventional Commits.
 - Si une étape est trop grosse, découpe en **PR empilées** (la PR N+1 cible la branche N).
-- Avant toute PR : self-review du diff, `pnpm check` + `pnpm test` + `pnpm build` verts, puis
+- Avant toute PR : self-review du diff, `pnpm check` + `pnpm build` verts, puis
   `/ship-pr`. Ne présenter que du vert.
 - Remplir `.github/pull_request_template.md`, section « Notes React » incluse.
-- CI GitHub Actions (`.github/workflows/ci.yml`) : lint, typecheck, format, tests, build sur chaque PR.
+- CI GitHub Actions (`.github/workflows/ci.yml`) : lint, typecheck, format, build sur chaque PR.
 - Hook Git pre-commit (`lefthook.yml`, installé par `pnpm install`) : oxlint --fix + Prettier
   sur les fichiers stagés, commit bloqué s'il reste une erreur. Ne pas contourner avec
   `--no-verify` : corriger l'erreur.
@@ -227,4 +226,4 @@ Hors scope : synchro bancaire auto, multi-utilisateurs, émission de factures.
 - **Pro (2026-10-06)** : catégories pro dans l'enum `TransactionCategory` (filtrées par type de compte) plutôt qu'un
   2e enum ; prévisionnel sans saisie = réel du même mois N-1 ; salaire et cotisations calculés depuis les règles de
   l'année (les prélèvements URSSAF / PAS… ne comptent pas dans les charges) ; clients en texte libre dans la facturation
-  (pas de table) ; encaissé = crédits `CLIENT_PAYMENT` du mois, reste à encaisser = solde cumulé facturé TTC − encaissé ; graphiques en CSS (pas de lib) ; Vitest pour les calculs purs.
+  (pas de table) ; encaissé = crédits `CLIENT_PAYMENT` du mois, reste à encaisser = solde cumulé facturé TTC − encaissé ; graphiques en CSS (pas de lib) .
