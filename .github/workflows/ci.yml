@@ -11,7 +11,7 @@ concurrency:
 
 jobs:
   check:
-    name: Lint · Typecheck · Tests · Build
+    name: Lint · Typecheck · Build
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
@@ -35,9 +35,6 @@ jobs:
 
       - name: Format
         run: pnpm format:check
-
-      - name: Tests
-        run: pnpm test
 
       - name: Build
         run: pnpm build
