@@ -97,6 +97,44 @@ model IncomeTaxBracket {
   @@id([year, fromCents])
 }
 
+/// Statut juridique et fiscal de la société, choisi par année dans Réglages › Pro. Seul `SAS_IR` est
+/// calculé pour l'instant (les autres sont affichés « Bientôt ») : un statut = un `ProRegime` côté serveur.
+enum CompanyRegime {
+  SAS_IR // SAS à l'impôt sur le revenu (option 5 exercices max)
+  SAS_IS // SAS à l'impôt sur les sociétés
+  EURL // EURL
+}
+
+/// Règles de Stygma pour une année (Réglages › Pro) : taux du bulletin de paie, charges sociales sur
+/// la quote-part de bénéfice, clés des frais mixtes, barème km. Une année sans ligne reprend la
+/// dernière année configurée avant elle (sinon `DEFAULT_PRO_YEAR_SETTINGS`, `shared/pro-rules.ts`).
+/// Pas de float : taux en points de base (4460 = 44,60 %), surfaces en dm², barème en millièmes d'€.
+model ProYearSettings {
+  userId                 String
+  user                   User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  year                   Int           @db.SmallInt
+  regime                 CompanyRegime @default(SAS_IR)
+  /// Premier exercice avec l'option pour l'IR (5 exercices maximum).
+  irOptionFirstYear      Int           @db.SmallInt
+  grossSalaryCents       Int
+  employerContributionBp Int
+  employeeContributionBp Int
+  /// Net imposable en % du brut (base du prélèvement à la source).
+  taxableNetBp           Int
+  withholdingTaxBp       Int
+  /// Charges sociales sur la quote-part de bénéfice (réglées en perso).
+  profitSocialChargesBp  Int
+  officeAreaDm2          Int
+  homeAreaDm2            Int
+  /// Clé de répartition des autres frais mixtes (internet, téléphone, énergie) : numérateur / dénominateur.
+  mixedKeyNumerator      Int           @db.SmallInt
+  mixedKeyDenominator    Int           @db.SmallInt
+  /// Barème kilométrique en millièmes d'euro par km (636 = 0,636 €/km).
+  mileageRateMilli       Int
+
+  @@id([userId, year])
+}
+
 enum ImportStatus {
   PENDING_REVIEW // En attente de relecture
   VALIDATED // Validé
@@ -105,15 +143,15 @@ enum ImportStatus {
 /// Un fichier de relevé importé. Ses transactions sont écrites dès l'import (sans catégorie) ;
 /// seuls les imports VALIDATED comptent dans les dashboards.
 model ImportBatch {
-  id            String        @id @default(cuid())
-  userId        String
-  user          User          @relation(fields: [userId], references: [id], onDelete: Cascade)
-  accountType   AccountType
-  fileName      String
-  status        ImportStatus  @default(PENDING_REVIEW)
-  createdAt     DateTime      @default(now())
-  validatedAt   DateTime?
-  transactions  Transaction[]
+  id           String        @id @default(cuid())
+  userId       String
+  user         User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  accountType  AccountType
+  fileName     String
+  status       ImportStatus  @default(PENDING_REVIEW)
+  createdAt    DateTime      @default(now())
+  validatedAt  DateTime?
+  transactions Transaction[]
 
   @@index([userId])
 }
@@ -152,18 +190,19 @@ model Transaction {
 // (`prisma/seed.ts`, inscription publique désactivée). `IncomeTaxBracket` reste global (barème légal).
 
 model User {
-  id             String          @id
-  name           String
-  email          String          @unique
-  emailVerified  Boolean         @default(false)
-  image          String?
-  createdAt      DateTime        @default(now())
-  updatedAt      DateTime        @updatedAt
-  sessions       Session[]
-  accounts       Account[]
-  envelopeShares EnvelopeShare[]
-  importBatches  ImportBatch[]
-  transactions   Transaction[]
+  id              String            @id
+  name            String
+  email           String            @unique
+  emailVerified   Boolean           @default(false)
+  image           String?
+  createdAt       DateTime          @default(now())
+  updatedAt       DateTime          @updatedAt
+  sessions        Session[]
+  accounts        Account[]
+  envelopeShares  EnvelopeShare[]
+  importBatches   ImportBatch[]
+  transactions    Transaction[]
+  proYearSettings ProYearSettings[]
 }
 
 model Session {
