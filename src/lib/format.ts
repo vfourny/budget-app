@@ -43,3 +43,8 @@ const percentFormat = new Intl.NumberFormat(LOCALE, { maximumFractionDigits: 2 }
 export function formatBp(bp: number): string {
   return percentFormat.format(bp / 100);
 }
+
+/** dm² → m² lisibles : 1250 → "12,5". */
+export function formatSquareMeters(dm2: number): string {
+  return percentFormat.format(dm2 / 100);
+}

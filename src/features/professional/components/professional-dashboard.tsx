@@ -1,4 +1,4 @@
-import { ActionIcon, Alert, Button, Grid, Group, Loader, Tooltip } from "@mantine/core";
+import { ActionIcon, Alert, Button, Grid, Group, Loader, Stack, Tooltip } from "@mantine/core";
 import { IconCalendarEvent, IconListDetails, IconUpload } from "@tabler/icons-react";
 import { Link } from "react-router";
 
@@ -7,6 +7,8 @@ import { PeriodPicker } from "@/components/period-picker";
 import { TransactionsTable } from "@/components/transactions-table";
 import { BillingCard } from "@/features/professional/components/month/billing-card";
 import { CategoryForecastCard } from "@/features/professional/components/month/category-forecast-card";
+import { MileageCard } from "@/features/professional/components/month/mileage-card";
+import { MixedCostsCard } from "@/features/professional/components/month/mixed-costs-card";
 import { ProfitCard } from "@/features/professional/components/month/profit-card";
 import { RevenueKpiCard } from "@/features/professional/components/month/revenue-kpi-card";
 import { VatCard } from "@/features/professional/components/month/vat-card";
@@ -110,6 +112,12 @@ function MonthContent({ period }: { period: Period }) {
         </Grid.Col>
         <Grid.Col span={{ base: 12, lg: 7 }}>
           <CategoryForecastCard month={data} />
+        </Grid.Col>
+        <Grid.Col span={{ base: 12, lg: 5 }}>
+          <Stack gap={16}>
+            <MixedCostsCard month={data} />
+            <MileageCard month={data} />
+          </Stack>
         </Grid.Col>
       </Grid>
       <TransactionsTable

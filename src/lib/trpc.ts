@@ -1,5 +1,6 @@
 import { QueryClient } from "@tanstack/react-query";
 import { createTRPCClient, httpBatchLink } from "@trpc/client";
+import type { inferRouterOutputs } from "@trpc/server";
 import { createTRPCOptionsProxy } from "@trpc/tanstack-react-query";
 import superjson from "superjson";
 
@@ -27,3 +28,6 @@ export const trpcClient = createTRPCClient<AppRouter>({
  * pas besoin de Context React (qui sert quand la valeur dépend de l'endroit dans l'arbre).
  */
 export const trpc = createTRPCOptionsProxy<AppRouter>({ client: trpcClient, queryClient });
+
+/** Types des réponses de l'API (`RouterOutputs["professional"]["month"]`), déduits du routeur. */
+export type RouterOutputs = inferRouterOutputs<AppRouter>;
