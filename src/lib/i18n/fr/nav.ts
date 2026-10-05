@@ -7,4 +7,6 @@ export const nav = {
   professional: "Pro",
   imports: "Imports",
   settings: "Réglages",
+  switchToLight: "Passer en thème clair",
+  switchToDark: "Passer en thème sombre",
 } as const;

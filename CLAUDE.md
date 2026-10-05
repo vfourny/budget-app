@@ -27,17 +27,17 @@ Choix délibéré : **le plus simple possible**. SPA React (pas de SSR, pas de S
 
 - un backend Nitro dans le même projet.
 
-| Couche      | Choix                                                                        |
-| ----------- | ---------------------------------------------------------------------------- |
-| Front       | React 19 (SPA) + Vite 8, TypeScript 6                                        |
-| Backend     | Nitro 3 via `nitro/vite` (le moteur serveur de Nuxt) — dossier `server/`     |
-| API         | tRPC 11 + Zod 4, TanStack Query 5 (`@trpc/tanstack-react-query`)             |
-| DB          | Prisma 7 + PostgreSQL Neon (driver adapter `@prisma/adapter-neon`)           |
-| UI          | Mantine 9 + React Router 8, thème sombre « obsidian / platine », accent doré |
-| Auth        | Better Auth (email + mot de passe, mono-utilisateur, sessions en base)       |
-| IA          | API Gemini (Google AI Studio) pour catégoriser les lignes de relevé          |
-| Hébergement | Vercel (Hobby, détection Nitro automatique) + Neon (Free)                    |
-| Qualité     | oxlint (règles React hooks incluses), Prettier, `tsc`                        |
+| Couche      | Choix                                                                                |
+| ----------- | ------------------------------------------------------------------------------------ |
+| Front       | React 19 (SPA) + Vite 8, TypeScript 6                                                |
+| Backend     | Nitro 3 via `nitro/vite` (le moteur serveur de Nuxt) — dossier `server/`             |
+| API         | tRPC 11 + Zod 4, TanStack Query 5 (`@trpc/tanstack-react-query`)                     |
+| DB          | Prisma 7 + PostgreSQL Neon (driver adapter `@prisma/adapter-neon`)                   |
+| UI          | Mantine 9 + React Router 8, thème « obsidian / platine » clair + sombre, accent doré |
+| Auth        | Better Auth (email + mot de passe, mono-utilisateur, sessions en base)               |
+| IA          | API Gemini (Google AI Studio) pour catégoriser les lignes de relevé                  |
+| Hébergement | Vercel (Hobby, détection Nitro automatique) + Neon (Free)                            |
+| Qualité     | oxlint (règles React hooks incluses), Prettier, `tsc`                                |
 
 ## Commandes
 
@@ -129,8 +129,12 @@ nitro.config.ts        # serverDir: ./server
   `(LIST as readonly T[]).includes(value)` : même résultat, sans cast.
 - **UI** : composants Mantine, thème et tokens de la maquette dans `src/lib/theme.ts` (palettes
   `dark` / `gold` / `amber`, polices, rayons). Pas de couleur en dur dans les composants : utiliser
-  les tokens Mantine (`c="gold.6"`, `var(--mantine-color-dark-5)`…). CSS sur mesure en **CSS Modules**
-  (`xxx.module.css`, ≈ `<style scoped>` Vue). L'app est toujours sombre (pas de bascule clair).
+  les tokens Mantine (`c="gold.6"`, `var(--mantine-color-text)`, `c="dimmed"`…) ou les variables
+  `--app-*` (`--app-border`, `--app-hover`, `--app-caption`…). CSS sur mesure en **CSS Modules**
+  (`xxx.module.css`, ≈ `<style scoped>` Vue). Thèmes **clair et sombre** (sombre par défaut, bascule
+  dans la barre latérale, choix mémorisé par Mantine) : jamais `dark.N` / `--mantine-color-dark-N`
+  dans un composant (figé en sombre) ; une couleur qui dépend du thème = une variable dans
+  `cssVariablesResolver` (`light` + `dark`).
 - **Routing** : React Router en mode « library » (`BrowserRouter` + `<Routes>` dans `app.tsx`).
   Une nouvelle page = un fichier dans `src/pages/` + une `<Route>` ; s'il faut l'afficher dans le
   menu, l'ajouter à `MAIN_NAV` (`features/layout/components/app-layout.tsx`).

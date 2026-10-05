@@ -23,7 +23,13 @@ export function PageHeader({ eyebrow, title, actions }: PageHeaderProps) {
       }}
     >
       <Stack gap={6}>
-        <Text fz={12} fw={700} c="dark.2" tt="uppercase" style={{ letterSpacing: "1.4px" }}>
+        <Text
+          fz={12}
+          fw={700}
+          c="var(--app-caption)"
+          tt="uppercase"
+          style={{ letterSpacing: "1.4px" }}
+        >
           {eyebrow}
         </Text>
         <Title order={1}>{title}</Title>

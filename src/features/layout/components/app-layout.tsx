@@ -11,6 +11,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import { Link, Outlet, useLocation, useNavigate } from "react-router";
 
 import classes from "@/features/layout/components/app-layout.module.css";
+import { ColorSchemeToggle } from "@/features/layout/components/color-scheme-toggle";
 import { authClient } from "@/lib/auth-client";
 import { fr } from "@/lib/i18n/fr";
 
@@ -81,6 +82,7 @@ export function AppLayout() {
         <div className={classes.user}>
           <div className={classes.avatar}>{userName.charAt(0).toUpperCase()}</div>
           <span style={{ flexGrow: 1 }}>{userName}</span>
+          <ColorSchemeToggle />
           <ActionIcon
             variant="subtle"
             color="gray"

@@ -4,10 +4,27 @@
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="color-scheme" content="dark" />
+    <meta name="color-scheme" content="dark light" />
+    <script>
+      // Applique le thème mémorisé par Mantine avant le chargement de React (évite un flash).
+      try {
+        const scheme = localStorage.getItem("mantine-color-scheme-value");
+        document.documentElement.dataset.mantineColorScheme = scheme === "light" ? "light" : "dark";
+      } catch {
+        document.documentElement.dataset.mantineColorScheme = "dark";
+      }
+    </script>
+    <style>
+      body {
+        background: #0d0e10;
+      }
+      html[data-mantine-color-scheme="light"] body {
+        background: #f4f3ef;
+      }
+    </style>
     <title>Budget</title>
   </head>
-  <body style="background: #0d0e10">
+  <body>
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
   </body>
