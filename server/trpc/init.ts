@@ -35,7 +35,10 @@ const t = initTRPC.context<typeof createTRPCContext>().create({
 
 export const createTRPCRouter = t.router;
 
-/** Procédure sans auth : réservée à ce qui doit rester public (aucune pour l'instant). */
+/**
+ * Procédure sans auth : réservée à ce qui doit rester public (aucune pour l'instant).
+ * @public
+ */
 export const publicProcedure = t.procedure;
 
 /**

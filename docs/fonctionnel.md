@@ -29,7 +29,7 @@ Liste **figée** (enum Prisma `TransactionCategory`), reprise des colonnes de l'
 
 | Catégorie           | Code                  | Enveloppe          |
 | ------------------- | --------------------- | ------------------ |
-| Loyer               | `RENT`                | Dépenses courantes |
+| Loyer versé         | `RENT_PAID`           | Dépenses courantes |
 | Essence             | `FUEL`                | Dépenses courantes |
 | Banque et assurance | `BANK_INSURANCE`      | Dépenses courantes |
 | Restaurant          | `RESTAURANT`          | Loisirs            |
@@ -155,7 +155,7 @@ Composant partagé : résumé (nombre, crédits, débits), filtres Toutes / Cré
 ## Catégories du compte pro
 
 Un relevé **pro** ne propose (relecture) et ne demande à Gemini que les catégories pro ; un relevé perso, toutes les
-autres (`PROFESSIONAL_CATEGORIES` dans `shared/account-categories.ts`, refus `CATEGORY_NOT_ALLOWED` sinon).
+autres (`ACCOUNT_CATEGORIES.PROFESSIONAL` dans `shared/account-categories.ts`, refus `CATEGORY_NOT_ALLOWED` sinon).
 
 | Groupe        | Catégories                                                                                                                                                                                  |
 | ------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |

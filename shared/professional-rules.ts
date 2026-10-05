@@ -69,7 +69,7 @@ export const PROFESSIONAL_CHARGE_CATEGORIES = Object.keys(
  * L'ordre sert aussi à répartir les remboursements reçus (d'abord le loyer, etc.).
  */
 export const MIXED_COSTS = [
-  { category: "RENT", key: "area" },
+  { category: "RENT_PAID", key: "area" },
   { category: "INTERNET", key: "key" },
   { category: "TELECOM", key: "key" },
   { category: "ENERGY", key: "key" },
@@ -103,16 +103,6 @@ export const EMPLOYER_CONTRIBUTION_SPLIT_BP = {
   HEALTH_COVER: 1310,
   DISABILITY_COVER: 336,
 } as const satisfies Partial<Record<ProfessionalCategory, number>>;
-
-/**
- * Catégories qu'on peut prévoir mois par mois (`MonthlyForecast`) : charges pro, BNC prélevés et
- * dépenses perso des frais mixtes.
- */
-export const FORECASTABLE_CATEGORIES = [
-  ...PROFESSIONAL_CHARGE_CATEGORIES,
-  "BNC_WITHDRAWAL",
-  ...MIXED_COSTS.map((cost) => cost.category),
-] as const satisfies readonly TransactionCategory[];
 
 /**
  * Groupes de l'éditeur du prévisionnel : les catégories saisies ensemble, et le compte d'où viennent

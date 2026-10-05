@@ -4,7 +4,8 @@ import type { TransactionCategory } from "@server/generated/prisma/enums";
  * viennent de l'ancien Google Sheet ; ajuster ici pour affiner les propositions de l'IA.
  * `satisfies Record<TransactionCategory, string>` : erreur TS si une catégorie de l'enum manque. */
 export const CATEGORY_HINTS = {
-  RENT: "Loyer du logement et charges locatives (virement ou prélèvement au propriétaire / à l'agence).",
+  RENT_PAID:
+    "Loyer versé pour le logement et charges locatives (virement ou prélèvement au propriétaire / à l'agence).",
   FUEL: "Carburant, stations-service, recharge de véhicule électrique.",
   BANK_INSURANCE:
     "Frais bancaires, cotisations de carte, assurances (auto, habitation, mutuelle…).",

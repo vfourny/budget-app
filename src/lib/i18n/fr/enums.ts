@@ -49,7 +49,7 @@ export const envelopes = {
  * listes de choix). Rattachement aux enveloppes : `@shared/personal-rules`.
  */
 export const categories = {
-  RENT: "Loyer",
+  RENT_PAID: "Loyer versé",
   FUEL: "Essence",
   BANK_INSURANCE: "Banque et assurance",
   RESTAURANT: "Restaurant",

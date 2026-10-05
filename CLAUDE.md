@@ -43,7 +43,7 @@ Choix délibéré : **le plus simple possible**. SPA React (pas de SSR, pas de S
 
 ```bash
 pnpm dev            # front + API sur un seul serveur (http://localhost:5173, API sous /api)
-pnpm check          # lint + typecheck + format:check + i18n:check (à lancer avant toute PR)
+pnpm check          # lint + typecheck + format:check + i18n:check + knip (à lancer avant toute PR)
 pnpm build          # build de prod (fait aussi en CI) → .output/ (ou .vercel/output sur Vercel)
 pnpm preview        # sert le build de prod localement
 pnpm lint:fix       # autofix oxlint
@@ -68,11 +68,11 @@ src/                   # FRONT — SPA React, tourne uniquement dans le navigate
   app.tsx              # table des routes (React Router)
   pages/               # une page = un écran (assemble un header + des composants de feature)
   features/<domaine>/  # import, review, dashboard… : components/ + hooks/ du domaine
-  components/          # UI partagée entre features (PageHeader, ComingSoon…)
+  components/          # UI partagée entre features (PageHeader, KpiCard…)
   lib/                 # utilitaires front : trpc.ts (client + queryClient), theme.ts (thème Mantine)…
     i18n/fr/           # TOUS les textes de l'UI (dictionnaires typés) + plural.ts (accord en nombre)
   styles/global.css    # règles CSS globales (le thème, lui, est dans lib/theme.ts)
-shared/                # code pur partagé front + back (personal-rules.ts, professional-rules.ts, account-categories.ts, billing-days.ts, working-days.ts), alias @shared/
+shared/                # code pur partagé front + back (personal-rules.ts, professional-rules.ts, account-categories.ts, billing-days.ts), alias @shared/
 server/                # BACKEND — Nitro, mêmes conventions que le server/ de Nuxt
   api/                 # routes HTTP : server/api/health.ts → GET /api/health
     trpc/[...path].ts  # point d'entrée HTTP de tRPC

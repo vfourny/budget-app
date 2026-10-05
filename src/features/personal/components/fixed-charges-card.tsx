@@ -11,7 +11,7 @@ type FixedChargeCategory = FixedCharge["category"];
 
 /** Icône et couleur (tokens Mantine) de chaque catégorie de la card ; `satisfies` : clé manquante = erreur TS. */
 const STYLE = {
-  RENT: { Icon: IconHome, color: "blue.3" },
+  RENT_PAID: { Icon: IconHome, color: "blue.3" },
   ENERGY: { Icon: IconBolt, color: "gold.6" },
   TELECOM: { Icon: IconPhone, color: "teal.4" },
   INTERNET: { Icon: IconWifi, color: "grape.4" },

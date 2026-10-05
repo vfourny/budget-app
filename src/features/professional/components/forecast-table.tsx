@@ -9,7 +9,7 @@ import type { ForecastActual } from "@server/lib/professional/types";
 import classes from "./forecast-table.module.css";
 
 /** `detail` : ligne « dont … » grisée ; `memo` : pour info (hors total) ; `total` : ligne de total. */
-export type ForecastRowTone = "normal" | "detail" | "memo" | "total";
+type ForecastRowTone = "normal" | "detail" | "memo" | "total";
 
 export interface ForecastRow {
   key: string;

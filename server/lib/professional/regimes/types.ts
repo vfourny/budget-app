@@ -1,7 +1,7 @@
 import type { ProfessionalYearSettingsValues } from "@shared/professional-rules";
 
 /** Rémunération mensuelle du dirigeant selon le régime, en centimes. */
-export interface Remuneration {
+interface Remuneration {
   grossSalaryCents: number;
   /** Part employeur : une charge de la société. */
   employerContributionsCents: number;

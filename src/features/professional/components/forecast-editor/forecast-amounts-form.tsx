@@ -24,9 +24,9 @@ import type { TransactionCategory } from "@server/generated/prisma/enums";
 import type { ForecastGroup } from "@shared/professional-rules";
 
 /** Saisie par catégorie : `null` = pas de saisie (valeur par défaut N-1). En centimes. */
-export type Overrides = Partial<Record<TransactionCategory, number | null>>;
+type Overrides = Partial<Record<TransactionCategory, number | null>>;
 
-export interface AmountsView {
+interface AmountsView {
   /** Montant affiché d'une catégorie : saisie, sinon défaut. */
   valueOf: (category: TransactionCategory) => number;
 }

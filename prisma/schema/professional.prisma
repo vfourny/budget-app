@@ -65,7 +65,7 @@ model BillingLine {
 }
 
 /// Montant prévu d'une catégorie pour un mois : charges pro, BNC prélevés, et dépenses perso des frais
-/// mixtes (RENT, INTERNET…). Sans ligne, le prévisionnel prend sa valeur par défaut (réel N-1).
+/// mixtes (RENT_PAID, INTERNET…). Sans ligne, le prévisionnel prend sa valeur par défaut (réel N-1).
 model MonthlyForecast {
   userId      String
   user        User                @relation(fields: [userId], references: [id], onDelete: Cascade)

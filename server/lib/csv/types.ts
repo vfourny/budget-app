@@ -32,7 +32,7 @@ export interface ParsedBankStatement {
 export type AmountColumns =
   { kind: "signed"; column: number } | { kind: "debitCredit"; debit: number; credit: number };
 
-export interface BankCsvColumns {
+interface BankCsvColumns {
   date: number;
   /** Index de colonne, ou fonction pour composer un libellé plus riche (ex. concaténer avec
    * un champ "informations complémentaires") — utile pour la catégorisation automatique. */

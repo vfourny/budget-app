@@ -9,7 +9,7 @@ enum AccountType {
 /// Catégorie d'une transaction (liste figée, colonnes du Google Sheet). Le libellé affiché et
 /// l'enveloppe de rattachement vivent dans `src/lib/i18n/fr/enums.ts` et `shared/personal-rules.ts`.
 enum TransactionCategory {
-  RENT // Loyer
+  RENT_PAID // Loyer versé (loyer perçu : catégorie à part, avec le compte appartement)
   FUEL // Essence
   BANK_INSURANCE // Banque et assurance
   RESTAURANT // Restaurant
@@ -34,7 +34,7 @@ enum TransactionCategory {
   TRAINING // Formation
   SHORT_TERM_SAVINGS // Épargne court terme
   // ── Compte pro (Stygma) : catégories proposées seulement pour les relevés pro (voir
-  // `PROFESSIONAL_CATEGORIES` dans `shared/account-categories.ts`).
+  // `ACCOUNT_CATEGORIES.PROFESSIONAL` dans `shared/account-categories.ts`).
   CLIENT_PAYMENT // Encaissement d'une facture client (crédit)
   PROFESSIONAL_OTHER_CREDIT // Autre crédit pro
   PROFESSIONAL_INSURANCE // RC Pro, assurances de la société

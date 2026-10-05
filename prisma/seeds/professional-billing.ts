@@ -1,9 +1,8 @@
 import { db } from "@server/lib/db";
-import { workingDays } from "@shared/working-days";
 
 /**
- * Facturation Pro de départ : un client, tous les jours ouvrés du mois (hors fériés), en prévu sur
- * toute l'année et en réel jusqu'à `actualUntilMonth`.
+ * Facturation Pro de départ (données de dev local) : un client, tous les jours ouvrés du mois
+ * (lundi → vendredi, fériés ignorés), en prévu sur toute l'année et en réel jusqu'à `actualUntilMonth`.
  */
 const PROFESSIONAL_BILLING_SEED = {
   year: 2026,
@@ -12,6 +11,17 @@ const PROFESSIONAL_BILLING_SEED = {
   actualDailyRateCents: 45_000,
   actualUntilMonth: 9,
 } as const;
+
+/** Nombre de jours lundi → vendredi du mois (`month` de 1 à 12). Les fériés ne sont pas retirés. */
+function weekdaysInMonth(year: number, month: number) {
+  const daysInMonth = new Date(Date.UTC(year, month, 0)).getUTCDate();
+  let count = 0;
+  for (let day = 1; day <= daysInMonth; day++) {
+    const weekDay = new Date(Date.UTC(year, month - 1, day)).getUTCDay();
+    if (weekDay !== 0 && weekDay !== 6) count++;
+  }
+  return count;
+}
 
 /** Un mois (et un type prévu / réel) qui a déjà des lignes n'est jamais touché : les saisies de l'éditeur restent. */
 export async function seedProfessionalBilling(userId: string) {
@@ -39,7 +49,7 @@ export async function seedProfessionalBilling(userId: string) {
         kind,
         clientName: seed.clientName,
         dailyRateCents,
-        days: workingDays(seed.year, month),
+        days: weekdaysInMonth(seed.year, month),
       })),
     });
     created += count;

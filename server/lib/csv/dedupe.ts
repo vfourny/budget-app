@@ -1,11 +1,7 @@
 import type { ParsedTransaction } from "@server/lib/csv/types";
 
 /** Identité d'une ligne : même jour, même montant, même libellé. */
-export function transactionKey(transaction: {
-  date: Date;
-  amountCents: number;
-  label: string;
-}): string {
+function transactionKey(transaction: { date: Date; amountCents: number; label: string }): string {
   return `${transaction.date.toISOString().slice(0, 10)}|${transaction.amountCents}|${transaction.label}`;
 }
 

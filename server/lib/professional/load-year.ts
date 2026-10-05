@@ -20,7 +20,7 @@ const MIXED_CATEGORIES = MIXED_COSTS.map((cost) => cost.category);
 const monthIndex = (year: number, month: number) => year * 12 + (month - 1);
 
 /** Un mois a un réel s'il est commencé ou passé. */
-export function hasActual(year: number, month: number, today: Date): boolean {
+function hasActual(year: number, month: number, today: Date): boolean {
   return monthIndex(year, month) <= monthIndex(today.getUTCFullYear(), today.getUTCMonth() + 1);
 }
 
