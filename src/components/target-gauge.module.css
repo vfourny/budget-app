@@ -11,8 +11,12 @@
   background: var(--mantine-color-amber-6);
 }
 
-.fill[data-on-track="true"] {
+.fill[data-state="good"] {
   background: var(--mantine-color-teal-5);
+}
+
+.fill[data-state="even"] {
+  background: var(--mantine-color-gold-6);
 }
 
 .marker {

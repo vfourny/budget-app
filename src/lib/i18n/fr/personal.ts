@@ -1,17 +1,9 @@
 /** Dashboard Perso. */
 export const personal = {
   eyebrow: "Budget perso",
-  eyebrowMonth: "Vue du mois",
-  eyebrowYear: "Vue de l'année",
   loadFailed: "Impossible de charger le dashboard.",
   loadPeriodFailed: "Impossible de charger la période.",
   empty: "Aucun import validé pour le moment : le dashboard se remplit à la validation.",
-  views: { month: "Mois", year: "Année" },
-  month: "Mois",
-  previousMonth: "Mois précédent",
-  nextMonth: "Mois suivant",
-  previousYear: "Année précédente",
-  nextYear: "Année suivante",
   // Cards KPI
   kpi: {
     expensesMonth: "Dépenses",
