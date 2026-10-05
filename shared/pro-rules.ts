@@ -1,4 +1,5 @@
-import type { CompanyRegime } from "@server/generated/prisma/enums";
+import type { ProCategory } from "@shared/account-categories";
+import type { CompanyRegime, TransactionCategory } from "@server/generated/prisma/enums";
 
 /*
  * ✏️ RÈGLES DU COMPTE PRO (Stygma) : constantes partagées front + serveur (fichier pur, sans
@@ -47,3 +48,77 @@ export const SUPPORTED_REGIMES = ["SAS_IR"] as const satisfies readonly CompanyR
 
 /** Nombre maximum d'exercices avec l'option pour l'IR. */
 export const IR_OPTION_MAX_YEARS = 5;
+
+/** TVA collectée sur les factures (prestations de services), en points de base. */
+export const COLLECTED_VAT_BP = 2000;
+
+/**
+ * Charges pro (catégories du relevé pro) et taux de TVA déductible de chacune, en points de base :
+ * le relevé donne des montants TTC, ramenés en HT avec ce taux. 0 = pas de TVA récupérable
+ * (assurance, frais bancaires, impôts, services facturés depuis l'étranger sans TVA française).
+ * L'ordre = ordre des lignes « Charges pro » de l'écran Pro.
+ */
+export const PRO_CHARGE_VAT_BP = {
+  PRO_INSURANCE: 0,
+  PRO_ACCOUNTANT: 2000,
+  PRO_BANK_FEES: 0,
+  PRO_EQUIPMENT: 2000,
+  PRO_SOFTWARE: 0,
+  PRO_MEALS: 1000,
+  PRO_TRAVEL: 1000,
+  PRO_TAXES: 0,
+  PRO_OTHER: 2000,
+} as const satisfies Partial<Record<ProCategory, number>>;
+
+export type ProChargeCategory = keyof typeof PRO_CHARGE_VAT_BP;
+
+export const PRO_CHARGE_CATEGORIES = Object.keys(PRO_CHARGE_VAT_BP) as ProChargeCategory[];
+
+/**
+ * Frais mixtes : dépenses du compte **perso** dont Stygma rembourse une quote-part. `"area"` =
+ * prorata surface bureau / logement, `"key"` = clé n/d des Réglages (5/7 par défaut).
+ * L'ordre sert aussi à répartir les remboursements reçus (d'abord le loyer, etc.).
+ */
+export const MIXED_COSTS = [
+  { category: "RENT", key: "area" },
+  { category: "INTERNET", key: "key" },
+  { category: "TELECOM", key: "key" },
+  { category: "ENERGY", key: "key" },
+] as const satisfies readonly { category: TransactionCategory; key: "area" | "key" }[];
+
+export type MixedCostCategory = (typeof MIXED_COSTS)[number]["category"];
+
+/**
+ * Répartition indicative des cotisations patronales entre les organismes (points de base, total
+ * 10 000) : détail « dont … » du tableau prévu / réel. Tirée d'un bulletin de paie.
+ */
+export const EMPLOYER_CONTRIBUTION_SPLIT_BP = {
+  URSSAF: 6999,
+  SUPPLEMENTARY_PENSION: 1355,
+  HEALTH_COVER: 1310,
+  DISABILITY_COVER: 336,
+} as const satisfies Partial<Record<ProCategory, number>>;
+
+/**
+ * Catégories qu'on peut prévoir mois par mois (`MonthlyForecast`) : charges pro, BNC prélevés et
+ * dépenses perso des frais mixtes.
+ */
+export const FORECASTABLE_CATEGORIES = [
+  ...PRO_CHARGE_CATEGORIES,
+  "BNC_WITHDRAWAL",
+  ...MIXED_COSTS.map((cost) => cost.category),
+] as const satisfies readonly TransactionCategory[];
+
+/** Une facture est « encaissée » si un paiement du client arrive dans le mois ou les N suivants. */
+export const PAYMENT_MATCH_WINDOW_MONTHS = 2;
+
+// ---------------------------------------------------------------------------------------------
+// Vérifications au chargement (front et serveur) : erreur immédiate plutôt qu'un calcul faux.
+// ---------------------------------------------------------------------------------------------
+
+const splitTotal = Object.values(EMPLOYER_CONTRIBUTION_SPLIT_BP).reduce((sum, bp) => sum + bp, 0);
+if (splitTotal !== 10_000) {
+  throw new Error(
+    `pro-rules : EMPLOYER_CONTRIBUTION_SPLIT_BP fait ${splitTotal} au lieu de 10 000.`,
+  );
+}
