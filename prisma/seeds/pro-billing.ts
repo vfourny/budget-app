@@ -39,7 +39,7 @@ export async function seedProBilling(userId: string) {
         kind,
         clientName: seed.clientName,
         dailyRateCents,
-        halfDays: workingDays(seed.year, month) * 2,
+        days: workingDays(seed.year, month),
       })),
     });
     created += count;

@@ -4,16 +4,17 @@ import type { ReactNode } from "react";
 import { DeltaBadge } from "@/components/delta-badge";
 import { InfoTip } from "@/components/info-tip";
 import { TargetGauge } from "@/components/target-gauge";
-import { formatCents, formatHalfDays } from "@/lib/format";
+import { formatCents, formatDays } from "@/lib/format";
 import { fr } from "@/lib/i18n/fr";
+import { averageDailyRate } from "@shared/billing-days";
 import type { ClientBilling, ProMonth } from "@server/lib/pro/types";
 
 /** TJM moyen d'une ligne (centimes) : montant / jours. */
-const dailyRate = (line: { halfDays: number; amountCents: number }) =>
-  line.halfDays > 0 ? Math.round((line.amountCents * 2) / line.halfDays) : 0;
+const dailyRate = (line: { days: number; amountCents: number }) =>
+  averageDailyRate(line.amountCents, line.days);
 
-const calc = (line: { halfDays: number; amountCents: number }) =>
-  [formatHalfDays(line.halfDays), formatCents(dailyRate(line))] as const;
+const calc = (line: { days: number; amountCents: number }) =>
+  [formatDays(line.days), formatCents(dailyRate(line))] as const;
 
 /**
  * « Facturation & encaissements » : une ligne par client, jours × TJM réels (saisis) vs prévus,

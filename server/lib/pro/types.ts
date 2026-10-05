@@ -20,7 +20,7 @@ export interface BillingInput {
   clientName: string;
   dailyRateCents: number;
   /** Demi-journées (3,5 j = 7). */
-  halfDays: number;
+  days: number;
 }
 
 /** Tout ce qu'il faut pour calculer un mois : rien n'est lu en base dans le calcul. */
@@ -65,8 +65,8 @@ export interface ProMonthInput {
 
 export interface ClientBilling {
   clientName: string;
-  forecast: { halfDays: number; amountCents: number };
-  actual: { halfDays: number; amountCents: number } | null;
+  forecast: { days: number; amountCents: number };
+  actual: { days: number; amountCents: number } | null;
   /** TTC réel (prévu pour un mois à venir). */
   ttcCents: number;
 }
@@ -103,7 +103,7 @@ export interface ProMonth {
   billing: {
     clients: ClientBilling[];
     /** Demi-journées facturées (réel) ou prévues (mois à venir). */
-    halfDays: number;
+    days: number;
     /** Facturé HT (réel). */
     invoicedCents: number;
     /** Facturé TTC du mois : réel, ou prévu pour un mois à venir. */

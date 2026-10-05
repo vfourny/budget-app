@@ -38,8 +38,3 @@ export function subtractAmounts(a: Amount, b: Amount): Amount {
     actual: a.actual === null || b.actual === null ? null : a.actual - b.actual,
   };
 }
-
-/** Montant d'une ligne de facturation : demi-journées / 2 × TJM. */
-export function billingAmount(line: { halfDays: number; dailyRateCents: number }): number {
-  return Math.round((line.halfDays * line.dailyRateCents) / 2);
-}
