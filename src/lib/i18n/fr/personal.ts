@@ -52,8 +52,4 @@ export const personal = {
   breakdown: {
     title: "Par catégorie",
   },
-  transactions: {
-    title: "Transactions",
-    empty: "Aucune transaction pour ce mois.",
-  },
 } as const;

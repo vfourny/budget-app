@@ -7,6 +7,7 @@ import { nav } from "./nav";
 import { personal } from "./personal";
 import { review } from "./review";
 import { professional, settings } from "./settings";
+import { transactions } from "./transactions";
 
 /** Locale des formats (`Intl`) : dates, montants. */
 export const LOCALE = "fr-FR";
@@ -42,6 +43,7 @@ export const fr = {
   personal,
   settings,
   professional,
+  transactions,
   accountTypes,
   importStatus,
   envelopes,
