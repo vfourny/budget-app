@@ -1,10 +1,9 @@
-import { ActionIcon, Group, Text, Tooltip } from "@mantine/core";
-import { IconInfoCircle } from "@tabler/icons-react";
+import { Group, Text } from "@mantine/core";
 
+import { InfoTip } from "@/components/info-tip";
+import { TargetGauge } from "@/components/target-gauge";
 import { formatCents } from "@/lib/format";
 import { fr } from "@/lib/i18n/fr";
-
-import classes from "./envelope-gauge.module.css";
 
 interface EnvelopeGaugeProps {
   name: string;
@@ -18,7 +17,7 @@ interface EnvelopeGaugeProps {
   kind: "expense" | "savings";
 }
 
-/** Jauge réel vs recommandé : la barre = le réel, le trait = le recommandé. */
+/** Jauge d'une enveloppe : nom + info-bulle, réel / recommandé, barre réel vs recommandé. */
 export function EnvelopeGauge({
   name,
   realCents,
@@ -27,10 +26,6 @@ export function EnvelopeGauge({
   sourceText,
   kind,
 }: EnvelopeGaugeProps) {
-  const scale = Math.max(realCents, recommendedCents, 1) * 1.1;
-  const onTrack =
-    kind === "savings" ? realCents >= recommendedCents : realCents <= recommendedCents;
-
   return (
     <div>
       <Group justify="space-between" mb={4} wrap="nowrap">
@@ -38,23 +33,10 @@ export function EnvelopeGauge({
           <Text size="sm" c="dimmed">
             {name}
           </Text>
-          <Tooltip
-            multiline
-            w={260}
-            withArrow
+          <InfoTip
             label={fr.personal.gauge.tooltip(sourceText, recommendedPercent)}
-            events={{ hover: true, focus: true, touch: true }}
-          >
-            <ActionIcon
-              variant="subtle"
-              color="gray"
-              size="xs"
-              radius="xl"
-              aria-label={fr.personal.gauge.howComputed(name)}
-            >
-              <IconInfoCircle size={14} />
-            </ActionIcon>
-          </Tooltip>
+            ariaLabel={fr.personal.gauge.howComputed(name)}
+          />
         </Group>
         <Text size="sm" fw={600}>
           {formatCents(realCents)}
@@ -64,22 +46,16 @@ export function EnvelopeGauge({
           </Text>
         </Text>
       </Group>
-      <div
-        className={classes.track}
-        role="img"
-        aria-label={fr.personal.gauge.aria(
+      <TargetGauge
+        real={realCents}
+        target={recommendedCents}
+        goal={kind === "savings" ? "atLeast" : "atMost"}
+        ariaLabel={fr.personal.gauge.aria(
           name,
           formatCents(realCents),
           formatCents(recommendedCents),
         )}
-      >
-        <div
-          className={classes.fill}
-          data-on-track={onTrack}
-          style={{ width: `${(realCents / scale) * 100}%` }}
-        />
-        <div className={classes.marker} style={{ left: `${(recommendedCents / scale) * 100}%` }} />
-      </div>
+      />
     </div>
   );
 }

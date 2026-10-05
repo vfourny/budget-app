@@ -4,6 +4,7 @@ import { accountTypes, categories, envelopes, importStatus, revenueLines } from 
 import { csvErrors, errors } from "./errors";
 import { importForm, imports } from "./imports";
 import { nav } from "./nav";
+import { period } from "./period";
 import { personal } from "./personal";
 import { review } from "./review";
 import { professional, settings } from "./settings";
@@ -40,6 +41,7 @@ export const fr = {
   imports,
   importForm,
   review,
+  period,
   personal,
   settings,
   professional,

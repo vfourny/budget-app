@@ -1,46 +1,26 @@
-import {
-  ActionIcon,
-  Alert,
-  Button,
-  Grid,
-  Group,
-  Loader,
-  Paper,
-  SegmentedControl,
-  Select,
-} from "@mantine/core";
-import { IconChevronLeft, IconChevronRight } from "@tabler/icons-react";
-import { useState } from "react";
+import { Alert, Button, Grid, Group, Loader, Paper } from "@mantine/core";
 import { Link } from "react-router";
 
 import { PageHeader, PageTitleAccent } from "@/components/page-header";
-import { CategoryBreakdown } from "@/features/personal/components/category-breakdown";
-import { KpiCards } from "@/features/personal/components/kpi-cards";
-import { FixedChargesCard } from "@/features/personal/components/fixed-charges-card";
+import { PeriodPicker } from "@/components/period-picker";
 import { TransactionsTable } from "@/components/transactions-table";
+import { CategoryBreakdown } from "@/features/personal/components/category-breakdown";
+import { FixedChargesCard } from "@/features/personal/components/fixed-charges-card";
+import { KpiCards } from "@/features/personal/components/kpi-cards";
 import { useOverview, usePeriods } from "@/features/personal/hooks/use-personal";
-import { capitalizedMonthName, monthName } from "@/lib/format";
+import { usePeriodSelection, type Period, type PeriodView } from "@/hooks/use-period-selection";
+import { capitalizedMonthName } from "@/lib/format";
 import { fr } from "@/lib/i18n/fr";
-
-type View = "month" | "year";
-interface Period {
-  year: number;
-  month: number;
-}
-
-const periodKey = (period: Period) => `${period.year}-${period.month}`;
 
 export function PersonalDashboard() {
   const periods = usePeriods();
-  const [view, setView] = useState<View>("month");
-  // `null` tant que l'utilisateur n'a rien choisi : on affiche alors la période la plus récente
-  // (valeur dérivée pendant le rendu, plutôt qu'un `useEffect` qui recopierait la requête).
-  const [chosen, setChosen] = useState<Period | null>(null);
+  // Par défaut : la période la plus récente qui a des données.
+  const { view, setView, selected, select } = usePeriodSelection(periods.data?.[0]);
 
   if (periods.isPending) return <Loader color="gold" />;
   if (periods.isError) return <Alert color="red" title={fr.personal.loadFailed} />;
 
-  if (periods.data.length === 0) {
+  if (!selected) {
     return (
       <>
         <PageHeader eyebrow={fr.personal.eyebrow} title={fr.nav.personal} />
@@ -56,25 +36,10 @@ export function PersonalDashboard() {
     );
   }
 
-  const selected = chosen ?? periods.data[0];
-  const years = [...new Set(periods.data.map((period) => period.year))].sort((a, b) => a - b);
-  const monthIndex = periods.data.findIndex((p) => periodKey(p) === periodKey(selected));
-  // `periods.data` est trié du plus récent au plus ancien : « précédent » = index + 1.
-  const previousMonth = periods.data[monthIndex + 1];
-  const nextMonth = monthIndex > 0 ? periods.data[monthIndex - 1] : undefined;
-  const yearIndex = years.indexOf(selected.year);
-
-  function selectYear(year: number | undefined) {
-    if (year === undefined) return;
-    // On garde le mois choisi s'il existe cette année-là, sinon le plus récent de l'année.
-    const inYear = periods.data?.filter((p) => p.year === year) ?? [];
-    setChosen(inYear.find((p) => p.month === selected.month) ?? inYear[0] ?? null);
-  }
-
   return (
     <>
       <PageHeader
-        eyebrow={view === "month" ? fr.personal.eyebrowMonth : fr.personal.eyebrowYear}
+        eyebrow={view === "month" ? fr.period.eyebrowMonth : fr.period.eyebrowYear}
         title={
           <>
             {view === "month" && `${capitalizedMonthName(selected.month)} `}
@@ -82,72 +47,13 @@ export function PersonalDashboard() {
           </>
         }
         actions={
-          <Group gap={12}>
-            <SegmentedControl
-              value={view}
-              onChange={(value) => setView(value as View)}
-              data={[
-                { value: "month", label: fr.personal.views.month },
-                { value: "year", label: fr.personal.views.year },
-              ]}
-            />
-            {view === "month" ? (
-              <Group gap={6}>
-                <ActionIcon
-                  variant="default"
-                  size="lg"
-                  aria-label={fr.personal.previousMonth}
-                  disabled={!previousMonth}
-                  onClick={() => previousMonth && setChosen(previousMonth)}
-                >
-                  <IconChevronLeft size={16} />
-                </ActionIcon>
-                <Select
-                  aria-label={fr.personal.month}
-                  w={190}
-                  allowDeselect={false}
-                  data={periods.data.map((period) => ({
-                    value: periodKey(period),
-                    label: `${monthName(period.month)} ${period.year}`,
-                  }))}
-                  value={periodKey(selected)}
-                  onChange={(value) =>
-                    setChosen(periods.data.find((p) => periodKey(p) === value) ?? null)
-                  }
-                />
-                <ActionIcon
-                  variant="default"
-                  size="lg"
-                  aria-label={fr.personal.nextMonth}
-                  disabled={!nextMonth}
-                  onClick={() => nextMonth && setChosen(nextMonth)}
-                >
-                  <IconChevronRight size={16} />
-                </ActionIcon>
-              </Group>
-            ) : (
-              <Group gap={6}>
-                <ActionIcon
-                  variant="default"
-                  size="lg"
-                  aria-label={fr.personal.previousYear}
-                  disabled={yearIndex <= 0}
-                  onClick={() => selectYear(years[yearIndex - 1])}
-                >
-                  <IconChevronLeft size={16} />
-                </ActionIcon>
-                <ActionIcon
-                  variant="default"
-                  size="lg"
-                  aria-label={fr.personal.nextYear}
-                  disabled={yearIndex >= years.length - 1}
-                  onClick={() => selectYear(years[yearIndex + 1])}
-                >
-                  <IconChevronRight size={16} />
-                </ActionIcon>
-              </Group>
-            )}
-          </Group>
+          <PeriodPicker
+            view={view}
+            onViewChange={setView}
+            periods={periods.data}
+            selected={selected}
+            onSelect={select}
+          />
         }
       />
       <PeriodContent view={view} period={selected} />
@@ -155,7 +61,7 @@ export function PersonalDashboard() {
   );
 }
 
-function PeriodContent({ view, period }: { view: View; period: Period }) {
+function PeriodContent({ view, period }: { view: PeriodView; period: Period }) {
   const overview = useOverview(period.year, view === "month" ? period.month : undefined);
 
   if (overview.isPending) return <Loader color="gold" />;

@@ -1,7 +1,7 @@
-import { Anchor, Grid, Group, Paper, Stack, Text } from "@mantine/core";
-import type { ReactNode } from "react";
+import { Anchor, Grid } from "@mantine/core";
 import { Link } from "react-router";
 
+import { KpiCard, KpiLine } from "@/components/kpi-card";
 import { EnvelopeGauge } from "@/features/personal/components/envelope-gauge";
 import { useIncomeTaxBrackets } from "@/features/settings/hooks/use-income-tax-brackets";
 import { useEnvelopeShares } from "@/features/settings/hooks/use-envelope-shares";
@@ -40,7 +40,9 @@ export function KpiCards({
     return envelopes.map((envelope) => {
       const realCents = overview.byEnvelope[envelope];
       if (!shares) {
-        return <Line key={envelope} name={fr.envelopes[envelope]} value={formatCents(realCents)} />;
+        return (
+          <KpiLine key={envelope} name={fr.envelopes[envelope]} value={formatCents(realCents)} />
+        );
       }
       return (
         <EnvelopeGauge
@@ -66,40 +68,44 @@ export function KpiCards({
   return (
     <Grid gap={16} mb={16} align="stretch">
       <Grid.Col span={topSpan}>
-        <Kpi
+        <KpiCard
           label={fr.common.revenues}
           value={formatCents(overview.revenueCents)}
           color="blue.3"
           hint={fr.personal.kpi.revenuesHint}
         >
           {overview.revenueLines.map((line) => (
-            <Line key={line.key} name={fr.revenueLines[line.key]} value={formatCents(line.cents)} />
+            <KpiLine
+              key={line.key}
+              name={fr.revenueLines[line.key]}
+              value={formatCents(line.cents)}
+            />
           ))}
-        </Kpi>
+        </KpiCard>
       </Grid.Col>
       <Grid.Col span={topSpan}>
-        <Kpi
+        <KpiCard
           label={view === "month" ? fr.personal.kpi.expensesMonth : fr.personal.kpi.expensesYear}
           value={formatCents(overview.expenseCents)}
           hint={fr.personal.kpi.expensesHint}
         >
           {gauges(EXPENSE_ENVELOPES, "expense")}
-        </Kpi>
+        </KpiCard>
       </Grid.Col>
       <Grid.Col span={topSpan}>
-        <Kpi
+        <KpiCard
           label={view === "month" ? fr.personal.kpi.savingsMonth : fr.personal.kpi.savingsYear}
           value={formatCents(overview.savingsCents)}
           color="gold.6"
           hint={fr.personal.kpi.savingsHint(savingsRate)}
         >
           {gauges(SAVINGS_ENVELOPES, "savings")}
-        </Kpi>
+        </KpiCard>
       </Grid.Col>
       {view === "year" && (
         <>
           <Grid.Col span={bottomSpan}>
-            <Kpi
+            <KpiCard
               label={fr.personal.kpi.averageExpense}
               value={formatCents(Math.round(overview.expenseCents / months))}
               hint={fr.personal.kpi.monthsWithData(overview.monthsWithData)}
@@ -107,14 +113,14 @@ export function KpiCards({
           </Grid.Col>
           <Grid.Col span={bottomSpan}>
             {brackets.data && brackets.data.length > 0 ? (
-              <Kpi
+              <KpiCard
                 label={fr.personal.kpi.incomeTax(year)}
                 value={formatCents(estimateIncomeTaxCents(annualRevenueCents, brackets.data))}
                 color="blue.3"
                 hint={fr.personal.kpi.incomeTaxHint}
               />
             ) : (
-              <Kpi
+              <KpiCard
                 label={fr.personal.kpi.incomeTax(year)}
                 value={brackets.isPending ? "…" : "—"}
                 color="blue.3"
@@ -131,59 +137,11 @@ export function KpiCards({
                     {fr.personal.kpi.incomeTaxMissingLink}
                   </Anchor>
                 )}
-              </Kpi>
+              </KpiCard>
             )}
           </Grid.Col>
         </>
       )}
     </Grid>
-  );
-}
-
-function Kpi({
-  label,
-  value,
-  hint,
-  color,
-  children,
-}: {
-  label: string;
-  value: string;
-  hint: string;
-  color?: string;
-  children?: ReactNode;
-}) {
-  return (
-    <Paper withBorder radius="lg" p={24} h="100%">
-      <Stack gap={6}>
-        <Text size="sm" c="dimmed">
-          {label}
-        </Text>
-        <Text fz={30} fw={600} lh={1.1} c={color}>
-          {value}
-        </Text>
-        <Text size="xs" c="dimmed">
-          {hint}
-        </Text>
-        {children && (
-          <Stack gap={8} mt={12}>
-            {children}
-          </Stack>
-        )}
-      </Stack>
-    </Paper>
-  );
-}
-
-function Line({ name, value }: { name: string; value: string }) {
-  return (
-    <Group justify="space-between">
-      <Text size="sm" c="dimmed">
-        {name}
-      </Text>
-      <Text size="sm" fw={600}>
-        {value}
-      </Text>
-    </Group>
   );
 }
