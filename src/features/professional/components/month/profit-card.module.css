@@ -1,0 +1,36 @@
+.split {
+  display: flex;
+  height: 10px;
+  border-radius: 5px;
+  overflow: hidden;
+  background: var(--app-hover);
+}
+
+.segment {
+  height: 100%;
+}
+
+.segment[data-forecast] {
+  opacity: 0.45;
+}
+
+.charges {
+  background: var(--mantine-color-blue-3);
+}
+
+.salary {
+  background: var(--mantine-color-dimmed);
+}
+
+.employer {
+  background: var(--mantine-color-text);
+}
+
+.profit {
+  background: var(--mantine-color-gold-6);
+}
+
+.after {
+  padding-top: 16px;
+  border-top: 1px solid var(--app-border);
+}

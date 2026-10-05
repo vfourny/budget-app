@@ -36,3 +36,10 @@ const dayFormat = new Intl.NumberFormat(LOCALE, { maximumFractionDigits: 1 });
 export function formatHalfDays(halfDays: number): string {
   return dayFormat.format(halfDays / 2);
 }
+
+const percentFormat = new Intl.NumberFormat(LOCALE, { maximumFractionDigits: 2 });
+
+/** Points de base → pourcentage lisible, sans le signe : 970 → "9,7". */
+export function formatBp(bp: number): string {
+  return percentFormat.format(bp / 100);
+}
