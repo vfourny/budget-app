@@ -2,6 +2,7 @@ import { categorizeRouter } from "@server/trpc/routers/categorize";
 import { clientRouter } from "@server/trpc/routers/client";
 import { importRouter } from "@server/trpc/routers/import";
 import { personalRouter } from "@server/trpc/routers/personal";
+import { proForecastRouter } from "@server/trpc/routers/pro-forecast";
 import { professionalRouter } from "@server/trpc/routers/professional";
 import { settingsRouter } from "@server/trpc/routers/settings";
 import { transactionRouter } from "@server/trpc/routers/transaction";
@@ -14,6 +15,7 @@ export const appRouter = createTRPCRouter({
   import: importRouter,
   personal: personalRouter,
   professional: professionalRouter,
+  proForecast: proForecastRouter,
   settings: settingsRouter,
   transaction: transactionRouter,
 });
