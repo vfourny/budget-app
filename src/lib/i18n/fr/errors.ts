@@ -19,6 +19,8 @@ export const errors = {
   IMPORT_NOT_FOUND: "Import introuvable.",
   IMPORT_ALREADY_VALIDATED: "Cet import est déjà validé.",
   TRANSACTION_NOT_FOUND: "Transaction introuvable.",
+  CLIENT_NOT_FOUND: "Client introuvable.",
+  CLIENT_NAME_TAKEN: "Un client porte déjà ce nom.",
   CATEGORY_NOT_ALLOWED: "Cette catégorie n'existe pas pour ce type de compte (perso / pro).",
   NO_READABLE_TRANSACTIONS:
     "Aucune transaction lisible dans ce fichier : format de banque incorrect ?",
