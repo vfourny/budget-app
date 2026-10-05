@@ -39,6 +39,8 @@ interface ForecastAmountsFormProps {
   /** Colonne repère : réel du mois précédent ou même mois N-1. */
   reference: "previousMonth" | "lastYear";
   hint: string;
+  /** En-têtes des deux premières colonnes (défaut : « Charge », « Prévu (€ HT) »). */
+  headers?: { category: string; amount: string };
   /** Colonnes en plus (clé de répartition, part Stygma…) : en-têtes et cellules. */
   extraHeaders?: string[];
   extraCells?: (category: TransactionCategory, view: AmountsView) => ReactNode[];
@@ -89,6 +91,10 @@ function AmountsFields({
   rows,
   reference,
   hint,
+  headers = {
+    category: fr.professional.editor.amounts.category,
+    amount: fr.professional.editor.amounts.forecast,
+  },
   extraHeaders = [],
   extraCells,
   children,
@@ -136,8 +142,8 @@ function AmountsFields({
       <Table verticalSpacing="xs">
         <Table.Thead>
           <Table.Tr>
-            <Table.Th>{text.amounts.category}</Table.Th>
-            <Table.Th>{text.amounts.forecast}</Table.Th>
+            <Table.Th>{headers.category}</Table.Th>
+            <Table.Th>{headers.amount}</Table.Th>
             <Table.Th ta="right">
               {reference === "previousMonth" ? text.amounts.previousMonth : text.amounts.lastYear}
             </Table.Th>

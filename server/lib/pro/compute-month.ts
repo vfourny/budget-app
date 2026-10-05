@@ -22,6 +22,7 @@ import {
   COLLECTED_VAT_BP,
   EMPLOYER_CONTRIBUTION_SPLIT_BP,
   MIXED_COSTS,
+  mixedShareBp,
   PRO_CHARGE_CATEGORIES,
   PRO_CHARGE_VAT_BP,
 } from "@shared/pro-rules";
@@ -198,13 +199,8 @@ function billingByClient(input: ProMonthInput): ClientBilling[] {
 /** Frais mixtes ligne par ligne : dépense perso × quote-part, remboursements répartis dans l'ordre. */
 function mixedCostRows(input: ProMonthInput): MixedCostRow[] {
   const { settings, hasActual } = input;
-  const areaBp = Math.round((settings.officeAreaDm2 * 10_000) / Math.max(1, settings.homeAreaDm2));
-  const keyBp = Math.round(
-    (settings.mixedKeyNumerator * 10_000) / Math.max(1, settings.mixedKeyDenominator),
-  );
-
   const rows = MIXED_COSTS.map(({ category, key }) => {
-    const shareBp = key === "area" ? areaBp : keyBp;
+    const shareBp = mixedShareBp(settings, key);
     const spent: Amount = amount(
       input.forecasts[category] ?? input.lastYearPersoDebits[category] ?? 0,
       hasActual ? (input.persoDebits[category] ?? 0) : null,

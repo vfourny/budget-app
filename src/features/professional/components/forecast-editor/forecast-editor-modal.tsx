@@ -3,13 +3,14 @@ import { useState } from "react";
 
 import { BillingTab } from "@/features/professional/components/forecast-editor/billing-tab";
 import { ChargesTab } from "@/features/professional/components/forecast-editor/charges-tab";
+import { MixedCostsTab } from "@/features/professional/components/forecast-editor/mixed-costs-tab";
 import type { BillingSource } from "@/features/professional/hooks/use-forecast-editor";
 import type { Period } from "@/hooks/use-period-selection";
 import { capitalizedMonthName } from "@/lib/format";
 import { fr } from "@/lib/i18n/fr";
 import type { ProYearSettingsValues } from "@shared/pro-rules";
 
-export type EditorTab = "billing" | "charges";
+export type EditorTab = "billing" | "charges" | "mixedCosts";
 
 export interface EditorTarget {
   tab: EditorTab;
@@ -62,6 +63,7 @@ export function ForecastEditorModal({
         <Tabs.List aria-label={text.tabsAria} mb={16}>
           <Tabs.Tab value="billing">{text.tabs.billing}</Tabs.Tab>
           <Tabs.Tab value="charges">{text.tabs.charges}</Tabs.Tab>
+          <Tabs.Tab value="mixedCosts">{text.tabs.mixedCosts}</Tabs.Tab>
         </Tabs.List>
         <Tabs.Panel value="billing">
           <Stack gap={16}>
@@ -80,6 +82,9 @@ export function ForecastEditorModal({
         </Tabs.Panel>
         <Tabs.Panel value="charges">
           <ChargesTab period={period} settings={settings} />
+        </Tabs.Panel>
+        <Tabs.Panel value="mixedCosts">
+          <MixedCostsTab period={period} settings={settings} />
         </Tabs.Panel>
       </Tabs>
     </Modal>
