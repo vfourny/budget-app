@@ -1,4 +1,4 @@
-import type { Amount } from "@server/lib/pro/types";
+import type { ForecastActual } from "@server/lib/professional/types";
 
 /** `cents × bp / 10 000`, arrondi au centime. */
 export function applyBp(cents: number, bp: number): number {
@@ -11,17 +11,17 @@ export function htFromTtc(ttcCents: number, vatBp: number): number {
 }
 
 /** Valeur prévue + réelle (réel `null` sans réel). */
-export function amount(forecast: number, actual: number | null): Amount {
+export function amount(forecast: number, actual: number | null): ForecastActual {
   return { forecast, actual };
 }
 
 /** Applique `fn` au prévu et au réel (le réel reste `null` s'il l'est). */
-export function mapAmount(value: Amount, fn: (cents: number) => number): Amount {
+export function mapAmount(value: ForecastActual, fn: (cents: number) => number): ForecastActual {
   return { forecast: fn(value.forecast), actual: value.actual === null ? null : fn(value.actual) };
 }
 
 /** Somme de plusieurs montants ; le réel est `null` si l'un d'eux l'est. */
-export function sumAmounts(values: readonly Amount[]): Amount {
+export function sumAmounts(values: readonly ForecastActual[]): ForecastActual {
   let forecast = 0;
   let actual: number | null = 0;
   for (const value of values) {
@@ -32,7 +32,7 @@ export function sumAmounts(values: readonly Amount[]): Amount {
 }
 
 /** `a − b` sur le prévu et le réel. */
-export function subtractAmounts(a: Amount, b: Amount): Amount {
+export function subtractAmounts(a: ForecastActual, b: ForecastActual): ForecastActual {
   return {
     forecast: a.forecast - b.forecast,
     actual: a.actual === null || b.actual === null ? null : a.actual - b.actual,

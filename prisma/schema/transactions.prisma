@@ -7,9 +7,9 @@ enum AccountType {
 }
 
 /// Catégorie d'une transaction (liste figée, colonnes du Google Sheet). Le libellé affiché et
-/// l'enveloppe de rattachement vivent dans `src/lib/i18n/fr/enums.ts` et `shared/budget-rules.ts`.
+/// l'enveloppe de rattachement vivent dans `src/lib/i18n/fr/enums.ts` et `shared/personal-rules.ts`.
 enum TransactionCategory {
-  RENT // Loyer
+  RENT_PAID // Loyer versé (loyer perçu : catégorie à part, avec le compte appartement)
   FUEL // Essence
   BANK_INSURANCE // Banque et assurance
   RESTAURANT // Restaurant
@@ -34,18 +34,18 @@ enum TransactionCategory {
   TRAINING // Formation
   SHORT_TERM_SAVINGS // Épargne court terme
   // ── Compte pro (Stygma) : catégories proposées seulement pour les relevés pro (voir
-  // `PRO_CATEGORIES` dans `shared/account-categories.ts`).
+  // `ACCOUNT_CATEGORIES.PROFESSIONAL` dans `shared/account-categories.ts`).
   CLIENT_PAYMENT // Encaissement d'une facture client (crédit)
-  PRO_OTHER_CREDIT // Autre crédit pro
-  PRO_INSURANCE // RC Pro, assurances de la société
-  PRO_ACCOUNTANT // Expert-comptable
-  PRO_BANK_FEES // Frais et cotisations bancaires pro
-  PRO_EQUIPMENT // Petit matériel
-  PRO_SOFTWARE // Logiciels et abonnements pro
-  PRO_MEALS // Restauration pro
-  PRO_TRAVEL // Voyages et déplacements
-  PRO_TAXES // Impôts et taxes de la société (CFE, pénalités…)
-  PRO_OTHER // Autres charges pro
+  PROFESSIONAL_OTHER_CREDIT // Autre crédit pro
+  PROFESSIONAL_INSURANCE // RC Pro, assurances de la société
+  PROFESSIONAL_ACCOUNTANT // Expert-comptable
+  PROFESSIONAL_BANK_FEES // Frais et cotisations bancaires pro
+  PROFESSIONAL_EQUIPMENT // Petit matériel
+  PROFESSIONAL_SOFTWARE // Logiciels et abonnements pro
+  PROFESSIONAL_MEALS // Restauration pro
+  PROFESSIONAL_TRAVEL // Voyages et déplacements
+  PROFESSIONAL_TAXES // Impôts et taxes de la société (CFE, pénalités…)
+  PROFESSIONAL_OTHER // Autres charges pro
   NET_SALARY_TRANSFER // Salaire net viré au président
   BNC_WITHDRAWAL // Revenus BNC prélevés (virement vers le perso)
   MIXED_COSTS_REFUND // Remboursement des frais mixtes payés en perso

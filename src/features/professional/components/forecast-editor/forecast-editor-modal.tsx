@@ -5,17 +5,17 @@ import { BillingTab } from "@/features/professional/components/forecast-editor/b
 import { ChargesTab } from "@/features/professional/components/forecast-editor/charges-tab";
 import { MileageTab } from "@/features/professional/components/forecast-editor/mileage-tab";
 import { MixedCostsTab } from "@/features/professional/components/forecast-editor/mixed-costs-tab";
-import type { BillingSource } from "@/features/professional/hooks/use-forecast-editor";
 import type { Period } from "@/hooks/use-period-selection";
 import { capitalizedMonthName } from "@/lib/format";
 import { fr } from "@/lib/i18n/fr";
-import type { ProYearSettingsValues } from "@shared/pro-rules";
+import type { ProfessionalYearSettingsValues } from "@shared/professional-rules";
+import type { BillingKind } from "@server/generated/prisma/enums";
 
 export type EditorTab = "billing" | "charges" | "mixedCosts" | "mileage";
 
 export interface EditorTarget {
   tab: EditorTab;
-  source: BillingSource;
+  source: BillingKind;
 }
 
 interface ForecastEditorModalProps {
@@ -23,7 +23,7 @@ interface ForecastEditorModalProps {
   /** Le mois a un réel : la saisie « Réel » de la facturation est possible. */
   hasActual: boolean;
   /** Règles de l'année (salaire, taux) : rappelées dans l'onglet Charges. */
-  settings: ProYearSettingsValues;
+  settings: ProfessionalYearSettingsValues;
   initial: EditorTarget;
   onClose: () => void;
 }
@@ -40,7 +40,7 @@ export function ForecastEditorModal({
   onClose,
 }: ForecastEditorModalProps) {
   const [tab, setTab] = useState<EditorTab>(initial.tab);
-  const [source, setSource] = useState<BillingSource>(hasActual ? initial.source : "FORECAST");
+  const [source, setSource] = useState<BillingKind>(hasActual ? initial.source : "FORECAST");
   const text = fr.professional.editor;
   const periodLabel = `${capitalizedMonthName(period.month)} ${period.year}`;
 
@@ -73,7 +73,7 @@ export function ForecastEditorModal({
               w="fit-content"
               aria-label={text.sourceAria}
               value={source}
-              onChange={(value) => setSource(value as BillingSource)}
+              onChange={(value) => setSource(value as BillingKind)}
               data={[
                 { value: "FORECAST", label: text.source.FORECAST },
                 { value: "ACTUAL", label: text.source.ACTUAL, disabled: !hasActual },

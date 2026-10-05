@@ -1,5 +1,5 @@
-import { computeMonth } from "@server/lib/pro/compute-month";
-import type { ProMonth, ProMonthInput } from "@server/lib/pro/types";
+import { computeMonth } from "@server/lib/professional/compute-month";
+import type { ProfessionalMonth, ProfessionalMonthInput } from "@server/lib/professional/types";
 
 /** Ce qui se reporte d'un mois sur le suivant. */
 export interface YearOpening {
@@ -15,10 +15,13 @@ export interface YearOpening {
  * - le reste à encaisser cumulé (inchangé pendant les mois à venir).
  */
 export function computeYear(
-  months: readonly Omit<ProMonthInput, "previousVatDueCents" | "openingReceivablesCents">[],
+  months: readonly Omit<
+    ProfessionalMonthInput,
+    "previousVatDueCents" | "openingReceivablesCents"
+  >[],
   opening: YearOpening,
-): ProMonth[] {
-  const results: ProMonth[] = [];
+): ProfessionalMonth[] {
+  const results: ProfessionalMonth[] = [];
   let previousVatDueCents = opening.previousVatDueCents;
   let openingReceivablesCents = opening.receivablesCents;
   for (const month of months) {

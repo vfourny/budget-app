@@ -5,8 +5,8 @@ import { InfoTip } from "@/components/info-tip";
 import { TargetGauge } from "@/components/target-gauge";
 import { formatCents, formatDays } from "@/lib/format";
 import { fr } from "@/lib/i18n/fr";
-import { COLLECTED_VAT_BP } from "@shared/pro-rules";
-import type { ProMonth } from "@server/lib/pro/types";
+import { COLLECTED_VAT_BP } from "@shared/professional-rules";
+import type { ProfessionalMonth } from "@server/lib/professional/types";
 
 interface Stat {
   label: string;
@@ -19,7 +19,7 @@ interface Stat {
  * Carte « CA HT » : réel (ou prévu pour un mois à venir), jauge réel vs prévu, écart, puis
  * facturé / encaissé / reste à encaisser / jours.
  */
-export function RevenueKpiCard({ month }: { month: ProMonth }) {
+export function RevenueKpiCard({ month }: { month: ProfessionalMonth }) {
   const { revenue, billing } = month;
   const text = fr.professional.revenue;
   const invoiceCount = billing.clients.filter(

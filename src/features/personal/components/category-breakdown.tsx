@@ -1,6 +1,6 @@
 import { Group, Paper, Progress, Stack, Text, Title } from "@mantine/core";
 
-import { CATEGORY_CARD_CATEGORIES } from "@shared/budget-rules";
+import { CATEGORY_CARD_CATEGORIES } from "@shared/personal-rules";
 import { formatCents } from "@/lib/format";
 import { fr } from "@/lib/i18n/fr";
 import type { TransactionCategory } from "@server/generated/prisma/enums";
@@ -13,7 +13,7 @@ interface CategoryBreakdownProps {
 
 /**
  * Débits par catégorie, le plus gros en premier ; la barre est relative au plus gros, le % au
- * total affiché. Toutes les catégories de `CATEGORY_CARD_CATEGORIES` (budget-rules) sont
+ * total affiché. Toutes les catégories de `CATEGORY_CARD_CATEGORIES` (personal-rules) sont
  * affichées, même à 0 € (elles restent alors dans l'ordre de la liste, en fin de tableau).
  */
 export function CategoryBreakdown({ overview }: CategoryBreakdownProps) {

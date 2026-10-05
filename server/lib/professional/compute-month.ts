@@ -1,4 +1,4 @@
-import { allocateRefunds } from "@server/lib/pro/allocate-refunds";
+import { allocateRefunds } from "@server/lib/professional/allocate-refunds";
 import {
   amount,
   applyBp,
@@ -6,33 +6,33 @@ import {
   mapAmount,
   subtractAmounts,
   sumAmounts,
-} from "@server/lib/pro/amounts";
-import { regimeOf } from "@server/lib/pro/regimes";
+} from "@server/lib/professional/amounts";
+import { regimeOf } from "@server/lib/professional/regimes";
 import { billingAmount } from "@shared/billing-days";
 import type {
-  Amount,
+  ForecastActual,
   BillingInput,
   ChargeRow,
   ClientBilling,
   MixedCostRow,
-  ProMonth,
-  ProMonthInput,
-} from "@server/lib/pro/types";
+  ProfessionalMonth,
+  ProfessionalMonthInput,
+} from "@server/lib/professional/types";
 import {
   COLLECTED_VAT_BP,
   EMPLOYER_CONTRIBUTION_SPLIT_BP,
   MIXED_COSTS,
   mixedShareBp,
-  PRO_CHARGE_CATEGORIES,
-  PRO_CHARGE_VAT_BP,
-} from "@shared/pro-rules";
+  PROFESSIONAL_CHARGE_CATEGORIES,
+  PROFESSIONAL_CHARGE_VAT_BP,
+} from "@shared/professional-rules";
 
 /**
  * Calcul d'un mois du dashboard Pro : prévisionnel et réel côte à côte. Fonction **pure** (aucun
  * accès base) : toutes les données arrivent dans `input` (voir `load-year.ts`), ce qui la rend
  * testable et réutilisable (vue année = 12 appels).
  */
-export function computeMonth(input: ProMonthInput): ProMonth {
+export function computeMonth(input: ProfessionalMonthInput): ProfessionalMonth {
   const { hasActual, settings } = input;
   const actualOrNull = (cents: number) => (hasActual ? cents : null);
 
@@ -44,15 +44,15 @@ export function computeMonth(input: ProMonthInput): ProMonth {
   );
 
   // ── Charges pro (HT) ───────────────────────────────────────────────────────────────────────
-  const rows: ChargeRow[] = PRO_CHARGE_CATEGORIES.map((category) => {
-    const vatBp = PRO_CHARGE_VAT_BP[category];
-    const lastYearHt = htFromTtc(input.lastYearProDebits[category] ?? 0, vatBp);
+  const rows: ChargeRow[] = PROFESSIONAL_CHARGE_CATEGORIES.map((category) => {
+    const vatBp = PROFESSIONAL_CHARGE_VAT_BP[category];
+    const lastYearHt = htFromTtc(input.lastYearProfessionalDebits[category] ?? 0, vatBp);
     return {
       category,
       vatBp,
       amount: amount(
         input.forecasts[category] ?? lastYearHt,
-        actualOrNull(htFromTtc(input.proDebits[category] ?? 0, vatBp)),
+        actualOrNull(htFromTtc(input.professionalDebits[category] ?? 0, vatBp)),
       ),
     };
   });
@@ -61,7 +61,7 @@ export function computeMonth(input: ProMonthInput): ProMonth {
   const mixedCosts = mixedCostRows(input);
   const mixedCharge = amount(
     sum(mixedCosts.map((row) => row.due.forecast)),
-    actualOrNull(input.proDebits.MIXED_COSTS_REFUND ?? 0),
+    actualOrNull(input.professionalDebits.MIXED_COSTS_REFUND ?? 0),
   );
   const chargesTotal = sumAmounts([...rows.map((row) => row.amount), mixedCharge]);
 
@@ -72,8 +72,8 @@ export function computeMonth(input: ProMonthInput): ProMonth {
   const employerContributions = fixed(pay.employerContributionsCents);
   const remuneration = {
     bncWithdrawal: amount(
-      input.forecasts.BNC_WITHDRAWAL ?? input.lastYearProDebits.BNC_WITHDRAWAL ?? 0,
-      actualOrNull(input.proDebits.BNC_WITHDRAWAL ?? 0),
+      input.forecasts.BNC_WITHDRAWAL ?? input.lastYearProfessionalDebits.BNC_WITHDRAWAL ?? 0,
+      actualOrNull(input.professionalDebits.BNC_WITHDRAWAL ?? 0),
     ),
     grossSalary: fixed(pay.grossSalaryCents),
     employerContributions,
@@ -93,7 +93,9 @@ export function computeMonth(input: ProMonthInput): ProMonth {
   const deductible = amount(
     sum(rows.map((row) => applyBp(row.amount.forecast, row.vatBp))),
     actualOrNull(
-      sum(rows.map((row) => (input.proDebits[row.category] ?? 0) - (row.amount.actual ?? 0))),
+      sum(
+        rows.map((row) => (input.professionalDebits[row.category] ?? 0) - (row.amount.actual ?? 0)),
+      ),
     ),
   );
   const vat = {
@@ -102,7 +104,7 @@ export function computeMonth(input: ProMonthInput): ProMonth {
     due: subtractAmounts(collected, deductible),
     payment: amount(
       Math.max(0, input.previousVatDueCents),
-      actualOrNull(input.proDebits.VAT_PAYMENT ?? 0),
+      actualOrNull(input.professionalDebits.VAT_PAYMENT ?? 0),
     ),
   };
 
@@ -167,7 +169,7 @@ function sum(values: readonly number[]): number {
 }
 
 /** Facturation regroupée par nom de client (prévu et réel), TTC du réel (ou du prévu à venir). */
-function billingByClient(input: ProMonthInput): ClientBilling[] {
+function billingByClient(input: ProfessionalMonthInput): ClientBilling[] {
   const names = [
     ...new Set([...input.forecastBilling, ...input.actualBilling].map((line) => line.clientName)),
   ];
@@ -193,11 +195,11 @@ function billingByClient(input: ProMonthInput): ClientBilling[] {
 }
 
 /** Frais mixtes ligne par ligne : dépense perso × quote-part, remboursements répartis dans l'ordre. */
-function mixedCostRows(input: ProMonthInput): MixedCostRow[] {
+function mixedCostRows(input: ProfessionalMonthInput): MixedCostRow[] {
   const { settings, hasActual } = input;
   const rows = MIXED_COSTS.map(({ category, key }) => {
     const shareBp = mixedShareBp(settings, key);
-    const spent: Amount = amount(
+    const spent: ForecastActual = amount(
       input.forecasts[category] ?? input.lastYearPersoDebits[category] ?? 0,
       hasActual ? (input.persoDebits[category] ?? 0) : null,
     );
@@ -212,7 +214,7 @@ function mixedCostRows(input: ProMonthInput): MixedCostRow[] {
 
   const paid = hasActual
     ? allocateRefunds(
-        input.proDebits.MIXED_COSTS_REFUND ?? 0,
+        input.professionalDebits.MIXED_COSTS_REFUND ?? 0,
         rows.map((row) => row.due.actual ?? 0),
       )
     : null;

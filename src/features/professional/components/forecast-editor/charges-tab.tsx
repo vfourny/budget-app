@@ -4,7 +4,10 @@ import { ForecastAmountsForm } from "@/features/professional/components/forecast
 import type { Period } from "@/hooks/use-period-selection";
 import { formatBp, formatCents } from "@/lib/format";
 import { fr } from "@/lib/i18n/fr";
-import { PRO_CHARGE_CATEGORIES, type ProYearSettingsValues } from "@shared/pro-rules";
+import {
+  PROFESSIONAL_CHARGE_CATEGORIES,
+  type ProfessionalYearSettingsValues,
+} from "@shared/professional-rules";
 
 /** Onglet « Charges & rémunération » : prévu HT par charge pro + BNC prévu. */
 export function ChargesTab({
@@ -12,14 +15,14 @@ export function ChargesTab({
   settings,
 }: {
   period: Period;
-  settings: ProYearSettingsValues;
+  settings: ProfessionalYearSettingsValues;
 }) {
   const text = fr.professional.editor.charges;
   return (
     <ForecastAmountsForm
       period={period}
       group="charges"
-      rows={PRO_CHARGE_CATEGORIES}
+      rows={PROFESSIONAL_CHARGE_CATEGORIES}
       reference="previousMonth"
       hint={text.hint}
     >
@@ -31,7 +34,9 @@ export function ChargesTab({
             </Text>
             <Text size="sm" fw={600}>
               {text.total(
-                formatCents(PRO_CHARGE_CATEGORIES.reduce((total, c) => total + view.valueOf(c), 0)),
+                formatCents(
+                  PROFESSIONAL_CHARGE_CATEGORIES.reduce((total, c) => total + view.valueOf(c), 0),
+                ),
               )}
             </Text>
           </Group>

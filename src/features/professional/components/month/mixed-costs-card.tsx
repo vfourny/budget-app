@@ -4,7 +4,7 @@ import { InfoTip } from "@/components/info-tip";
 import { TargetGauge } from "@/components/target-gauge";
 import { formatBp, formatCents, formatSquareMeters } from "@/lib/format";
 import { fr } from "@/lib/i18n/fr";
-import type { MixedCostRow, ProMonth } from "@server/lib/pro/types";
+import type { MixedCostRow, ProfessionalMonth } from "@server/lib/professional/types";
 
 type Status = keyof typeof fr.professional.mixedCosts.status;
 
@@ -26,7 +26,7 @@ function statusOf(row: MixedCostRow): Status {
  * « Frais mixtes perso → pro » : loyer, internet, téléphone, énergie payés en perso ; part due par
  * Stygma (prorata surface ou clé n/d) et remboursements reçus, ligne par ligne.
  */
-export function MixedCostsCard({ month }: { month: ProMonth }) {
+export function MixedCostsCard({ month }: { month: ProfessionalMonth }) {
   const text = fr.professional.mixedCosts;
   const { settings } = month;
   const areaShare = month.mixedCosts.rows.find((row) => row.keyType === "area")?.shareBp ?? 0;

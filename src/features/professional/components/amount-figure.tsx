@@ -5,12 +5,12 @@ import { InfoTip } from "@/components/info-tip";
 import type { GaugeGoal } from "@/components/target-gauge";
 import { formatCents } from "@/lib/format";
 import { fr } from "@/lib/i18n/fr";
-import type { Amount } from "@server/lib/pro/types";
+import type { ForecastActual } from "@server/lib/professional/types";
 
 interface AmountFigureProps {
   label: string;
   tip: string;
-  amount: Amount;
+  amount: ForecastActual;
   /** Sens de l'écart réel − prévu (voir `DeltaBadge`) ; sans `goal`, pas de pastille d'écart. */
   goal?: GaugeGoal;
   /** Couleur du chiffre (token Mantine). */

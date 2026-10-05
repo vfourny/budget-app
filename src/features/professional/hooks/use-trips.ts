@@ -6,7 +6,7 @@ import { queryClient, trpc } from "@/lib/trpc";
 const invalidate = () =>
   Promise.all([
     queryClient.invalidateQueries(trpc.professional.pathFilter()),
-    queryClient.invalidateQueries(trpc.proForecast.mileage.queryFilter()),
+    queryClient.invalidateQueries(trpc.professionalForecast.mileage.queryFilter()),
   ]);
 
 export function useCreateTrip() {

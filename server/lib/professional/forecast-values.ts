@@ -1,8 +1,12 @@
 import type { TransactionCategory } from "@server/generated/prisma/enums";
 import { validatedTransactions } from "@server/lib/dashboard/scope";
 import type { db as Db } from "@server/lib/db";
-import { htFromTtc } from "@server/lib/pro/amounts";
-import { FORECAST_GROUPS, PRO_CHARGE_VAT_BP, type ForecastGroup } from "@shared/pro-rules";
+import { htFromTtc } from "@server/lib/professional/amounts";
+import {
+  FORECAST_GROUPS,
+  PROFESSIONAL_CHARGE_VAT_BP,
+  type ForecastGroup,
+} from "@shared/professional-rules";
 
 export interface ForecastValue {
   category: TransactionCategory;
@@ -38,7 +42,7 @@ async function debits(
     rows.flatMap((row) => {
       if (!row.category) return [];
       const ttc = -(row._sum.amountCents ?? 0);
-      const vatBp = (PRO_CHARGE_VAT_BP as Partial<Record<TransactionCategory, number>>)[
+      const vatBp = (PROFESSIONAL_CHARGE_VAT_BP as Partial<Record<TransactionCategory, number>>)[
         row.category
       ];
       return [[row.category, vatBp === undefined ? ttc : htFromTtc(ttc, vatBp)] as const];

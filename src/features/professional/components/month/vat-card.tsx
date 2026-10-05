@@ -4,13 +4,13 @@ import { InfoTip } from "@/components/info-tip";
 import { AmountFigure } from "@/features/professional/components/amount-figure";
 import { formatCents } from "@/lib/format";
 import { fr } from "@/lib/i18n/fr";
-import type { Amount, ProMonth } from "@server/lib/pro/types";
+import type { ForecastActual, ProfessionalMonth } from "@server/lib/professional/types";
 
 /** Carte « TVA à reverser » : collectée − déductible = à reverser, prévu vs réel. */
-export function VatCard({ month }: { month: ProMonth }) {
+export function VatCard({ month }: { month: ProfessionalMonth }) {
   const { vat } = month;
   const text = fr.professional.vat;
-  const shown = (amount: Amount) => amount.actual ?? amount.forecast;
+  const shown = (amount: ForecastActual) => amount.actual ?? amount.forecast;
   const scale = Math.max(vat.collected.forecast, shown(vat.collected), 1);
 
   const lines = [

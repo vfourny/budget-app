@@ -2,9 +2,9 @@ import { z } from "zod";
 
 import { BillingKind, TransactionCategory } from "@server/generated/prisma/enums";
 import { appError } from "@server/lib/app-error";
-import { forecastValues } from "@server/lib/pro/forecast-values";
+import { forecastValues } from "@server/lib/professional/forecast-values";
 import { DAY_STEP, MAX_BILLED_DAYS } from "@shared/billing-days";
-import { FORECAST_GROUPS, type ForecastGroup } from "@shared/pro-rules";
+import { FORECAST_GROUPS, type ForecastGroup } from "@shared/professional-rules";
 import { createTRPCRouter, protectedProcedure } from "@server/trpc/init";
 
 const periodSchema = z.object({
@@ -30,7 +30,7 @@ const inGroup = (group: ForecastGroup, category: TransactionCategory) =>
 const followingMonths = (month: number) =>
   Array.from({ length: 12 - month }, (_, index) => month + 1 + index);
 
-export const proForecastRouter = createTRPCRouter({
+export const professionalForecastRouter = createTRPCRouter({
   /**
    * Clients déjà saisis (autocomplétion de l'éditeur), avec le TJM de leur ligne la plus récente
    * pour pré-remplir une nouvelle ligne.

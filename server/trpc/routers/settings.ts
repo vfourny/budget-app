@@ -1,16 +1,16 @@
 import { z } from "zod";
 
-import { CompanyRegime } from "@server/generated/prisma/enums";
-import { BUDGET_ENVELOPES, type BudgetEnvelope } from "@server/lib/settings/envelope-shares";
-import { resolveProYearSettings } from "@server/lib/settings/pro-year-settings";
-import { DEFAULT_ENVELOPE_PERCENTS } from "@shared/budget-rules";
+import { CompanyRegime, type Envelope } from "@server/generated/prisma/enums";
+import { BUDGET_ENVELOPES } from "@server/lib/settings/envelope-shares";
+import { resolveProfessionalYearSettings } from "@server/lib/settings/professional-year-settings";
+import { DEFAULT_ENVELOPE_PERCENTS } from "@shared/personal-rules";
 import { createTRPCRouter, protectedProcedure } from "@server/trpc/init";
 
 const envelopeSharesSchema = z
   .object(
     Object.fromEntries(
       BUDGET_ENVELOPES.map((envelope) => [envelope, z.number().int().min(0).max(100)]),
-    ) as Record<BudgetEnvelope, z.ZodNumber>,
+    ) as Record<Envelope, z.ZodNumber>,
   )
   .refine((shares) => Object.values(shares).reduce((sum, percent) => sum + percent, 0) === 100, {
     message: "Envelope shares must sum to exactly 100.",
@@ -34,7 +34,7 @@ const incomeTaxBracketsSchema = z
 const basisPoints = z.number().int().min(0).max(100_00);
 
 /** Règles pro d'une année : entiers uniquement (centimes, points de base, dm², millièmes d'€). */
-const proYearSettingsSchema = z
+const professionalYearSettingsSchema = z
   .object({
     regime: z.enum(CompanyRegime),
     irOptionFirstYear: z.number().int().min(2000).max(2100),
@@ -61,9 +61,9 @@ export const settingsRouter = createTRPCRouter({
   /** Part du revenu recommandée par enveloppe (valeurs par défaut si jamais configurée). */
   envelopeShares: protectedProcedure.query(async ({ ctx }) => {
     const rows = await ctx.db.envelopeShare.findMany({ where: { userId: ctx.session.user.id } });
-    const shares: Record<BudgetEnvelope, number> = { ...DEFAULT_ENVELOPE_PERCENTS };
+    const shares: Record<Envelope, number> = { ...DEFAULT_ENVELOPE_PERCENTS };
     for (const row of rows) {
-      if (row.envelope in shares) shares[row.envelope as BudgetEnvelope] = row.percent;
+      if (row.envelope in shares) shares[row.envelope] = row.percent;
     }
     return shares;
   }),
@@ -113,13 +113,15 @@ export const settingsRouter = createTRPCRouter({
    * Règles pro applicables à une année (Réglages › Pro, écran Pro) : celles de l'année, sinon
    * reprises de la dernière année configurée avant, sinon les valeurs par défaut.
    */
-  proYear: protectedProcedure
+  professionalYear: protectedProcedure
     .input(z.object({ year: z.number().int() }))
-    .query(({ ctx, input }) => resolveProYearSettings(ctx.db, ctx.session.user.id, input.year)),
+    .query(({ ctx, input }) =>
+      resolveProfessionalYearSettings(ctx.db, ctx.session.user.id, input.year),
+    ),
 
   /** Années ayant des règles pro enregistrées (pastille « configuré » de Réglages). */
-  proYearsConfigured: protectedProcedure.query(async ({ ctx }) => {
-    const rows = await ctx.db.proYearSettings.findMany({
+  professionalYearsConfigured: protectedProcedure.query(async ({ ctx }) => {
+    const rows = await ctx.db.professionalYearSettings.findMany({
       where: { userId: ctx.session.user.id },
       orderBy: { year: "asc" },
       select: { year: true },
@@ -128,11 +130,16 @@ export const settingsRouter = createTRPCRouter({
   }),
 
   /** Enregistre (crée ou remplace) les règles pro d'une année, sans toucher aux autres années. */
-  setProYear: protectedProcedure
-    .input(z.object({ year: z.number().int().min(2000).max(2100), values: proYearSettingsSchema }))
+  setProfessionalYear: protectedProcedure
+    .input(
+      z.object({
+        year: z.number().int().min(2000).max(2100),
+        values: professionalYearSettingsSchema,
+      }),
+    )
     .mutation(async ({ ctx, input }) => {
       const userId = ctx.session.user.id;
-      await ctx.db.proYearSettings.upsert({
+      await ctx.db.professionalYearSettings.upsert({
         where: { userId_year: { userId, year: input.year } },
         create: { userId, year: input.year, ...input.values },
         update: input.values,

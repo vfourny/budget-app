@@ -2,15 +2,15 @@ import { Paper, Title } from "@mantine/core";
 
 import {
   ForecastTable,
-  type ForecastGroup,
+  type ForecastTableGroup,
 } from "@/features/professional/components/forecast-table";
 import { formatBp, formatCents } from "@/lib/format";
 import { fr } from "@/lib/i18n/fr";
-import type { ProMonth } from "@server/lib/pro/types";
+import type { ProfessionalMonth } from "@server/lib/professional/types";
 import type { TransactionCategory } from "@server/generated/prisma/enums";
 
 /** Groupes du tableau « Prévisionnel vs réel · par catégorie » d'un mois. */
-function monthForecastGroups(month: ProMonth): ForecastGroup[] {
+function monthForecastGroups(month: ProfessionalMonth): ForecastTableGroup[] {
   const text = fr.professional.categories;
   const { remuneration, settings } = month;
   const netSalary = remuneration.netSalary.actual ?? remuneration.netSalary.forecast;
@@ -118,7 +118,7 @@ function monthForecastGroups(month: ProMonth): ForecastGroup[] {
 }
 
 /** Carte « Prévisionnel vs réel · par catégorie » de la vue mois. */
-export function CategoryForecastCard({ month }: { month: ProMonth }) {
+export function CategoryForecastCard({ month }: { month: ProfessionalMonth }) {
   return (
     <Paper
       withBorder

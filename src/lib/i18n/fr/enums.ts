@@ -1,4 +1,4 @@
-import type { RevenueLineKey } from "@shared/budget-rules";
+import type { RevenueLineKey } from "@shared/personal-rules";
 import type {
   AccountType,
   CompanyRegime,
@@ -46,10 +46,10 @@ export const envelopes = {
 
 /**
  * Libellé de chaque catégorie ; l'ordre des clés = ordre d'affichage (colonnes du Google Sheet,
- * listes de choix). Rattachement aux enveloppes : `@shared/budget-rules`.
+ * listes de choix). Rattachement aux enveloppes : `@shared/personal-rules`.
  */
 export const categories = {
-  RENT: "Loyer",
+  RENT_PAID: "Loyer versé",
   FUEL: "Essence",
   BANK_INSURANCE: "Banque et assurance",
   RESTAURANT: "Restaurant",
@@ -75,16 +75,16 @@ export const categories = {
   PROFESSIONAL_REFUND: "Remboursement pro",
   // Compte pro (Stygma)
   CLIENT_PAYMENT: "Encaissement client",
-  PRO_OTHER_CREDIT: "Autre crédit pro",
-  PRO_INSURANCE: "RC Pro & assurances",
-  PRO_ACCOUNTANT: "Comptable",
-  PRO_BANK_FEES: "Frais bancaires",
-  PRO_EQUIPMENT: "Petit matériel",
-  PRO_SOFTWARE: "Logiciels & abonnements",
-  PRO_MEALS: "Restauration",
-  PRO_TRAVEL: "Voyages et déplacements",
-  PRO_TAXES: "Impôts et taxes pro",
-  PRO_OTHER: "Autres charges pro",
+  PROFESSIONAL_OTHER_CREDIT: "Autre crédit pro",
+  PROFESSIONAL_INSURANCE: "RC Pro & assurances",
+  PROFESSIONAL_ACCOUNTANT: "Comptable",
+  PROFESSIONAL_BANK_FEES: "Frais bancaires",
+  PROFESSIONAL_EQUIPMENT: "Petit matériel",
+  PROFESSIONAL_SOFTWARE: "Logiciels & abonnements",
+  PROFESSIONAL_MEALS: "Restauration",
+  PROFESSIONAL_TRAVEL: "Voyages et déplacements",
+  PROFESSIONAL_TAXES: "Impôts et taxes pro",
+  PROFESSIONAL_OTHER: "Autres charges pro",
   NET_SALARY_TRANSFER: "Salaire net versé",
   BNC_WITHDRAWAL: "Revenus BNC prélevés",
   MIXED_COSTS_REFUND: "Remboursement frais mixtes",
@@ -96,7 +96,7 @@ export const categories = {
   VAT_PAYMENT: "TVA",
 } as const satisfies Record<TransactionCategory, string>;
 
-/** Lignes du détail de la card Revenus (clés de `REVENUE_LINES` dans budget-rules + « other »). */
+/** Lignes du détail de la card Revenus (clés de `REVENUE_LINES` dans personal-rules + « other »). */
 export const revenueLines = {
   salary: "Salaire",
   vacations: "Vacations",

@@ -5,7 +5,7 @@ import { KpiCard, KpiLine } from "@/components/kpi-card";
 import { EnvelopeGauge } from "@/features/personal/components/envelope-gauge";
 import { useIncomeTaxBrackets } from "@/features/settings/hooks/use-income-tax-brackets";
 import { useEnvelopeShares } from "@/features/settings/hooks/use-envelope-shares";
-import { SAVINGS_ENVELOPES, isSavingsEnvelope } from "@shared/budget-rules";
+import { SAVINGS_ENVELOPES, isSavingsEnvelope } from "@shared/personal-rules";
 import { ENVELOPE_ORDER, envelopeSourceText } from "@/lib/envelopes";
 import { formatCents } from "@/lib/format";
 import { fr } from "@/lib/i18n/fr";
@@ -15,7 +15,7 @@ import type { PeriodTotals } from "@server/lib/dashboard/aggregate";
 
 type Overview = PeriodTotals & { monthsWithData: number };
 
-/** Enveloppes de dépense = toutes sauf l'épargne (voir `SAVINGS_ENVELOPES` dans budget-rules). */
+/** Enveloppes de dépense = toutes sauf l'épargne (voir `SAVINGS_ENVELOPES` dans personal-rules). */
 const EXPENSE_ENVELOPES = ENVELOPE_ORDER.filter((envelope) => !isSavingsEnvelope(envelope));
 
 export function KpiCards({

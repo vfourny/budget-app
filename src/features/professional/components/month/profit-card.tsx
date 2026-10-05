@@ -4,7 +4,7 @@ import { InfoTip } from "@/components/info-tip";
 import { AmountFigure } from "@/features/professional/components/amount-figure";
 import { formatBp, formatCents } from "@/lib/format";
 import { fr } from "@/lib/i18n/fr";
-import type { Amount, ProMonth } from "@server/lib/pro/types";
+import type { ForecastActual, ProfessionalMonth } from "@server/lib/professional/types";
 
 import classes from "./profit-card.module.css";
 
@@ -12,9 +12,9 @@ import classes from "./profit-card.module.css";
  * Carte « Bénéfice » : équation CA HT − charges − salaires − cotisations = bénéfice, barre de
  * répartition du CA, puis bénéfice − BNC prélevés = reste en trésorerie, et charges sociales.
  */
-export function ProfitCard({ month }: { month: ProMonth }) {
+export function ProfitCard({ month }: { month: ProfessionalMonth }) {
   const text = fr.professional.profit;
-  const shown = (amount: Amount) => amount.actual ?? amount.forecast;
+  const shown = (amount: ForecastActual) => amount.actual ?? amount.forecast;
 
   // Barre empilée : chaque poste ÷ CA HT (le bénéfice négatif n'a pas de segment).
   const segments = [

@@ -18,7 +18,7 @@ import type { Envelope, TransactionCategory } from "@server/generated/prisma/enu
  */
 export const ENVELOPE_CATEGORIES = {
   CURRENT_EXPENSES: [
-    "RENT",
+    "RENT_PAID",
     "FUEL",
     "BANK_INSURANCE",
     "GROCERIES",
@@ -78,7 +78,7 @@ export const CATEGORY_CARD_CATEGORIES = [
  * affichées même à 0 €). Le total de la card est la somme de ces catégories.
  */
 export const FIXED_CHARGES_CATEGORIES = [
-  "RENT",
+  "RENT_PAID",
   "ENERGY",
   "TELECOM",
   "INTERNET",
@@ -99,9 +99,9 @@ export const REVENUE_LINES = [
  * Catégories signalées « À vérifier » dans les tableaux de transactions des dashboards (badge +
  * filtre), en plus des lignes sans catégorie : fourre-tout à reclasser si possible.
  */
-export const TO_CHECK_CATEGORIES = [
+const TO_CHECK_CATEGORIES = [
   "OTHER",
-  "PRO_OTHER",
+  "PROFESSIONAL_OTHER",
 ] as const satisfies readonly TransactionCategory[];
 
 /** Clé d'une ligne de revenus (`"other"` = le reste). Libellés : `@/lib/i18n/fr`. */
@@ -118,7 +118,7 @@ for (const [envelope, categories] of Object.entries(ENVELOPE_CATEGORIES)) {
     if (existing) {
       // Erreur au démarrage (front et serveur) plutôt qu'un double comptage silencieux.
       throw new Error(
-        `budget-rules : la catégorie ${category} est dans deux enveloppes (${existing} et ${envelope}).`,
+        `personal-rules : la catégorie ${category} est dans deux enveloppes (${existing} et ${envelope}).`,
       );
     }
     ENVELOPE_BY_CATEGORY.set(category, envelope as Envelope);

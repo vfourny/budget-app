@@ -3,7 +3,7 @@ import { Group, Paper, Text, Title, Tooltip } from "@mantine/core";
 import { finalOf } from "@/features/professional/final-amount";
 import { formatCents, monthName, shortMonthName } from "@/lib/format";
 import { fr } from "@/lib/i18n/fr";
-import type { ProMonth } from "@server/lib/pro/types";
+import type { ProfessionalMonth } from "@server/lib/professional/types";
 
 import classes from "./revenue-chart.module.css";
 
@@ -11,7 +11,13 @@ import classes from "./revenue-chart.module.css";
  * Histogramme du CA HT par mois : barre pleine = réel, contour pointillé = prévisionnel restant,
  * trait = prévu d'origine, petite barre bleue = charges pro. En CSS (pas de lib de graphiques).
  */
-export function RevenueChart({ year, months }: { year: number; months: readonly ProMonth[] }) {
+export function RevenueChart({
+  year,
+  months,
+}: {
+  year: number;
+  months: readonly ProfessionalMonth[];
+}) {
   const text = fr.professional.year.chart;
   const max = Math.max(
     ...months.flatMap((month) => [

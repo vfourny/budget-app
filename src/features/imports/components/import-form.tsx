@@ -5,7 +5,7 @@ import type { AccountType } from "@server/generated/prisma/enums";
 import { useState, type SubmitEvent } from "react";
 import { Link, useNavigate, useSearchParams } from "react-router";
 
-import { useImportStatement } from "@/features/import/hooks/use-import-statement";
+import { useImportStatement } from "@/features/imports/hooks/use-import-statement";
 import { csvErrorMessage, errorMessage } from "@/lib/errors";
 import { fr } from "@/lib/i18n/fr";
 

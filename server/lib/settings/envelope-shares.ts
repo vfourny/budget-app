@@ -8,5 +8,3 @@ export const BUDGET_ENVELOPES = [
   "SAFETY_SAVINGS",
   "LONG_TERM_SAVINGS",
 ] as const satisfies readonly Envelope[];
-
-export type BudgetEnvelope = (typeof BUDGET_ENVELOPES)[number];

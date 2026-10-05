@@ -43,7 +43,7 @@ Choix délibéré : **le plus simple possible**. SPA React (pas de SSR, pas de S
 
 ```bash
 pnpm dev            # front + API sur un seul serveur (http://localhost:5173, API sous /api)
-pnpm check          # lint + typecheck + format:check + i18n:check (à lancer avant toute PR)
+pnpm check          # lint + typecheck + format:check + i18n:check + knip (à lancer avant toute PR)
 pnpm build          # build de prod (fait aussi en CI) → .output/ (ou .vercel/output sur Vercel)
 pnpm preview        # sert le build de prod localement
 pnpm lint:fix       # autofix oxlint
@@ -68,11 +68,11 @@ src/                   # FRONT — SPA React, tourne uniquement dans le navigate
   app.tsx              # table des routes (React Router)
   pages/               # une page = un écran (assemble un header + des composants de feature)
   features/<domaine>/  # import, review, dashboard… : components/ + hooks/ du domaine
-  components/          # UI partagée entre features (PageHeader, ComingSoon…)
+  components/          # UI partagée entre features (PageHeader, KpiCard…)
   lib/                 # utilitaires front : trpc.ts (client + queryClient), theme.ts (thème Mantine)…
     i18n/fr/           # TOUS les textes de l'UI (dictionnaires typés) + plural.ts (accord en nombre)
   styles/global.css    # règles CSS globales (le thème, lui, est dans lib/theme.ts)
-shared/                # code pur partagé front + back (budget-rules.ts, pro-rules.ts, account-categories.ts, billing-days.ts, working-days.ts), alias @shared/
+shared/                # code pur partagé front + back (personal-rules.ts, professional-rules.ts, account-categories.ts, billing-days.ts), alias @shared/
 server/                # BACKEND — Nitro, mêmes conventions que le server/ de Nuxt
   api/                 # routes HTTP : server/api/health.ts → GET /api/health
     trpc/[...path].ts  # point d'entrée HTTP de tRPC
@@ -92,14 +92,14 @@ nitro.config.ts        # serverDir: ./server
 - **Frontière front / back / shared** : `src/**` ne peut importer de `server/**` qu'en `import type`
   (ex. le type du routeur tRPC). Jamais d'import runtime (Prisma, secrets…) côté front.
   Le code utilisé par les deux côtés vit dans `shared/` (alias `@shared/…`) : fichiers purs, sans
-  dépendance runtime (ex. `shared/budget-rules.ts`), importables par `src/` et par `server/`.
+  dépendance runtime (ex. `shared/personal-rules.ts`), importables par `src/` et par `server/`.
   `shared/` n'importe jamais de `src/` ni de `server/` (sauf `import type`).
 - **Règles du budget** (catégories → enveloppes, épargne, catégories de la card « Par catégorie »,
-  lignes de revenus, par `key`) : uniquement dans `shared/budget-rules.ts`, jamais en dur ailleurs. Aucun libellé dedans :
-  les textes sont dans `@/lib/i18n/fr`. Équivalent pro : `shared/pro-rules.ts` (TVA par charge, frais mixtes, groupes
+  lignes de revenus, par `key`) : uniquement dans `shared/personal-rules.ts`, jamais en dur ailleurs. Aucun libellé dedans :
+  les textes sont dans `@/lib/i18n/fr`. Équivalent pro : `shared/professional-rules.ts` (TVA par charge, frais mixtes, groupes
   du prévisionnel) et `shared/account-categories.ts` (catégories proposées par type de compte).
-- **Calculs du dashboard Pro** : fonctions **pures** dans `server/lib/pro/` (aucun accès base) ;
-  les requêtes restent dans `load-year.ts`. Un statut juridique = un `ProRegime` (`server/lib/pro/regimes/`).
+- **Calculs du dashboard Pro** : fonctions **pures** dans `server/lib/professional/` (aucun accès base) ;
+  les requêtes restent dans `load-year.ts`. Un statut juridique = un `ProfessionalRegime` (`server/lib/professional/regimes/`).
 - **Données** : toujours via tRPC + TanStack Query. **Pas de `fetch` dans un `useEffect`.**
   `useEffect` est réservé à la synchro avec un système externe (oxlint le signale sinon).
 - **Pattern de lecture** : `useQuery(trpc.<domaine>.<proc>.queryOptions())` avec `trpc` de
@@ -144,7 +144,7 @@ nitro.config.ts        # serverDir: ./server
   menu, l'ajouter à `MAIN_NAV` (`features/layout/components/app-layout.tsx`).
 - Validation des entrées : schémas Zod, partagés entre tRPC et formulaires.
 - UI en **français**, code/identifiants/commits en **anglais**.
-- **Textes de l'UI** : jamais en dur dans un composant ni dans `budget-rules.ts` : ils viennent du
+- **Textes de l'UI** : jamais en dur dans un composant ni dans `personal-rules.ts` : ils viennent du
   dictionnaire `fr` de `@/lib/i18n/fr` (`fr.nav.personal`, `fr.categories[category]`…), un fichier par
   domaine (`common`, `nav`, `imports`, `review`, `personal`, `settings`, `enums`, `errors`).
   Pas de lib i18n pour l'instant (une seule langue) : de simples objets `as const`. Texte avec
@@ -192,7 +192,7 @@ schéma Zod + modèle Prisma, ajout d'un widget dashboard).
 4. Route tRPC `categorize` (Gemini, few-shot sur transactions validées, JSON `category` (valeur de l'enum) + `confidence`) (fait)
 5. Écran de relecture : historique, tableau de correction, « Valider », suppression d'un import (fait)
 6. Dashboard Perso mois / année : totaux, transactions, par catégorie (fait) ; parts recommandées par enveloppe dans Réglages + jauges réel vs recommandé (fait) ; abonnements, IR (à faire)
-7. Partie pro Stygma (fait, voir `docs/plan-pro.md`) : catégories pro, règles par année dans Réglages,
+7. Partie pro Stygma (fait, voir `docs/plan-professional.md`) : catégories pro, règles par année dans Réglages,
    dashboard mois / année (CA, TVA, bénéfice, facturation & encaissements, catégories, frais mixtes, km), éditeur du
    prévisionnel ; à venir : régimes IS / EURL, TVA à l'encaissement
 

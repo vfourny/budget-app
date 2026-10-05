@@ -1,8 +1,7 @@
+import type { IncomeTaxBracket as PrismaIncomeTaxBracket } from "@server/generated/prisma/browser";
+
 /** Tranche du barème de l'IR : seuil bas (centimes) et taux marginal (%). */
-export interface IncomeTaxBracket {
-  fromCents: number;
-  ratePercent: number;
-}
+export type IncomeTaxBracket = Pick<PrismaIncomeTaxBracket, "fromCents" | "ratePercent">;
 
 /**
  * Estimation grossière de l'IR pour 1 part : barème progressif (tranches saisies dans Réglages,

@@ -3,7 +3,7 @@ import { Paper, Table, Text, Title } from "@mantine/core";
 import { finalOf } from "@/features/professional/final-amount";
 import { formatEurosRounded, shortMonthName } from "@/lib/format";
 import { fr } from "@/lib/i18n/fr";
-import type { ProMonth } from "@server/lib/pro/types";
+import type { ProfessionalMonth } from "@server/lib/professional/types";
 
 import classes from "./income-statement.module.css";
 
@@ -12,7 +12,7 @@ type RowKey = keyof typeof fr.professional.year.statement.rows;
 /** Une ligne : valeur d'un mois (finale, sauf le prévu d'origine) et couleur éventuelle. */
 const ROWS: {
   key: RowKey;
-  value: (month: ProMonth) => number;
+  value: (month: ProfessionalMonth) => number;
   color?: string;
   strong?: boolean;
 }[] = [
@@ -32,7 +32,7 @@ const ROWS: {
 ];
 
 /** « Compte de résultat simplifié » : une colonne par mois + « Final » (somme réel + prévu restant). */
-export function IncomeStatement({ months }: { months: readonly ProMonth[] }) {
+export function IncomeStatement({ months }: { months: readonly ProfessionalMonth[] }) {
   const text = fr.professional.year.statement;
   return (
     <Paper withBorder radius="lg" p={24} mb={16} component="section" aria-label={text.title}>

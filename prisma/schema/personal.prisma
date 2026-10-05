@@ -10,7 +10,7 @@ enum Envelope {
 }
 
 /// Part du revenu mensuel recommandée pour une enveloppe (en %). Une ligne par (utilisateur, enveloppe)
-/// configurée ; sans ligne, la valeur par défaut de `DEFAULT_ENVELOPE_PERCENTS` (`shared/budget-rules.ts`) s'applique.
+/// configurée ; sans ligne, la valeur par défaut de `DEFAULT_ENVELOPE_PERCENTS` (`shared/personal-rules.ts`) s'applique.
 model EnvelopeShare {
   userId   String
   user     User     @relation(fields: [userId], references: [id], onDelete: Cascade)

@@ -11,7 +11,7 @@ type FixedChargeCategory = FixedCharge["category"];
 
 /** Icône et couleur (tokens Mantine) de chaque catégorie de la card ; `satisfies` : clé manquante = erreur TS. */
 const STYLE = {
-  RENT: { Icon: IconHome, color: "blue.3" },
+  RENT_PAID: { Icon: IconHome, color: "blue.3" },
   ENERGY: { Icon: IconBolt, color: "gold.6" },
   TELECOM: { Icon: IconPhone, color: "teal.4" },
   INTERNET: { Icon: IconWifi, color: "grape.4" },
@@ -22,7 +22,7 @@ const STYLE = {
 
 /**
  * Bandeau « Charges fixes » (loyer, énergie, télécom, internet) : débits de la période pour les catégories
- * de `FIXED_CHARGES_CATEGORIES` (budget-rules), + leur total. Mois ou année selon la vue choisie.
+ * de `FIXED_CHARGES_CATEGORIES` (personal-rules), + leur total. Mois ou année selon la vue choisie.
  */
 export function FixedChargesCard({ fixedCharges }: { fixedCharges: readonly FixedCharge[] }) {
   const total = fixedCharges.reduce((sum, line) => sum + line.cents, 0);

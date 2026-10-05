@@ -14,7 +14,7 @@
 3. Prévu des charges sans saisie = réel HT du même mois N-1 (même règle que frais mixtes et km).
 4. Table `Client` (nom, mot-clé bancaire, TJM par défaut), gérée dans Réglages › Pro.
 5. « À vérifier » = sans catégorie ou « Autres » / « Autres charges pro ».
-6. Vitest ajouté pour `server/lib/pro/` (`pnpm test`, en CI).
+6. Vitest ajouté pour `server/lib/professional/` (`pnpm test`, en CI).
 7. Années du régime : années configurées + année précédente, en cours et suivante.
 
 Écarts assumés avec la maquette : enregistrement explicite dans l'éditeur (bouton) au lieu d'un enregistrement à chaque
@@ -97,7 +97,7 @@ Deux onglets **Perso** / **Pro · Stygma** :
    | Cotisations                     | `URSSAF`, `SUPPLEMENTARY_PENSION` (Malakoff), `HEALTH_COVER` + `DISABILITY_COVER` (SwissLife), `WITHHOLDING_TAX` (DGFIP PAS-DSN)                                                                                                                                         |
    | Fiscalité                       | `VAT_PAYMENT` (DGFIP / SIE TVA)                                                                                                                                                                                                                                          |
 
-2. **Règles pro dans `shared/pro-rules.ts`** (même philosophie que `budget-rules.ts`, sans libellé) :
+2. **Règles pro dans `shared/professional-rules.ts`** (même philosophie que `personal-rules.ts`, sans libellé) :
    groupe de chaque catégorie pro, taux de TVA déductible (en points de base), catégories « frais mixtes »
    (`RENT` → clé surface, `INTERNET`/`TELECOM`/`ENERGY` → clé n/d), répartition indicative des cotisations
    patronales (URSSAF / retraite / santé / prévoyance), taux de TVA collectée (20 %).
@@ -105,7 +105,7 @@ Deux onglets **Perso** / **Pro · Stygma** :
 3. **Calcul pur et testable, séparé des requêtes** :
 
    ```
-   server/lib/pro/
+   server/lib/professional/
      load-period.ts        # requêtes Prisma d'un mois ou d'une année (transactions pro + perso, prévisionnel, réglages, trajets)
      compute-month.ts      # PUR : entrées d'un mois → { forecast, actual | null, billing, vat, profit, mixedCosts, mileage }
      regimes/
@@ -154,7 +154,7 @@ Deux onglets **Perso** / **Pro · Stygma** :
        year/  year-kpis · revenue-chart · income-statement-table · year-categories-table · year-mixed-costs · year-mileage
        forecast-editor/ forecast-editor-modal · billing-tab · charges-tab · mixed-costs-tab · mileage-tab
      hooks/ use-professional.ts · use-forecast-editor.ts · use-trips.ts
-   src/features/settings/components/ pro-year-settings-form.tsx
+   src/features/settings/components/ professional-year-settings-form.tsx
    src/lib/i18n/fr/professional.ts  # sort de settings.ts
    ```
 
@@ -192,23 +192,23 @@ Le composant reçoit des lignes déjà prêtes (`{ id, date, label, category, am
 
 ### Phase 1 — Fondations Pro
 
-| #   | Branche                    | Contenu                                                                                                                                                                                  |
-| --- | -------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| 4   | `feat/pro-categories`      | Catégories pro (enum + migration + `fr/enums.ts` + `CATEGORY_HINTS`) + `CATEGORIES_BY_ACCOUNT_TYPE` ; relecture et Gemini filtrés par type. **Les imports pro deviennent exploitables.** |
-| 5   | `feat/settings-tabs`       | Réglages en onglets Perso / Pro · Stygma (`Tabs` Mantine) ; onglet Perso = formulaires existants ; onglet Pro vide.                                                                      |
-| 6   | `feat/pro-year-settings`   | Modèle `ProYearSettings` + `CompanyRegime` + seed 2026 (valeurs de la maquette) + routes `settings.proYear/setProYear` (héritage de l'année précédente) + formulaire.                    |
-| 7   | `feat/pro-forecast-schema` | Modèles `Client`, `BillingLine`, `MonthlyForecast`, `MileageForecast`, `Trip` (migration seule) + `shared/pro-rules.ts`.                                                                 |
-| 8   | `feat/pro-compute`         | `server/lib/pro/` : `compute-month`, `regimes/sas-ir`, `match-payments`, `allocate-refunds` (pur) + tests unitaires (§ 7).                                                               |
+| #   | Branche                           | Contenu                                                                                                                                                                                  |
+| --- | --------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 4   | `feat/pro-categories`             | Catégories pro (enum + migration + `fr/enums.ts` + `CATEGORY_HINTS`) + `CATEGORIES_BY_ACCOUNT_TYPE` ; relecture et Gemini filtrés par type. **Les imports pro deviennent exploitables.** |
+| 5   | `feat/settings-tabs`              | Réglages en onglets Perso / Pro · Stygma (`Tabs` Mantine) ; onglet Perso = formulaires existants ; onglet Pro vide.                                                                      |
+| 6   | `feat/professional-year-settings` | Modèle `ProYearSettings` + `CompanyRegime` + seed 2026 (valeurs de la maquette) + routes `settings.proYear/setProYear` (héritage de l'année précédente) + formulaire.                    |
+| 7   | `feat/pro-forecast-schema`        | Modèles `Client`, `BillingLine`, `MonthlyForecast`, `MileageForecast`, `Trip` (migration seule) + `shared/professional-rules.ts`.                                                        |
+| 8   | `feat/pro-compute`                | `server/lib/professional/` : `compute-month`, `regimes/sas-ir`, `match-payments`, `allocate-refunds` (pur) + tests unitaires (§ 7).                                                      |
 
 ### Phase 2 — Dashboard Pro, vue mois (lecture)
 
-| #   | Branche                        | Contenu                                                                                                                                       |
-| --- | ------------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------- |
-| 9   | `feat/pro-month-overview`      | `load-period` + `professional.periods/month` ; page : en-tête, `PeriodPicker`, bandeau « mois à venir », KPI CA HT, tableau des transactions. |
-| 10  | `feat/pro-vat-profit`          | Cartes TVA à reverser + Bénéfice (équation, barre de répartition, BNC, reste en trésorerie, charges sociales).                                |
-| 11  | `feat/pro-billing-card`        | Facturation & encaissements (statuts via rapprochement).                                                                                      |
-| 12  | `feat/pro-category-table`      | Prévisionnel vs réel par catégorie (3 groupes + total).                                                                                       |
-| 13  | `feat/pro-mixed-costs-mileage` | Cartes Frais mixtes et Frais km (+ journal des trajets en lecture).                                                                           |
+| #   | Branche                          | Contenu                                                                                                                                       |
+| --- | -------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------- |
+| 9   | `feat/pro-month-overview`        | `load-period` + `professional.periods/month` ; page : en-tête, `PeriodPicker`, bandeau « mois à venir », KPI CA HT, tableau des transactions. |
+| 10  | `feat/pro-vat-profit`            | Cartes TVA à reverser + Bénéfice (équation, barre de répartition, BNC, reste en trésorerie, charges sociales).                                |
+| 11  | `feat/professional-billing-card` | Facturation & encaissements (statuts via rapprochement).                                                                                      |
+| 12  | `feat/pro-category-table`        | Prévisionnel vs réel par catégorie (3 groupes + total).                                                                                       |
+| 13  | `feat/pro-mixed-costs-mileage`   | Cartes Frais mixtes et Frais km (+ journal des trajets en lecture).                                                                           |
 
 ### Phase 3 — Saisie du prévisionnel
 
@@ -260,7 +260,7 @@ composants Vue partagés ; PR 15 : `useReducer` pour l'éditeur ≈ état local 
 3. **Prévu des charges pro** sans saisie : 0 €, ou réel du même mois N-1 (comme frais mixtes et km) ? — _hypothèse : réel N-1, même règle partout._
 4. **Clients** : table `Client` (nom + mot-clé bancaire pour le rapprochement) plutôt que le texte libre de la maquette ? — _hypothèse : oui._ **Révisé** : texte libre, encaissé = crédits du mois, reste à encaisser = solde cumulé (`docs/fonctionnel.md`).
 5. **« À vérifier » dans les dashboards** = sans catégorie ou « Autres » ? — _hypothèse : oui._
-6. **Tests unitaires** : ajouter Vitest (dev-dependency) uniquement pour `server/lib/pro/` (calculs financiers) ? — _hypothèse : oui, PR 8._
+6. **Tests unitaires** : ajouter Vitest (dev-dependency) uniquement pour `server/lib/professional/` (calculs financiers) ? — _hypothèse : oui, PR 8._
 7. **Années du régime** dans Réglages : liste fixe 2025 → 2028 (maquette) ou années ayant des données + année suivante ? — _hypothèse : années avec données + suivante._
 
 ---
