@@ -104,8 +104,10 @@ nitro.config.ts        # serverDir: ./server
   (`server/trpc/init.ts`, 401 sans session) ; `publicProcedure` seulement pour du contenu public.
 - **Auth** : Better Auth (`server/lib/auth.ts`, monté sur `/api/auth/*`). Inscription publique
   **désactivée** ; l'unique compte est créé par le seed (`pnpm db:seed`, rejoué par `pnpm db:reset`) depuis `SEED_USER_EMAIL` / `SEED_USER_PASSWORD`. Front : `authClient`
-  (`@/lib/auth-client`), routes privées sous `RequireAuth` dans `app.tsx`. Pas de `userId` sur les
-  données métier (un seul utilisateur) : à revoir si le multi-utilisateurs devient un besoin.
+  (`@/lib/auth-client`), routes privées sous `RequireAuth` dans `app.tsx`. Les données métier
+  (`EnvelopeShare`, `ImportBatch`, `Transaction`) portent un `userId` : **toute requête tRPC filtre sur
+  `ctx.session.user.id`** (`findFirst({ where: { id, userId } })` plutôt que `findUnique({ where: { id } })`,
+  `userId` à la création). `IncomeTaxBracket` reste global (barème légal).
 - **Valeurs dérivées** calculées pendant le rendu (≈ `computed`), pas stockées dans un
   `useState` ; `useMemo` seulement si le calcul est coûteux.
 - **Hooks custom** (`useXxx`) dans `features/<domaine>/hooks/` dès qu'une logique à état est

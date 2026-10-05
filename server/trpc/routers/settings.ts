@@ -32,7 +32,7 @@ const incomeTaxBracketsSchema = z
 export const settingsRouter = createTRPCRouter({
   /** Part du revenu recommandée par enveloppe (valeurs par défaut si jamais configurée). */
   envelopeShares: protectedProcedure.query(async ({ ctx }) => {
-    const rows = await ctx.db.envelopeShare.findMany();
+    const rows = await ctx.db.envelopeShare.findMany({ where: { userId: ctx.session.user.id } });
     const shares: Record<BudgetEnvelope, number> = { ...DEFAULT_ENVELOPE_PERCENTS };
     for (const row of rows) {
       if (row.envelope in shares) shares[row.envelope as BudgetEnvelope] = row.percent;
@@ -44,11 +44,12 @@ export const settingsRouter = createTRPCRouter({
   setEnvelopeShares: protectedProcedure
     .input(envelopeSharesSchema)
     .mutation(async ({ ctx, input }) => {
+      const userId = ctx.session.user.id;
       await ctx.db.$transaction(
         BUDGET_ENVELOPES.map((envelope) =>
           ctx.db.envelopeShare.upsert({
-            where: { envelope },
-            create: { envelope, percent: input[envelope] },
+            where: { userId_envelope: { userId, envelope } },
+            create: { userId, envelope, percent: input[envelope] },
             update: { percent: input[envelope] },
           }),
         ),

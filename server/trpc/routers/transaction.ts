@@ -13,8 +13,9 @@ export const transactionRouter = createTRPCRouter({
   setCategory: protectedProcedure
     .input(z.object({ id: z.string().min(1), category: z.enum(TransactionCategory) }))
     .mutation(async ({ ctx, input }) => {
-      const transaction = await ctx.db.transaction.findUnique({
-        where: { id: input.id },
+      // Filtré sur l'utilisateur : la transaction d'un autre compte = « introuvable ».
+      const transaction = await ctx.db.transaction.findFirst({
+        where: { id: input.id, userId: ctx.session.user.id },
         select: { importBatch: { select: { status: true } } },
       });
       if (!transaction) {

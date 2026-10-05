@@ -32,8 +32,10 @@ export const importRouter = createTRPCRouter({
 
     // Relevés qui se chevauchent : on n'importe pas deux fois la même ligne.
     const times = transactions.map((transaction) => transaction.date.getTime());
+    const userId = ctx.session.user.id;
     const existing = await ctx.db.transaction.findMany({
       where: {
+        userId,
         accountType: input.accountType,
         date: { gte: new Date(Math.min(...times)), lte: new Date(Math.max(...times)) },
       },
@@ -47,12 +49,14 @@ export const importRouter = createTRPCRouter({
     // Une seule transaction SQL : un import est écrit en entier ou pas du tout.
     const batch = await ctx.db.importBatch.create({
       data: {
+        userId,
         accountType: input.accountType,
         fileName: input.fileName,
         transactions: {
           createMany: {
             data: fresh.map((transaction) => ({
               ...transaction,
+              userId,
               accountType: input.accountType,
             })),
           },
@@ -68,6 +72,7 @@ export const importRouter = createTRPCRouter({
   /** Historique : un import par ligne, le plus récent d'abord. */
   list: protectedProcedure.query(async ({ ctx }) => {
     const batches = await ctx.db.importBatch.findMany({
+      where: { userId: ctx.session.user.id },
       orderBy: { createdAt: "desc" },
       select: {
         id: true,
@@ -102,8 +107,8 @@ export const importRouter = createTRPCRouter({
   get: protectedProcedure
     .input(z.object({ id: z.string().min(1) }))
     .query(async ({ ctx, input }) => {
-      const batch = await ctx.db.importBatch.findUnique({
-        where: { id: input.id },
+      const batch = await ctx.db.importBatch.findFirst({
+        where: { id: input.id, userId: ctx.session.user.id },
         select: {
           id: true,
           fileName: true,
@@ -145,8 +150,8 @@ export const importRouter = createTRPCRouter({
   validate: protectedProcedure
     .input(z.object({ id: z.string().min(1) }))
     .mutation(async ({ ctx, input }) => {
-      const batch = await ctx.db.importBatch.findUnique({
-        where: { id: input.id },
+      const batch = await ctx.db.importBatch.findFirst({
+        where: { id: input.id, userId: ctx.session.user.id },
         select: { status: true },
       });
       if (!batch) throw appError("NOT_FOUND", "IMPORT_NOT_FOUND");
@@ -172,7 +177,9 @@ export const importRouter = createTRPCRouter({
   delete: protectedProcedure
     .input(z.object({ id: z.string().min(1) }))
     .mutation(async ({ ctx, input }) => {
-      const { count } = await ctx.db.importBatch.deleteMany({ where: { id: input.id } });
+      const { count } = await ctx.db.importBatch.deleteMany({
+        where: { id: input.id, userId: ctx.session.user.id },
+      });
       if (count === 0) throw appError("NOT_FOUND", "IMPORT_NOT_FOUND");
       return { id: input.id };
     }),
