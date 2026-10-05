@@ -10,7 +10,10 @@ import {
  * PrimeVue : un objet `createTheme` passé au `MantineProvider`.
  *
  * `dark` remplace la palette sombre par défaut de Mantine : c'est elle qui donne le fond de
- * page, les cartes, les bordures et le texte en mode sombre (l'app est toujours sombre).
+ * page, les cartes, les bordures et le texte en mode sombre. Le mode clair (« platine ») est
+ * défini par les variables `light` de `cssVariablesResolver` plus bas.
+ * Dans les composants, ne pas utiliser `dark.N` directement (figé en sombre) : passer par les
+ * variables `--app-*` / `--mantine-color-*` qui changent avec le thème.
  * Index : 0 texte, 1 texte atténué, 2 légende, 4 bordure, 5 survol, 6 champs, 7 cartes, 8 fond.
  */
 const dark: MantineColorsTuple = [
@@ -79,10 +82,33 @@ export const theme = createTheme({
   },
 });
 
-/** Variables CSS propres à l'app : couleurs de la maquette qui n'ont pas d'équivalent Mantine. */
+/**
+ * Variables CSS dépendant du thème clair / sombre. Mantine les pose sur
+ * `[data-mantine-color-scheme="light|dark"]` (≈ des tokens par thème dans un preset PrimeVue).
+ * - `--mantine-color-*` : surcharge des couleurs sémantiques de Mantine (fond, bordures, texte).
+ * - `--app-*` : couleurs de la maquette sans équivalent Mantine.
+ * - En clair, les teintes d'accent utilisées comme texte (`gold.6`, `amber.3/4`, `teal.4`) sont
+ *   assombries pour rester lisibles sur fond clair : les composants n'ont rien à changer.
+ */
 export const cssVariablesResolver: CSSVariablesResolver = () => ({
   variables: {},
-  light: {},
+  light: {
+    "--mantine-color-body": "#f4f3ef",
+    "--mantine-color-text": "#1b1d20",
+    "--mantine-color-default": "#ffffff",
+    "--mantine-color-default-border": "#d9d7d0",
+    "--mantine-color-default-hover": "#ebe9e3",
+    "--mantine-color-dimmed": "#5f6268",
+    "--mantine-color-paper": "#ffffff",
+    "--mantine-color-gold-6": "#9c7e3e",
+    "--mantine-color-amber-3": "#c9743a",
+    "--mantine-color-amber-4": "#b5622b",
+    "--mantine-color-teal-4": "#0c8a63",
+    "--app-border": "#e4e2dc",
+    "--app-navbar-bg": "#ecebe6",
+    "--app-hover": "#e4e2dc",
+    "--app-caption": "#75787d",
+  },
   dark: {
     "--mantine-color-body": "#0d0e10",
     "--mantine-color-default": "#0d0e10",
@@ -93,5 +119,7 @@ export const cssVariablesResolver: CSSVariablesResolver = () => ({
     "--mantine-color-paper": "#15171a",
     "--app-border": "#22252a",
     "--app-navbar-bg": "#0a0b0d",
+    "--app-hover": "#1c1f23",
+    "--app-caption": "#8a8d92",
   },
 });
