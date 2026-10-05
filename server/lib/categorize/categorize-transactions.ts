@@ -1,7 +1,8 @@
 import type { GoogleGenAI } from "@google/genai";
 import { z } from "zod";
 
-import { TransactionCategory } from "@server/generated/prisma/enums";
+import { TransactionCategory, type AccountType } from "@server/generated/prisma/enums";
+import { isCategoryOf } from "@shared/account-categories";
 import { CATEGORY_HINTS } from "@server/lib/categorize/category-hints";
 import { env } from "@server/lib/env";
 
@@ -12,7 +13,12 @@ const CHUNK_SIZE = 200;
 /** En dessous de cette confiance, la ligne sera proposée dans « À vérifier » à la relecture. */
 export const LOW_CONFIDENCE_THRESHOLD = 0.7;
 
-const CATEGORIES = Object.values(TransactionCategory);
+/** Catégories proposées à l'IA selon le type de compte (perso / pro). */
+function categoriesOf(accountType: AccountType): TransactionCategory[] {
+  return Object.values(TransactionCategory).filter((category) =>
+    isCategoryOf(accountType, category),
+  );
+}
 
 export interface CategorizeInput {
   label: string;
@@ -42,7 +48,7 @@ const responseSchema = z.object({
 });
 
 /** Schéma JSON imposé à la réponse (sortie structurée Gemini). `enum` garantit une catégorie valide. */
-const OUTPUT_SCHEMA = {
+const outputSchema = (categories: readonly TransactionCategory[]) => ({
   type: "object",
   properties: {
     results: {
@@ -51,7 +57,7 @@ const OUTPUT_SCHEMA = {
         type: "object",
         properties: {
           index: { type: "integer" },
-          category: { type: "string", enum: CATEGORIES },
+          category: { type: "string", enum: categories },
           confidence: { type: "number" },
         },
         required: ["index", "category", "confidence"],
@@ -59,12 +65,21 @@ const OUTPUT_SCHEMA = {
     },
   },
   required: ["results"],
-} as const;
+});
 
-const SYSTEM_PROMPT = `Tu classes les lignes d'un relevé bancaire français dans une liste figée de catégories de budget.
+const ACCOUNT_CONTEXT = {
+  PERSONAL: "le compte bancaire personnel de Valentin Fourny",
+  PROFESSIONAL:
+    "le compte bancaire professionnel de sa société Stygma SAS (freelance développeur, président assimilé salarié)",
+} as const satisfies Record<AccountType, string>;
+
+const systemPrompt = (
+  accountType: AccountType,
+  categories: readonly TransactionCategory[],
+) => `Tu classes les lignes d'un relevé bancaire français (${ACCOUNT_CONTEXT[accountType]}) dans une liste figée de catégories.
 
 Catégories (code : description) :
-${CATEGORIES.map((category) => `- ${category} : ${CATEGORY_HINTS[category]}`).join("\n")}
+${categories.map((category) => `- ${category} : ${CATEGORY_HINTS[category]}`).join("\n")}
 
 Règles :
 - Chaque ligne est au format « index | montant en euros | libellé bancaire ». Un montant négatif est un débit, un montant positif est un crédit.
@@ -91,9 +106,11 @@ function formatExamples(examples: readonly CategorizeExample[]): string {
 
 async function categorizeChunk(
   client: GoogleGenAI,
+  accountType: AccountType,
   chunk: readonly CategorizeInput[],
   examples: readonly CategorizeExample[],
 ): Promise<(CategorizedLine | null)[]> {
+  const categories = categoriesOf(accountType);
   const lines = chunk.map(
     (transaction, index) =>
       `${index} | ${formatCents(transaction.amountCents)} | ${transaction.label}`,
@@ -103,9 +120,9 @@ async function categorizeChunk(
     model: env.GEMINI_MODEL,
     contents: `${formatExamples(examples)}Lignes à classer :\n${lines.join("\n")}`,
     config: {
-      systemInstruction: SYSTEM_PROMPT,
+      systemInstruction: systemPrompt(accountType, categories),
       responseMimeType: "application/json",
-      responseJsonSchema: OUTPUT_SCHEMA,
+      responseJsonSchema: outputSchema(categories),
       temperature: 0,
     },
   });
@@ -124,6 +141,8 @@ async function categorizeChunk(
   const categorized: (CategorizedLine | null)[] = chunk.map(() => null);
   for (const result of results) {
     if (result.index < 0 || result.index >= chunk.length) continue;
+    // Catégorie de l'autre type de compte (ne devrait pas arriver avec le schéma) : ignorée.
+    if (!isCategoryOf(accountType, result.category)) continue;
     categorized[result.index] = {
       category: result.category,
       confidence: Math.min(1, Math.max(0, result.confidence)),
@@ -133,12 +152,13 @@ async function categorizeChunk(
 }
 
 /**
- * Propose une catégorie et une confiance pour chaque transaction. Le résultat est aligné sur
+ * Propose une catégorie (parmi celles du type de compte) et une confiance pour chaque transaction. Le résultat est aligné sur
  * `transactions` (même ordre, `null` si l'IA n'a pas répondu pour la ligne). Les découpes en
  * lots partent en parallèle ; si l'un échoue, tout échoue (l'appelant n'écrit rien en base).
  */
 export async function categorizeTransactions(
   client: GoogleGenAI,
+  accountType: AccountType,
   transactions: readonly CategorizeInput[],
   examples: readonly CategorizeExample[] = [],
 ): Promise<(CategorizedLine | null)[]> {
@@ -148,7 +168,7 @@ export async function categorizeTransactions(
   }
 
   const results = await Promise.all(
-    chunks.map((chunk) => categorizeChunk(client, chunk, examples)),
+    chunks.map((chunk) => categorizeChunk(client, accountType, chunk, examples)),
   );
   return results.flat();
 }

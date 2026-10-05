@@ -65,6 +65,27 @@ export const categories = {
   VACATION_PAYMENT: "Versement vacation",
   REFUND: "Autre remboursement",
   PROFESSIONAL_REFUND: "Remboursement pro",
+  // Compte pro (Stygma)
+  CLIENT_PAYMENT: "Encaissement client",
+  PRO_OTHER_CREDIT: "Autre crédit pro",
+  PRO_INSURANCE: "RC Pro & assurances",
+  PRO_ACCOUNTANT: "Comptable",
+  PRO_BANK_FEES: "Frais bancaires",
+  PRO_EQUIPMENT: "Petit matériel",
+  PRO_SOFTWARE: "Logiciels & abonnements",
+  PRO_MEALS: "Restauration",
+  PRO_TRAVEL: "Voyages et déplacements",
+  PRO_TAXES: "Impôts et taxes pro",
+  PRO_OTHER: "Autres charges pro",
+  NET_SALARY_TRANSFER: "Salaire net versé",
+  BNC_WITHDRAWAL: "Revenus BNC prélevés",
+  MIXED_COSTS_REFUND: "Remboursement frais mixtes",
+  URSSAF: "URSSAF",
+  SUPPLEMENTARY_PENSION: "Retraite complémentaire",
+  HEALTH_COVER: "Complémentaire santé",
+  DISABILITY_COVER: "Prévoyance",
+  WITHHOLDING_TAX: "Prélèvement à la source",
+  VAT_PAYMENT: "TVA",
 } as const satisfies Record<TransactionCategory, string>;
 
 /** Lignes du détail de la card Revenus (clés de `REVENUE_LINES` dans budget-rules + « other »). */

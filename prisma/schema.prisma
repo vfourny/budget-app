@@ -51,6 +51,28 @@ enum TransactionCategory {
   PROFESSIONAL_REFUND // Remboursement pro : frais mixtes perso/pro remboursés par Stygma (crédit)
   TRAINING // Formation
   SHORT_TERM_SAVINGS // Épargne court terme
+  // ── Compte pro (Stygma) : catégories proposées seulement pour les relevés pro (voir
+  // `PRO_CATEGORIES` dans `shared/account-categories.ts`).
+  CLIENT_PAYMENT // Encaissement d'une facture client (crédit)
+  PRO_OTHER_CREDIT // Autre crédit pro
+  PRO_INSURANCE // RC Pro, assurances de la société
+  PRO_ACCOUNTANT // Expert-comptable
+  PRO_BANK_FEES // Frais et cotisations bancaires pro
+  PRO_EQUIPMENT // Petit matériel
+  PRO_SOFTWARE // Logiciels et abonnements pro
+  PRO_MEALS // Restauration pro
+  PRO_TRAVEL // Voyages et déplacements
+  PRO_TAXES // Impôts et taxes de la société (CFE, pénalités…)
+  PRO_OTHER // Autres charges pro
+  NET_SALARY_TRANSFER // Salaire net viré au président
+  BNC_WITHDRAWAL // Revenus BNC prélevés (virement vers le perso)
+  MIXED_COSTS_REFUND // Remboursement des frais mixtes payés en perso
+  URSSAF // Cotisations URSSAF
+  SUPPLEMENTARY_PENSION // Retraite complémentaire
+  HEALTH_COVER // Complémentaire santé
+  DISABILITY_COVER // Prévoyance
+  WITHHOLDING_TAX // Prélèvement à la source (DGFIP PAS)
+  VAT_PAYMENT // Paiement de la TVA
 }
 
 /// Part du revenu mensuel recommandée pour une enveloppe (en %). Une ligne par (utilisateur, enveloppe)

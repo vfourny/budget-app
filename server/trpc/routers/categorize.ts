@@ -84,7 +84,7 @@ export const categorizeRouter = createTRPCRouter({
 
       let results;
       try {
-        results = await categorizeTransactions(gemini, transactions, examples);
+        results = await categorizeTransactions(gemini, batch.accountType, transactions, examples);
       } catch (error) {
         console.error("Catégorisation : échec de l'appel à l'IA", error);
         throw toTRPCError(error);

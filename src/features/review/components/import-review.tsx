@@ -26,17 +26,23 @@ import {
 import { errorMessage } from "@/lib/errors";
 import { formatCents, formatDate } from "@/lib/format";
 import { fr } from "@/lib/i18n/fr";
-import type { TransactionCategory } from "@server/generated/prisma/enums";
+import { isCategoryOf } from "@shared/account-categories";
+import type { AccountType, TransactionCategory } from "@server/generated/prisma/enums";
 
 import classes from "./import-review.module.css";
 
 type Filter = "all" | "review";
 
+// Options du sélecteur par type de compte : un relevé pro ne propose que les catégories pro.
 // Ordre des options = ordre des clés de `fr.categories` (colonnes du Google Sheet).
-const CATEGORY_OPTIONS = (Object.keys(fr.categories) as TransactionCategory[]).map((category) => ({
-  value: category,
-  label: fr.categories[category],
-}));
+const CATEGORY_OPTIONS = Object.fromEntries(
+  (Object.keys(fr.accountTypes) as AccountType[]).map((accountType) => [
+    accountType,
+    (Object.keys(fr.categories) as TransactionCategory[])
+      .filter((category) => isCategoryOf(accountType, category))
+      .map((category) => ({ value: category, label: fr.categories[category] })),
+  ]),
+) as Record<AccountType, { value: TransactionCategory; label: string }[]>;
 
 export function ImportReview({ importId }: { importId: string }) {
   const review = useImportReview(importId);
@@ -129,7 +135,7 @@ export function ImportReview({ importId }: { importId: string }) {
                     placeholder={fr.review.categoryPlaceholder}
                     size="sm"
                     w={210}
-                    data={CATEGORY_OPTIONS}
+                    data={CATEGORY_OPTIONS[batch.accountType]}
                     value={row.category}
                     allowDeselect={false}
                     disabled={locked}
