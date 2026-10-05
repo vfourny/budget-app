@@ -99,7 +99,10 @@ export const REVENUE_LINES = [
  * Catégories signalées « À vérifier » dans les tableaux de transactions des dashboards (badge +
  * filtre), en plus des lignes sans catégorie : fourre-tout à reclasser si possible.
  */
-export const TO_CHECK_CATEGORIES = ["OTHER"] as const satisfies readonly TransactionCategory[];
+export const TO_CHECK_CATEGORIES = [
+  "OTHER",
+  "PRO_OTHER",
+] as const satisfies readonly TransactionCategory[];
 
 /** Clé d'une ligne de revenus (`"other"` = le reste). Libellés : `@/lib/i18n/fr`. */
 export type RevenueLineKey = (typeof REVENUE_LINES)[number]["key"] | "other";

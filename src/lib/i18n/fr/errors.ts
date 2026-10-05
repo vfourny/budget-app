@@ -19,6 +19,7 @@ export const errors = {
   IMPORT_NOT_FOUND: "Import introuvable.",
   IMPORT_ALREADY_VALIDATED: "Cet import est déjà validé.",
   TRANSACTION_NOT_FOUND: "Transaction introuvable.",
+  CATEGORY_NOT_ALLOWED: "Cette catégorie n'existe pas pour ce type de compte (perso / pro).",
   NO_READABLE_TRANSACTIONS:
     "Aucune transaction lisible dans ce fichier : format de banque incorrect ?",
   ALL_ROWS_ALREADY_IMPORTED: "Toutes les lignes de ce relevé sont déjà importées.",
