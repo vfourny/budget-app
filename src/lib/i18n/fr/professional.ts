@@ -182,6 +182,16 @@ export const professional = {
       bncHint: "€ virés vers ton perso (prélèvement sur le bénéfice)",
       mixedNote: "Frais mixtes : à régler dans l'onglet « Frais mixtes ».",
     },
+    mixedCosts: {
+      hint: "Tes dépenses perso (loyer, internet, téléphone, électricité) et la part que Stygma te rembourse. Pré-rempli avec tes dépenses perso du même mois l'an dernier : modifie ce que tu sais déjà (nouveau loyer, abonnement changé…).",
+      category: "Frais payé en perso",
+      amount: "Dépense perso (€)",
+      key: "Clé de répartition",
+      share: "Part Stygma",
+      areaKey: (share: string) => `surface ${share} %`,
+      ratioKey: (numerator: number, denominator: number) => `clé ${numerator}/${denominator}`,
+      total: (amount: string) => `Part Stygma prévue : ${amount}`,
+    },
     billing: {
       hintForecast:
         "Une ligne par client : TJM potentiel (HT) × jours. Plusieurs clients possibles dans le mois.",

@@ -89,6 +89,22 @@ export const MIXED_COSTS = [
 export type MixedCostCategory = (typeof MIXED_COSTS)[number]["category"];
 
 /**
+ * Part remboursée par Stygma (points de base) selon la clé : surface bureau / logement, ou clé n/d
+ * des Réglages. Utilisée par le calcul et par l'éditeur du prévisionnel.
+ */
+export function mixedShareBp(
+  settings: Pick<
+    ProYearSettingsValues,
+    "officeAreaDm2" | "homeAreaDm2" | "mixedKeyNumerator" | "mixedKeyDenominator"
+  >,
+  key: "area" | "key",
+): number {
+  return key === "area"
+    ? Math.round((settings.officeAreaDm2 * 10_000) / Math.max(1, settings.homeAreaDm2))
+    : Math.round((settings.mixedKeyNumerator * 10_000) / Math.max(1, settings.mixedKeyDenominator));
+}
+
+/**
  * Répartition indicative des cotisations patronales entre les organismes (points de base, total
  * 10 000) : détail « dont … » du tableau prévu / réel. Tirée d'un bulletin de paie.
  */
