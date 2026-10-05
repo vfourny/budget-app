@@ -163,6 +163,25 @@ export const professional = {
     saved: "Enregistré.",
     saveFailed: "Enregistrement impossible",
     loadFailed: "Impossible de charger le prévisionnel.",
+    amounts: {
+      category: "Charge",
+      forecast: "Prévu (€ HT)",
+      previousMonth: "Mois précédent (réel)",
+      lastYear: "Même mois N-1",
+      modified: "modifié",
+      resetLastYear: "Revenir aux valeurs N-1",
+      amountAria: (label: string) => `Montant prévu : ${label}`,
+    },
+    charges: {
+      hint: "Un montant prévu par charge pour ce mois, et le BNC viré vers ton perso. Sans saisie, c'est le réel du même mois l'an dernier. « Appliquer aux mois suivants » copie le tout sur la fin de l'année.",
+      total: (amount: string) => `Charges prévues ce mois : ${amount} HT`,
+      remuneration: "Rémunération",
+      salaryNote: (gross: string, employer: string, withholding: string) =>
+        `Salaire brut ${gross} fixe chaque mois, cotisations patronales ${employer} %, PAS ${withholding} % : définis dans Réglages › Pro (valeurs de l'année), pas ici.`,
+      bnc: "BNC prévu",
+      bncHint: "€ virés vers ton perso (prélèvement sur le bénéfice)",
+      mixedNote: "Frais mixtes : à régler dans l'onglet « Frais mixtes ».",
+    },
     billing: {
       hintForecast:
         "Une ligne par client : TJM potentiel (HT) × jours. Plusieurs clients possibles dans le mois.",

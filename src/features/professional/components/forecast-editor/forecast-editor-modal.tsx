@@ -2,12 +2,14 @@ import { Modal, SegmentedControl, Stack, Tabs } from "@mantine/core";
 import { useState } from "react";
 
 import { BillingTab } from "@/features/professional/components/forecast-editor/billing-tab";
+import { ChargesTab } from "@/features/professional/components/forecast-editor/charges-tab";
 import type { BillingSource } from "@/features/professional/hooks/use-forecast-editor";
 import type { Period } from "@/hooks/use-period-selection";
 import { capitalizedMonthName } from "@/lib/format";
 import { fr } from "@/lib/i18n/fr";
+import type { ProYearSettingsValues } from "@shared/pro-rules";
 
-export type EditorTab = "billing";
+export type EditorTab = "billing" | "charges";
 
 export interface EditorTarget {
   tab: EditorTab;
@@ -18,6 +20,8 @@ interface ForecastEditorModalProps {
   period: Period;
   /** Le mois a un réel : la saisie « Réel » de la facturation est possible. */
   hasActual: boolean;
+  /** Règles de l'année (salaire, taux) : rappelées dans l'onglet Charges. */
+  settings: ProYearSettingsValues;
   initial: EditorTarget;
   onClose: () => void;
 }
@@ -29,6 +33,7 @@ interface ForecastEditorModalProps {
 export function ForecastEditorModal({
   period,
   hasActual,
+  settings,
   initial,
   onClose,
 }: ForecastEditorModalProps) {
@@ -56,6 +61,7 @@ export function ForecastEditorModal({
       >
         <Tabs.List aria-label={text.tabsAria} mb={16}>
           <Tabs.Tab value="billing">{text.tabs.billing}</Tabs.Tab>
+          <Tabs.Tab value="charges">{text.tabs.charges}</Tabs.Tab>
         </Tabs.List>
         <Tabs.Panel value="billing">
           <Stack gap={16}>
@@ -71,6 +77,9 @@ export function ForecastEditorModal({
             />
             <BillingTab period={period} source={source} />
           </Stack>
+        </Tabs.Panel>
+        <Tabs.Panel value="charges">
+          <ChargesTab period={period} settings={settings} />
         </Tabs.Panel>
       </Tabs>
     </Modal>

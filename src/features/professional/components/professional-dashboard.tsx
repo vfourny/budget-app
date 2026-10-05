@@ -156,6 +156,7 @@ function MonthContent({ period }: { period: Period }) {
         <ForecastEditorModal
           period={period}
           hasActual={data.hasActual}
+          settings={data.settings}
           initial={editor}
           onClose={() => setEditor(null)}
         />

@@ -109,6 +109,23 @@ export const FORECASTABLE_CATEGORIES = [
   ...MIXED_COSTS.map((cost) => cost.category),
 ] as const satisfies readonly TransactionCategory[];
 
+/**
+ * Groupes de l'éditeur du prévisionnel : les catégories saisies ensemble, et le compte d'où viennent
+ * leurs valeurs par défaut (réel N-1) : relevé pro (montants ramenés en HT) ou relevé perso.
+ */
+export const FORECAST_GROUPS = {
+  charges: {
+    accountType: "PROFESSIONAL",
+    categories: [...PRO_CHARGE_CATEGORIES, "BNC_WITHDRAWAL"],
+  },
+  mixedCosts: { accountType: "PERSONAL", categories: MIXED_COSTS.map((cost) => cost.category) },
+} as const satisfies Record<
+  string,
+  { accountType: "PROFESSIONAL" | "PERSONAL"; categories: readonly TransactionCategory[] }
+>;
+
+export type ForecastGroup = keyof typeof FORECAST_GROUPS;
+
 /** Une facture est « encaissée » si un paiement du client arrive dans le mois ou les N suivants. */
 export const PAYMENT_MATCH_WINDOW_MONTHS = 2;
 
