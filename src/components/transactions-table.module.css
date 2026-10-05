@@ -1,0 +1,24 @@
+.card {
+  overflow: hidden;
+  scroll-margin-top: 24px;
+}
+
+.header {
+  padding: 20px 24px;
+  border-bottom: 1px solid var(--app-border);
+}
+
+/* Dates, montants et badges ne passent jamais à la ligne : c'est le libellé qui s'adapte. */
+.nowrap {
+  white-space: nowrap;
+}
+
+.badge {
+  flex-shrink: 0;
+  max-width: none;
+  overflow: visible;
+}
+
+.badge :global(.mantine-Badge-label) {
+  overflow: visible;
+}

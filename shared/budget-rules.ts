@@ -95,6 +95,12 @@ export const REVENUE_LINES = [
   { key: "otherRefund", categories: ["REFUND"] },
 ] as const satisfies readonly { key: string; categories: readonly TransactionCategory[] }[];
 
+/**
+ * Catégories signalées « À vérifier » dans les tableaux de transactions des dashboards (badge +
+ * filtre), en plus des lignes sans catégorie : fourre-tout à reclasser si possible.
+ */
+export const TO_CHECK_CATEGORIES = ["OTHER"] as const satisfies readonly TransactionCategory[];
+
 /** Clé d'une ligne de revenus (`"other"` = le reste). Libellés : `@/lib/i18n/fr`. */
 export type RevenueLineKey = (typeof REVENUE_LINES)[number]["key"] | "other";
 
@@ -126,4 +132,9 @@ export function envelopeOf(category: TransactionCategory | null): Envelope | nul
 
 export function isSavingsEnvelope(envelope: Envelope): boolean {
   return SAVINGS_ENVELOPES.some((savingsEnvelope) => savingsEnvelope === envelope);
+}
+
+/** Ligne à signaler dans un tableau de dashboard : sans catégorie ou dans `TO_CHECK_CATEGORIES`. */
+export function isToCheck(category: TransactionCategory | null): boolean {
+  return category === null || TO_CHECK_CATEGORIES.some((toCheck) => toCheck === category);
 }
