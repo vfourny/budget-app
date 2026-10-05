@@ -129,11 +129,3 @@ export const settings = {
     saveFailed: "Enregistrement impossible",
   },
 } as const;
-
-/** Écran Pro (pas encore construit). */
-export const professional = {
-  eyebrow: "Stygma SAS",
-  title: "Pro",
-  comingSoon:
-    "La partie pro (TVA, facturation, prévisionnel) viendra après la validation du MVP perso.",
-} as const;

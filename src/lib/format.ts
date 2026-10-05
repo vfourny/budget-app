@@ -29,3 +29,10 @@ export function capitalizedMonthName(month: number): string {
   const name = monthName(month);
   return name.charAt(0).toUpperCase() + name.slice(1);
 }
+
+const dayFormat = new Intl.NumberFormat(LOCALE, { maximumFractionDigits: 1 });
+
+/** Demi-journées → jours lisibles : 41 → "20,5". */
+export function formatHalfDays(halfDays: number): string {
+  return dayFormat.format(halfDays / 2);
+}

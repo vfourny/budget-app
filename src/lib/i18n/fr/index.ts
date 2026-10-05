@@ -14,7 +14,8 @@ import { nav } from "./nav";
 import { period } from "./period";
 import { personal } from "./personal";
 import { review } from "./review";
-import { professional, settings } from "./settings";
+import { professional } from "./professional";
+import { settings } from "./settings";
 import { transactions } from "./transactions";
 
 /** Locale des formats (`Intl`) : dates, montants. */
