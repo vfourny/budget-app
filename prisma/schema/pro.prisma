@@ -1,0 +1,105 @@
+// ─── Pro (Stygma) ────────────────────────────────────────────────────────────────────────────────────
+
+/// Statut juridique et fiscal de la société, choisi par année dans Réglages › Pro. Seul `SAS_IR` est
+/// calculé pour l'instant (les autres sont affichés « Bientôt ») : un statut = un `ProRegime` côté serveur.
+enum CompanyRegime {
+  SAS_IR // SAS à l'impôt sur le revenu (option 5 exercices max)
+  SAS_IS // SAS à l'impôt sur les sociétés
+  EURL // EURL
+}
+
+/// Règles de Stygma pour une année (Réglages › Pro) : taux du bulletin de paie, charges sociales sur
+/// la quote-part de bénéfice, clés des frais mixtes, barème km. Une année sans ligne reprend la
+/// dernière année configurée avant elle (sinon `DEFAULT_PRO_YEAR_SETTINGS`, `shared/pro-rules.ts`).
+/// Pas de float : taux en points de base (4460 = 44,60 %), surfaces en dm², barème en millièmes d'€.
+model ProYearSettings {
+  userId                 String
+  user                   User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  year                   Int           @db.SmallInt
+  regime                 CompanyRegime @default(SAS_IR)
+  /// Premier exercice avec l'option pour l'IR (5 exercices maximum).
+  irOptionFirstYear      Int           @db.SmallInt
+  grossSalaryCents       Int
+  employerContributionBp Int
+  employeeContributionBp Int
+  /// Net imposable en % du brut (base du prélèvement à la source).
+  taxableNetBp           Int
+  withholdingTaxBp       Int
+  /// Charges sociales sur la quote-part de bénéfice (réglées en perso).
+  profitSocialChargesBp  Int
+  officeAreaDm2          Int
+  homeAreaDm2            Int
+  /// Clé de répartition des autres frais mixtes (internet, téléphone, énergie) : numérateur / dénominateur.
+  mixedKeyNumerator      Int           @db.SmallInt
+  mixedKeyDenominator    Int           @db.SmallInt
+  /// Barème kilométrique en millièmes d'euro par km (636 = 0,636 €/km).
+  mileageRateMilli       Int
+
+  @@id([userId, year])
+}
+
+/// Ligne de facturation prévue (prévisionnel) ou réellement facturée (saisie à la main : jours et TJM
+/// ne figurent pas sur le relevé bancaire).
+enum BillingKind {
+  FORECAST // Prévu
+  ACTUAL // Réel
+}
+
+/// Prestation d'un mois pour un client : jours × TJM, en prévisionnel ou en réel. Plusieurs clients
+/// (donc plusieurs lignes) possibles dans un mois. CA HT = Σ demi-journées / 2 × TJM. Le client est
+/// un simple nom saisi dans l'éditeur (autocomplétion sur les noms déjà utilisés), pas une table.
+model BillingLine {
+  id             String      @id @default(cuid())
+  userId         String
+  user           User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  clientName     String
+  year           Int         @db.SmallInt
+  month          Int         @db.SmallInt
+  kind           BillingKind
+  dailyRateCents Int
+  /// Demi-journées travaillées (3,5 jours = 7) : pas de float.
+  halfDays       Int
+
+  @@index([userId, year, month])
+}
+
+/// Montant prévu d'une catégorie pour un mois : charges pro, BNC prélevés, et dépenses perso des frais
+/// mixtes (RENT, INTERNET…). Sans ligne, le prévisionnel prend sa valeur par défaut (réel N-1).
+model MonthlyForecast {
+  userId      String
+  user        User                @relation(fields: [userId], references: [id], onDelete: Cascade)
+  year        Int                 @db.SmallInt
+  month       Int                 @db.SmallInt
+  category    TransactionCategory
+  amountCents Int
+
+  @@id([userId, year, month, category])
+}
+
+/// Kilomètres pro prévus pour un mois. Sans ligne : km réels du même mois l'année précédente.
+model MileageForecast {
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  year   Int    @db.SmallInt
+  month  Int    @db.SmallInt
+  km     Int
+
+  @@id([userId, year, month])
+}
+
+/// Trajet pro (journal des frais kilométriques) : les km réels d'un mois = somme de ses trajets.
+model Trip {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  date      DateTime @db.Date
+  /// Dénormalisés depuis `date`, comme pour `Transaction`.
+  month     Int      @db.SmallInt
+  year      Int      @db.SmallInt
+  route     String
+  reason    String
+  km        Int
+  createdAt DateTime @default(now())
+
+  @@index([userId, year, month])
+}

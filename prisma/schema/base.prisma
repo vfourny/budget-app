@@ -1,0 +1,13 @@
+// Schéma Prisma découpé par domaine : tous les fichiers de `prisma/schema/` forment un seul schéma
+// (dossier déclaré dans `prisma.config.ts`). Un modèle peut référencer un modèle d'un autre fichier.
+
+// Prisma 7 : générateur "prisma-client" (client TS sans moteur Rust), sorti dans server/generated/.
+generator client {
+  provider = "prisma-client"
+  output   = "../../server/generated/prisma"
+}
+
+// L'URL de connexion est dans prisma.config.ts (CLI) et server/lib/db.ts (runtime).
+datasource db {
+  provider = "postgresql"
+}

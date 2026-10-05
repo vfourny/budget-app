@@ -1,0 +1,70 @@
+// ─── Authentification (Better Auth) ──────────────────────────────────────────────────────────
+// Modèles imposés par Better Auth (adapter Prisma) : ne pas renommer les champs. Les données
+// métier (`EnvelopeShare`, `ImportBatch`, `Transaction`) portent un `userId` : chaque requête
+// tRPC filtre sur `ctx.session.user.id`. Aujourd'hui un seul `User`, créé par le seed
+// (`prisma/seeds/user.ts`, inscription publique désactivée). `IncomeTaxBracket` reste global (barème légal).
+
+model User {
+  id               String            @id
+  name             String
+  email            String            @unique
+  emailVerified    Boolean           @default(false)
+  image            String?
+  createdAt        DateTime          @default(now())
+  updatedAt        DateTime          @updatedAt
+  sessions         Session[]
+  accounts         Account[]
+  envelopeShares   EnvelopeShare[]
+  importBatches    ImportBatch[]
+  transactions     Transaction[]
+  proYearSettings  ProYearSettings[]
+  billingLines     BillingLine[]
+  monthlyForecasts MonthlyForecast[]
+  mileageForecasts MileageForecast[]
+  trips            Trip[]
+}
+
+model Session {
+  id        String   @id
+  expiresAt DateTime
+  token     String   @unique
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  ipAddress String?
+  userAgent String?
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+}
+
+/// Identifiants d'un user : pour l'email + mot de passe, `providerId = "credential"` et `password` = hash.
+model Account {
+  id                    String    @id
+  accountId             String
+  providerId            String
+  userId                String
+  user                  User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  accessToken           String?
+  refreshToken          String?
+  idToken               String?
+  accessTokenExpiresAt  DateTime?
+  refreshTokenExpiresAt DateTime?
+  scope                 String?
+  password              String?
+  createdAt             DateTime  @default(now())
+  updatedAt             DateTime  @updatedAt
+
+  @@index([userId])
+}
+
+model Verification {
+  id         String   @id
+  identifier String
+  value      String
+  expiresAt  DateTime
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@index([identifier])
+}
