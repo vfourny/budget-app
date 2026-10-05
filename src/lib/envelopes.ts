@@ -1,4 +1,4 @@
-import { ENVELOPE_CATEGORIES, isSavingsEnvelope } from "@/lib/budget-rules";
+import { ENVELOPE_CATEGORIES, isSavingsEnvelope } from "@shared/budget-rules";
 import { fr } from "@/lib/i18n/fr";
 import type { Envelope } from "@server/generated/prisma/enums";
 

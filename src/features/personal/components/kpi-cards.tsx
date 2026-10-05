@@ -5,7 +5,7 @@ import { Link } from "react-router";
 import { EnvelopeGauge } from "@/features/personal/components/envelope-gauge";
 import { useIncomeTaxBrackets } from "@/features/settings/hooks/use-income-tax-brackets";
 import { useEnvelopeShares } from "@/features/settings/hooks/use-envelope-shares";
-import { SAVINGS_ENVELOPES, isSavingsEnvelope } from "@/lib/budget-rules";
+import { SAVINGS_ENVELOPES, isSavingsEnvelope } from "@shared/budget-rules";
 import { ENVELOPE_ORDER, envelopeSourceText } from "@/lib/envelopes";
 import { formatCents } from "@/lib/format";
 import { fr } from "@/lib/i18n/fr";
