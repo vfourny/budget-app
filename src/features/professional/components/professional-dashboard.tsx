@@ -18,6 +18,9 @@ import { ProfitCard } from "@/features/professional/components/month/profit-card
 import { RevenueKpiCard } from "@/features/professional/components/month/revenue-kpi-card";
 import { VatCard } from "@/features/professional/components/month/vat-card";
 import { IncomeStatement } from "@/features/professional/components/year/income-statement";
+import { YearCategories } from "@/features/professional/components/year/year-categories";
+import { YearMileage } from "@/features/professional/components/year/year-mileage";
+import { YearMixedCosts } from "@/features/professional/components/year/year-mixed-costs";
 import { RevenueChart } from "@/features/professional/components/year/revenue-chart";
 import { YearKpis } from "@/features/professional/components/year/year-kpis";
 import {
@@ -183,6 +186,17 @@ function YearContent({ year }: { year: number }) {
       <YearKpis months={months.data} />
       <RevenueChart year={year} months={months.data} />
       <IncomeStatement months={months.data} />
+      <Grid gap={16} align="flex-start">
+        <Grid.Col span={{ base: 12, lg: 7 }}>
+          <YearCategories months={months.data} />
+        </Grid.Col>
+        <Grid.Col span={{ base: 12, lg: 5 }}>
+          <Stack gap={16}>
+            <YearMixedCosts months={months.data} />
+            <YearMileage months={months.data} />
+          </Stack>
+        </Grid.Col>
+      </Grid>
     </>
   );
 }

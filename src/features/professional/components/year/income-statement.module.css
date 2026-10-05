@@ -1,4 +1,4 @@
 .table {
   white-space: nowrap;
-  font-size: var(--mantine-font-size-sm);
+  font-size: var(--mantine-font-size-xs);
 }
