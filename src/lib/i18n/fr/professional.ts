@@ -246,6 +246,30 @@ export const professional = {
       mileageSub: (km: string, left: string) =>
         `${km} km sur l'année · frais mixtes restant dus : ${left}`,
     },
+    categories: {
+      title: "Catégories · prévu vs réel sur l'année",
+      subtitle: (from: string, to: string) =>
+        `Prévu et réel cumulés sur les mois avec réel (${from} → ${to})`,
+      noActual: "Pas encore de mois avec réel : seul le prévu de l'année est affiché.",
+      yearForecast: (amount: string) => `prévu année ${amount}`,
+    },
+    mixedCosts: {
+      title: "Frais mixtes · année",
+      description:
+        "Loyer, internet, téléphone, énergie · cumul des mois avec réel. Idéal pour un remboursement groupé.",
+      yearForecast: (amount: string) => `Prévu année : ${amount}`,
+      spent: (amount: string) => `Payé en perso : ${amount}`,
+      due: (amount: string) => `Dû : ${amount}`,
+      paid: (paid: string, left: string) => `${paid} remboursé · reste ${left}`,
+      left: "Reste à rembourser (année)",
+    },
+    mileage: {
+      title: "Frais kilométriques · année",
+      toDate: "À ce jour",
+      yearForecast: "Prévu année",
+      barsAria: "Kilomètres par mois",
+      bar: (month: string, km: string) => `${month} : ${km} km`,
+    },
     statement: {
       title: "Compte de résultat simplifié",
       subtitle:
