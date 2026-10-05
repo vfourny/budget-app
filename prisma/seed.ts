@@ -2,11 +2,13 @@ import "dotenv/config";
 
 import { auth } from "@server/lib/auth";
 import { db } from "@server/lib/db";
+import { workingDays } from "@shared/working-days";
 
 // Seed : crée l'unique compte de l'app (l'inscription HTTP est désactivée) et insère les barèmes
 // de l'IR. Lancé automatiquement par `pnpm db:reset` (prisma migrate reset) ou à la main avec
 // `pnpm db:seed` (à relancer sur chaque base, develop et production, après avoir complété la
-// liste ci-dessous). Idempotent. Identifiants lus dans `.env` (SEED_USER_*).
+// liste ci-dessous). Idempotent. Identifiants lus dans `.env` (SEED_USER_*). Insère aussi une
+// facturation Pro 2026 de départ (voir `PRO_BILLING_SEED`).
 
 /**
  * Barème de l'IR (1 part) par année : clé = année affichée dans le dashboard Perso, valeur =
@@ -63,8 +65,10 @@ if (!email || !password) {
 }
 
 const ctx = await auth.$context;
+const existing = await ctx.internalAdapter.findUserByEmail(email);
+let userId = existing?.user.id;
 
-if (await ctx.internalAdapter.findUserByEmail(email)) {
+if (userId) {
   process.stdout.write(`Compte déjà présent : ${email}` + "\n");
 } else {
   if (password.length < ctx.password.config.minPasswordLength) {
@@ -84,7 +88,50 @@ if (await ctx.internalAdapter.findUserByEmail(email)) {
     accountId: user.id,
     password: await ctx.password.hash(password),
   });
+  userId = user.id;
   process.stdout.write(`Compte créé : ${email}` + "\n");
 }
+
+/**
+ * Facturation Pro de départ : un client, tous les jours ouvrés du mois (hors fériés), en prévu sur
+ * toute l'année et en réel jusqu'à `actualUntilMonth`. Un mois (et un type) qui a déjà des lignes
+ * n'est jamais touché : les saisies faites dans l'éditeur sont conservées.
+ */
+const PRO_BILLING_SEED = {
+  year: 2026,
+  clientName: "Davidson",
+  forecastDailyRateCents: 40_000,
+  actualDailyRateCents: 45_000,
+  actualUntilMonth: 9,
+} as const;
+
+const seed = PRO_BILLING_SEED;
+const ownerId = userId; // `let` non rétréci dans les callbacks ci-dessous
+const months = Array.from({ length: 12 }, (_, index) => index + 1);
+const kinds = [
+  { kind: "FORECAST", dailyRateCents: seed.forecastDailyRateCents, lastMonth: 12 },
+  { kind: "ACTUAL", dailyRateCents: seed.actualDailyRateCents, lastMonth: seed.actualUntilMonth },
+] as const;
+let created = 0;
+for (const { kind, dailyRateCents, lastMonth } of kinds) {
+  const filled = await db.billingLine.findMany({
+    where: { userId: ownerId, year: seed.year, kind },
+    distinct: ["month"],
+    select: { month: true },
+  });
+  const data = months
+    .filter((month) => month <= lastMonth && !filled.some((line) => line.month === month))
+    .map((month) => ({
+      userId: ownerId,
+      year: seed.year,
+      month,
+      kind,
+      clientName: seed.clientName,
+      dailyRateCents,
+      halfDays: workingDays(seed.year, month) * 2,
+    }));
+  created += (await db.billingLine.createMany({ data })).count;
+}
+process.stdout.write(`Facturation Pro ${seed.year} : ${created} ligne(s) créée(s)` + "\n");
 
 await db.$disconnect();
