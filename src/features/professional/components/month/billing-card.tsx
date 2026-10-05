@@ -1,4 +1,4 @@
-import { Badge, Group, Paper, Stack, Table, Text, Title } from "@mantine/core";
+import { Group, Paper, SimpleGrid, Stack, Table, Text, Title } from "@mantine/core";
 import type { ReactNode } from "react";
 
 import { DeltaBadge } from "@/components/delta-badge";
@@ -6,14 +6,7 @@ import { InfoTip } from "@/components/info-tip";
 import { TargetGauge } from "@/components/target-gauge";
 import { formatCents, formatHalfDays } from "@/lib/format";
 import { fr } from "@/lib/i18n/fr";
-import type { ClientBilling, InvoiceStatus, ProMonth } from "@server/lib/pro/types";
-
-const STATUS_COLOR = {
-  TO_INVOICE: "gray",
-  NOT_INVOICED: "gray",
-  PENDING: "red",
-  PAID: "teal",
-} as const satisfies Record<InvoiceStatus, string>;
+import type { ClientBilling, ProMonth } from "@server/lib/pro/types";
 
 /** TJM moyen d'une ligne (centimes) : montant / jours. */
 const dailyRate = (line: { halfDays: number; amountCents: number }) =>
@@ -24,7 +17,8 @@ const calc = (line: { halfDays: number; amountCents: number }) =>
 
 /**
  * « Facturation & encaissements » : une ligne par client, jours × TJM réels (saisis) vs prévus,
- * HT et écart, statut de la facture (rapprochée des encaissements du relevé pro).
+ * HT et écart ; en bas, facturé TTC, encaissé dans le mois (catégorie « Encaissement client ») et
+ * reste à encaisser cumulé (les clients paient 1 à 2 mois plus tard).
  */
 export function BillingCard({ month, action }: { month: ProMonth; action?: ReactNode }) {
   const text = fr.professional.billing;
@@ -58,12 +52,13 @@ export function BillingCard({ month, action }: { month: ProMonth; action?: React
             </Table.Thead>
             <Table.Tbody>
               {clients.map((client) => (
-                <ClientRow key={client.clientId} client={client} />
+                <ClientRow key={client.clientName} client={client} />
               ))}
             </Table.Tbody>
           </Table>
         </Table.ScrollContainer>
       )}
+      <Collections month={month} />
     </Paper>
   );
 }
@@ -75,16 +70,12 @@ function ClientRow({ client }: { client: ClientBilling }) {
   return (
     <Table.Tr>
       <Table.Td>
-        <Group gap={8}>
-          <Text fw={600}>{client.clientName}</Text>
-          <Badge variant="light" color={STATUS_COLOR[client.status]} tt="none">
-            {text.status[client.status]}
-          </Badge>
-        </Group>
-        {client.actual && client.ttcCents > 0 && (
+        <Text fw={600}>{client.clientName}</Text>
+        {client.ttcCents > 0 && (
           <Text size="xs" c="dimmed">
-            {text.ttc(formatCents(client.ttcCents))} ·{" "}
-            {text.collected(formatCents(client.paidCents))}
+            {client.actual
+              ? text.ttc(formatCents(client.ttcCents))
+              : text.forecastTtc(formatCents(client.ttcCents))}
           </Text>
         )}
       </Table.Td>
@@ -128,5 +119,51 @@ function ClientRow({ client }: { client: ClientBilling }) {
         </Stack>
       </Table.Td>
     </Table.Tr>
+  );
+}
+
+/** Bas de carte : facturé TTC du mois, encaissé dans le mois, reste à encaisser cumulé. */
+function Collections({ month }: { month: ProMonth }) {
+  const text = fr.professional.billing.collections;
+  const { billing } = month;
+  const receivables = billing.receivablesCents;
+
+  return (
+    <SimpleGrid
+      cols={{ base: 1, sm: 3 }}
+      spacing={16}
+      mt={16}
+      pt={16}
+      style={{ borderTop: "1px solid var(--app-border)" }}
+    >
+      <div>
+        <Text size="xs" c="dimmed">
+          {month.hasActual ? text.invoiced : text.toInvoice}
+        </Text>
+        <Text fw={600}>{formatCents(billing.invoicedTtcCents)}</Text>
+      </div>
+      <div>
+        <Text size="xs" c="dimmed">
+          {text.collected}
+        </Text>
+        <Text fw={600} c={month.hasActual ? "teal.4" : "dimmed"}>
+          {month.hasActual ? formatCents(billing.collectedTtcCents) : "—"}
+        </Text>
+      </div>
+      <div>
+        <Group gap={4} wrap="nowrap">
+          <Text size="xs" c="dimmed">
+            {text.receivables}
+          </Text>
+          <InfoTip
+            label={text.receivablesTip}
+            ariaLabel={fr.professional.howComputed(text.receivables)}
+          />
+        </Group>
+        <Text fw={600} c={receivables ? "red.4" : "dimmed"}>
+          {receivables === null ? "—" : formatCents(receivables)}
+        </Text>
+      </div>
+    </SimpleGrid>
   );
 }

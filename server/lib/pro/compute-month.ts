@@ -27,9 +27,6 @@ import {
   PRO_CHARGE_VAT_BP,
 } from "@shared/pro-rules";
 
-/** Tolérance du statut « Encaissée » : un écart d'arrondi (< 1 €) ne laisse pas une facture en attente. */
-const PAID_TOLERANCE_CENTS = 100;
-
 /**
  * Calcul d'un mois du dashboard Pro : prévisionnel et réel côte à côte. Fonction **pure** (aucun
  * accès base) : toutes les données arrivent dans `input` (voir `load-year.ts`), ce qui la rend
@@ -134,10 +131,17 @@ export function computeMonth(input: ProMonthInput): ProMonth {
         ),
       ),
       invoicedCents: revenue.actual ?? 0,
-      collectedTtcCents: sum(clients.map((client) => client.paidCents)),
-      remainingTtcCents: sum(
-        clients.map((client) => Math.max(0, client.ttcCents - client.paidCents)),
-      ),
+      invoicedTtcCents: sum(clients.map((client) => client.ttcCents)),
+      collectedTtcCents: hasActual ? input.collections.receivedCents : 0,
+      // Solde cumulé : ce qui restait dû + facturé du mois − encaissé du mois (jamais négatif).
+      receivablesCents: hasActual
+        ? Math.max(
+            0,
+            input.openingReceivablesCents +
+              sum(clients.map((client) => client.ttcCents)) -
+              input.collections.countedCents,
+          )
+        : null,
     },
     charges: { rows, mixedCosts: mixedCharge, total: chargesTotal },
     remuneration,
@@ -164,35 +168,29 @@ function sum(values: readonly number[]): number {
   return values.reduce((total, value) => total + value, 0);
 }
 
-/** Facturation regroupée par client (prévu et réel), avec le statut de la facture réelle. */
+/** Facturation regroupée par nom de client (prévu et réel), TTC du réel (ou du prévu à venir). */
 function billingByClient(input: ProMonthInput): ClientBilling[] {
-  const names = new Map<string, string>();
-  for (const line of [...input.forecastBilling, ...input.actualBilling]) {
-    names.set(line.clientId, line.clientName);
-  }
-  const totals = (lines: readonly BillingInput[], clientId: string) => {
-    const own = lines.filter((line) => line.clientId === clientId);
+  const names = [
+    ...new Set([...input.forecastBilling, ...input.actualBilling].map((line) => line.clientName)),
+  ];
+  const totals = (lines: readonly BillingInput[], clientName: string) => {
+    const own = lines.filter((line) => line.clientName === clientName);
     return {
       halfDays: sum(own.map((line) => line.halfDays)),
       amountCents: sum(own.map(billingAmount)),
     };
   };
+  const ttc = (ht: number) => ht + applyBp(ht, COLLECTED_VAT_BP);
 
-  return [...names].map(([clientId, clientName]) => {
-    const forecast = totals(input.forecastBilling, clientId);
-    const actual = input.hasActual ? totals(input.actualBilling, clientId) : null;
-    const ttcCents = actual
-      ? actual.amountCents + applyBp(actual.amountCents, COLLECTED_VAT_BP)
-      : 0;
-    const paidCents = input.paidByClient[clientId] ?? 0;
-    const status = !actual
-      ? "TO_INVOICE"
-      : actual.amountCents === 0
-        ? "NOT_INVOICED"
-        : paidCents >= ttcCents - PAID_TOLERANCE_CENTS
-          ? "PAID"
-          : "PENDING";
-    return { clientId, clientName, forecast, actual, status, ttcCents, paidCents };
+  return names.map((clientName) => {
+    const forecast = totals(input.forecastBilling, clientName);
+    const actual = input.hasActual ? totals(input.actualBilling, clientName) : null;
+    return {
+      clientName,
+      forecast,
+      actual,
+      ttcCents: ttc((actual ?? forecast).amountCents),
+    };
   });
 }
 

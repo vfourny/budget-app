@@ -193,7 +193,7 @@ schéma Zod + modèle Prisma, ajout d'un widget dashboard).
 4. Route tRPC `categorize` (Gemini, few-shot sur transactions validées, JSON `category` (valeur de l'enum) + `confidence`) (fait)
 5. Écran de relecture : historique, tableau de correction, « Valider », suppression d'un import (fait)
 6. Dashboard Perso mois / année : totaux, transactions, par catégorie (fait) ; parts recommandées par enveloppe dans Réglages + jauges réel vs recommandé (fait) ; abonnements, IR (à faire)
-7. Partie pro Stygma (fait, voir `docs/plan-pro.md`) : catégories pro, règles par année et clients dans Réglages,
+7. Partie pro Stygma (fait, voir `docs/plan-pro.md`) : catégories pro, règles par année dans Réglages,
    dashboard mois / année (CA, TVA, bénéfice, facturation & encaissements, catégories, frais mixtes, km), éditeur du
    prévisionnel ; à venir : régimes IS / EURL, TVA à l'encaissement
 
@@ -226,5 +226,5 @@ Hors scope : synchro bancaire auto, multi-utilisateurs, émission de factures.
   règles `rules-of-hooks` / `exhaustive-deps` incluses).
 - **Pro (2026-10-06)** : catégories pro dans l'enum `TransactionCategory` (filtrées par type de compte) plutôt qu'un
   2e enum ; prévisionnel sans saisie = réel du même mois N-1 ; salaire et cotisations calculés depuis les règles de
-  l'année (les prélèvements URSSAF / PAS… ne comptent pas dans les charges) ; encaissements rapprochés par mot-clé
-  client (FIFO, factures des mois antérieurs) ; graphiques en CSS (pas de lib) ; Vitest pour les calculs purs.
+  l'année (les prélèvements URSSAF / PAS… ne comptent pas dans les charges) ; clients en texte libre dans la facturation
+  (pas de table) ; encaissé = crédits `CLIENT_PAYMENT` du mois, reste à encaisser = solde cumulé facturé TTC − encaissé ; graphiques en CSS (pas de lib) ; Vitest pour les calculs purs.

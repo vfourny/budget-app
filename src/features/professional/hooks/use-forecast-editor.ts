@@ -11,6 +11,11 @@ const invalidate = () =>
     queryClient.invalidateQueries(trpc.professional.pathFilter()),
   ]);
 
+/** Clients déjà saisis (autocomplétion) avec leur dernier TJM. */
+export function useBillingClients() {
+  return useQuery(trpc.proForecast.clients.queryOptions());
+}
+
 export function useBillingLines(year: number, month: number, kind: BillingSource) {
   return useQuery(trpc.proForecast.billingLines.queryOptions({ year, month, kind }));
 }

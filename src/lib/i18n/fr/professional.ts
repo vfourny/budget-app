@@ -65,14 +65,16 @@ export const professional = {
     columns: { client: "Client", calc: "Jours × TJM", amount: "HT · réel vs prévu" },
     amountTip:
       "Montants HT. La TVA est de 20 % sur chaque facture (voir la carte TVA) et le TTC est indiqué sous le nom du client. Vert au-dessus du prévu, rouge en dessous, doré pile.",
-    status: {
-      TO_INVOICE: "À facturer",
-      NOT_INVOICED: "Non facturé",
-      PENDING: "En attente",
-      PAID: "Encaissée",
-    },
     ttc: (amount: string) => `TTC ${amount}`,
-    collected: (amount: string) => `encaissé ${amount}`,
+    forecastTtc: (amount: string) => `TTC prévu ${amount}`,
+    collections: {
+      invoiced: "Facturé ce mois (TTC)",
+      toInvoice: "À facturer (TTC prévu)",
+      collected: "Encaissé ce mois (TTC)",
+      receivables: "Reste à encaisser (cumul)",
+      receivablesTip:
+        "Tout le facturé TTC moins tout l'encaissé (virements « Encaissement client »), depuis le début de la facturation dans l'app : les clients paient 1 à 2 mois après la facture, le solde absorbe ce décalage. Les virements reçus avant le premier mois facturé dans l'app paient des factures plus anciennes et ne sont pas déduits.",
+    },
     calc: (days: string, rate: string) => `${days} j × ${rate}`,
     forecastCalc: (days: string, rate: string) => `prévu ${days} j × ${rate}`,
     gaugeAria: (client: string, real: string, forecast: string) =>
@@ -219,10 +221,9 @@ export const professional = {
       hintForecast:
         "Une ligne par client : TJM potentiel (HT) × jours. Plusieurs clients possibles dans le mois.",
       hintActual:
-        "Jours et TJM réellement facturés, à saisir à la main : ils ne figurent pas sur le relevé. Les encaissements, eux, sont rapprochés automatiquement à l'import.",
-      noClients: "Aucun client : ajoute-les d'abord dans Réglages › Pro.",
-      noClientsLink: "Ouvrir Réglages › Pro",
+        "Jours et TJM réellement facturés, à saisir à la main : ils ne figurent pas sur le relevé. Les encaissements, eux, viennent du relevé pro (catégorie « Encaissement client »).",
       client: "Client",
+      clientPlaceholder: "Nom du client",
       dailyRate: "TJM (€ HT)",
       days: "Jours",
       total: "Total HT",
@@ -308,10 +309,12 @@ export const professional = {
     invoicedSub: (count: number) => `HT · ${plural(count, "facture")}`,
     toInvoice: "À facturer",
     collected: "Encaissé",
+    collectedSub: "TTC reçu ce mois",
     remaining: "Reste à encaisser",
+    remainingSub: "TTC, cumul",
+    toInvoiceTtc: "À facturer TTC",
     days: "Jours facturés",
     ht: "HT",
-    ttc: "TTC",
     forecastTtc: "TTC prévu",
     nothingBeforeEnd: "rien avant la fin du mois",
   },

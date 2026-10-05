@@ -4,10 +4,9 @@ import type { db as Db } from "@server/lib/db";
 import { applyBp, billingAmount } from "@server/lib/pro/amounts";
 import { computeMonth } from "@server/lib/pro/compute-month";
 import { computeYear } from "@server/lib/pro/compute-year";
-import { invoiceKey, matchPayments } from "@server/lib/pro/match-payments";
 import type { BillingInput, CategoryCents, ProMonth, ProMonthInput } from "@server/lib/pro/types";
 import { resolveProYearSettings } from "@server/lib/settings/pro-year-settings";
-import { COLLECTED_VAT_BP, MIXED_COSTS, PAYMENT_MATCH_WINDOW_MONTHS } from "@shared/pro-rules";
+import { COLLECTED_VAT_BP, MIXED_COSTS } from "@shared/pro-rules";
 import type { ProYearSettingsValues } from "@shared/pro-rules";
 
 const MIXED_CATEGORIES = MIXED_COSTS.map((cost) => cost.category);
@@ -58,11 +57,11 @@ export async function loadProYear(
     proDebitRows,
     persoDebitRows,
     billingLines,
-    clients,
+    earlierActualLines,
+    collectionRows,
     forecasts,
     mileageForecasts,
     trips,
-    payments,
   ] = await Promise.all([
     db.transaction.groupBy({
       by: ["year", "month", "category"],
@@ -89,32 +88,31 @@ export async function loadProYear(
         year: true,
         month: true,
         kind: true,
-        clientId: true,
+        clientName: true,
         dailyRateCents: true,
         halfDays: true,
-        client: { select: { name: true } },
       },
       orderBy: { id: "asc" },
     }),
-    db.client.findMany({
-      where: { userId },
-      select: { id: true, name: true, bankLabelKeyword: true },
+    // Facturation réelle des années précédentes : reste à encaisser au 1er janvier.
+    db.billingLine.findMany({
+      where: { userId, kind: "ACTUAL", year: { lt: year } },
+      select: { year: true, month: true, dailyRateCents: true, halfDays: true },
     }),
-    db.monthlyForecast.findMany({ where: { userId, year: years } }),
-    db.mileageForecast.findMany({ where: { userId, year } }),
-    db.trip.groupBy({ by: ["year", "month"], where: { userId, year: years }, _sum: { km: true } }),
-    db.transaction.findMany({
+    // Encaissements clients (crédits du relevé pro), par mois, jusqu'à l'année affichée.
+    db.transaction.groupBy({
+      by: ["year", "month"],
       where: {
         ...validatedTransactions(userId, "PROFESSIONAL"),
         category: "CLIENT_PAYMENT",
         amountCents: { gt: 0 },
-        date: {
-          gte: new Date(Date.UTC(previousYear, 0, 1)),
-          lt: new Date(Date.UTC(year + 1, PAYMENT_MATCH_WINDOW_MONTHS, 1)),
-        },
+        year: { lte: year },
       },
-      select: { date: true, label: true, amountCents: true },
+      _sum: { amountCents: true },
     }),
+    db.monthlyForecast.findMany({ where: { userId, year: years } }),
+    db.mileageForecast.findMany({ where: { userId, year } }),
+    db.trip.groupBy({ by: ["year", "month"], where: { userId, year: years }, _sum: { km: true } }),
   ]);
 
   const proDebits: MonthCategoryCents = new Map();
@@ -135,39 +133,47 @@ export async function loadProYear(
     billingLines
       .filter((line) => line.kind === kind && line.year === y && line.month === month)
       .map((line) => ({
-        clientId: line.clientId,
-        clientName: line.client.name,
+        clientName: line.clientName,
         dailyRateCents: line.dailyRateCents,
         halfDays: line.halfDays,
       }));
 
-  // Rapprochement factures ↔ encaissements sur les deux années (les virements de janvier peuvent
-  // payer les factures de décembre).
-  const invoices = billingLines
-    .filter((line) => line.kind === "ACTUAL")
-    .map((line) => {
-      const ht = billingAmount(line);
-      return {
-        clientId: line.clientId,
-        year: line.year,
-        month: line.month,
-        ttcCents: ht + applyBp(ht, COLLECTED_VAT_BP),
-      };
-    });
-  const paid = matchPayments(
-    invoices,
-    clients.map((client) => ({
-      clientId: client.id,
-      keyword: client.bankLabelKeyword || client.name,
-    })),
-    payments,
+  // ── Reste à encaisser cumulé ─────────────────────────────────────────────────────────────────
+  // Facturé TTC réel par mois, toutes années confondues (jusqu'à l'année affichée).
+  const invoicedTtc = new Map<number, number>();
+  const actualLines = [
+    ...earlierActualLines,
+    ...billingLines.filter((line) => line.kind === "ACTUAL" && line.year === year),
+  ];
+  for (const line of actualLines) {
+    const ht = billingAmount(line);
+    const key = monthIndex(line.year, line.month);
+    invoicedTtc.set(key, (invoicedTtc.get(key) ?? 0) + ht + applyBp(ht, COLLECTED_VAT_BP));
+  }
+  const received = new Map(
+    collectionRows.map((row) => [monthIndex(row.year, row.month), row._sum.amountCents ?? 0]),
   );
+  // Les virements reçus jusqu'au premier mois facturé dans l'app paient des factures plus
+  // anciennes (absentes de l'app) : ils ne viennent pas en déduction du reste à encaisser.
+  const invoicedMonths = [...invoicedTtc].filter(([, ttc]) => ttc > 0).map(([key]) => key);
+  const firstInvoiced = invoicedMonths.length > 0 ? Math.min(...invoicedMonths) : null;
+  const counted = (key: number) =>
+    firstInvoiced !== null && key > firstInvoiced ? (received.get(key) ?? 0) : 0;
+  let openingReceivables = 0;
+  if (firstInvoiced !== null) {
+    for (let key = firstInvoiced; key < monthIndex(year, 1); key++) {
+      openingReceivables = Math.max(
+        0,
+        openingReceivables + (invoicedTtc.get(key) ?? 0) - counted(key),
+      );
+    }
+  }
 
   const monthInput = (
     y: number,
     month: number,
     values: ProYearSettingsValues,
-  ): Omit<ProMonthInput, "previousVatDueCents"> => ({
+  ): Omit<ProMonthInput, "previousVatDueCents" | "openingReceivablesCents"> => ({
     year: y,
     month,
     hasActual: hasActual(y, month, today),
@@ -179,12 +185,10 @@ export async function loadProYear(
     persoDebits: persoDebits.get(monthIndex(y, month)) ?? {},
     lastYearPersoDebits: persoDebits.get(monthIndex(y - 1, month)) ?? {},
     forecasts: monthlyForecasts.get(monthIndex(y, month)) ?? {},
-    paidByClient: Object.fromEntries(
-      clients.map((client) => [
-        client.id,
-        paid.get(invoiceKey({ clientId: client.id, year: y, month })) ?? 0,
-      ]),
-    ),
+    collections: {
+      receivedCents: received.get(monthIndex(y, month)) ?? 0,
+      countedCents: counted(monthIndex(y, month)),
+    },
     mileage: {
       tripsKm: tripsKm.get(monthIndex(y, month)) ?? 0,
       lastYearTripsKm: tripsKm.get(monthIndex(y - 1, month)) ?? 0,
@@ -196,9 +200,13 @@ export async function loadProYear(
   const december = computeMonth({
     ...monthInput(previousYear, 12, previousSettings.values),
     previousVatDueCents: 0,
+    openingReceivablesCents: 0,
   });
   const months = Array.from({ length: 12 }, (_, index) =>
     monthInput(year, index + 1, settings.values),
   );
-  return computeYear(months, december.vat.due.actual ?? december.vat.due.forecast);
+  return computeYear(months, {
+    previousVatDueCents: december.vat.due.actual ?? december.vat.due.forecast,
+    receivablesCents: openingReceivables,
+  });
 }

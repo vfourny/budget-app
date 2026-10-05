@@ -142,29 +142,14 @@ enum BillingKind {
   ACTUAL // Réel
 }
 
-/// Client de Stygma. `bankLabelKeyword` = mot du libellé bancaire de ses virements (ex. « DAVIDSON ») :
-/// sert à rapprocher les factures des encaissements du relevé pro.
-model Client {
-  id                    String        @id @default(cuid())
-  userId                String
-  user                  User          @relation(fields: [userId], references: [id], onDelete: Cascade)
-  name                  String
-  bankLabelKeyword      String?
-  defaultDailyRateCents Int?
-  createdAt             DateTime      @default(now())
-  billingLines          BillingLine[]
-
-  @@unique([userId, name])
-}
-
 /// Prestation d'un mois pour un client : jours × TJM, en prévisionnel ou en réel. Plusieurs clients
-/// (donc plusieurs lignes) possibles dans un mois. CA HT = Σ demi-journées / 2 × TJM.
+/// (donc plusieurs lignes) possibles dans un mois. CA HT = Σ demi-journées / 2 × TJM. Le client est
+/// un simple nom saisi dans l'éditeur (autocomplétion sur les noms déjà utilisés), pas une table.
 model BillingLine {
   id             String      @id @default(cuid())
   userId         String
   user           User        @relation(fields: [userId], references: [id], onDelete: Cascade)
-  clientId       String
-  client         Client      @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  clientName     String
   year           Int         @db.SmallInt
   month          Int         @db.SmallInt
   kind           BillingKind
@@ -173,7 +158,6 @@ model BillingLine {
   halfDays       Int
 
   @@index([userId, year, month])
-  @@index([clientId])
 }
 
 /// Montant prévu d'une catégorie pour un mois : charges pro, BNC prélevés, et dépenses perso des frais
@@ -285,7 +269,6 @@ model User {
   importBatches    ImportBatch[]
   transactions     Transaction[]
   proYearSettings  ProYearSettings[]
-  clients          Client[]
   billingLines     BillingLine[]
   monthlyForecasts MonthlyForecast[]
   mileageForecasts MileageForecast[]

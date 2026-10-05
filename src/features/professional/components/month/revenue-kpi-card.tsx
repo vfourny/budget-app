@@ -38,21 +38,21 @@ export function RevenueKpiCard({ month }: { month: ProMonth }) {
         {
           label: text.collected,
           value: formatCents(billing.collectedTtcCents),
-          sub: text.ttc,
+          sub: text.collectedSub,
           color: "teal.4",
         },
         {
           label: text.remaining,
-          value: formatCents(billing.remainingTtcCents),
-          sub: text.ttc,
-          color: billing.remainingTtcCents > 0 ? "red.4" : undefined,
+          value: formatCents(billing.receivablesCents ?? 0),
+          sub: text.remainingSub,
+          color: (billing.receivablesCents ?? 0) > 0 ? "red.4" : undefined,
         },
         { label: text.days, value: fr.professional.days(formatHalfDays(billing.halfDays)) },
       ]
     : [
         { label: text.toInvoice, value: formatCents(revenue.forecast), sub: text.ht },
         { label: text.collected, value: "—", sub: text.nothingBeforeEnd },
-        { label: text.remaining, value: formatCents(forecastTtc), sub: text.forecastTtc },
+        { label: text.toInvoiceTtc, value: formatCents(forecastTtc), sub: text.forecastTtc },
         { label: text.days, value: fr.professional.days(formatHalfDays(billing.halfDays)) },
       ];
 

@@ -114,17 +114,6 @@ export const settings = {
     saveFailed: "Enregistrement impossible",
     resetDefaults: "Valeurs par défaut",
   },
-  clients: {
-    title: "Clients",
-    description:
-      "Clients de Stygma pour la facturation. Le mot-clé bancaire (ex. DAVIDSON) repère leurs virements dans le relevé pro pour marquer les factures « Encaissée » ; vide, c'est le nom qui sert.",
-    loadFailed: "Impossible de charger les clients.",
-    empty: "Aucun client pour l'instant.",
-    name: "Nom",
-    keyword: "Mot-clé bancaire",
-    dailyRate: "TJM par défaut (€ HT)",
-    add: "Ajouter le client",
-  },
   incomeTax: {
     title: "Barème de l'impôt sur le revenu",
     description:
