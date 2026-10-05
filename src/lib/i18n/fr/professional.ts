@@ -59,6 +59,25 @@ export const professional = {
       "Taux × bénéfice (Réglages › Pro). La base est ta quote-part du bénéfice, retirée ou non. Se règle en perso : à mettre de côté. Taux à confirmer avec ton comptable. Bénéfice négatif = 0.",
     socialChargesSub: (rate: string) => `${rate} % du bénéfice`,
   },
+  billing: {
+    title: "Facturation & encaissements",
+    empty: "Aucune facturation pour ce mois : saisis les jours et le TJM dans le prévisionnel.",
+    columns: { client: "Client", calc: "Jours × TJM", amount: "HT · réel vs prévu" },
+    amountTip:
+      "Montants HT. La TVA est de 20 % sur chaque facture (voir la carte TVA) et le TTC est indiqué sous le nom du client. Vert au-dessus du prévu, rouge en dessous, doré pile.",
+    status: {
+      TO_INVOICE: "À facturer",
+      NOT_INVOICED: "Non facturé",
+      PENDING: "En attente",
+      PAID: "Encaissée",
+    },
+    ttc: (amount: string) => `TTC ${amount}`,
+    collected: (amount: string) => `encaissé ${amount}`,
+    calc: (days: string, rate: string) => `${days} j × ${rate}`,
+    forecastCalc: (days: string, rate: string) => `prévu ${days} j × ${rate}`,
+    gaugeAria: (client: string, real: string, forecast: string) =>
+      `${client} : ${real} HT pour ${forecast} prévus`,
+  },
   revenue: {
     title: "CA HT",
     tip: "Total des prestations du mois, hors TVA : jours × TJM de chaque client (voir Facturation). Rattaché au mois de la prestation, pas à celui de l'encaissement.",

@@ -5,6 +5,7 @@ import { Link } from "react-router";
 import { PageHeader, PageTitleAccent } from "@/components/page-header";
 import { PeriodPicker } from "@/components/period-picker";
 import { TransactionsTable } from "@/components/transactions-table";
+import { BillingCard } from "@/features/professional/components/month/billing-card";
 import { ProfitCard } from "@/features/professional/components/month/profit-card";
 import { RevenueKpiCard } from "@/features/professional/components/month/revenue-kpi-card";
 import { VatCard } from "@/features/professional/components/month/vat-card";
@@ -102,6 +103,9 @@ function MonthContent({ period }: { period: Period }) {
         </Grid.Col>
         <Grid.Col span={12}>
           <ProfitCard month={data} />
+        </Grid.Col>
+        <Grid.Col span={12}>
+          <BillingCard month={data} />
         </Grid.Col>
       </Grid>
       <TransactionsTable
