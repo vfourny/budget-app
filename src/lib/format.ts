@@ -53,3 +53,10 @@ export function formatBp(bp: number): string {
 export function formatSquareMeters(dm2: number): string {
   return percentFormat.format(dm2 / 100);
 }
+
+const euroRounded = new Intl.NumberFormat(LOCALE, { maximumFractionDigits: 0 });
+
+/** Montant arrondi à l'euro, sans symbole (tableaux denses) : 123456 → "1 235". */
+export function formatEurosRounded(amountCents: number): string {
+  return euroRounded.format(Math.round(amountCents / 100));
+}
