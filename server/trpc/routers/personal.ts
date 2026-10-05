@@ -1,26 +1,14 @@
 import { z } from "zod";
 
 import { aggregatePeriod } from "@server/lib/dashboard/aggregate";
+import { periodsWithData, validatedTransactions } from "@server/lib/dashboard/scope";
 import { createTRPCRouter, protectedProcedure } from "@server/trpc/init";
-
-/** Seules les transactions des imports VALIDATED du compte perso comptent dans le dashboard. */
-const personalValidated = (userId: string) =>
-  ({
-    userId,
-    accountType: "PERSONAL",
-    importBatch: { status: "VALIDATED" },
-  }) as const;
 
 export const personalRouter = createTRPCRouter({
   /** Mois ayant des données (du plus récent au plus ancien) : alimente le sélecteur de période. */
-  periods: protectedProcedure.query(async ({ ctx }) => {
-    const periods = await ctx.db.transaction.groupBy({
-      by: ["year", "month"],
-      where: personalValidated(ctx.session.user.id),
-      orderBy: [{ year: "desc" }, { month: "desc" }],
-    });
-    return periods.map(({ year, month }) => ({ year, month }));
-  }),
+  periods: protectedProcedure.query(({ ctx }) =>
+    periodsWithData(ctx.db, ctx.session.user.id, "PERSONAL"),
+  ),
 
   /**
    * Totaux d'un mois (`month` renseigné, avec le détail des transactions) ou d'une année entière
@@ -31,7 +19,7 @@ export const personalRouter = createTRPCRouter({
     .query(async ({ ctx, input }) => {
       const rows = await ctx.db.transaction.findMany({
         where: {
-          ...personalValidated(ctx.session.user.id),
+          ...validatedTransactions(ctx.session.user.id, "PERSONAL"),
           year: input.year,
           ...(input.month !== undefined && { month: input.month }),
         },
