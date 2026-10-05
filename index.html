@@ -6,13 +6,20 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="color-scheme" content="dark light" />
     <script>
-      // Applique le thème mémorisé par Mantine avant le chargement de React (évite un flash).
-      try {
-        const scheme = localStorage.getItem("mantine-color-scheme-value");
-        document.documentElement.dataset.mantineColorScheme = scheme === "light" ? "light" : "dark";
-      } catch {
-        document.documentElement.dataset.mantineColorScheme = "dark";
-      }
+      // Applique le thème avant le chargement de React (évite un flash) : le choix mémorisé par
+      // Mantine (« light » / « dark »), sinon (« auto » ou rien) celui du système.
+      (function () {
+        let scheme = null;
+        try {
+          scheme = localStorage.getItem("mantine-color-scheme-value");
+        } catch {
+          // localStorage indisponible (navigation privée stricte) : on suit le système.
+        }
+        if (scheme !== "light" && scheme !== "dark") {
+          scheme = matchMedia("(prefers-color-scheme: light)").matches ? "light" : "dark";
+        }
+        document.documentElement.dataset.mantineColorScheme = scheme;
+      })();
     </script>
     <style>
       body {
