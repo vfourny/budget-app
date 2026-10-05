@@ -3,7 +3,7 @@ import { Dropzone } from "@mantine/dropzone";
 import { IconAlertTriangle, IconFileSpreadsheet, IconUpload } from "@tabler/icons-react";
 import type { AccountType } from "@server/generated/prisma/enums";
 import { useState, type SubmitEvent } from "react";
-import { Link, useNavigate } from "react-router";
+import { Link, useNavigate, useSearchParams } from "react-router";
 
 import { useImportStatement } from "@/features/import/hooks/use-import-statement";
 import { csvErrorMessage, errorMessage } from "@/lib/errors";
@@ -23,7 +23,12 @@ export function ImportForm() {
   // État des champs : `useState` explicite (≈ `ref()` + `v-model` en Vue). Un input « contrôlé »
   // reçoit `value` et notifie via `onChange`. Le fichier, lui, vient de la Dropzone : on garde
   // seulement le `File` choisi.
-  const [accountType, setAccountType] = useState<AccountType | null>(null);
+  // `?accountType=PROFESSIONAL` (bouton « Importer un relevé pro » de l'écran Pro) : type pré-choisi.
+  const [searchParams] = useSearchParams();
+  const [accountType, setAccountType] = useState<AccountType | null>(
+    ACCOUNT_TYPE_OPTIONS.find((option) => option.value === searchParams.get("accountType"))
+      ?.value ?? null,
+  );
   const [file, setFile] = useState<File | null>(null);
   const [fileRejected, setFileRejected] = useState(false);
 
