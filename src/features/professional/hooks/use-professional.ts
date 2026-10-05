@@ -11,3 +11,8 @@ export function useProPeriods() {
 export function useProMonth(year: number, month: number) {
   return useQuery(trpc.professional.month.queryOptions({ year, month }));
 }
+
+/** Les 12 mois d'une année (vue année). */
+export function useProYear(year: number) {
+  return useQuery(trpc.professional.year.queryOptions({ year }));
+}
