@@ -81,7 +81,7 @@ server/                # BACKEND — Nitro, mêmes conventions que le server/ de
   lib/                 # db.ts (PrismaClient singleton), env.ts (validation Zod des variables)
     pro/               # dashboard Pro : load-year (requêtes) + compute-month (calcul pur, testé) + regimes/
   generated/prisma/    # client Prisma généré — gitignoré, ne pas éditer
-prisma/                # schema.prisma, migrations/
+prisma/                # schema/ (un .prisma par domaine), migrations/, seed.ts + seeds/ (un fichier par domaine)
 prisma.config.ts       # config CLI Prisma 7 (URL directe pour les migrations)
 index.html             # page unique de la SPA
 vite.config.ts         # plugins React + Nitro, alias @/ (src) et @server/ (server)
@@ -122,7 +122,7 @@ nitro.config.ts        # serverDir: ./server
 - **Montants** : entiers en **centimes**, signés (négatif = débit). Jamais de float pour de
   l'argent.
 - **Prisma** : côté serveur, toujours passer par `db` de `@server/lib/db`. Toute modif de
-  `schema.prisma` s'accompagne d'une migration versionnée dans `prisma/migrations/`.
+  schéma (`prisma/schema/*.prisma`, un fichier par domaine : base, auth, transactions, budget, pro) s'accompagne d'une migration versionnée dans `prisma/migrations/`.
 - **Dates** : `Transaction.date` en `@db.Date` ; `month` (1-12) et `year` dénormalisés pour les
   agrégations.
 - **Typage des constantes** : pour un objet/tableau de config ou une liste figée, préférer

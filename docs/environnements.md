@@ -46,7 +46,7 @@ pnpm db:deploy
 Faire évoluer le schéma :
 
 ```bash
-# modifier prisma/schema.prisma, puis :
+# modifier le fichier du domaine dans prisma/schema/, puis :
 pnpm db:migrate               # crée + applique la migration sur la branche develop
 git add prisma/migrations     # la migration est versionnée avec la PR
 ```

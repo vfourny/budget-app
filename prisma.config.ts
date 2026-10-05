@@ -1,11 +1,11 @@
 import "dotenv/config";
 import { defineConfig } from "prisma/config";
 
-// Prisma 7 : la CLI (migrate, studio) lit sa config ici, plus dans schema.prisma.
+// Prisma 7 : la CLI (migrate, studio) lit sa config ici, plus dans le schéma.
 // On passe par la connexion DIRECTE (non-pooled) : les migrations ont besoin d'une session
 // Postgres stable, incompatible avec le pooler PgBouncer de Neon.
 export default defineConfig({
-  schema: "prisma/schema.prisma",
+  schema: "prisma/schema",
   migrations: {
     path: "prisma/migrations",
     // Exécuté par `prisma db seed` et automatiquement après `prisma migrate reset`.
