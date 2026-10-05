@@ -1,6 +1,7 @@
 import type { RevenueLineKey } from "@shared/budget-rules";
 import type {
   AccountType,
+  CompanyRegime,
   Envelope,
   ImportStatus,
   TransactionCategory,
@@ -17,6 +18,13 @@ export const accountTypes = {
   PERSONAL: "Perso",
   PROFESSIONAL: "Pro (Stygma)",
 } as const satisfies Record<AccountType, string>;
+
+/** Statut juridique et fiscal de la société (Réglages › Pro). */
+export const companyRegimes = {
+  SAS_IR: "SAS à l'IR",
+  SAS_IS: "SAS à l'IS",
+  EURL: "EURL",
+} as const satisfies Record<CompanyRegime, string>;
 
 /** Statut d'un import (le détail « N à vérifier » est dans `imports.toReview`). */
 export const importStatus = {

@@ -1,6 +1,13 @@
 import { auth } from "./auth";
 import { common } from "./common";
-import { accountTypes, categories, envelopes, importStatus, revenueLines } from "./enums";
+import {
+  accountTypes,
+  categories,
+  companyRegimes,
+  envelopes,
+  importStatus,
+  revenueLines,
+} from "./enums";
 import { csvErrors, errors } from "./errors";
 import { importForm, imports } from "./imports";
 import { nav } from "./nav";
@@ -47,6 +54,7 @@ export const fr = {
   professional,
   transactions,
   accountTypes,
+  companyRegimes,
   importStatus,
   envelopes,
   categories,

@@ -1,10 +1,10 @@
 import { Paper, Stack, Tabs } from "@mantine/core";
 import { useSearchParams } from "react-router";
 
-import { ComingSoon } from "@/components/coming-soon";
 import { PageHeader } from "@/components/page-header";
 import { EnvelopeSharesForm } from "@/features/settings/components/envelope-shares-form";
 import { IncomeTaxBracketsForm } from "@/features/settings/components/income-tax-brackets-form";
+import { ProYearSettingsForm } from "@/features/settings/components/pro-year-settings-form";
 import { fr } from "@/lib/i18n/fr";
 
 const TABS = ["personal", "professional"] as const;
@@ -40,7 +40,9 @@ export function SettingsPage() {
           </Stack>
         </Tabs.Panel>
         <Tabs.Panel value="professional">
-          <ComingSoon>{fr.settings.tabs.professionalComingSoon}</ComingSoon>
+          <Paper withBorder radius="lg" p={28}>
+            <ProYearSettingsForm />
+          </Paper>
         </Tabs.Panel>
       </Tabs>
     </>
