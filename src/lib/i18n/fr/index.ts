@@ -37,6 +37,22 @@ const months = [
   "décembre",
 ] as const;
 
+/** Noms courts des mois (colonnes, axes). */
+const monthsShort = [
+  "janv.",
+  "févr.",
+  "mars",
+  "avr.",
+  "mai",
+  "juin",
+  "juil.",
+  "août",
+  "sept.",
+  "oct.",
+  "nov.",
+  "déc.",
+] as const;
+
 /**
  * Tous les textes affichés de l'app (UI en français). Un texte vient d'ici, jamais écrit en dur
  * dans un composant. Un dictionnaire par domaine ; ceux qui dépendent d'un enum Prisma sont
@@ -63,4 +79,5 @@ export const fr = {
   errors,
   csvErrors,
   months,
+  monthsShort,
 } as const;

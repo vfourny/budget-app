@@ -232,6 +232,32 @@ export const professional = {
       totalActual: (amount: string, days: string) => `Total réel : ${amount} HT · ${days} j`,
     },
   },
+  year: {
+    kpis: {
+      revenue: "CA HT final (réel + prévu restant)",
+      revenueSub: (actual: string, forecast: string) =>
+        `Réel à ce jour ${actual} · prévu d'origine ${forecast}`,
+      profit: "Bénéfice final",
+      profitSub: "Avant IR des associés",
+      vat: "TVA à reverser (réel cumulé)",
+      vatSub: (from: string, to: string) => `${from} → ${to}`,
+      noActual: "Pas encore de réel",
+      mileage: "Frais km à déclarer",
+      mileageSub: (km: string, left: string) =>
+        `${km} km sur l'année · frais mixtes restant dus : ${left}`,
+    },
+    chart: {
+      title: "CA HT · réel et prévisionnel",
+      actual: "Réel",
+      forecastLeft: "Prévisionnel restant",
+      originalForecast: "Prévu d'origine",
+      charges: "Charges pro",
+      aria: (year: number) =>
+        `Histogramme du CA HT réel et prévisionnel par mois, de janvier à décembre ${year}`,
+      bar: (month: string, revenue: string, forecast: string, charges: string) =>
+        `${month} : CA ${revenue} (prévu ${forecast}), charges ${charges}`,
+    },
+  },
   revenue: {
     title: "CA HT",
     tip: "Total des prestations du mois, hors TVA : jours × TJM de chaque client (voir Facturation). Rattaché au mois de la prestation, pas à celui de l'encaissement.",

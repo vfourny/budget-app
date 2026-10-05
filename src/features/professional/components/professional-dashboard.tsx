@@ -17,7 +17,13 @@ import { MixedCostsCard } from "@/features/professional/components/month/mixed-c
 import { ProfitCard } from "@/features/professional/components/month/profit-card";
 import { RevenueKpiCard } from "@/features/professional/components/month/revenue-kpi-card";
 import { VatCard } from "@/features/professional/components/month/vat-card";
-import { useProMonth, useProPeriods } from "@/features/professional/hooks/use-professional";
+import { RevenueChart } from "@/features/professional/components/year/revenue-chart";
+import { YearKpis } from "@/features/professional/components/year/year-kpis";
+import {
+  useProMonth,
+  useProPeriods,
+  useProYear,
+} from "@/features/professional/hooks/use-professional";
 import { usePeriodSelection, type Period } from "@/hooks/use-period-selection";
 import { capitalizedMonthName } from "@/lib/format";
 import { fr } from "@/lib/i18n/fr";
@@ -72,7 +78,7 @@ export function ProfessionalDashboard() {
           </Group>
         }
       />
-      {view === "month" ? <MonthContent period={selected} /> : null}
+      {view === "month" ? <MonthContent period={selected} /> : <YearContent year={selected.year} />}
     </>
   );
 }
@@ -161,6 +167,20 @@ function MonthContent({ period }: { period: Period }) {
           onClose={() => setEditor(null)}
         />
       )}
+    </>
+  );
+}
+
+function YearContent({ year }: { year: number }) {
+  const months = useProYear(year);
+
+  if (months.isPending) return <Loader color="gold" />;
+  if (months.isError) return <Alert color="red" title={fr.professional.loadPeriodFailed} />;
+
+  return (
+    <>
+      <YearKpis months={months.data} />
+      <RevenueChart year={year} months={months.data} />
     </>
   );
 }

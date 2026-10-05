@@ -1,0 +1,77 @@
+.chart {
+  display: grid;
+  grid-template-columns: repeat(12, 1fr);
+  gap: 8px;
+  height: 220px;
+}
+
+.column {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 0;
+}
+
+.bars {
+  position: relative;
+  flex: 1;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  gap: 3px;
+}
+
+.revenue {
+  width: 55%;
+  border-radius: 4px 4px 0 0;
+  background: var(--mantine-color-gold-6);
+}
+
+/* Mois à venir : contour pointillé, pas de remplissage. */
+.revenue[data-forecast] {
+  background: transparent;
+  border: 1px dashed var(--mantine-color-gold-6);
+  border-bottom: none;
+}
+
+.charges {
+  width: 20%;
+  border-radius: 3px 3px 0 0;
+  background: var(--mantine-color-blue-3);
+  opacity: 0.8;
+}
+
+.marker {
+  position: absolute;
+  left: 15%;
+  width: 55%;
+  height: 2px;
+  background: var(--mantine-color-text);
+}
+
+.legendActual,
+.legendForecast,
+.legendMarker,
+.legendCharges {
+  display: inline-block;
+  width: 12px;
+  height: 12px;
+  border-radius: 3px;
+}
+
+.legendActual {
+  background: var(--mantine-color-gold-6);
+}
+
+.legendForecast {
+  border: 1px dashed var(--mantine-color-gold-6);
+}
+
+.legendMarker {
+  height: 2px;
+  background: var(--mantine-color-text);
+}
+
+.legendCharges {
+  background: var(--mantine-color-blue-3);
+}

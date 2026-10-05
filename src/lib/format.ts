@@ -24,6 +24,11 @@ export function monthName(month: number): string {
   return fr.months[month - 1] ?? String(month);
 }
 
+/** 9 → "sept." */
+export function shortMonthName(month: number): string {
+  return fr.monthsShort[month - 1] ?? String(month);
+}
+
 /** 9 → "Septembre". */
 export function capitalizedMonthName(month: number): string {
   const name = monthName(month);
