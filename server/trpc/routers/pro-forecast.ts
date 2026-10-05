@@ -165,4 +165,52 @@ export const proForecastRouter = createTRPCRouter({
       ]);
       return { months: months.length };
     }),
+
+  /** Km prévus d'un mois : saisie (`null` = défaut) et km réels (trajets) du même mois N-1. */
+  mileage: protectedProcedure.input(periodSchema).query(async ({ ctx, input }) => {
+    const userId = ctx.session.user.id;
+    const [override, lastYear] = await Promise.all([
+      ctx.db.mileageForecast.findUnique({ where: { userId_year_month: { userId, ...input } } }),
+      ctx.db.trip.aggregate({
+        where: { userId, year: input.year - 1, month: input.month },
+        _sum: { km: true },
+      }),
+    ]);
+    return { overrideKm: override?.km ?? null, lastYearKm: lastYear._sum.km ?? 0 };
+  }),
+
+  /** Enregistre les km prévus d'un mois ; `null` = revenir aux km N-1. */
+  setMileage: protectedProcedure
+    .input(periodSchema.extend({ km: z.number().int().min(0).max(100_000).nullable() }))
+    .mutation(async ({ ctx, input }) => {
+      const userId = ctx.session.user.id;
+      const { km, ...period } = input;
+      if (km === null) {
+        await ctx.db.mileageForecast.deleteMany({ where: { userId, ...period } });
+      } else {
+        await ctx.db.mileageForecast.upsert({
+          where: { userId_year_month: { userId, ...period } },
+          create: { userId, ...period, km },
+          update: { km },
+        });
+      }
+      return input;
+    }),
+
+  /** « Appliquer aux mois suivants » : recopie les km prévus du mois sur la fin de l'année. */
+  copyMileageToFollowingMonths: protectedProcedure
+    .input(periodSchema.extend({ km: z.number().int().min(0).max(100_000) }))
+    .mutation(async ({ ctx, input }) => {
+      const userId = ctx.session.user.id;
+      const months = followingMonths(input.month);
+      await ctx.db.$transaction([
+        ctx.db.mileageForecast.deleteMany({
+          where: { userId, year: input.year, month: { in: months } },
+        }),
+        ctx.db.mileageForecast.createMany({
+          data: months.map((month) => ({ userId, year: input.year, month, km: input.km })),
+        }),
+      ]);
+      return { months: months.length };
+    }),
 });
