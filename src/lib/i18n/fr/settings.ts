@@ -14,6 +14,20 @@ export const settings = {
     saveFailed: "Enregistrement impossible",
     resetDefaults: "Valeurs par défaut",
   },
+  incomeTax: {
+    title: "Barème de l'impôt sur le revenu",
+    description:
+      "Barème (1 part) en vigueur pour l'année choisie : il sert à l'IR estimé de la vue année du dashboard Perso. À renseigner chaque année.",
+    year: "Année",
+    loadFailed: "Impossible de charger le barème.",
+    empty: "Barème non renseigné pour cette année : saisis les tranches ci-dessous.",
+    from: "À partir de",
+    rate: "Taux",
+    addBracket: "Ajouter une tranche",
+    removeBracket: "Supprimer la tranche",
+    invalid: "Le barème doit commencer à 0 € et avoir des seuils strictement croissants.",
+    saveFailed: "Enregistrement impossible",
+  },
 } as const;
 
 /** Écran Pro (pas encore construit). */

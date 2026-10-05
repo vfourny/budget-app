@@ -1,7 +1,6 @@
 import { ActionIcon, AppShell, NavLink } from "@mantine/core";
 import {
   IconBriefcase,
-  IconHome2,
   IconInbox,
   IconLayoutDashboard,
   IconLogout,
@@ -22,7 +21,6 @@ interface NavItem {
 }
 
 const MAIN_NAV = [
-  { to: "/", label: fr.nav.home, icon: IconHome2 },
   { to: "/personal", label: fr.nav.personal, icon: IconLayoutDashboard },
   { to: "/professional", label: fr.nav.professional, icon: IconBriefcase },
   { to: "/imports", label: fr.nav.imports, icon: IconInbox },
@@ -37,8 +35,7 @@ const SETTINGS_NAV = {
 function NavItemLink({ to, label, icon: IconComponent }: NavItem) {
   const { pathname } = useLocation();
   // Actif si l'URL est la page elle-même ou l'une de ses sous-pages (/imports/new).
-  // `/` est traité à part, sinon il serait « actif » partout.
-  const active = to === "/" ? pathname === "/" : pathname === to || pathname.startsWith(`${to}/`);
+  const active = pathname === to || pathname.startsWith(`${to}/`);
 
   return (
     <NavLink

@@ -37,7 +37,8 @@ export const categorizeRouter = createTRPCRouter({
   run: protectedProcedure
     .input(z.object({ batchId: z.string().min(1) }))
     .mutation(async ({ ctx, input }) => {
-      const batch = await ctx.db.importBatch.findUnique({ where: { id: input.batchId } });
+      const userId = ctx.session.user.id;
+      const batch = await ctx.db.importBatch.findFirst({ where: { id: input.batchId, userId } });
       if (!batch) throw appError("NOT_FOUND", "IMPORT_NOT_FOUND");
       if (batch.status !== "PENDING_REVIEW") {
         throw appError("BAD_REQUEST", "IMPORT_ALREADY_VALIDATED");
@@ -57,6 +58,7 @@ export const categorizeRouter = createTRPCRouter({
       // sur le libellé normalisé (sans date ni n° de carte) se fait ensuite, en gardant les plus récents.
       const validated = await ctx.db.transaction.findMany({
         where: {
+          userId,
           accountType: batch.accountType,
           category: { not: null },
           importBatch: { status: "VALIDATED" },

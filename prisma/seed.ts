@@ -3,9 +3,54 @@ import "dotenv/config";
 import { auth } from "@server/lib/auth";
 import { db } from "@server/lib/db";
 
-// Seed : crée l'unique compte de l'app (l'inscription HTTP est désactivée). Lancé automatiquement
-// par `pnpm db:reset` (prisma migrate reset) ou à la main avec `pnpm db:seed`. Idempotent : si le
-// compte existe déjà, il ne fait rien. Identifiants lus dans `.env` (SEED_USER_*).
+// Seed : crée l'unique compte de l'app (l'inscription HTTP est désactivée) et insère les barèmes
+// de l'IR. Lancé automatiquement par `pnpm db:reset` (prisma migrate reset) ou à la main avec
+// `pnpm db:seed` (à relancer sur chaque base, develop et production, après avoir complété la
+// liste ci-dessous). Idempotent. Identifiants lus dans `.env` (SEED_USER_*).
+
+/**
+ * Barème de l'IR (1 part) par année : clé = année affichée dans le dashboard Perso, valeur =
+ * tranches `[seuil bas en centimes, taux marginal en %]`, triées par seuil croissant.
+ * ⚠️ À COMPLÉTER CHAQUE ANNÉE : ajouter ici le barème de la nouvelle année (publié avec la loi de
+ * finances), puis relancer `pnpm db:seed`. Une année absente de la base fait afficher « barème non
+ * renseigné » sur la card « IR estimé » (on peut aussi le saisir dans Réglages).
+ * Le seed n'écrase jamais une année déjà présente en base (donc pas une saisie faite dans Réglages).
+ */
+const INCOME_TAX_BRACKETS_BY_YEAR: Record<number, readonly (readonly [number, number])[]> = {
+  // Loi de finances 2025 (revenus 2024).
+  2025: [
+    [0, 0],
+    [1_149_700, 11],
+    [2_931_500, 30],
+    [8_382_300, 41],
+    [18_029_400, 45],
+  ],
+  // Loi de finances 2026 (revenus 2025).
+  2026: [
+    [0, 0],
+    [1_160_000, 11],
+    [2_957_900, 30],
+    [8_457_700, 41],
+    [18_191_700, 45],
+  ],
+};
+
+for (const [year, brackets] of Object.entries(INCOME_TAX_BRACKETS_BY_YEAR)) {
+  const exists = await db.incomeTaxBracket.count({ where: { year: Number(year) } });
+  if (exists > 0) {
+    process.stdout.write(`Barème IR ${year} déjà présent` + "\n");
+    continue;
+  }
+  await db.incomeTaxBracket.createMany({
+    data: brackets.map(([fromCents, ratePercent]) => ({
+      year: Number(year),
+      fromCents,
+      ratePercent,
+    })),
+  });
+  process.stdout.write(`Barème IR ${year} créé` + "\n");
+}
+
 const email = process.env.SEED_USER_EMAIL;
 const password = process.env.SEED_USER_PASSWORD;
 const name = process.env.SEED_USER_NAME ?? "Valentin";

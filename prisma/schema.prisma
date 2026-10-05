@@ -38,7 +38,10 @@ enum TransactionCategory {
   HEALTH // Santé
   TRANSPORT // Transport
   TAXES // Impôts et taxes
-  OTHER_SUBSCRIPTIONS // Abonnements divers
+  OTHER_SUBSCRIPTIONS // Abonnements divers (streaming, logiciels…)
+  ENERGY // Énergie (électricité, gaz)
+  TELECOM // Télécom (forfait téléphone)
+  INTERNET // Internet (box)
   OTHER // Autres
   LONG_TERM_SAVINGS // Épargne long terme
   SALARY_PAYMENT // Versement salaire (revenu)
@@ -50,11 +53,26 @@ enum TransactionCategory {
   SHORT_TERM_SAVINGS // Épargne court terme
 }
 
-/// Part du revenu mensuel recommandée pour une enveloppe (en %). Une ligne par enveloppe
+/// Part du revenu mensuel recommandée pour une enveloppe (en %). Une ligne par (utilisateur, enveloppe)
 /// configurée ; sans ligne, la valeur par défaut de `DEFAULT_ENVELOPE_PERCENTS` (`src/lib/budget-rules.ts`) s'applique.
 model EnvelopeShare {
-  envelope Envelope @id
+  userId   String
+  user     User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  envelope Envelope
   percent  Int
+
+  @@id([userId, envelope])
+}
+
+/// Tranche du barème de l'IR (1 part) en vigueur une année donnée (`year` = année affichée dans le
+/// dashboard). `fromCents` = seuil bas de la tranche, `ratePercent` = taux marginal. Une année sans
+/// ligne = barème non renseigné (le dashboard demande de le saisir dans Réglages).
+model IncomeTaxBracket {
+  year        Int @db.SmallInt
+  fromCents   Int
+  ratePercent Int @db.SmallInt
+
+  @@id([year, fromCents])
 }
 
 enum ImportStatus {
@@ -66,16 +84,22 @@ enum ImportStatus {
 /// seuls les imports VALIDATED comptent dans les dashboards.
 model ImportBatch {
   id            String        @id @default(cuid())
+  userId        String
+  user          User          @relation(fields: [userId], references: [id], onDelete: Cascade)
   accountType   AccountType
   fileName      String
   status        ImportStatus  @default(PENDING_REVIEW)
   createdAt     DateTime      @default(now())
   validatedAt   DateTime?
   transactions  Transaction[]
+
+  @@index([userId])
 }
 
 model Transaction {
   id                 String               @id @default(cuid())
+  userId             String
+  user               User                 @relation(fields: [userId], references: [id], onDelete: Cascade)
   date               DateTime             @db.Date
   label              String
   /// Montant en centimes, signé : négatif = débit, positif = crédit.
@@ -93,29 +117,31 @@ model Transaction {
   createdAt          DateTime             @default(now())
   updatedAt          DateTime             @updatedAt
 
-  @@index([year, month])
-  @@index([accountType, year, month])
+  @@index([userId, year, month])
+  @@index([userId, accountType, year, month])
   @@index([category])
   @@index([importBatchId])
 }
 
 // ─── Authentification (Better Auth) ──────────────────────────────────────────────────────────
-// Modèles imposés par Better Auth (adapter Prisma) : ne pas renommer les champs. App
-// mono-utilisateur : un seul `User`, créé par le seed (`prisma/seed.ts`, inscription publique
-// désactivée), donc les données métier ne portent pas de `userId`.
+// Modèles imposés par Better Auth (adapter Prisma) : ne pas renommer les champs. Les données
+// métier (`EnvelopeShare`, `ImportBatch`, `Transaction`) portent un `userId` : chaque requête
+// tRPC filtre sur `ctx.session.user.id`. Aujourd'hui un seul `User`, créé par le seed
+// (`prisma/seed.ts`, inscription publique désactivée). `IncomeTaxBracket` reste global (barème légal).
 
 model User {
-  id            String    @id
-  name          String
-  email         String    @unique
-  emailVerified Boolean   @default(false)
-  image         String?
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @updatedAt
-  sessions      Session[]
-  accounts      Account[]
-
-  @@map("user")
+  id             String          @id
+  name           String
+  email          String          @unique
+  emailVerified  Boolean         @default(false)
+  image          String?
+  createdAt      DateTime        @default(now())
+  updatedAt      DateTime        @updatedAt
+  sessions       Session[]
+  accounts       Account[]
+  envelopeShares EnvelopeShare[]
+  importBatches  ImportBatch[]
+  transactions   Transaction[]
 }
 
 model Session {
@@ -130,7 +156,6 @@ model Session {
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId])
-  @@map("session")
 }
 
 /// Identifiants d'un user : pour l'email + mot de passe, `providerId = "credential"` et `password` = hash.
@@ -151,7 +176,6 @@ model Account {
   updatedAt             DateTime  @updatedAt
 
   @@index([userId])
-  @@map("account")
 }
 
 model Verification {
@@ -163,5 +187,4 @@ model Verification {
   updatedAt  DateTime @updatedAt
 
   @@index([identifier])
-  @@map("verification")
 }

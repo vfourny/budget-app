@@ -104,8 +104,10 @@ nitro.config.ts        # serverDir: ./server
   (`server/trpc/init.ts`, 401 sans session) ; `publicProcedure` seulement pour du contenu public.
 - **Auth** : Better Auth (`server/lib/auth.ts`, monté sur `/api/auth/*`). Inscription publique
   **désactivée** ; l'unique compte est créé par le seed (`pnpm db:seed`, rejoué par `pnpm db:reset`) depuis `SEED_USER_EMAIL` / `SEED_USER_PASSWORD`. Front : `authClient`
-  (`@/lib/auth-client`), routes privées sous `RequireAuth` dans `app.tsx`. Pas de `userId` sur les
-  données métier (un seul utilisateur) : à revoir si le multi-utilisateurs devient un besoin.
+  (`@/lib/auth-client`), routes privées sous `RequireAuth` dans `app.tsx`. Les données métier
+  (`EnvelopeShare`, `ImportBatch`, `Transaction`) portent un `userId` : **toute requête tRPC filtre sur
+  `ctx.session.user.id`** (`findFirst({ where: { id, userId } })` plutôt que `findUnique({ where: { id } })`,
+  `userId` à la création). `IncomeTaxBracket` reste global (barème légal).
 - **Valeurs dérivées** calculées pendant le rendu (≈ `computed`), pas stockées dans un
   `useState` ; `useMemo` seulement si le calcul est coûteux.
 - **Hooks custom** (`useXxx`) dans `features/<domaine>/hooks/` dès qu'une logique à état est
@@ -133,8 +135,8 @@ nitro.config.ts        # serverDir: ./server
 - Validation des entrées : schémas Zod, partagés entre tRPC et formulaires.
 - UI en **français**, code/identifiants/commits en **anglais**.
 - **Textes de l'UI** : jamais en dur dans un composant ni dans `budget-rules.ts` : ils viennent du
-  dictionnaire `fr` de `@/lib/i18n/fr` (`fr.nav.home`, `fr.categories[category]`…), un fichier par
-  domaine (`common`, `nav`, `home`, `imports`, `review`, `personal`, `settings`, `enums`, `errors`).
+  dictionnaire `fr` de `@/lib/i18n/fr` (`fr.nav.personal`, `fr.categories[category]`…), un fichier par
+  domaine (`common`, `nav`, `imports`, `review`, `personal`, `settings`, `enums`, `errors`).
   Pas de lib i18n pour l'instant (une seule langue) : de simples objets `as const`. Texte avec
   variable = fonction (`fr.imports.confirmDelete(n)`) ; pluriels via `plural` / `pluralize`
   (`@/lib/i18n/plural`), jamais de `n > 1 ? "s" : ""` à la main. Libellés d'un enum Prisma :
@@ -179,7 +181,7 @@ schéma Zod + modèle Prisma, ajout d'un widget dashboard).
 3. Upload CSV (parser générique, mapping de colonnes par banque) (fait)
 4. Route tRPC `categorize` (Gemini, few-shot sur transactions validées, JSON `category` (valeur de l'enum) + `confidence`) (fait)
 5. Écran de relecture : historique, tableau de correction, « Valider », suppression d'un import (fait)
-6. Dashboard Perso mois / année : totaux, transactions, par catégorie (fait) ; Accueil (résumé du mois + imports à vérifier) (fait) ; parts recommandées par enveloppe dans Réglages + jauges réel vs recommandé (fait) ; abonnements, IR (à faire)
+6. Dashboard Perso mois / année : totaux, transactions, par catégorie (fait) ; parts recommandées par enveloppe dans Réglages + jauges réel vs recommandé (fait) ; abonnements, IR (à faire)
 7. Après validation du MVP perso : partie pro Stygma (TVA, facturation, prévisionnel/réel)
 
 Hors scope : synchro bancaire auto, multi-utilisateurs, facturation/TVA en v1.

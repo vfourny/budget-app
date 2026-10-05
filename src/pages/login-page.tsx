@@ -11,7 +11,7 @@ export function LoginPage() {
 
   // Déjà connecté : inutile de montrer le formulaire.
   if (!isPending && session) {
-    return <Navigate to="/" replace />;
+    return <Navigate to="/personal" replace />;
   }
 
   return (

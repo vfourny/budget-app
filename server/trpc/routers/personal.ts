@@ -4,17 +4,19 @@ import { aggregatePeriod } from "@server/lib/dashboard/aggregate";
 import { createTRPCRouter, protectedProcedure } from "@server/trpc/init";
 
 /** Seules les transactions des imports VALIDATED du compte perso comptent dans le dashboard. */
-const PERSONAL_VALIDATED = {
-  accountType: "PERSONAL",
-  importBatch: { status: "VALIDATED" },
-} as const;
+const personalValidated = (userId: string) =>
+  ({
+    userId,
+    accountType: "PERSONAL",
+    importBatch: { status: "VALIDATED" },
+  }) as const;
 
 export const personalRouter = createTRPCRouter({
   /** Mois ayant des données (du plus récent au plus ancien) : alimente le sélecteur de période. */
   periods: protectedProcedure.query(async ({ ctx }) => {
     const periods = await ctx.db.transaction.groupBy({
       by: ["year", "month"],
-      where: PERSONAL_VALIDATED,
+      where: personalValidated(ctx.session.user.id),
       orderBy: [{ year: "desc" }, { month: "desc" }],
     });
     return periods.map(({ year, month }) => ({ year, month }));
@@ -29,7 +31,7 @@ export const personalRouter = createTRPCRouter({
     .query(async ({ ctx, input }) => {
       const rows = await ctx.db.transaction.findMany({
         where: {
-          ...PERSONAL_VALIDATED,
+          ...personalValidated(ctx.session.user.id),
           year: input.year,
           ...(input.month !== undefined && { month: input.month }),
         },

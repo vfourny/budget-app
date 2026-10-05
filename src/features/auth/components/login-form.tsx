@@ -27,7 +27,7 @@ export function LoginForm() {
       setError(signInError.status === 429 ? fr.auth.tooManyAttempts : fr.auth.invalidCredentials);
       return;
     }
-    void navigate("/", { replace: true });
+    void navigate("/personal", { replace: true });
   }
 
   return (

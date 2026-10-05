@@ -23,6 +23,11 @@ export const personal = {
     savingsHint: (ratePercent: number) => `${ratePercent} % des revenus`,
     averageExpense: "Dépense moyenne / mois",
     monthsWithData: (count: number) => `${count} mois avec données`,
+    incomeTax: (year: number) => `IR estimé ${year}`,
+    incomeTaxHint: "Barème 1 part, avant réductions",
+    incomeTaxMissing: (year: number) => `Barème de l'IR ${year} non renseigné.`,
+    incomeTaxMissingLink: "Le renseigner dans Réglages",
+    incomeTaxLoadFailed: "Barème de l'IR indisponible.",
   },
   // Jauges réel vs recommandé
   gauge: {
@@ -40,9 +45,12 @@ export const personal = {
     savings: (labels: readonly string[]) =>
       `Total des virements d'épargne des catégories : ${labels.join(", ")}.`,
   },
+  fixedCharges: {
+    title: "Charges fixes",
+    total: "Total",
+  },
   breakdown: {
     title: "Par catégorie",
-    empty: "Aucune dépense sur cette période.",
   },
   transactions: {
     title: "Transactions",

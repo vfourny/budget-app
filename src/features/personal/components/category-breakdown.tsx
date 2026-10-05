@@ -11,14 +11,16 @@ interface CategoryBreakdownProps {
   };
 }
 
-const SHOWN = new Set<TransactionCategory | null>(CATEGORY_CARD_CATEGORIES);
-
 /**
  * Débits par catégorie, le plus gros en premier ; la barre est relative au plus gros, le % au
- * total affiché. Les catégories affichées se règlent dans `CATEGORY_CARD_CATEGORIES` (budget-rules).
+ * total affiché. Toutes les catégories de `CATEGORY_CARD_CATEGORIES` (budget-rules) sont
+ * affichées, même à 0 € (elles restent alors dans l'ordre de la liste, en fin de tableau).
  */
 export function CategoryBreakdown({ overview }: CategoryBreakdownProps) {
-  const rows = overview.debitsByCategory.filter(({ category }) => SHOWN.has(category));
+  const rows = CATEGORY_CARD_CATEGORIES.map((category) => ({
+    category,
+    cents: overview.debitsByCategory.find((debit) => debit.category === category)?.cents ?? 0,
+  })).sort((a, b) => b.cents - a.cents);
   const max = rows[0]?.cents ?? 0;
   const total = rows.reduce((sum, row) => sum + row.cents, 0);
 
@@ -27,26 +29,22 @@ export function CategoryBreakdown({ overview }: CategoryBreakdownProps) {
       <Title order={2} mb={20}>
         {fr.personal.breakdown.title}
       </Title>
-      {rows.length === 0 ? (
-        <Text c="dimmed">{fr.personal.breakdown.empty}</Text>
-      ) : (
-        <Stack gap={16}>
-          {rows.map(({ category, cents }) => (
-            <div key={category ?? "none"}>
-              <Group justify="space-between" mb={6}>
-                <Text size="sm">{category ? fr.categories[category] : fr.common.noCategory}</Text>
-                <Text size="sm" fw={600}>
-                  {formatCents(cents)}
-                  <Text span size="xs" c="dimmed" ml={8}>
-                    {Math.round((cents / total) * 100)} %
-                  </Text>
+      <Stack gap={16}>
+        {rows.map(({ category, cents }) => (
+          <div key={category}>
+            <Group justify="space-between" mb={6}>
+              <Text size="sm">{fr.categories[category]}</Text>
+              <Text size="sm" fw={600}>
+                {formatCents(cents)}
+                <Text span size="xs" c="dimmed" ml={8}>
+                  {total > 0 ? Math.round((cents / total) * 100) : 0} %
                 </Text>
-              </Group>
-              <Progress value={(cents / max) * 100} color="gold" size="sm" />
-            </div>
-          ))}
-        </Stack>
-      )}
+              </Text>
+            </Group>
+            <Progress value={max > 0 ? (cents / max) * 100 : 0} color="gold" size="sm" />
+          </div>
+        ))}
+      </Stack>
     </Paper>
   );
 }

@@ -1,5 +1,6 @@
 import {
   REVENUE_LINES,
+  FIXED_CHARGES_CATEGORIES,
   envelopeOf,
   isSavingsEnvelope,
   type RevenueLineKey,
@@ -25,6 +26,8 @@ export interface PeriodTotals {
   byEnvelope: Record<Envelope, number>;
   /** Débits par catégorie (épargne comprise), du plus gros au plus petit. */
   debitsByCategory: { category: TransactionCategory | null; cents: number }[];
+  /** Débits des `FIXED_CHARGES_CATEGORIES` (dans cet ordre, 0 si aucun) : card « Charges fixes ». */
+  fixedCharges: { category: (typeof FIXED_CHARGES_CATEGORIES)[number]; cents: number }[];
 }
 
 /**
@@ -72,5 +75,18 @@ export function aggregatePeriod(rows: readonly AggregatedRow[]): PeriodTotals {
     .map(([category, cents]) => ({ category, cents }))
     .sort((a, b) => b.cents - a.cents);
 
-  return { revenueCents, revenueLines, expenseCents, savingsCents, byEnvelope, debitsByCategory };
+  const fixedCharges = FIXED_CHARGES_CATEGORIES.map((category) => ({
+    category,
+    cents: debits.get(category) ?? 0,
+  }));
+
+  return {
+    revenueCents,
+    revenueLines,
+    expenseCents,
+    savingsCents,
+    byEnvelope,
+    debitsByCategory,
+    fixedCharges,
+  };
 }
