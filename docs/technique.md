@@ -21,7 +21,7 @@ server/                # BACKEND — Nitro, mêmes conventions que le server/ de
   trpc/                # init.ts (contexte, procédures), root.ts (appRouter), routers/<domaine>.ts
   lib/                 # db.ts (PrismaClient), env.ts (validation Zod), csv/ (parseur de relevés)
   generated/prisma/    # client Prisma généré — gitignoré, ne pas éditer
-prisma/                # schema.prisma, migrations/
+prisma/                # schema/ (un .prisma par domaine), migrations/, seed.ts + seeds/
 prisma.config.ts       # config CLI Prisma 7
 ```
 
@@ -75,7 +75,8 @@ Routeurs actuels : `categorize` (`run` : demande à Gemini une catégorie + conf
 - Générateur `prisma-client` (client TS sans moteur Rust) sorti dans `server/generated/prisma/` (gitignoré, régénéré par `postinstall`).
 - **Deux URLs Neon** : `DATABASE_URL` (pooled, host `-pooler`) pour le runtime via `@prisma/adapter-neon`, `DIRECT_URL` (directe) pour la CLI Prisma et les migrations (`prisma.config.ts`).
 - Côté serveur, toujours passer par `db` de `@server/lib/db` (singleton mis en cache sur `globalThis` pour survivre au hot reload).
-- **Toute modif de `schema.prisma` s'accompagne d'une migration versionnée** dans `prisma/migrations/` (`pnpm db:migrate`).
+- **Schéma découpé par domaine** dans `prisma/schema/` (déclaré dans `prisma.config.ts`) : `base` (générateur, datasource), `auth` (Better Auth), `transactions` (imports, transactions, catégories), `budget` (enveloppes, IR), `pro` (Stygma). Prisma les lit comme un seul schéma : une relation peut traverser les fichiers.
+- **Toute modif du schéma s'accompagne d'une migration versionnée** dans `prisma/migrations/` (`pnpm db:migrate`).
 - `prisma.config.ts` n'utilise volontairement pas `env()` : il lèverait une erreur si la variable manque, ce qui casserait `prisma generate` en CI (pas de DB nécessaire).
 
 ### Modèle de données
@@ -142,4 +143,3 @@ Chaque PR qui introduit un pattern React le documente dans sa section « Notes R
 
 - **Colonne « Solde » en double** dans l'export BoursoBank : on mappe par index de colonne, pas par nom d'en-tête (voir [import-csv.md](./import-csv.md)).
 - **`pnpm lint` et `pnpm build`** utilisent des binaires natifs (oxlint, esbuild) : ne pas les lancer depuis une VM Linux sur un `node_modules` installé sous macOS, et inversement.
-- **Commentaires historiques** : `prisma/schema.prisma` mentionne encore Next / `server-only` / `src/server/db.ts` (vestiges de la version Next.js abandonnée). Le chemin réel est `server/lib/db.ts`.

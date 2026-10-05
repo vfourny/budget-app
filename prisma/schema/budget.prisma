@@ -1,0 +1,32 @@
+// ─── Budget perso (enveloppes, IR) ───────────────────────────────────────────────────────────────────
+
+/// Enveloppes budgétaires (méthode des « comptes » / enveloppes).
+enum Envelope {
+  CURRENT_EXPENSES // Dépenses courantes
+  LEISURE // Loisirs
+  TRAINING // Formation
+  SAFETY_SAVINGS // Épargne sécurité
+  LONG_TERM_SAVINGS // Épargne long terme
+}
+
+/// Part du revenu mensuel recommandée pour une enveloppe (en %). Une ligne par (utilisateur, enveloppe)
+/// configurée ; sans ligne, la valeur par défaut de `DEFAULT_ENVELOPE_PERCENTS` (`shared/budget-rules.ts`) s'applique.
+model EnvelopeShare {
+  userId   String
+  user     User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  envelope Envelope
+  percent  Int
+
+  @@id([userId, envelope])
+}
+
+/// Tranche du barème de l'IR (1 part) en vigueur une année donnée (`year` = année affichée dans le
+/// dashboard). `fromCents` = seuil bas de la tranche, `ratePercent` = taux marginal. Une année sans
+/// ligne = barème non renseigné (le dashboard demande de le saisir dans Réglages).
+model IncomeTaxBracket {
+  year        Int @db.SmallInt
+  fromCents   Int
+  ratePercent Int @db.SmallInt
+
+  @@id([year, fromCents])
+}
