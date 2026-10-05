@@ -1,16 +1,32 @@
-import { ActionIcon, useComputedColorScheme, useMantineColorScheme } from "@mantine/core";
-import { IconMoon, IconSun } from "@tabler/icons-react";
+import { ActionIcon, useMantineColorScheme, type MantineColorScheme } from "@mantine/core";
+import { IconDeviceDesktop, IconMoon, IconSun } from "@tabler/icons-react";
 
 import { fr } from "@/lib/i18n/fr";
 
-/** Bouton soleil / lune qui bascule entre thème clair et sombre.
- * Mantine mémorise le choix dans le localStorage : il survit au rechargement. */
+/** Ordre de la bascule : Système → Clair → Sombre → Système… */
+const NEXT = {
+  auto: "light",
+  light: "dark",
+  dark: "auto",
+} as const satisfies Record<MantineColorScheme, MantineColorScheme>;
+
+const ICONS = {
+  auto: IconDeviceDesktop,
+  light: IconSun,
+  dark: IconMoon,
+} as const satisfies Record<MantineColorScheme, typeof IconSun>;
+
+/**
+ * Bouton du thème à 3 états : suivre le système (défaut), clair, sombre. L'icône montre le mode
+ * choisi, le libellé l'action du prochain clic. Mantine mémorise le choix dans le localStorage
+ * et, en mode « auto », suit `prefers-color-scheme` en direct. ≈ `useColorMode()` de Nuxt Color
+ * Mode avec `preference: "system"`.
+ */
 export function ColorSchemeToggle() {
-  // `setColorScheme` change le thème ; `useComputedColorScheme` donne le thème réellement affiché
-  // ("light" | "dark", jamais "auto") pour choisir l'icône. ≈ `useColorMode()` de Nuxt Color Mode.
-  const { setColorScheme } = useMantineColorScheme();
-  const isDark = useComputedColorScheme("dark") === "dark";
-  const label = isDark ? fr.nav.switchToLight : fr.nav.switchToDark;
+  const { colorScheme, setColorScheme } = useMantineColorScheme();
+  const next = NEXT[colorScheme];
+  const label = fr.nav.colorScheme[next];
+  const Icon = ICONS[colorScheme];
 
   return (
     <ActionIcon
@@ -18,9 +34,9 @@ export function ColorSchemeToggle() {
       color="gray"
       aria-label={label}
       title={label}
-      onClick={() => setColorScheme(isDark ? "light" : "dark")}
+      onClick={() => setColorScheme(next)}
     >
-      {isDark ? <IconSun size={18} stroke={1.8} /> : <IconMoon size={18} stroke={1.8} />}
+      <Icon size={18} stroke={1.8} />
     </ActionIcon>
   );
 }

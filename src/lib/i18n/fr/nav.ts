@@ -7,6 +7,10 @@ export const nav = {
   professional: "Pro",
   imports: "Imports",
   settings: "Réglages",
-  switchToLight: "Passer en thème clair",
-  switchToDark: "Passer en thème sombre",
+  /** Libellé du bouton de thème = l'action du prochain clic (Système → Clair → Sombre). */
+  colorScheme: {
+    auto: "Suivre le thème du système",
+    light: "Passer en thème clair",
+    dark: "Passer en thème sombre",
+  },
 } as const;

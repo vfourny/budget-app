@@ -20,9 +20,9 @@ import { queryClient } from "@/lib/trpc";
 // - QueryClientProvider : le cache TanStack Query (hooks `useQuery` / `useMutation`).
 // - BrowserRouter : l'URL courante pour `<Routes>`, `<NavLink>`, `useNavigate()` (≈ Vue Router en
 //   mode history).
-// - MantineProvider : le thème (≈ le plugin de thème de PrimeVue / Vuetify). Sombre par défaut ;
-//   le choix clair/sombre de l'utilisateur est mémorisé par Mantine dans le localStorage
-//   (bouton dans la barre latérale, voir `ColorSchemeToggle`).
+// - MantineProvider : le thème (≈ le plugin de thème de PrimeVue / Vuetify). Par défaut il suit le
+//   thème du système (`auto`) ; un choix forcé clair / sombre est mémorisé par Mantine dans le
+//   localStorage (bouton dans la barre latérale, voir `ColorSchemeToggle`).
 // StrictMode (dev uniquement) monte les composants deux fois pour débusquer les effets mal nettoyés.
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
@@ -31,7 +31,7 @@ createRoot(document.getElementById("root")!).render(
         <MantineProvider
           theme={theme}
           cssVariablesResolver={cssVariablesResolver}
-          defaultColorScheme="dark"
+          defaultColorScheme="auto"
         >
           <App />
         </MantineProvider>
