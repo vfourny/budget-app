@@ -142,9 +142,6 @@ export const FORECAST_GROUPS = {
 
 export type ForecastGroup = keyof typeof FORECAST_GROUPS;
 
-/** Une facture est « encaissée » si un paiement du client arrive dans le mois ou les N suivants. */
-export const PAYMENT_MATCH_WINDOW_MONTHS = 2;
-
 // ---------------------------------------------------------------------------------------------
 // Vérifications au chargement (front et serveur) : erreur immédiate plutôt qu'un calcul faux.
 // ---------------------------------------------------------------------------------------------

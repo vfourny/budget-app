@@ -11,10 +11,8 @@ function input(overrides: Partial<ProMonthInput> = {}): ProMonthInput {
     month: 9,
     hasActual: true,
     settings: { ...DEFAULT_PRO_YEAR_SETTINGS },
-    forecastBilling: [
-      { clientId: "c1", clientName: "Nexity", dailyRateCents: 45_000, halfDays: 42 },
-    ],
-    actualBilling: [{ clientId: "c1", clientName: "Nexity", dailyRateCents: 45_000, halfDays: 40 }],
+    forecastBilling: [{ clientName: "Nexity", dailyRateCents: 45_000, halfDays: 42 }],
+    actualBilling: [{ clientName: "Nexity", dailyRateCents: 45_000, halfDays: 40 }],
     proDebits: {
       PRO_ACCOUNTANT: 21_600, // 180 € HT + 36 € TVA
       PRO_INSURANCE: 1_967,
@@ -28,7 +26,9 @@ function input(overrides: Partial<ProMonthInput> = {}): ProMonthInput {
     persoDebits: { RENT: 90_000, INTERNET: 5_000, TELECOM: 4_500, ENERGY: 13_000 },
     lastYearPersoDebits: { RENT: 88_000, INTERNET: 5_000, TELECOM: 4_500, ENERGY: 9_200 },
     forecasts: { PRO_MEALS: 3_000 },
-    paidByClient: { c1: 1_080_000 },
+    // 8 640 € reçus ce mois (facture de juillet), 1 000 € encore dus à l'ouverture du mois.
+    collections: { receivedCents: 864_000, countedCents: 864_000 },
+    openingReceivablesCents: 100_000,
     previousVatDueCents: 140_000,
     mileage: { tripsKm: 100, lastYearTripsKm: 108, forecastKm: null },
     ...overrides,
@@ -39,11 +39,7 @@ describe("computeMonth", () => {
   it("computes revenue from half days × daily rate", () => {
     const month = computeMonth(input());
     expect(month.revenue).toEqual({ forecast: 945_000, actual: 900_000 });
-    expect(month.billing.clients[0]).toMatchObject({
-      status: "PAID",
-      ttcCents: 1_080_000,
-      paidCents: 1_080_000,
-    });
+    expect(month.billing.clients[0]).toMatchObject({ clientName: "Nexity", ttcCents: 1_080_000 });
     expect(month.billing.halfDays).toBe(40);
   });
 
@@ -99,10 +95,13 @@ describe("computeMonth", () => {
   });
 
   it("has no actual values for a future month", () => {
-    const month = computeMonth(input({ month: 11, hasActual: false, paidByClient: {} }));
+    const month = computeMonth(input({ month: 11, hasActual: false }));
     expect(month.revenue.actual).toBeNull();
     expect(month.profit.actual).toBeNull();
-    expect(month.billing.clients[0].status).toBe("TO_INVOICE");
+    expect(month.billing.receivablesCents).toBeNull();
+    expect(month.billing.collectedTtcCents).toBe(0);
+    // TTC prévu : 21 j × 450 € × 1,2.
+    expect(month.billing.invoicedTtcCents).toBe(1_134_000);
     expect(month.billing.halfDays).toBe(42);
     expect(month.mileage).toMatchObject({ forecastKm: 108, actualKm: null });
     expect(month.mixedCosts.leftToRefundCents).toBe(
@@ -110,11 +109,28 @@ describe("computeMonth", () => {
     );
   });
 
-  it("flags an invoice as not invoiced or pending", () => {
-    expect(computeMonth(input({ actualBilling: [] })).billing.clients[0].status).toBe(
-      "NOT_INVOICED",
+  it("tracks collections and cumulative receivables (clients pay later)", () => {
+    const month = computeMonth(input());
+    expect(month.billing.collectedTtcCents).toBe(864_000);
+    // 1 000 € dus + 10 800 € facturés − 8 640 € reçus.
+    expect(month.billing.receivablesCents).toBe(316_000);
+    // Un virement qui paie des factures absentes de l'app ne crée pas de solde négatif.
+    const early = computeMonth(
+      input({
+        openingReceivablesCents: 0,
+        collections: { receivedCents: 3_402_000, countedCents: 3_402_000 },
+      }),
     );
-    expect(computeMonth(input({ paidByClient: {} })).billing.clients[0].status).toBe("PENDING");
+    expect(early.billing.receivablesCents).toBe(0);
+    // Reçu mais non déduit (avant le premier mois facturé dans l'app) : affiché, pas déduit.
+    const uncounted = computeMonth(
+      input({
+        openingReceivablesCents: 0,
+        collections: { receivedCents: 864_000, countedCents: 0 },
+      }),
+    );
+    expect(uncounted.billing.collectedTtcCents).toBe(864_000);
+    expect(uncounted.billing.receivablesCents).toBe(1_080_000);
   });
 
   it("computes mileage at the yearly rate", () => {

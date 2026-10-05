@@ -179,15 +179,19 @@ Un jeu de règles **par année** (`ProYearSettings`) : régime (seule la **SAS �
 « Bientôt »), première année de l'option IR (5 exercices max), salaire brut mensuel, taux patronal, salarial, net
 imposable, PAS, charges sociales sur la quote-part de bénéfice, surfaces bureau / logement, clé n/d des autres frais
 mixtes, barème km. Une année non configurée reprend la dernière année configurée avant elle, sinon les valeurs par
-défaut (`DEFAULT_PRO_YEAR_SETTINGS`). Les **clients** (nom, mot-clé bancaire, TJM par défaut) se gèrent au même endroit.
+défaut (`DEFAULT_PRO_YEAR_SETTINGS`).
 
 ### Règles de calcul (SAS à l'IR)
 
 - **CA HT** = jours × TJM des lignes de facturation, saisies en **prévu** et en **réel** (à la main : jours et TJM ne
   sont pas sur le relevé), rattaché au mois de la prestation.
-- **Encaissements** : un virement « Encaissement client » dont le libellé contient le mot-clé du client paie ses
-  factures des **mois antérieurs**, de la plus ancienne à la plus récente. Statuts : À facturer (mois à venir), Non
-  facturé, En attente, Encaissée (à 1 € près).
+- **Clients** : nom en texte libre dans la ligne de facturation (suggestions des clients déjà saisis, choisir un
+  client reprend son dernier TJM). Pas de liste à gérer dans Réglages.
+- **Encaissé** = total des crédits « Encaissement client » (`CLIENT_PAYMENT`) du mois, TTC.
+- **Reste à encaisser** = solde **cumulé** : ce qui restait dû + facturé TTC du mois (réel) − encaissé du mois,
+  jamais négatif. Les clients payant plus tard, le solde se reporte d'un mois sur l'autre (et d'une année sur
+  l'autre). Les virements reçus jusqu'au premier mois facturé dans l'app paient des factures antérieures : affichés
+  en « Encaissé », ils ne diminuent pas le solde.
 - **Charges pro** : débits TTC du relevé ramenés en HT au taux de leur catégorie ; la différence est la **TVA
   déductible**. Frais mixtes : remboursements versés (pas de TVA déductible).
 - **TVA à reverser** = 20 % du CA HT − TVA déductible, par mois. La TVA payée un mois (catégorie TVA) est comparée à

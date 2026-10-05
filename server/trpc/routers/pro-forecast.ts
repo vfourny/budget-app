@@ -12,7 +12,8 @@ const periodSchema = z.object({
 });
 
 const billingLineSchema = z.object({
-  clientId: z.string().min(1),
+  /** Nom du client, en texte libre. */
+  clientName: z.string().trim().min(1).max(80),
   dailyRateCents: z.number().int().min(0).max(10_000_00),
   /** Demi-journées : 0 à 62 (31 jours). */
   halfDays: z.number().int().min(0).max(62),
@@ -29,6 +30,22 @@ const followingMonths = (month: number) =>
   Array.from({ length: 12 - month }, (_, index) => month + 1 + index);
 
 export const proForecastRouter = createTRPCRouter({
+  /**
+   * Clients déjà saisis (autocomplétion de l'éditeur), avec le TJM de leur ligne la plus récente
+   * pour pré-remplir une nouvelle ligne.
+   */
+  clients: protectedProcedure.query(async ({ ctx }) => {
+    const lines = await ctx.db.billingLine.findMany({
+      where: { userId: ctx.session.user.id },
+      orderBy: [{ year: "desc" }, { month: "desc" }, { kind: "desc" }],
+      distinct: ["clientName"],
+      select: { clientName: true, dailyRateCents: true },
+    });
+    return lines
+      .map((line) => ({ name: line.clientName, lastDailyRateCents: line.dailyRateCents }))
+      .sort((a, b) => a.name.localeCompare(b.name, "fr"));
+  }),
+
   /** Lignes de facturation d'un mois, prévues (`FORECAST`) ou réelles (`ACTUAL`). */
   billingLines: protectedProcedure
     .input(periodSchema.extend({ kind: z.enum(BillingKind) }))
@@ -36,7 +53,7 @@ export const proForecastRouter = createTRPCRouter({
       ctx.db.billingLine.findMany({
         where: { userId: ctx.session.user.id, ...input },
         orderBy: { id: "asc" },
-        select: { id: true, clientId: true, dailyRateCents: true, halfDays: true },
+        select: { id: true, clientName: true, dailyRateCents: true, halfDays: true },
       }),
     ),
 
@@ -48,10 +65,6 @@ export const proForecastRouter = createTRPCRouter({
     .mutation(async ({ ctx, input }) => {
       const userId = ctx.session.user.id;
       const { lines, ...where } = input;
-      // Chaque client doit appartenir à l'utilisateur.
-      const clientIds = [...new Set(lines.map((line) => line.clientId))];
-      const owned = await ctx.db.client.count({ where: { userId, id: { in: clientIds } } });
-      if (owned !== clientIds.length) throw appError("NOT_FOUND", "CLIENT_NOT_FOUND");
 
       await ctx.db.$transaction([
         ctx.db.billingLine.deleteMany({ where: { userId, ...where } }),
@@ -70,7 +83,7 @@ export const proForecastRouter = createTRPCRouter({
       const months = followingMonths(input.month);
       const source = await ctx.db.billingLine.findMany({
         where: { userId, year: input.year, month: input.month, kind: "FORECAST" },
-        select: { clientId: true, dailyRateCents: true, halfDays: true },
+        select: { clientName: true, dailyRateCents: true, halfDays: true },
       });
       await ctx.db.$transaction([
         ctx.db.billingLine.deleteMany({

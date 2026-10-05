@@ -16,7 +16,7 @@ export interface Amount {
 
 /** Ligne de facturation (prévue ou réelle) d'un client pour le mois. */
 export interface BillingInput {
-  clientId: string;
+  /** Nom du client (texte libre) : les lignes d'un même nom sont regroupées. */
   clientName: string;
   dailyRateCents: number;
   /** Demi-journées (3,5 j = 7). */
@@ -43,8 +43,14 @@ export interface ProMonthInput {
   lastYearPersoDebits: CategoryCents;
   /** Montants prévus saisis (`MonthlyForecast`), HT pour les charges pro. */
   forecasts: CategoryCents;
-  /** Encaissements (TTC) attribués aux factures du mois, par client (voir `match-payments`). */
-  paidByClient: Readonly<Record<string, number>>;
+  /**
+   * Encaissements clients du mois (crédits « Encaissement client » du relevé pro, TTC).
+   * `countedCents` = la part qui vient en déduction du reste à encaisser : 0 tant que la
+   * facturation n'a pas commencé dans l'app (ces virements paient des factures plus anciennes).
+   */
+  collections: { receivedCents: number; countedCents: number };
+  /** Reste à encaisser (TTC, cumulé) au début du mois. */
+  openingReceivablesCents: number;
   /** TVA à reverser du mois précédent (payée ce mois-ci). */
   previousVatDueCents: number;
   mileage: {
@@ -57,18 +63,12 @@ export interface ProMonthInput {
   };
 }
 
-export type InvoiceStatus = "TO_INVOICE" | "NOT_INVOICED" | "PENDING" | "PAID";
-
 export interface ClientBilling {
-  clientId: string;
   clientName: string;
   forecast: { halfDays: number; amountCents: number };
   actual: { halfDays: number; amountCents: number } | null;
-  status: InvoiceStatus;
-  /** TTC de la facture réelle (0 sans réel). */
+  /** TTC réel (prévu pour un mois à venir). */
   ttcCents: number;
-  /** Encaissé (TTC) sur cette facture. */
-  paidCents: number;
 }
 
 export interface ChargeRow {
@@ -104,9 +104,18 @@ export interface ProMonth {
     clients: ClientBilling[];
     /** Demi-journées facturées (réel) ou prévues (mois à venir). */
     halfDays: number;
+    /** Facturé HT (réel). */
     invoicedCents: number;
+    /** Facturé TTC du mois : réel, ou prévu pour un mois à venir. */
+    invoicedTtcCents: number;
+    /** Encaissé TTC dans le mois (virements « Encaissement client »), 0 pour un mois à venir. */
     collectedTtcCents: number;
-    remainingTtcCents: number;
+    /**
+     * Reste à encaisser TTC **cumulé** à la fin du mois : tout le facturé moins tout l'encaissé
+     * depuis le début de la facturation (les clients paient 1 à 2 mois plus tard). `null` pour un
+     * mois à venir.
+     */
+    receivablesCents: number | null;
   };
   charges: {
     rows: ChargeRow[];

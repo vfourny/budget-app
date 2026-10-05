@@ -1,27 +1,25 @@
 import {
   ActionIcon,
   Alert,
-  Anchor,
+  Autocomplete,
   Button,
   Group,
   Loader,
   NumberInput,
-  Select,
   Stack,
   Table,
   Text,
 } from "@mantine/core";
 import { IconTrash } from "@tabler/icons-react";
 import { useReducer } from "react";
-import { Link } from "react-router";
 
 import {
+  useBillingClients,
   useBillingLines,
   useCopyBillingToFollowingMonths,
   useSetBillingLines,
   type BillingSource,
 } from "@/features/professional/hooks/use-forecast-editor";
-import { useClients } from "@/features/settings/hooks/use-clients";
 import { errorMessage } from "@/lib/errors";
 import { formatCents, formatHalfDays } from "@/lib/format";
 import { fr } from "@/lib/i18n/fr";
@@ -29,19 +27,20 @@ import type { Period } from "@/hooks/use-period-selection";
 
 /** Ligne en cours d'édition : TJM en euros, jours décimaux (pas de 0,5) pour la saisie. */
 interface Line {
-  clientId: string;
+  clientName: string;
   dailyRateEuros: number;
   days: number;
 }
 
-type Client = { id: string; defaultDailyRateCents: number | null };
+/** Client déjà saisi dans une facturation : nom + TJM de sa ligne la plus récente. */
+type KnownClient = { name: string; lastDailyRateCents: number };
 
 /**
  * Brouillon des lignes, géré par un reducer : toutes les modifications passent par `dispatch`
  * (≈ des mutations nommées d'un store Pinia local au composant).
  */
 type Action =
-  | { type: "add"; client: Client }
+  | { type: "add"; client: KnownClient | undefined }
   | { type: "update"; index: number; patch: Partial<Line> }
   | { type: "remove"; index: number };
 
@@ -51,8 +50,8 @@ function linesReducer(lines: Line[], action: Action): Line[] {
       return [
         ...lines,
         {
-          clientId: action.client.id,
-          dailyRateEuros: (action.client.defaultDailyRateCents ?? 0) / 100,
+          clientName: action.client?.name ?? "",
+          dailyRateEuros: (action.client?.lastDailyRateCents ?? 0) / 100,
           days: 0,
         },
       ];
@@ -77,21 +76,11 @@ interface BillingTabProps {
 /** Onglet « Facturation » : jours × TJM par client, prévus ou réels. */
 export function BillingTab({ period, source }: BillingTabProps) {
   const lines = useBillingLines(period.year, period.month, source);
-  const clients = useClients();
+  const clients = useBillingClients();
   const text = fr.professional.editor;
 
   if (lines.isPending || clients.isPending) return <Loader color="gold" />;
   if (lines.isError || clients.isError) return <Alert color="red" title={text.loadFailed} />;
-  if (clients.data.length === 0) {
-    return (
-      <Stack gap={8}>
-        <Text c="dimmed">{text.billing.noClients}</Text>
-        <Anchor component={Link} to="/settings?tab=professional">
-          {text.billing.noClientsLink}
-        </Anchor>
-      </Stack>
-    );
-  }
 
   return (
     <BillingLinesForm
@@ -101,7 +90,7 @@ export function BillingTab({ period, source }: BillingTabProps) {
       source={source}
       clients={clients.data}
       initial={lines.data.map((line) => ({
-        clientId: line.clientId,
+        clientName: line.clientName,
         dailyRateEuros: line.dailyRateCents / 100,
         days: line.halfDays / 2,
       }))}
@@ -110,7 +99,7 @@ export function BillingTab({ period, source }: BillingTabProps) {
 }
 
 interface BillingLinesFormProps extends BillingTabProps {
-  clients: readonly (Client & { name: string })[];
+  clients: readonly KnownClient[];
   initial: Line[];
 }
 
@@ -123,7 +112,8 @@ function BillingLinesForm({ period, source, clients, initial }: BillingLinesForm
   const totalCents = lines.reduce((total, line) => total + amountOf(line), 0);
   const totalHalfDays = lines.reduce((total, line) => total + halfDaysOf(line), 0);
   const changed = JSON.stringify(lines) !== JSON.stringify(initial);
-  const options = clients.map((client) => ({ value: client.id, label: client.name }));
+  const missingName = lines.some((line) => line.clientName.trim() === "");
+  const clientNames = clients.map((client) => client.name);
   const totalText = source === "FORECAST" ? text.billing.totalForecast : text.billing.totalActual;
 
   function saveLines(onSuccess?: () => void) {
@@ -133,7 +123,7 @@ function BillingLinesForm({ period, source, clients, initial }: BillingLinesForm
         month: period.month,
         kind: source,
         lines: lines.map((line) => ({
-          clientId: line.clientId,
+          clientName: line.clientName.trim(),
           dailyRateCents: Math.round(line.dailyRateEuros * 100),
           halfDays: halfDaysOf(line),
         })),
@@ -162,14 +152,27 @@ function BillingLinesForm({ period, source, clients, initial }: BillingLinesForm
             // Lignes sans identifiant stable : l'index suffit, l'ordre ne change que par suppression.
             <Table.Tr key={index}>
               <Table.Td>
-                <Select
+                {/* Texte libre avec suggestions des clients déjà saisis ; choisir une suggestion
+                    reprend son dernier TJM. */}
+                <Autocomplete
                   aria-label={text.billing.client}
-                  data={options}
-                  value={line.clientId}
-                  allowDeselect={false}
+                  placeholder={text.billing.clientPlaceholder}
+                  data={clientNames}
+                  value={line.clientName}
+                  error={line.clientName.trim() === ""}
                   onChange={(value) =>
-                    value && dispatch({ type: "update", index, patch: { clientId: value } })
+                    dispatch({ type: "update", index, patch: { clientName: value } })
                   }
+                  onOptionSubmit={(value) => {
+                    const known = clients.find((client) => client.name === value);
+                    if (known) {
+                      dispatch({
+                        type: "update",
+                        index,
+                        patch: { dailyRateEuros: known.lastDailyRateCents / 100 },
+                      });
+                    }
+                  }}
                 />
               </Table.Td>
               <Table.Td>
@@ -226,7 +229,17 @@ function BillingLinesForm({ period, source, clients, initial }: BillingLinesForm
       </Table>
 
       <Group justify="space-between">
-        <Button variant="subtle" onClick={() => dispatch({ type: "add", client: clients[0] })}>
+        {/* Nouvelle ligne pré-remplie avec le client de la dernière ligne (souvent le même). */}
+        <Button
+          variant="subtle"
+          onClick={() =>
+            dispatch({
+              type: "add",
+              client:
+                clients.find((client) => client.name === lines.at(-1)?.clientName) ?? clients[0],
+            })
+          }
+        >
           {text.billing.add}
         </Button>
         <Text size="sm" c="dimmed">
@@ -254,6 +267,7 @@ function BillingLinesForm({ period, source, clients, initial }: BillingLinesForm
         {source === "FORECAST" && period.month < 12 && (
           <Button
             variant="default"
+            disabled={missingName}
             loading={copy.isPending}
             // Enregistre d'abord le mois affiché, puis le recopie sur la fin de l'année.
             onClick={() => saveLines(() => copy.mutate({ year: period.year, month: period.month }))}
@@ -261,7 +275,11 @@ function BillingLinesForm({ period, source, clients, initial }: BillingLinesForm
             {text.applyNext}
           </Button>
         )}
-        <Button disabled={!changed} loading={save.isPending} onClick={() => saveLines()}>
+        <Button
+          disabled={!changed || missingName}
+          loading={save.isPending}
+          onClick={() => saveLines()}
+        >
           {fr.common.save}
         </Button>
       </Group>

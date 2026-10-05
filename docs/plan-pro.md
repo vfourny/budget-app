@@ -258,7 +258,7 @@ composants Vue partagés ; PR 15 : `useReducer` pour l'éditeur ≈ état local 
 1. **Catégories pro** : la liste du § 3 te va ? (ajout de `PRO_SOFTWARE` absent de la maquette, alors que Claude / Figma / GitKraken sont nombreux dans le relevé) — _hypothèse : oui._
 2. **Cotisations réelles** : calculées depuis Réglages (maquette) plutôt que lues dans les prélèvements URSSAF / Malakoff / SwissLife ? — _hypothèse : Réglages en V1._
 3. **Prévu des charges pro** sans saisie : 0 €, ou réel du même mois N-1 (comme frais mixtes et km) ? — _hypothèse : réel N-1, même règle partout._
-4. **Clients** : table `Client` (nom + mot-clé bancaire pour le rapprochement) plutôt que le texte libre de la maquette ? — _hypothèse : oui._
+4. **Clients** : table `Client` (nom + mot-clé bancaire pour le rapprochement) plutôt que le texte libre de la maquette ? — _hypothèse : oui._ **Révisé** : texte libre, encaissé = crédits du mois, reste à encaisser = solde cumulé (`docs/fonctionnel.md`).
 5. **« À vérifier » dans les dashboards** = sans catégorie ou « Autres » ? — _hypothèse : oui._
 6. **Tests unitaires** : ajouter Vitest (dev-dependency) uniquement pour `server/lib/pro/` (calculs financiers) ? — _hypothèse : oui, PR 8._
 7. **Années du régime** dans Réglages : liste fixe 2025 → 2028 (maquette) ou années ayant des données + année suivante ? — _hypothèse : années avec données + suivante._
