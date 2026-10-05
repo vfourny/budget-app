@@ -2,6 +2,11 @@
 export const settings = {
   eyebrow: "Configuration",
   title: "Réglages",
+  tabs: {
+    personal: "Perso",
+    professional: "Pro · Stygma",
+    professionalComingSoon: "Les règles de Stygma (taux, frais mixtes, barème km) arrivent ici.",
+  },
   shares: {
     title: "Parts du revenu par enveloppe",
     description:
