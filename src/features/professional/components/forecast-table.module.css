@@ -1,0 +1,4 @@
+/* Montants sur une ligne : c'est le libellé de la catégorie qui passe à la ligne. */
+.number {
+  white-space: nowrap;
+}
