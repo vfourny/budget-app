@@ -8,9 +8,9 @@ import {
 import { DEFAULT_ENVELOPE_PERCENTS } from "@shared/budget-rules";
 import { errorMessage } from "@/lib/errors";
 import { fr } from "@/lib/i18n/fr";
-import type { BudgetEnvelope } from "@server/lib/settings/envelope-shares";
+import type { Envelope } from "@server/generated/prisma/enums";
 
-type Shares = Record<BudgetEnvelope, number>;
+type Shares = Record<Envelope, number>;
 
 export function EnvelopeSharesForm() {
   const shares = useEnvelopeShares();
@@ -27,7 +27,7 @@ function SharesFields({ initial }: { initial: Shares }) {
   const [draft, setDraft] = useState<Shares>(initial);
   const save = useSetEnvelopeShares();
 
-  const envelopes = Object.keys(initial) as BudgetEnvelope[];
+  const envelopes = Object.keys(initial) as Envelope[];
   const total = envelopes.reduce((sum, envelope) => sum + draft[envelope], 0);
   const unassigned = 100 - total;
   const isDefault = envelopes.every(

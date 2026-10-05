@@ -5,13 +5,10 @@ import {
   isSavingsEnvelope,
   type RevenueLineKey,
 } from "@shared/budget-rules";
+import type { Transaction } from "@server/generated/prisma/client";
 import type { Envelope, TransactionCategory } from "@server/generated/prisma/enums";
 
-export interface AggregatedRow {
-  category: TransactionCategory | null;
-  /** Centimes, signé : négatif = débit. */
-  amountCents: number;
-}
+export type AggregatedRow = Pick<Transaction, "category" | "amountCents">;
 
 export interface PeriodTotals {
   /** Somme des crédits. */

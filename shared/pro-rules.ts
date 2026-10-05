@@ -1,5 +1,6 @@
 import type { ProCategory } from "@shared/account-categories";
 import type { CompanyRegime, TransactionCategory } from "@server/generated/prisma/enums";
+import type { ProYearSettings } from "@server/generated/prisma/browser";
 
 /*
  * ✏️ RÈGLES DU COMPTE PRO (Stygma) : constantes partagées front + serveur (fichier pur, sans
@@ -7,21 +8,7 @@ import type { CompanyRegime, TransactionCategory } from "@server/generated/prism
  */
 
 /** Règles d'une année (Réglages › Pro), en entiers : centimes, points de base, dm², millièmes d'€. */
-export interface ProYearSettingsValues {
-  regime: CompanyRegime;
-  irOptionFirstYear: number;
-  grossSalaryCents: number;
-  employerContributionBp: number;
-  employeeContributionBp: number;
-  taxableNetBp: number;
-  withholdingTaxBp: number;
-  profitSocialChargesBp: number;
-  officeAreaDm2: number;
-  homeAreaDm2: number;
-  mixedKeyNumerator: number;
-  mixedKeyDenominator: number;
-  mileageRateMilli: number;
-}
+export type ProYearSettingsValues = Omit<ProYearSettings, "userId" | "year">;
 
 /**
  * Valeurs utilisées tant qu'aucune année n'est configurée, et par « Valeurs par défaut ».

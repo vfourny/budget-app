@@ -1,8 +1,7 @@
 import { useMutation, useQuery } from "@tanstack/react-query";
 
 import { queryClient, trpc } from "@/lib/trpc";
-
-export type BillingSource = "FORECAST" | "ACTUAL";
+import type { BillingKind } from "@server/generated/prisma/enums";
 
 /** Une saisie du prévisionnel change le dashboard Pro et les autres saisies : on rafraîchit les deux. */
 const invalidate = () =>
@@ -16,7 +15,7 @@ export function useBillingClients() {
   return useQuery(trpc.proForecast.clients.queryOptions());
 }
 
-export function useBillingLines(year: number, month: number, kind: BillingSource) {
+export function useBillingLines(year: number, month: number, kind: BillingKind) {
   return useQuery(trpc.proForecast.billingLines.queryOptions({ year, month, kind }));
 }
 

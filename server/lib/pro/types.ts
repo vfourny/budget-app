@@ -1,3 +1,4 @@
+import type { BillingLine } from "@server/generated/prisma/client";
 import type { TransactionCategory } from "@server/generated/prisma/enums";
 import type {
   MixedCostCategory,
@@ -15,13 +16,7 @@ export interface Amount {
 }
 
 /** Ligne de facturation (prévue ou réelle) d'un client pour le mois. */
-export interface BillingInput {
-  /** Nom du client (texte libre) : les lignes d'un même nom sont regroupées. */
-  clientName: string;
-  dailyRateCents: number;
-  /** Demi-journées (3,5 j = 7). */
-  days: number;
-}
+export type BillingInput = Pick<BillingLine, "clientName" | "dailyRateCents" | "days">;
 
 /** Tout ce qu'il faut pour calculer un mois : rien n'est lu en base dans le calcul. */
 export interface ProMonthInput {

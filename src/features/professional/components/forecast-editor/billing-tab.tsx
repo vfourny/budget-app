@@ -18,13 +18,13 @@ import {
   useBillingLines,
   useCopyBillingToFollowingMonths,
   useSetBillingLines,
-  type BillingSource,
 } from "@/features/professional/hooks/use-forecast-editor";
 import { errorMessage } from "@/lib/errors";
 import { formatCents, formatDays } from "@/lib/format";
 import { fr } from "@/lib/i18n/fr";
 import type { Period } from "@/hooks/use-period-selection";
 import { billingAmount, DAY_STEP, MAX_BILLED_DAYS, roundToDayStep } from "@shared/billing-days";
+import type { BillingKind } from "@server/generated/prisma/enums";
 
 /** Ligne en cours d'édition : TJM en euros, jours décimaux (pas de 0,5) pour la saisie. */
 interface Line {
@@ -75,7 +75,7 @@ const amountOf = (line: Line) =>
 
 interface BillingTabProps {
   period: Period;
-  source: BillingSource;
+  source: BillingKind;
 }
 
 /** Onglet « Facturation » : jours × TJM par client, prévus ou réels. */

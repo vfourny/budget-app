@@ -1,14 +1,12 @@
+import type { Transaction } from "@server/generated/prisma/client";
+
 /** Une transaction normalisée à partir d'une ligne de relevé, avant écriture en base
  * (`accountType`, `category`, `importBatchId` sont ajoutés plus tard, à la validation de
  * l'import — voir `ImportBatch` dans le schéma Prisma). */
-export interface ParsedTransaction {
-  date: Date;
-  label: string;
-  /** Montant en centimes, signé : négatif = débit. */
-  amountCents: number;
-  month: number;
-  year: number;
-}
+export type ParsedTransaction = Pick<
+  Transaction,
+  "date" | "label" | "amountCents" | "month" | "year"
+>;
 
 /** Pourquoi une ligne est écartée : un **code**, traduit côté front (`i18n/fr/errors.ts`). */
 export type CsvLineErrorCode =
