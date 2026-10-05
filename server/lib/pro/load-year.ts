@@ -1,7 +1,8 @@
 import type { TransactionCategory } from "@server/generated/prisma/enums";
 import { validatedTransactions } from "@server/lib/dashboard/scope";
 import type { db as Db } from "@server/lib/db";
-import { applyBp, billingAmount } from "@server/lib/pro/amounts";
+import { applyBp } from "@server/lib/pro/amounts";
+import { billingAmount } from "@shared/billing-days";
 import { computeMonth } from "@server/lib/pro/compute-month";
 import { computeYear } from "@server/lib/pro/compute-year";
 import type { BillingInput, CategoryCents, ProMonth, ProMonthInput } from "@server/lib/pro/types";
@@ -90,14 +91,14 @@ export async function loadProYear(
         kind: true,
         clientName: true,
         dailyRateCents: true,
-        halfDays: true,
+        days: true,
       },
       orderBy: { id: "asc" },
     }),
     // Facturation réelle des années précédentes : reste à encaisser au 1er janvier.
     db.billingLine.findMany({
       where: { userId, kind: "ACTUAL", year: { lt: year } },
-      select: { year: true, month: true, dailyRateCents: true, halfDays: true },
+      select: { year: true, month: true, dailyRateCents: true, days: true },
     }),
     // Encaissements clients (crédits du relevé pro), par mois, jusqu'à l'année affichée.
     db.transaction.groupBy({
@@ -135,7 +136,7 @@ export async function loadProYear(
       .map((line) => ({
         clientName: line.clientName,
         dailyRateCents: line.dailyRateCents,
-        halfDays: line.halfDays,
+        days: line.days,
       }));
 
   // ── Reste à encaisser cumulé ─────────────────────────────────────────────────────────────────

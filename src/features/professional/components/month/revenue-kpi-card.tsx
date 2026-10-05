@@ -3,7 +3,7 @@ import { Group, Paper, SimpleGrid, Stack, Text } from "@mantine/core";
 import { DeltaBadge } from "@/components/delta-badge";
 import { InfoTip } from "@/components/info-tip";
 import { TargetGauge } from "@/components/target-gauge";
-import { formatCents, formatHalfDays } from "@/lib/format";
+import { formatCents, formatDays } from "@/lib/format";
 import { fr } from "@/lib/i18n/fr";
 import { COLLECTED_VAT_BP } from "@shared/pro-rules";
 import type { ProMonth } from "@server/lib/pro/types";
@@ -47,13 +47,13 @@ export function RevenueKpiCard({ month }: { month: ProMonth }) {
           sub: text.remainingSub,
           color: (billing.receivablesCents ?? 0) > 0 ? "red.4" : undefined,
         },
-        { label: text.days, value: fr.professional.days(formatHalfDays(billing.halfDays)) },
+        { label: text.days, value: fr.professional.days(formatDays(billing.days)) },
       ]
     : [
         { label: text.toInvoice, value: formatCents(revenue.forecast), sub: text.ht },
         { label: text.collected, value: "—", sub: text.nothingBeforeEnd },
         { label: text.toInvoiceTtc, value: formatCents(forecastTtc), sub: text.forecastTtc },
-        { label: text.days, value: fr.professional.days(formatHalfDays(billing.halfDays)) },
+        { label: text.days, value: fr.professional.days(formatDays(billing.days)) },
       ];
 
   return (

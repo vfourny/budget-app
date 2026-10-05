@@ -3,6 +3,7 @@ import { z } from "zod";
 import { BillingKind, TransactionCategory } from "@server/generated/prisma/enums";
 import { appError } from "@server/lib/app-error";
 import { forecastValues } from "@server/lib/pro/forecast-values";
+import { DAY_STEP, MAX_BILLED_DAYS } from "@shared/billing-days";
 import { FORECAST_GROUPS, type ForecastGroup } from "@shared/pro-rules";
 import { createTRPCRouter, protectedProcedure } from "@server/trpc/init";
 
@@ -15,8 +16,8 @@ const billingLineSchema = z.object({
   /** Nom du client, en texte libre. */
   clientName: z.string().trim().min(1).max(80),
   dailyRateCents: z.number().int().min(0).max(10_000_00),
-  /** Demi-journées : 0 à 62 (31 jours). */
-  halfDays: z.number().int().min(0).max(62),
+  /** Jours facturés, par demi-journée (1, 0,5…), voir `shared/billing-days.ts`. */
+  days: z.number().min(0).max(MAX_BILLED_DAYS).multipleOf(DAY_STEP),
 });
 
 const groupSchema = z.enum(Object.keys(FORECAST_GROUPS) as [ForecastGroup, ...ForecastGroup[]]);
@@ -53,7 +54,7 @@ export const proForecastRouter = createTRPCRouter({
       ctx.db.billingLine.findMany({
         where: { userId: ctx.session.user.id, ...input },
         orderBy: { id: "asc" },
-        select: { id: true, clientName: true, dailyRateCents: true, halfDays: true },
+        select: { id: true, clientName: true, dailyRateCents: true, days: true },
       }),
     ),
 
@@ -83,7 +84,7 @@ export const proForecastRouter = createTRPCRouter({
       const months = followingMonths(input.month);
       const source = await ctx.db.billingLine.findMany({
         where: { userId, year: input.year, month: input.month, kind: "FORECAST" },
-        select: { clientName: true, dailyRateCents: true, halfDays: true },
+        select: { clientName: true, dailyRateCents: true, days: true },
       });
       await ctx.db.$transaction([
         ctx.db.billingLine.deleteMany({

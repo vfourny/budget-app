@@ -11,8 +11,8 @@ function input(overrides: Partial<ProMonthInput> = {}): ProMonthInput {
     month: 9,
     hasActual: true,
     settings: { ...DEFAULT_PRO_YEAR_SETTINGS },
-    forecastBilling: [{ clientName: "Nexity", dailyRateCents: 45_000, halfDays: 42 }],
-    actualBilling: [{ clientName: "Nexity", dailyRateCents: 45_000, halfDays: 40 }],
+    forecastBilling: [{ clientName: "Nexity", dailyRateCents: 45_000, days: 21 }],
+    actualBilling: [{ clientName: "Nexity", dailyRateCents: 45_000, days: 20 }],
     proDebits: {
       PRO_ACCOUNTANT: 21_600, // 180 € HT + 36 € TVA
       PRO_INSURANCE: 1_967,
@@ -36,11 +36,11 @@ function input(overrides: Partial<ProMonthInput> = {}): ProMonthInput {
 }
 
 describe("computeMonth", () => {
-  it("computes revenue from half days × daily rate", () => {
+  it("computes revenue from days × daily rate", () => {
     const month = computeMonth(input());
     expect(month.revenue).toEqual({ forecast: 945_000, actual: 900_000 });
     expect(month.billing.clients[0]).toMatchObject({ clientName: "Nexity", ttcCents: 1_080_000 });
-    expect(month.billing.halfDays).toBe(40);
+    expect(month.billing.days).toBe(20);
   });
 
   it("converts charges to HT and defaults the forecast to last year's actual", () => {
@@ -102,7 +102,7 @@ describe("computeMonth", () => {
     expect(month.billing.collectedTtcCents).toBe(0);
     // TTC prévu : 21 j × 450 € × 1,2.
     expect(month.billing.invoicedTtcCents).toBe(1_134_000);
-    expect(month.billing.halfDays).toBe(42);
+    expect(month.billing.days).toBe(21);
     expect(month.mileage).toMatchObject({ forecastKm: 108, actualKm: null });
     expect(month.mixedCosts.leftToRefundCents).toBe(
       month.mixedCosts.rows.reduce((total, row) => total + row.due.forecast, 0),

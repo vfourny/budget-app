@@ -46,7 +46,7 @@ enum BillingKind {
 }
 
 /// Prestation d'un mois pour un client : jours × TJM, en prévisionnel ou en réel. Plusieurs clients
-/// (donc plusieurs lignes) possibles dans un mois. CA HT = Σ demi-journées / 2 × TJM. Le client est
+/// (donc plusieurs lignes) possibles dans un mois. CA HT = Σ jours × TJM. Le client est
 /// un simple nom saisi dans l'éditeur (autocomplétion sur les noms déjà utilisés), pas une table.
 model BillingLine {
   id             String      @id @default(cuid())
@@ -57,8 +57,9 @@ model BillingLine {
   month          Int         @db.SmallInt
   kind           BillingKind
   dailyRateCents Int
-  /// Demi-journées travaillées (3,5 jours = 7) : pas de float.
-  halfDays       Int
+  /// Jours facturés (1, 0,5, 15,5…) : uniquement des multiples de 0,5, exacts en float (validés
+  /// par tRPC, voir `shared/billing-days.ts`).
+  days           Float
 
   @@index([userId, year, month])
 }

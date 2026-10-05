@@ -60,6 +60,7 @@ Routeurs actuels : `categorize` (`run` : demande à Gemini une catégorie + conf
 - `regimes/` : interface `ProRegime` (rémunération, charges sociales sur bénéfice) ; `sas-ir.ts` est la seule implémentation. Ajouter l'IS ou l'EURL = un fichier + une entrée dans `regimes/index.ts`.
 - Reste à encaisser : `load-year.ts` calcule le solde d'ouverture de l'année (facturé TTC réel − encaissements depuis le premier mois facturé), `compute-year.ts` le reporte de mois en mois (`openingReceivablesCents`), `compute-month.ts` l'applique (plancher à 0).
 - `allocate-refunds.ts` (remboursements de frais mixtes ligne par ligne), `forecast-values.ts` (valeurs de l'éditeur : saisie, défaut N-1, mois précédent).
+- Jours facturés : `BillingLine.days` en `Float`, limité aux multiples de 0,5 (exacts en binaire, validés par tRPC avec `multipleOf`) ; pas, plafond, montant jours × TJM et TJM moyen dans `shared/billing-days.ts`.
 - Règles modifiables (TVA par charge, frais mixtes, groupes de l'éditeur, répartition des cotisations) : `shared/pro-rules.ts` ; catégories pro : `shared/account-categories.ts`.
 - **Tests** : `pnpm test` (Vitest, config `vitest.config.ts`) sur les calculs purs (`server/**/*.test.ts`, `shared/**/*.test.ts`), lancés en CI.
 
@@ -87,7 +88,7 @@ Routeurs actuels : `categorize` (`run` : demande à Gemini une catégorie + conf
 | `EnvelopeShare`   | Part du revenu (en %) recommandée pour une enveloppe ; sans ligne, la valeur par défaut s'applique   |
 | `Transaction`     | Une ligne validée : date, libellé, montant en centimes, catégorie, mois/année                        |
 | `ProYearSettings` | Règles pro d'une année (régime, taux en points de base, surfaces en dm², barème km en millièmes d'€) |
-| `BillingLine`     | Jours (en demi-journées) × TJM pour un client (`clientName`, texte libre) et un mois, prévu ou réel  |
+| `BillingLine`     | Jours (par 0,5) × TJM pour un client (`clientName`, texte libre) et un mois, prévu ou réel           |
 | `MonthlyForecast` | Montant prévu d'une catégorie pour un mois (charges pro, BNC, dépenses perso des frais mixtes)       |
 | `MileageForecast` | Km prévus d'un mois                                                                                  |
 | `Trip`            | Trajet du journal des frais km (date, trajet, motif, km)                                             |
