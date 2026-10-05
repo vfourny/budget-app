@@ -97,7 +97,6 @@ export const professional = {
     employer: "Cotisations patronales",
     rateOfGross: (rate: string) => `${rate} % du brut`,
     splitOf: (label: string) => `↳ ${label}`,
-    splitSub: "part indicative des cotisations patronales",
     employee: "Cotisations salariales",
     employeeSub: (rate: string) => `${rate} % du brut · retenues sur le salaire`,
     withholding: "Prélèvement à la source",
@@ -106,6 +105,43 @@ export const professional = {
     socialChargesSub: (rate: string) => `${rate} % de la quote-part · à régler en perso`,
     vat: "TVA",
     vatSub: "payée au titre du mois précédent",
+  },
+  mixedCosts: {
+    title: "Frais mixtes perso → pro",
+    description: "Payés depuis le compte perso, Stygma rembourse sa quote-part.",
+    tip: (area: string, key: string) =>
+      `Loyer : au prorata de la surface du bureau (${area}). Autres frais : clé ${key}. Clés modifiables dans Réglages › Pro. Prévisionnel : tes dépenses perso du même mois l'an dernier. Pour le loyer, prévoir une convention écrite avec la société et l'accord du bailleur.`,
+    areaKey: (office: string, home: string, share: string) =>
+      `bureau ${office} m² / logement ${home} m² = ${share} %`,
+    ratioKey: (numerator: number, denominator: number) => `${numerator}/${denominator}`,
+    lineTip: (spent: string, due: string, key: string) =>
+      `Payé en perso : ${spent} · Dû par Stygma : ${due} · Clé : ${key}`,
+    status: { forecast: "Prévu", paid: "Soldé", partial: "Partiel", toRefund: "À rembourser" },
+    paidOfDue: (paid: string, due: string) => `${paid} / ${due}`,
+    forecastDue: (due: string) => `Prévu ${due}`,
+    gaugeAria: (label: string, paid: string, due: string) =>
+      `${label} : ${paid} remboursés sur ${due} dus`,
+    left: "Reste à rembourser",
+  },
+  mileage: {
+    title: "Frais kilométriques",
+    tip: (rate: string) =>
+      `Kilomètres × barème (${rate}, Réglages › Pro). Montant à déclarer, pas une transaction bancaire. Prévisionnel : km du même mois l'an dernier, modifiable dans « Éditer le prévisionnel ».`,
+    done: "Réalisé ce mois",
+    km: (km: string) => `${km} km`,
+    toDeclare: (amount: string) => `${amount} à déclarer`,
+    vsForecast: (delta: string) => `${delta} km vs prévu`,
+    onForecast: "Pile le prévu",
+    rate: (rate: string) => `Barème ${rate}`,
+    rateUnit: (rate: string) => `${rate} €/km`,
+    noTripsYet: "Pas encore de trajets sur ce mois",
+    toDate: "Cumul à ce jour",
+    forecast: "Prévu ce mois",
+    gaugeAria: (actual: string, forecast: string) =>
+      `${actual} km réalisés pour ${forecast} prévus`,
+    journal: "Journal des trajets",
+    noTrips: "Aucun trajet saisi pour ce mois.",
+    total: "Total des trajets",
   },
   revenue: {
     title: "CA HT",

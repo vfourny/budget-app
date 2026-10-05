@@ -36,7 +36,7 @@ export const professionalRouter = createTRPCRouter({
     .input(z.object({ year: yearSchema, month: z.number().int().min(1).max(12) }))
     .query(async ({ ctx, input }) => {
       const userId = ctx.session.user.id;
-      const [months, transactions] = await Promise.all([
+      const [months, transactions, trips] = await Promise.all([
         loadProYear(ctx.db, userId, input.year),
         ctx.db.transaction.findMany({
           where: {
@@ -47,8 +47,22 @@ export const professionalRouter = createTRPCRouter({
           orderBy: [{ date: "desc" }, { createdAt: "desc" }],
           select: { id: true, date: true, label: true, amountCents: true, category: true },
         }),
+        ctx.db.trip.findMany({
+          where: { userId, year: input.year, month: input.month },
+          orderBy: [{ date: "asc" }, { createdAt: "asc" }],
+          select: { id: true, date: true, route: true, reason: true, km: true },
+        }),
       ]);
-      return { ...months[input.month - 1], transactions };
+      const month = months[input.month - 1];
+      // Cumul des km réalisés depuis janvier (mois passés et mois affiché).
+      const mileageToDate = months.slice(0, input.month).reduce(
+        (total, m) => ({
+          km: total.km + (m.mileage.actualKm ?? 0),
+          cents: total.cents + (m.mileage.amount.actual ?? 0),
+        }),
+        { km: 0, cents: 0 },
+      );
+      return { ...month, transactions, trips, mileageToDate };
     }),
 
   /** Les 12 mois d'une année (vue année, et contexte du mois : TVA du mois précédent, cumuls). */
