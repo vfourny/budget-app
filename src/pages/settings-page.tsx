@@ -2,6 +2,7 @@ import { Paper, Stack, Tabs } from "@mantine/core";
 import { useSearchParams } from "react-router";
 
 import { PageHeader } from "@/components/page-header";
+import { ClientsForm } from "@/features/settings/components/clients-form";
 import { EnvelopeSharesForm } from "@/features/settings/components/envelope-shares-form";
 import { IncomeTaxBracketsForm } from "@/features/settings/components/income-tax-brackets-form";
 import { ProYearSettingsForm } from "@/features/settings/components/pro-year-settings-form";
@@ -40,9 +41,14 @@ export function SettingsPage() {
           </Stack>
         </Tabs.Panel>
         <Tabs.Panel value="professional">
-          <Paper withBorder radius="lg" p={28}>
-            <ProYearSettingsForm />
-          </Paper>
+          <Stack gap={16}>
+            <Paper withBorder radius="lg" p={28}>
+              <ProYearSettingsForm />
+            </Paper>
+            <Paper withBorder radius="lg" p={28}>
+              <ClientsForm />
+            </Paper>
+          </Stack>
         </Tabs.Panel>
       </Tabs>
     </>
