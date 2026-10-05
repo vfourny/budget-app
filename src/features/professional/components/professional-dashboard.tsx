@@ -1,10 +1,15 @@
 import { ActionIcon, Alert, Button, Grid, Group, Loader, Stack, Tooltip } from "@mantine/core";
-import { IconCalendarEvent, IconListDetails, IconUpload } from "@tabler/icons-react";
+import { IconCalendarEvent, IconEdit, IconListDetails, IconUpload } from "@tabler/icons-react";
+import { useState } from "react";
 import { Link } from "react-router";
 
 import { PageHeader, PageTitleAccent } from "@/components/page-header";
 import { PeriodPicker } from "@/components/period-picker";
 import { TransactionsTable } from "@/components/transactions-table";
+import {
+  ForecastEditorModal,
+  type EditorTarget,
+} from "@/features/professional/components/forecast-editor/forecast-editor-modal";
 import { BillingCard } from "@/features/professional/components/month/billing-card";
 import { CategoryForecastCard } from "@/features/professional/components/month/category-forecast-card";
 import { MileageCard } from "@/features/professional/components/month/mileage-card";
@@ -74,6 +79,8 @@ export function ProfessionalDashboard() {
 
 function MonthContent({ period }: { period: Period }) {
   const month = useProMonth(period.year, period.month);
+  // Modale du prévisionnel : `null` = fermée, sinon l'onglet et la source à ouvrir.
+  const [editor, setEditor] = useState<EditorTarget | null>(null);
 
   if (month.isPending) return <Loader color="gold" />;
   if (month.isError) return <Alert color="red" title={fr.professional.loadPeriodFailed} />;
@@ -87,6 +94,14 @@ function MonthContent({ period }: { period: Period }) {
         </Alert>
       )}
       <Group justify="flex-end" mb={12}>
+        <Button
+          variant="default"
+          size="compact-sm"
+          leftSection={<IconEdit size={14} />}
+          onClick={() => setEditor({ tab: "billing", source: "FORECAST" })}
+        >
+          {fr.professional.editor.open}
+        </Button>
         <Button
           component="a"
           href="#transactions"
@@ -108,7 +123,20 @@ function MonthContent({ period }: { period: Period }) {
           <ProfitCard month={data} />
         </Grid.Col>
         <Grid.Col span={12}>
-          <BillingCard month={data} />
+          <BillingCard
+            month={data}
+            action={
+              data.hasActual && (
+                <Button
+                  variant="light"
+                  size="compact-sm"
+                  onClick={() => setEditor({ tab: "billing", source: "ACTUAL" })}
+                >
+                  {fr.professional.editor.enterActual}
+                </Button>
+              )
+            }
+          />
         </Grid.Col>
         <Grid.Col span={{ base: 12, lg: 7 }}>
           <CategoryForecastCard month={data} />
@@ -124,6 +152,14 @@ function MonthContent({ period }: { period: Period }) {
         transactions={data.transactions}
         emptyText={data.hasActual ? undefined : fr.professional.futureTransactions}
       />
+      {editor && (
+        <ForecastEditorModal
+          period={period}
+          hasActual={data.hasActual}
+          initial={editor}
+          onClose={() => setEditor(null)}
+        />
+      )}
     </>
   );
 }
