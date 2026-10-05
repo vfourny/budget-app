@@ -18,9 +18,10 @@
     "noFallthroughCasesInSwitch": true,
     "paths": {
       "@/*": ["./src/*"],
-      "@server/*": ["./server/*"]
+      "@server/*": ["./server/*"],
+      "@shared/*": ["./shared/*"]
     }
   },
-  "include": ["src", "server", "prisma", "*.ts"],
+  "include": ["src", "server", "shared", "prisma", "*.ts"],
   "exclude": ["node_modules", ".output", ".vercel", "dist"]
 }

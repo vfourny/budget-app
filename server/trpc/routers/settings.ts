@@ -1,7 +1,7 @@
 import { z } from "zod";
 
 import { BUDGET_ENVELOPES, type BudgetEnvelope } from "@server/lib/settings/envelope-shares";
-import { DEFAULT_ENVELOPE_PERCENTS } from "@/lib/budget-rules";
+import { DEFAULT_ENVELOPE_PERCENTS } from "@shared/budget-rules";
 import { createTRPCRouter, protectedProcedure } from "@server/trpc/init";
 
 const envelopeSharesSchema = z

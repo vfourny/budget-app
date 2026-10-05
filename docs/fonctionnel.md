@@ -25,7 +25,7 @@ Loisirs, Formation).
 ### Catégories de transaction
 
 Liste **figée** (enum Prisma `TransactionCategory`), reprise des colonnes de l'ancien Google Sheet. Libellé affiché :
-`src/lib/i18n/fr/enums.ts` ; enveloppe de rattachement : `src/lib/budget-rules.ts`.
+`src/lib/i18n/fr/enums.ts` ; enveloppe de rattachement : `shared/budget-rules.ts`.
 
 | Catégorie           | Code                  | Enveloppe          |
 | ------------------- | --------------------- | ------------------ |
@@ -56,7 +56,7 @@ Liste **figée** (enum Prisma `TransactionCategory`), reprise des colonnes de l'
 
 Points d'attention :
 
-- **Toutes les règles modifiables** sont dans `src/lib/budget-rules.ts` : catégories cumulées dans chaque enveloppe (
+- **Toutes les règles modifiables** sont dans `shared/budget-rules.ts` : catégories cumulées dans chaque enveloppe (
   `ENVELOPE_CATEGORIES`), enveloppes d'épargne, catégories affichées dans la card « Par catégorie » (
   `CATEGORY_CARD_CATEGORIES`), lignes de la card Revenus (`REVENUE_LINES`). Une règle modifiée s'applique à tout l'
   historique (rien n'est stocké en base). La colonne « Enveloppe » du tableau ci-dessus est indicative : la source de
@@ -64,7 +64,7 @@ Points d'attention :
 - La catégorie d'une transaction est **optionnelle** (`null` tant qu'elle n'est pas catégorisée / relue).
 - Ajouter ou renommer une catégorie = modifier l'enum Prisma **+ une migration
   versionnée + `src/lib/i18n/fr/enums.ts` + `server/lib/categorize/category-hints.ts`**, puis la ranger dans
-  `src/lib/budget-rules.ts` (le typage `Record<TransactionCategory, …>` fait échouer `tsc` si l'un des deux est oublié).
+  `shared/budget-rules.ts` (le typage `Record<TransactionCategory, …>` fait échouer `tsc` si l'un des deux est oublié).
 
 ## Type de compte
 

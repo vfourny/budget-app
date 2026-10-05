@@ -72,6 +72,7 @@ src/                   # FRONT — SPA React, tourne uniquement dans le navigate
   lib/                 # utilitaires front : trpc.ts (client + queryClient), theme.ts (thème Mantine)…
     i18n/fr/           # TOUS les textes de l'UI (dictionnaires typés) + plural.ts (accord en nombre)
   styles/global.css    # règles CSS globales (le thème, lui, est dans lib/theme.ts)
+shared/                # code pur partagé front + back (budget-rules.ts), alias @shared/
 server/                # BACKEND — Nitro, mêmes conventions que le server/ de Nuxt
   api/                 # routes HTTP : server/api/health.ts → GET /api/health
     trpc/[...path].ts  # point d'entrée HTTP de tRPC
@@ -87,12 +88,13 @@ nitro.config.ts        # serverDir: ./server
 
 ## Conventions
 
-- **Frontière front / back** : `src/**` ne peut importer de `server/**` qu'en `import type`
+- **Frontière front / back / shared** : `src/**` ne peut importer de `server/**` qu'en `import type`
   (ex. le type du routeur tRPC). Jamais d'import runtime (Prisma, secrets…) côté front.
-  Exception dans l'autre sens : `src/lib/budget-rules.ts` (pur, sans dépendance) est importé par le
-  serveur, pour que front et dashboard partagent les mêmes règles.
+  Le code utilisé par les deux côtés vit dans `shared/` (alias `@shared/…`) : fichiers purs, sans
+  dépendance runtime (ex. `shared/budget-rules.ts`), importables par `src/` et par `server/`.
+  `shared/` n'importe jamais de `src/` ni de `server/` (sauf `import type`).
 - **Règles du budget** (catégories → enveloppes, épargne, catégories de la card « Par catégorie »,
-  lignes de revenus, par `key`) : uniquement dans `src/lib/budget-rules.ts`, jamais en dur ailleurs. Aucun libellé dedans :
+  lignes de revenus, par `key`) : uniquement dans `shared/budget-rules.ts`, jamais en dur ailleurs. Aucun libellé dedans :
   les textes sont dans `@/lib/i18n/fr`.
 - **Données** : toujours via tRPC + TanStack Query. **Pas de `fetch` dans un `useEffect`.**
   `useEffect` est réservé à la synchro avec un système externe (oxlint le signale sinon).
@@ -147,7 +149,7 @@ nitro.config.ts        # serverDir: ./server
   CSV écartées, un `CsvLineErrorCode`). Le front le traduit via `fr.errors` / `fr.csvErrors`, avec
   `errorMessage(error)` (`@/lib/errors`). Nouveau code = l'ajouter à `AppErrorCode` **et** à
   `fr/errors.ts` (exhaustif).
-- Imports : `@/…` pour `src/`, `@server/…` pour `server/`. `import type` obligatoire pour les
+- Imports : `@/…` pour `src/`, `@server/…` pour `server/`, `@shared/…` pour `shared/`. `import type` obligatoire pour les
   types (`verbatimModuleSyntax`).
 
 ## Workflow Git / PR

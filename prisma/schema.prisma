@@ -25,7 +25,7 @@ enum Envelope {
 }
 
 /// Catégorie d'une transaction (liste figée, colonnes du Google Sheet). Le libellé affiché et
-/// l'enveloppe de rattachement vivent dans `src/lib/i18n/fr/enums.ts` et `src/lib/budget-rules.ts`.
+/// l'enveloppe de rattachement vivent dans `src/lib/i18n/fr/enums.ts` et `shared/budget-rules.ts`.
 enum TransactionCategory {
   RENT // Loyer
   FUEL // Essence
@@ -54,7 +54,7 @@ enum TransactionCategory {
 }
 
 /// Part du revenu mensuel recommandée pour une enveloppe (en %). Une ligne par (utilisateur, enveloppe)
-/// configurée ; sans ligne, la valeur par défaut de `DEFAULT_ENVELOPE_PERCENTS` (`src/lib/budget-rules.ts`) s'applique.
+/// configurée ; sans ligne, la valeur par défaut de `DEFAULT_ENVELOPE_PERCENTS` (`shared/budget-rules.ts`) s'applique.
 model EnvelopeShare {
   userId   String
   user     User     @relation(fields: [userId], references: [id], onDelete: Cascade)

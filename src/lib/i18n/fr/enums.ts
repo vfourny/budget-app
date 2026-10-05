@@ -1,4 +1,4 @@
-import type { RevenueLineKey } from "@/lib/budget-rules";
+import type { RevenueLineKey } from "@shared/budget-rules";
 import type {
   AccountType,
   Envelope,
@@ -38,7 +38,7 @@ export const envelopes = {
 
 /**
  * Libellé de chaque catégorie ; l'ordre des clés = ordre d'affichage (colonnes du Google Sheet,
- * listes de choix). Rattachement aux enveloppes : `@/lib/budget-rules`.
+ * listes de choix). Rattachement aux enveloppes : `@shared/budget-rules`.
  */
 export const categories = {
   RENT: "Loyer",
