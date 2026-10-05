@@ -8,7 +8,7 @@ import { MixedCostsTab } from "@/features/professional/components/forecast-edito
 import type { Period } from "@/hooks/use-period-selection";
 import { capitalizedMonthName } from "@/lib/format";
 import { fr } from "@/lib/i18n/fr";
-import type { ProYearSettingsValues } from "@shared/pro-rules";
+import type { ProfessionalYearSettingsValues } from "@shared/professional-rules";
 import type { BillingKind } from "@server/generated/prisma/enums";
 
 export type EditorTab = "billing" | "charges" | "mixedCosts" | "mileage";
@@ -23,7 +23,7 @@ interface ForecastEditorModalProps {
   /** Le mois a un réel : la saisie « Réel » de la facturation est possible. */
   hasActual: boolean;
   /** Règles de l'année (salaire, taux) : rappelées dans l'onglet Charges. */
-  settings: ProYearSettingsValues;
+  settings: ProfessionalYearSettingsValues;
   initial: EditorTarget;
   onClose: () => void;
 }

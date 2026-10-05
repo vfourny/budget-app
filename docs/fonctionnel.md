@@ -25,7 +25,7 @@ Loisirs, Formation).
 ### Catégories de transaction
 
 Liste **figée** (enum Prisma `TransactionCategory`), reprise des colonnes de l'ancien Google Sheet. Libellé affiché :
-`src/lib/i18n/fr/enums.ts` ; enveloppe de rattachement : `shared/budget-rules.ts`.
+`src/lib/i18n/fr/enums.ts` ; enveloppe de rattachement : `shared/personal-rules.ts`.
 
 | Catégorie           | Code                  | Enveloppe          |
 | ------------------- | --------------------- | ------------------ |
@@ -56,7 +56,7 @@ Liste **figée** (enum Prisma `TransactionCategory`), reprise des colonnes de l'
 
 Points d'attention :
 
-- **Toutes les règles modifiables** sont dans `shared/budget-rules.ts` : catégories cumulées dans chaque enveloppe (
+- **Toutes les règles modifiables** sont dans `shared/personal-rules.ts` : catégories cumulées dans chaque enveloppe (
   `ENVELOPE_CATEGORIES`), enveloppes d'épargne, catégories affichées dans la card « Par catégorie » (
   `CATEGORY_CARD_CATEGORIES`), lignes de la card Revenus (`REVENUE_LINES`). Une règle modifiée s'applique à tout l'
   historique (rien n'est stocké en base). La colonne « Enveloppe » du tableau ci-dessus est indicative : la source de
@@ -64,7 +64,7 @@ Points d'attention :
 - La catégorie d'une transaction est **optionnelle** (`null` tant qu'elle n'est pas catégorisée / relue).
 - Ajouter ou renommer une catégorie = modifier l'enum Prisma **+ une migration
   versionnée + `src/lib/i18n/fr/enums.ts` + `server/lib/categorize/category-hints.ts`**, puis la ranger dans
-  `shared/budget-rules.ts` (le typage `Record<TransactionCategory, …>` fait échouer `tsc` si l'un des deux est oublié).
+  `shared/personal-rules.ts` (le typage `Record<TransactionCategory, …>` fait échouer `tsc` si l'un des deux est oublié).
 
 ## Type de compte
 
@@ -141,7 +141,7 @@ reste des débits sont des **dépenses**.
 - Les parts recommandées (méthode des 5 comptes) se règlent dans **Réglages** (le total doit faire exactement 100 %).
   Les 5 enveloppes sont toujours affichées avec leur jauge, même à 0 €.
 - **Card Charges fixes** (bandeau entre les cartes KPI et le tableau) : débits de la période pour Loyer, Énergie, Télécom
-  et Internet (`FIXED_CHARGES_CATEGORIES` dans budget-rules), toujours affichés même à 0 €, + leur total ; mensuel en vue mois,
+  et Internet (`FIXED_CHARGES_CATEGORIES` dans personal-rules), toujours affichés même à 0 €, + leur total ; mensuel en vue mois,
   cumulé en vue année.
 - **À venir** : donut par catégorie en vue année.
 
@@ -155,18 +155,18 @@ Composant partagé : résumé (nombre, crédits, débits), filtres Toutes / Cré
 ## Catégories du compte pro
 
 Un relevé **pro** ne propose (relecture) et ne demande à Gemini que les catégories pro ; un relevé perso, toutes les
-autres (`PRO_CATEGORIES` dans `shared/account-categories.ts`, refus `CATEGORY_NOT_ALLOWED` sinon).
+autres (`PROFESSIONAL_CATEGORIES` dans `shared/account-categories.ts`, refus `CATEGORY_NOT_ALLOWED` sinon).
 
-| Groupe        | Catégories                                                                                                                                                                         |
-| ------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Encaissements | Encaissement client `CLIENT_PAYMENT`, Autre crédit pro `PRO_OTHER_CREDIT`                                                                                                          |
-| Charges pro   | RC Pro & assurances, Comptable, Frais bancaires, Petit matériel, Logiciels & abonnements, Restauration, Voyages et déplacements, Impôts et taxes pro, Autres charges pro (`PRO_*`) |
-| Rémunération  | Salaire net versé `NET_SALARY_TRANSFER`, Revenus BNC prélevés `BNC_WITHDRAWAL`, Remboursement frais mixtes `MIXED_COSTS_REFUND`                                                    |
-| Cotisations   | URSSAF, Retraite complémentaire, Complémentaire santé, Prévoyance, Prélèvement à la source                                                                                         |
-| Fiscalité     | TVA `VAT_PAYMENT`                                                                                                                                                                  |
+| Groupe        | Catégories                                                                                                                                                                                  |
+| ------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Encaissements | Encaissement client `CLIENT_PAYMENT`, Autre crédit pro `PROFESSIONAL_OTHER_CREDIT`                                                                                                          |
+| Charges pro   | RC Pro & assurances, Comptable, Frais bancaires, Petit matériel, Logiciels & abonnements, Restauration, Voyages et déplacements, Impôts et taxes pro, Autres charges pro (`PROFESSIONAL_*`) |
+| Rémunération  | Salaire net versé `NET_SALARY_TRANSFER`, Revenus BNC prélevés `BNC_WITHDRAWAL`, Remboursement frais mixtes `MIXED_COSTS_REFUND`                                                             |
+| Cotisations   | URSSAF, Retraite complémentaire, Complémentaire santé, Prévoyance, Prélèvement à la source                                                                                                  |
+| Fiscalité     | TVA `VAT_PAYMENT`                                                                                                                                                                           |
 
-Taux de TVA déductible par charge, frais mixtes et répartition des cotisations : `shared/pro-rules.ts` (le
-« budget-rules » du pro).
+Taux de TVA déductible par charge, frais mixtes et répartition des cotisations : `shared/professional-rules.ts` (le
+« personal-rules » du pro).
 
 ## Dashboard Pro Stygma (`/professional`)
 
@@ -175,11 +175,11 @@ prévisionnel s'affiche (bandeau « Mois à venir »). Ne comptent que les trans
 
 ### Règles de l'année (Réglages › Pro)
 
-Un jeu de règles **par année** (`ProYearSettings`) : régime (seule la **SAS à l'IR** est calculée ; IS et EURL
+Un jeu de règles **par année** (`ProfessionalYearSettings`) : régime (seule la **SAS à l'IR** est calculée ; IS et EURL
 « Bientôt »), première année de l'option IR (5 exercices max), salaire brut mensuel, taux patronal, salarial, net
 imposable, PAS, charges sociales sur la quote-part de bénéfice, surfaces bureau / logement, clé n/d des autres frais
 mixtes, barème km. Une année non configurée reprend la dernière année configurée avant elle, sinon les valeurs par
-défaut (`DEFAULT_PRO_YEAR_SETTINGS`).
+défaut (`DEFAULT_PROFESSIONAL_YEAR_SETTINGS`).
 
 ### Règles de calcul (SAS à l'IR)
 
@@ -221,4 +221,4 @@ de l'année.
 - **Vue année** : CA HT final (réel + prévu restant), bénéfice final, TVA réelle cumulée, frais km ; histogramme du CA ;
   compte de résultat simplifié (12 mois + Final) ; catégories, frais mixtes et km cumulés.
 - Mockup de référence : artboard « Dashboard pro — Stygma SAS » du canvas Claude Design. Plan de réalisation :
-  [plan-pro.md](./plan-pro.md).
+  [plan-professional.md](./plan-professional.md).

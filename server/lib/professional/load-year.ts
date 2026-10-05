@@ -1,14 +1,19 @@
 import type { TransactionCategory } from "@server/generated/prisma/enums";
 import { validatedTransactions } from "@server/lib/dashboard/scope";
 import type { db as Db } from "@server/lib/db";
-import { applyBp } from "@server/lib/pro/amounts";
+import { applyBp } from "@server/lib/professional/amounts";
 import { billingAmount } from "@shared/billing-days";
-import { computeMonth } from "@server/lib/pro/compute-month";
-import { computeYear } from "@server/lib/pro/compute-year";
-import type { BillingInput, CategoryCents, ProMonth, ProMonthInput } from "@server/lib/pro/types";
-import { resolveProYearSettings } from "@server/lib/settings/pro-year-settings";
-import { COLLECTED_VAT_BP, MIXED_COSTS } from "@shared/pro-rules";
-import type { ProYearSettingsValues } from "@shared/pro-rules";
+import { computeMonth } from "@server/lib/professional/compute-month";
+import { computeYear } from "@server/lib/professional/compute-year";
+import type {
+  BillingInput,
+  CategoryCents,
+  ProfessionalMonth,
+  ProfessionalMonthInput,
+} from "@server/lib/professional/types";
+import { resolveProfessionalYearSettings } from "@server/lib/settings/professional-year-settings";
+import { COLLECTED_VAT_BP, MIXED_COSTS } from "@shared/professional-rules";
+import type { ProfessionalYearSettingsValues } from "@shared/professional-rules";
 
 const MIXED_CATEGORIES = MIXED_COSTS.map((cost) => cost.category);
 
@@ -41,21 +46,21 @@ function addTo(
  * précédente pour la TVA payée en janvier), puis appelle le calcul pur `computeYear`.
  * Quelques requêtes groupées : l'année entière reste petite (quelques centaines de lignes).
  */
-export async function loadProYear(
+export async function loadProfessionalYear(
   db: typeof Db,
   userId: string,
   year: number,
   today = new Date(),
-): Promise<ProMonth[]> {
+): Promise<ProfessionalMonth[]> {
   const previousYear = year - 1;
   const [settings, previousSettings] = await Promise.all([
-    resolveProYearSettings(db, userId, year),
-    resolveProYearSettings(db, userId, previousYear),
+    resolveProfessionalYearSettings(db, userId, year),
+    resolveProfessionalYearSettings(db, userId, previousYear),
   ]);
 
   const years = { gte: previousYear, lte: year };
   const [
-    proDebitRows,
+    professionalDebitRows,
     persoDebitRows,
     billingLines,
     earlierActualLines,
@@ -116,9 +121,9 @@ export async function loadProYear(
     db.trip.groupBy({ by: ["year", "month"], where: { userId, year: years }, _sum: { km: true } }),
   ]);
 
-  const proDebits: MonthCategoryCents = new Map();
-  for (const row of proDebitRows) {
-    addTo(proDebits, row.year, row.month, row.category, -(row._sum.amountCents ?? 0));
+  const professionalDebits: MonthCategoryCents = new Map();
+  for (const row of professionalDebitRows) {
+    addTo(professionalDebits, row.year, row.month, row.category, -(row._sum.amountCents ?? 0));
   }
   const persoDebits: MonthCategoryCents = new Map();
   for (const row of persoDebitRows) {
@@ -173,16 +178,16 @@ export async function loadProYear(
   const monthInput = (
     y: number,
     month: number,
-    values: ProYearSettingsValues,
-  ): Omit<ProMonthInput, "previousVatDueCents" | "openingReceivablesCents"> => ({
+    values: ProfessionalYearSettingsValues,
+  ): Omit<ProfessionalMonthInput, "previousVatDueCents" | "openingReceivablesCents"> => ({
     year: y,
     month,
     hasActual: hasActual(y, month, today),
     settings: values,
     forecastBilling: billing("FORECAST", y, month),
     actualBilling: billing("ACTUAL", y, month),
-    proDebits: proDebits.get(monthIndex(y, month)) ?? {},
-    lastYearProDebits: proDebits.get(monthIndex(y - 1, month)) ?? {},
+    professionalDebits: professionalDebits.get(monthIndex(y, month)) ?? {},
+    lastYearProfessionalDebits: professionalDebits.get(monthIndex(y - 1, month)) ?? {},
     persoDebits: persoDebits.get(monthIndex(y, month)) ?? {},
     lastYearPersoDebits: persoDebits.get(monthIndex(y - 1, month)) ?? {},
     forecasts: monthlyForecasts.get(monthIndex(y, month)) ?? {},

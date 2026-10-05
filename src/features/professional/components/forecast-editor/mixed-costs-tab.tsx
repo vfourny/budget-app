@@ -4,7 +4,11 @@ import { ForecastAmountsForm } from "@/features/professional/components/forecast
 import type { Period } from "@/hooks/use-period-selection";
 import { formatBp, formatCents } from "@/lib/format";
 import { fr } from "@/lib/i18n/fr";
-import { MIXED_COSTS, mixedShareBp, type ProYearSettingsValues } from "@shared/pro-rules";
+import {
+  MIXED_COSTS,
+  mixedShareBp,
+  type ProfessionalYearSettingsValues,
+} from "@shared/professional-rules";
 
 /** Onglet « Frais mixtes » : dépenses perso prévues et part remboursée par Stygma. */
 export function MixedCostsTab({
@@ -12,7 +16,7 @@ export function MixedCostsTab({
   settings,
 }: {
   period: Period;
-  settings: ProYearSettingsValues;
+  settings: ProfessionalYearSettingsValues;
 }) {
   const text = fr.professional.editor.mixedCosts;
   const costs = MIXED_COSTS.map((cost) => ({ ...cost, shareBp: mixedShareBp(settings, cost.key) }));

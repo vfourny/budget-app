@@ -5,7 +5,7 @@ import { workingDays } from "@shared/working-days";
  * Facturation Pro de départ : un client, tous les jours ouvrés du mois (hors fériés), en prévu sur
  * toute l'année et en réel jusqu'à `actualUntilMonth`.
  */
-const PRO_BILLING_SEED = {
+const PROFESSIONAL_BILLING_SEED = {
   year: 2026,
   clientName: "Davidson",
   forecastDailyRateCents: 40_000,
@@ -14,8 +14,8 @@ const PRO_BILLING_SEED = {
 } as const;
 
 /** Un mois (et un type prévu / réel) qui a déjà des lignes n'est jamais touché : les saisies de l'éditeur restent. */
-export async function seedProBilling(userId: string) {
-  const seed = PRO_BILLING_SEED;
+export async function seedProfessionalBilling(userId: string) {
+  const seed = PROFESSIONAL_BILLING_SEED;
   const kinds = [
     { kind: "FORECAST", dailyRateCents: seed.forecastDailyRateCents, lastMonth: 12 },
     { kind: "ACTUAL", dailyRateCents: seed.actualDailyRateCents, lastMonth: seed.actualUntilMonth },

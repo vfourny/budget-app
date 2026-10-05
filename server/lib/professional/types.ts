@@ -2,15 +2,15 @@ import type { BillingLine } from "@server/generated/prisma/client";
 import type { TransactionCategory } from "@server/generated/prisma/enums";
 import type {
   MixedCostCategory,
-  ProChargeCategory,
-  ProYearSettingsValues,
-} from "@shared/pro-rules";
+  ProfessionalChargeCategory,
+  ProfessionalYearSettingsValues,
+} from "@shared/professional-rules";
 
 /** Montants par catégorie, en centimes positifs (débits ou crédits selon le contexte). */
 export type CategoryCents = Partial<Record<TransactionCategory, number>>;
 
 /** Une valeur prévue et réelle. `actual` = `null` tant que le mois n'a pas de réel (mois à venir). */
-export interface Amount {
+export interface ForecastActual {
   forecast: number;
   actual: number | null;
 }
@@ -19,19 +19,19 @@ export interface Amount {
 export type BillingInput = Pick<BillingLine, "clientName" | "dailyRateCents" | "days">;
 
 /** Tout ce qu'il faut pour calculer un mois : rien n'est lu en base dans le calcul. */
-export interface ProMonthInput {
+export interface ProfessionalMonthInput {
   year: number;
   /** 1-12 */
   month: number;
   /** Le mois est commencé ou passé : il a un réel (sinon, prévisionnel seul). */
   hasActual: boolean;
-  settings: ProYearSettingsValues;
+  settings: ProfessionalYearSettingsValues;
   forecastBilling: readonly BillingInput[];
   actualBilling: readonly BillingInput[];
   /** Débits du relevé pro du mois par catégorie (TTC, positifs). */
-  proDebits: CategoryCents;
+  professionalDebits: CategoryCents;
   /** Débits du relevé pro du même mois l'année précédente : valeurs par défaut du prévisionnel. */
-  lastYearProDebits: CategoryCents;
+  lastYearProfessionalDebits: CategoryCents;
   /** Débits du relevé perso du mois (frais mixtes : loyer, internet…). */
   persoDebits: CategoryCents;
   /** Débits perso du même mois l'année précédente : prévisionnel par défaut des frais mixtes. */
@@ -67,11 +67,11 @@ export interface ClientBilling {
 }
 
 export interface ChargeRow {
-  category: ProChargeCategory;
+  category: ProfessionalChargeCategory;
   /** Taux de TVA déductible (points de base). */
   vatBp: number;
   /** HT. */
-  amount: Amount;
+  amount: ForecastActual;
 }
 
 export interface MixedCostRow {
@@ -80,21 +80,21 @@ export interface MixedCostRow {
   /** Part remboursée par Stygma, en points de base (2222 = 22,22 %). */
   shareBp: number;
   /** Dépense perso du mois. */
-  spent: Amount;
+  spent: ForecastActual;
   /** Part due par Stygma. */
-  due: Amount;
+  due: ForecastActual;
   /** Remboursé (débits « Remboursement frais mixtes » du relevé pro, répartis ligne par ligne). */
   paidCents: number | null;
 }
 
-export interface ProMonth {
+export interface ProfessionalMonth {
   year: number;
   month: number;
   hasActual: boolean;
   /** Règles de l'année utilisées (taux, clés), pour les explications de l'écran. */
-  settings: ProYearSettingsValues;
+  settings: ProfessionalYearSettingsValues;
   /** Chiffre d'affaires HT (jours × TJM). */
-  revenue: Amount;
+  revenue: ForecastActual;
   billing: {
     clients: ClientBilling[];
     /** Demi-journées facturées (réel) ou prévues (mois à venir). */
@@ -115,30 +115,35 @@ export interface ProMonth {
   charges: {
     rows: ChargeRow[];
     /** Frais mixtes : ligne de charge = remboursements versés (prévu = part due prévue). */
-    mixedCosts: Amount;
-    total: Amount;
+    mixedCosts: ForecastActual;
+    total: ForecastActual;
   };
   remuneration: {
-    bncWithdrawal: Amount;
-    grossSalary: Amount;
-    employerContributions: Amount;
+    bncWithdrawal: ForecastActual;
+    grossSalary: ForecastActual;
+    employerContributions: ForecastActual;
     /** Détail des cotisations patronales par organisme (`EMPLOYER_CONTRIBUTION_SPLIT_BP`). */
-    employerContributionSplit: { category: string; amount: Amount }[];
-    employeeContributions: Amount;
-    netSalary: Amount;
-    withholdingTax: Amount;
+    employerContributionSplit: { category: string; amount: ForecastActual }[];
+    employeeContributions: ForecastActual;
+    netSalary: ForecastActual;
+    withholdingTax: ForecastActual;
   };
-  vat: { collected: Amount; deductible: Amount; due: Amount; payment: Amount };
-  profit: Amount;
+  vat: {
+    collected: ForecastActual;
+    deductible: ForecastActual;
+    due: ForecastActual;
+    payment: ForecastActual;
+  };
+  profit: ForecastActual;
   /** Bénéfice − BNC prélevés : ce qui reste dans la société. */
-  retained: Amount;
+  retained: ForecastActual;
   /** Charges sociales sur la quote-part de bénéfice (réglées en perso). */
-  profitSocialCharges: Amount;
+  profitSocialCharges: ForecastActual;
   mixedCosts: { rows: MixedCostRow[]; leftToRefundCents: number };
   mileage: {
     forecastKm: number;
     actualKm: number | null;
     rateMilli: number;
-    amount: Amount;
+    amount: ForecastActual;
   };
 }

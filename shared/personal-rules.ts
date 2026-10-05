@@ -101,7 +101,7 @@ export const REVENUE_LINES = [
  */
 export const TO_CHECK_CATEGORIES = [
   "OTHER",
-  "PRO_OTHER",
+  "PROFESSIONAL_OTHER",
 ] as const satisfies readonly TransactionCategory[];
 
 /** Clé d'une ligne de revenus (`"other"` = le reste). Libellés : `@/lib/i18n/fr`. */
@@ -118,7 +118,7 @@ for (const [envelope, categories] of Object.entries(ENVELOPE_CATEGORIES)) {
     if (existing) {
       // Erreur au démarrage (front et serveur) plutôt qu'un double comptage silencieux.
       throw new Error(
-        `budget-rules : la catégorie ${category} est dans deux enveloppes (${existing} et ${envelope}).`,
+        `personal-rules : la catégorie ${category} est dans deux enveloppes (${existing} et ${envelope}).`,
       );
     }
     ENVELOPE_BY_CATEGORY.set(category, envelope as Envelope);

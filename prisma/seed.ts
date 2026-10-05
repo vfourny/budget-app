@@ -3,7 +3,7 @@ import "dotenv/config";
 import { db } from "@server/lib/db";
 
 import { seedIncomeTaxBrackets } from "./seeds/income-tax";
-import { seedProBilling } from "./seeds/pro-billing";
+import { seedProfessionalBilling } from "./seeds/professional-billing";
 import { seedUser } from "./seeds/user";
 
 // Seed : lancé automatiquement par `pnpm db:reset` (prisma migrate reset) ou à la main avec
@@ -14,7 +14,7 @@ import { seedUser } from "./seeds/user";
 try {
   await seedIncomeTaxBrackets();
   const userId = await seedUser();
-  await seedProBilling(userId);
+  await seedProfessionalBilling(userId);
 } catch (error) {
   console.error(error instanceof Error ? error.message : error);
   process.exitCode = 1;

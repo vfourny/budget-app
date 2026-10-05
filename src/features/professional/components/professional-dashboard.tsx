@@ -24,19 +24,19 @@ import { YearMixedCosts } from "@/features/professional/components/year/year-mix
 import { RevenueChart } from "@/features/professional/components/year/revenue-chart";
 import { YearKpis } from "@/features/professional/components/year/year-kpis";
 import {
-  useProMonth,
-  useProPeriods,
-  useProYear,
+  useProfessionalMonth,
+  useProfessionalPeriods,
+  useProfessionalYear,
 } from "@/features/professional/hooks/use-professional";
 import { usePeriodSelection, type Period } from "@/hooks/use-period-selection";
 import { capitalizedMonthName } from "@/lib/format";
 import { fr } from "@/lib/i18n/fr";
 
 /** Lien vers l'import, type de compte « Pro » déjà choisi. */
-const IMPORT_PRO_URL = "/imports/new?accountType=PROFESSIONAL";
+const IMPORT_PROFESSIONAL_URL = "/imports/new?accountType=PROFESSIONAL";
 
 export function ProfessionalDashboard() {
-  const periods = useProPeriods();
+  const periods = useProfessionalPeriods();
   // Par défaut : le mois en cours (le sélecteur propose aussi les mois à venir, en prévisionnel).
   const today = new Date();
   const { view, setView, selected, select } = usePeriodSelection({
@@ -64,7 +64,7 @@ export function ProfessionalDashboard() {
             <Tooltip label={fr.professional.importStatement}>
               <ActionIcon
                 component={Link}
-                to={IMPORT_PRO_URL}
+                to={IMPORT_PROFESSIONAL_URL}
                 variant="default"
                 size="lg"
                 aria-label={fr.professional.importStatement}
@@ -88,7 +88,7 @@ export function ProfessionalDashboard() {
 }
 
 function MonthContent({ period }: { period: Period }) {
-  const month = useProMonth(period.year, period.month);
+  const month = useProfessionalMonth(period.year, period.month);
   // Modale du prévisionnel : `null` = fermée, sinon l'onglet et la source à ouvrir.
   const [editor, setEditor] = useState<EditorTarget | null>(null);
 
@@ -176,7 +176,7 @@ function MonthContent({ period }: { period: Period }) {
 }
 
 function YearContent({ year }: { year: number }) {
-  const months = useProYear(year);
+  const months = useProfessionalYear(year);
 
   if (months.isPending) return <Loader color="gold" />;
   if (months.isError) return <Alert color="red" title={fr.professional.loadPeriodFailed} />;

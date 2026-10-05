@@ -15,13 +15,13 @@ import {
   useCopyForecastsToFollowingMonths,
   useForecasts,
   useSetForecasts,
-  type ForecastGroupName,
 } from "@/features/professional/hooks/use-forecast-editor";
 import type { Period } from "@/hooks/use-period-selection";
 import { errorMessage } from "@/lib/errors";
 import { formatCents } from "@/lib/format";
 import { fr } from "@/lib/i18n/fr";
 import type { TransactionCategory } from "@server/generated/prisma/enums";
+import type { ForecastGroup } from "@shared/professional-rules";
 
 /** Saisie par catégorie : `null` = pas de saisie (valeur par défaut N-1). En centimes. */
 export type Overrides = Partial<Record<TransactionCategory, number | null>>;
@@ -33,7 +33,7 @@ export interface AmountsView {
 
 interface ForecastAmountsFormProps {
   period: Period;
-  group: ForecastGroupName;
+  group: ForecastGroup;
   /** Catégories affichées dans le tableau (les autres du groupe peuvent être rendues dans `children`). */
   rows: readonly TransactionCategory[];
   /** Colonne repère : réel du mois précédent ou même mois N-1. */

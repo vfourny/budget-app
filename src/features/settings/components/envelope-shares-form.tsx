@@ -5,7 +5,7 @@ import {
   useEnvelopeShares,
   useSetEnvelopeShares,
 } from "@/features/settings/hooks/use-envelope-shares";
-import { DEFAULT_ENVELOPE_PERCENTS } from "@shared/budget-rules";
+import { DEFAULT_ENVELOPE_PERCENTS } from "@shared/personal-rules";
 import { errorMessage } from "@/lib/errors";
 import { fr } from "@/lib/i18n/fr";
 import type { Envelope } from "@server/generated/prisma/enums";

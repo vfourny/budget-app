@@ -42,21 +42,22 @@ export const CATEGORY_HINTS = {
   // ── Compte pro (Stygma SAS) ──
   CLIENT_PAYMENT:
     "Crédit : paiement d'une facture par un client de la société (virement d'une entreprise cliente, ex. VIR DAVIDSON).",
-  PRO_OTHER_CREDIT:
+  PROFESSIONAL_OTHER_CREDIT:
     "Crédit pro qui n'est pas un paiement client : remboursement de frais, avoir, régularisation bancaire.",
-  PRO_INSURANCE: "Assurance de la société : RC Pro, multirisque (AIG, Hiscox…).",
-  PRO_ACCOUNTANT: "Honoraires de l'expert-comptable (IDEOZ…).",
-  PRO_BANK_FEES:
+  PROFESSIONAL_INSURANCE: "Assurance de la société : RC Pro, multirisque (AIG, Hiscox…).",
+  PROFESSIONAL_ACCOUNTANT: "Honoraires de l'expert-comptable (IDEOZ…).",
+  PROFESSIONAL_BANK_FEES:
     "Frais bancaires du compte pro : cotisation de l'offre (Atout Pro), commissions, frais sur achat à l'étranger.",
-  PRO_EQUIPMENT: "Petit matériel informatique ou de bureau (clavier, écran, câbles…).",
-  PRO_SOFTWARE:
+  PROFESSIONAL_EQUIPMENT: "Petit matériel informatique ou de bureau (clavier, écran, câbles…).",
+  PROFESSIONAL_SOFTWARE:
     "Logiciels, SaaS et abonnements professionnels (Claude, Anthropic, Figma, GitKraken, hébergement, nom de domaine…).",
-  PRO_MEALS: "Repas professionnels : restaurants, cafés, bars avec des clients ou en déplacement.",
-  PRO_TRAVEL:
+  PROFESSIONAL_MEALS:
+    "Repas professionnels : restaurants, cafés, bars avec des clients ou en déplacement.",
+  PROFESSIONAL_TRAVEL:
     "Déplacements professionnels : train (SNCF), métro / bus (Ilévia), parking, péage, taxi, hôtel.",
-  PRO_TAXES:
+  PROFESSIONAL_TAXES:
     "Impôts et taxes de la société hors TVA et hors prélèvement à la source : CFE, pénalités, frais de retard (ex. « Absence de bilan »).",
-  PRO_OTHER: "Autre dépense pro qui ne rentre dans aucune autre catégorie.",
+  PROFESSIONAL_OTHER: "Autre dépense pro qui ne rentre dans aucune autre catégorie.",
   NET_SALARY_TRANSFER:
     "Débit : salaire net viré au président (virement vers Valentin Fourny avec la mention salaire / paie).",
   BNC_WITHDRAWAL:

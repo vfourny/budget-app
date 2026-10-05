@@ -2,21 +2,24 @@ import { Paper, Text, Title } from "@mantine/core";
 
 import {
   ForecastTable,
-  type ForecastGroup,
+  type ForecastTableGroup,
   type ForecastRow,
 } from "@/features/professional/components/forecast-table";
 import { formatCents, monthName } from "@/lib/format";
 import { fr } from "@/lib/i18n/fr";
-import type { Amount, ProMonth } from "@server/lib/pro/types";
+import type { ForecastActual, ProfessionalMonth } from "@server/lib/professional/types";
 import type { TransactionCategory } from "@server/generated/prisma/enums";
 
 /**
  * Cumul d'un poste sur l'année : prévu et réel sur les mois avec réel (comparables), + le prévu
  * de toute l'année en sous-titre.
  */
-function cumulate(months: readonly ProMonth[], pick: (month: ProMonth) => Amount) {
+function cumulate(
+  months: readonly ProfessionalMonth[],
+  pick: (month: ProfessionalMonth) => ForecastActual,
+) {
   const actualMonths = months.filter((month) => month.hasActual);
-  const amount: Amount = {
+  const amount: ForecastActual = {
     forecast: actualMonths.reduce((total, month) => total + pick(month).forecast, 0),
     actual:
       actualMonths.length > 0
@@ -30,22 +33,22 @@ function cumulate(months: readonly ProMonth[], pick: (month: ProMonth) => Amount
 function row(
   key: string,
   label: string,
-  months: readonly ProMonth[],
-  pick: (month: ProMonth) => Amount,
+  months: readonly ProfessionalMonth[],
+  pick: (month: ProfessionalMonth) => ForecastActual,
   tone?: ForecastRow["tone"],
 ): ForecastRow {
   return { key, label, goal: "atMost", tone, ...cumulate(months, pick) };
 }
 
 /** « Catégories · prévu vs réel sur l'année » : mêmes groupes que le mois, cumulés. */
-export function YearCategories({ months }: { months: readonly ProMonth[] }) {
+export function YearCategories({ months }: { months: readonly ProfessionalMonth[] }) {
   const text = fr.professional.year.categories;
   const labels = fr.professional.categories;
   const first = months[0];
   const actualMonths = months.filter((month) => month.hasActual);
   const last = actualMonths.at(-1);
 
-  const groups: ForecastGroup[] = [
+  const groups: ForecastTableGroup[] = [
     {
       key: "charges",
       label: labels.groups.charges,

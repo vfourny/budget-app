@@ -1,7 +1,7 @@
 import { z } from "zod";
 
 import { validatedTransactions } from "@server/lib/dashboard/scope";
-import { loadProYear } from "@server/lib/pro/load-year";
+import { loadProfessionalYear } from "@server/lib/professional/load-year";
 import { createTRPCRouter, protectedProcedure } from "@server/trpc/init";
 
 const yearSchema = z.number().int().min(2000).max(2100);
@@ -37,7 +37,7 @@ export const professionalRouter = createTRPCRouter({
     .query(async ({ ctx, input }) => {
       const userId = ctx.session.user.id;
       const [months, transactions, trips] = await Promise.all([
-        loadProYear(ctx.db, userId, input.year),
+        loadProfessionalYear(ctx.db, userId, input.year),
         ctx.db.transaction.findMany({
           where: {
             ...validatedTransactions(userId, "PROFESSIONAL"),
@@ -68,5 +68,5 @@ export const professionalRouter = createTRPCRouter({
   /** Les 12 mois d'une année (vue année, et contexte du mois : TVA du mois précédent, cumuls). */
   year: protectedProcedure
     .input(z.object({ year: yearSchema }))
-    .query(({ ctx, input }) => loadProYear(ctx.db, ctx.session.user.id, input.year)),
+    .query(({ ctx, input }) => loadProfessionalYear(ctx.db, ctx.session.user.id, input.year)),
 });

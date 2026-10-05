@@ -7,18 +7,18 @@ import type { AccountType, TransactionCategory } from "@server/generated/prisma/
  */
 
 /** Catégories du compte pro (Stygma). Toute autre catégorie est une catégorie perso. */
-export const PRO_CATEGORIES = [
+export const PROFESSIONAL_CATEGORIES = [
   "CLIENT_PAYMENT",
-  "PRO_OTHER_CREDIT",
-  "PRO_INSURANCE",
-  "PRO_ACCOUNTANT",
-  "PRO_BANK_FEES",
-  "PRO_EQUIPMENT",
-  "PRO_SOFTWARE",
-  "PRO_MEALS",
-  "PRO_TRAVEL",
-  "PRO_TAXES",
-  "PRO_OTHER",
+  "PROFESSIONAL_OTHER_CREDIT",
+  "PROFESSIONAL_INSURANCE",
+  "PROFESSIONAL_ACCOUNTANT",
+  "PROFESSIONAL_BANK_FEES",
+  "PROFESSIONAL_EQUIPMENT",
+  "PROFESSIONAL_SOFTWARE",
+  "PROFESSIONAL_MEALS",
+  "PROFESSIONAL_TRAVEL",
+  "PROFESSIONAL_TAXES",
+  "PROFESSIONAL_OTHER",
   "NET_SALARY_TRANSFER",
   "BNC_WITHDRAWAL",
   "MIXED_COSTS_REFUND",
@@ -30,13 +30,15 @@ export const PRO_CATEGORIES = [
   "VAT_PAYMENT",
 ] as const satisfies readonly TransactionCategory[];
 
-export type ProCategory = (typeof PRO_CATEGORIES)[number];
+export type ProfessionalCategory = (typeof PROFESSIONAL_CATEGORIES)[number];
 
-export function isProCategory(category: TransactionCategory): category is ProCategory {
-  return PRO_CATEGORIES.some((proCategory) => proCategory === category);
+export function isProfessionalCategory(
+  category: TransactionCategory,
+): category is ProfessionalCategory {
+  return PROFESSIONAL_CATEGORIES.some((professionalCategory) => professionalCategory === category);
 }
 
 /** La catégorie peut-elle être choisie pour une transaction de ce type de compte ? */
 export function isCategoryOf(accountType: AccountType, category: TransactionCategory): boolean {
-  return isProCategory(category) === (accountType === "PROFESSIONAL");
+  return isProfessionalCategory(category) === (accountType === "PROFESSIONAL");
 }

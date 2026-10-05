@@ -2,7 +2,7 @@ import { Paper, SimpleGrid, Text, Title, Tooltip } from "@mantine/core";
 
 import { formatCents, monthName, shortMonthName } from "@/lib/format";
 import { LOCALE, fr } from "@/lib/i18n/fr";
-import type { ProMonth } from "@server/lib/pro/types";
+import type { ProfessionalMonth } from "@server/lib/professional/types";
 
 import classes from "./year-mileage.module.css";
 
@@ -10,9 +10,9 @@ const kmFormat = new Intl.NumberFormat(LOCALE);
 const rateFormat = new Intl.NumberFormat(LOCALE, { maximumFractionDigits: 3 });
 
 /** « Frais kilométriques · année » : réalisé à ce jour, prévu de l'année, km par mois. */
-export function YearMileage({ months }: { months: readonly ProMonth[] }) {
+export function YearMileage({ months }: { months: readonly ProfessionalMonth[] }) {
   const text = fr.professional.year.mileage;
-  const kmOf = (month: ProMonth) => month.mileage.actualKm ?? month.mileage.forecastKm;
+  const kmOf = (month: ProfessionalMonth) => month.mileage.actualKm ?? month.mileage.forecastKm;
   const toDate = months.filter((month) => month.hasActual);
   const toDateKm = toDate.reduce((total, month) => total + (month.mileage.actualKm ?? 0), 0);
   const toDateCents = toDate.reduce(

@@ -4,7 +4,7 @@ import {
   envelopeOf,
   isSavingsEnvelope,
   type RevenueLineKey,
-} from "@shared/budget-rules";
+} from "@shared/personal-rules";
 import type { Transaction } from "@server/generated/prisma/client";
 import type { Envelope, TransactionCategory } from "@server/generated/prisma/enums";
 
@@ -29,7 +29,7 @@ export interface PeriodTotals {
 
 /**
  * Totaux d'une période. Toutes les règles (enveloppe d'une catégorie, épargne ou dépense, lignes
- * de revenus) viennent de `@shared/budget-rules`. Hypothèse V1 : tout crédit est un revenu.
+ * de revenus) viennent de `@shared/personal-rules`. Hypothèse V1 : tout crédit est un revenu.
  * Que des entiers en centimes.
  */
 export function aggregatePeriod(rows: readonly AggregatedRow[]): PeriodTotals {

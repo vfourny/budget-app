@@ -4,12 +4,12 @@ import { KpiCard } from "@/components/kpi-card";
 import { finalOf, sumFinal } from "@/features/professional/final-amount";
 import { formatCents, monthName } from "@/lib/format";
 import { LOCALE, fr } from "@/lib/i18n/fr";
-import type { ProMonth } from "@server/lib/pro/types";
+import type { ProfessionalMonth } from "@server/lib/professional/types";
 
 const kmFormat = new Intl.NumberFormat(LOCALE);
 
 /** Cartes de la vue année : CA final, bénéfice final, TVA réelle cumulée, frais km. */
-export function YearKpis({ months }: { months: readonly ProMonth[] }) {
+export function YearKpis({ months }: { months: readonly ProfessionalMonth[] }) {
   const text = fr.professional.year.kpis;
   const actualMonths = months.filter((month) => month.hasActual);
   const lastActual = actualMonths.at(-1);

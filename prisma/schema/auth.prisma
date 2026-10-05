@@ -17,7 +17,7 @@ model User {
   envelopeShares   EnvelopeShare[]
   importBatches    ImportBatch[]
   transactions     Transaction[]
-  proYearSettings  ProYearSettings[]
+  professionalYearSettings  ProfessionalYearSettings[]
   billingLines     BillingLine[]
   monthlyForecasts MonthlyForecast[]
   mileageForecasts MileageForecast[]

@@ -1,6 +1,6 @@
-import type { ProCategory } from "@shared/account-categories";
+import type { ProfessionalCategory } from "@shared/account-categories";
 import type { CompanyRegime, TransactionCategory } from "@server/generated/prisma/enums";
-import type { ProYearSettings } from "@server/generated/prisma/browser";
+import type { ProfessionalYearSettings } from "@server/generated/prisma/browser";
 
 /*
  * ✏️ RÈGLES DU COMPTE PRO (Stygma) : constantes partagées front + serveur (fichier pur, sans
@@ -8,13 +8,13 @@ import type { ProYearSettings } from "@server/generated/prisma/browser";
  */
 
 /** Règles d'une année (Réglages › Pro), en entiers : centimes, points de base, dm², millièmes d'€. */
-export type ProYearSettingsValues = Omit<ProYearSettings, "userId" | "year">;
+export type ProfessionalYearSettingsValues = Omit<ProfessionalYearSettings, "userId" | "year">;
 
 /**
  * Valeurs utilisées tant qu'aucune année n'est configurée, et par « Valeurs par défaut ».
  * Exemples de la maquette : à valider avec le comptable.
  */
-export const DEFAULT_PRO_YEAR_SETTINGS = {
+export const DEFAULT_PROFESSIONAL_YEAR_SETTINGS = {
   regime: "SAS_IR",
   irOptionFirstYear: 2026,
   grossSalaryCents: 80_000,
@@ -28,7 +28,7 @@ export const DEFAULT_PRO_YEAR_SETTINGS = {
   mixedKeyNumerator: 5,
   mixedKeyDenominator: 7,
   mileageRateMilli: 636,
-} as const satisfies ProYearSettingsValues;
+} as const satisfies ProfessionalYearSettingsValues;
 
 /** Statuts que l'app sait calculer (les autres sont proposés « Bientôt » dans Réglages). */
 export const SUPPORTED_REGIMES = ["SAS_IR"] as const satisfies readonly CompanyRegime[];
@@ -45,21 +45,23 @@ export const COLLECTED_VAT_BP = 2000;
  * (assurance, frais bancaires, impôts, services facturés depuis l'étranger sans TVA française).
  * L'ordre = ordre des lignes « Charges pro » de l'écran Pro.
  */
-export const PRO_CHARGE_VAT_BP = {
-  PRO_INSURANCE: 0,
-  PRO_ACCOUNTANT: 2000,
-  PRO_BANK_FEES: 0,
-  PRO_EQUIPMENT: 2000,
-  PRO_SOFTWARE: 0,
-  PRO_MEALS: 1000,
-  PRO_TRAVEL: 1000,
-  PRO_TAXES: 0,
-  PRO_OTHER: 2000,
-} as const satisfies Partial<Record<ProCategory, number>>;
+export const PROFESSIONAL_CHARGE_VAT_BP = {
+  PROFESSIONAL_INSURANCE: 0,
+  PROFESSIONAL_ACCOUNTANT: 2000,
+  PROFESSIONAL_BANK_FEES: 0,
+  PROFESSIONAL_EQUIPMENT: 2000,
+  PROFESSIONAL_SOFTWARE: 0,
+  PROFESSIONAL_MEALS: 1000,
+  PROFESSIONAL_TRAVEL: 1000,
+  PROFESSIONAL_TAXES: 0,
+  PROFESSIONAL_OTHER: 2000,
+} as const satisfies Partial<Record<ProfessionalCategory, number>>;
 
-export type ProChargeCategory = keyof typeof PRO_CHARGE_VAT_BP;
+export type ProfessionalChargeCategory = keyof typeof PROFESSIONAL_CHARGE_VAT_BP;
 
-export const PRO_CHARGE_CATEGORIES = Object.keys(PRO_CHARGE_VAT_BP) as ProChargeCategory[];
+export const PROFESSIONAL_CHARGE_CATEGORIES = Object.keys(
+  PROFESSIONAL_CHARGE_VAT_BP,
+) as ProfessionalChargeCategory[];
 
 /**
  * Frais mixtes : dépenses du compte **perso** dont Stygma rembourse une quote-part. `"area"` =
@@ -81,7 +83,7 @@ export type MixedCostCategory = (typeof MIXED_COSTS)[number]["category"];
  */
 export function mixedShareBp(
   settings: Pick<
-    ProYearSettingsValues,
+    ProfessionalYearSettingsValues,
     "officeAreaDm2" | "homeAreaDm2" | "mixedKeyNumerator" | "mixedKeyDenominator"
   >,
   key: "area" | "key",
@@ -100,14 +102,14 @@ export const EMPLOYER_CONTRIBUTION_SPLIT_BP = {
   SUPPLEMENTARY_PENSION: 1355,
   HEALTH_COVER: 1310,
   DISABILITY_COVER: 336,
-} as const satisfies Partial<Record<ProCategory, number>>;
+} as const satisfies Partial<Record<ProfessionalCategory, number>>;
 
 /**
  * Catégories qu'on peut prévoir mois par mois (`MonthlyForecast`) : charges pro, BNC prélevés et
  * dépenses perso des frais mixtes.
  */
 export const FORECASTABLE_CATEGORIES = [
-  ...PRO_CHARGE_CATEGORIES,
+  ...PROFESSIONAL_CHARGE_CATEGORIES,
   "BNC_WITHDRAWAL",
   ...MIXED_COSTS.map((cost) => cost.category),
 ] as const satisfies readonly TransactionCategory[];
@@ -119,7 +121,7 @@ export const FORECASTABLE_CATEGORIES = [
 export const FORECAST_GROUPS = {
   charges: {
     accountType: "PROFESSIONAL",
-    categories: [...PRO_CHARGE_CATEGORIES, "BNC_WITHDRAWAL"],
+    categories: [...PROFESSIONAL_CHARGE_CATEGORIES, "BNC_WITHDRAWAL"],
   },
   mixedCosts: { accountType: "PERSONAL", categories: MIXED_COSTS.map((cost) => cost.category) },
 } as const satisfies Record<
@@ -136,6 +138,6 @@ export type ForecastGroup = keyof typeof FORECAST_GROUPS;
 const splitTotal = Object.values(EMPLOYER_CONTRIBUTION_SPLIT_BP).reduce((sum, bp) => sum + bp, 0);
 if (splitTotal !== 10_000) {
   throw new Error(
-    `pro-rules : EMPLOYER_CONTRIBUTION_SPLIT_BP fait ${splitTotal} au lieu de 10 000.`,
+    `professional-rules : EMPLOYER_CONTRIBUTION_SPLIT_BP fait ${splitTotal} au lieu de 10 000.`,
   );
 }

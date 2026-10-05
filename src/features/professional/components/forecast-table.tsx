@@ -4,7 +4,7 @@ import { Fragment } from "react";
 import type { GaugeGoal } from "@/components/target-gauge";
 import { formatCents } from "@/lib/format";
 import { fr } from "@/lib/i18n/fr";
-import type { Amount } from "@server/lib/pro/types";
+import type { ForecastActual } from "@server/lib/professional/types";
 
 import classes from "./forecast-table.module.css";
 
@@ -15,20 +15,20 @@ export interface ForecastRow {
   key: string;
   label: string;
   sub?: string;
-  amount: Amount;
+  amount: ForecastActual;
   /** Sens favorable de l'écart : `atMost` pour une charge (moins = mieux). */
   goal: GaugeGoal;
   tone?: ForecastRowTone;
 }
 
-export interface ForecastGroup {
+export interface ForecastTableGroup {
   key: string;
   label: string;
   rows: ForecastRow[];
 }
 
 /** Tableau Catégorie / Prévu / Réel / Écart, par groupes (vue mois et vue année). */
-export function ForecastTable({ groups }: { groups: readonly ForecastGroup[] }) {
+export function ForecastTable({ groups }: { groups: readonly ForecastTableGroup[] }) {
   const columns = fr.professional.categories.columns;
   return (
     <Table.ScrollContainer minWidth={560}>

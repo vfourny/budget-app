@@ -4,7 +4,7 @@ import { useSearchParams } from "react-router";
 import { PageHeader } from "@/components/page-header";
 import { EnvelopeSharesForm } from "@/features/settings/components/envelope-shares-form";
 import { IncomeTaxBracketsForm } from "@/features/settings/components/income-tax-brackets-form";
-import { ProYearSettingsForm } from "@/features/settings/components/pro-year-settings-form";
+import { ProfessionalYearSettingsForm } from "@/features/settings/components/professional-year-settings-form";
 import { fr } from "@/lib/i18n/fr";
 
 const TABS = ["personal", "professional"] as const;
@@ -41,7 +41,7 @@ export function SettingsPage() {
         </Tabs.Panel>
         <Tabs.Panel value="professional">
           <Paper withBorder radius="lg" p={28}>
-            <ProYearSettingsForm />
+            <ProfessionalYearSettingsForm />
           </Paper>
         </Tabs.Panel>
       </Tabs>

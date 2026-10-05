@@ -15,21 +15,21 @@ import {
 import { useState } from "react";
 
 import {
-  useProYearSettings,
-  useProYearsConfigured,
-  useSetProYearSettings,
-} from "@/features/settings/hooks/use-pro-year-settings";
+  useProfessionalYearSettings,
+  useProfessionalYearsConfigured,
+  useSetProfessionalYearSettings,
+} from "@/features/settings/hooks/use-professional-year-settings";
 import { errorMessage } from "@/lib/errors";
 import { fr } from "@/lib/i18n/fr";
 import {
-  DEFAULT_PRO_YEAR_SETTINGS,
+  DEFAULT_PROFESSIONAL_YEAR_SETTINGS,
   IR_OPTION_MAX_YEARS,
   SUPPORTED_REGIMES,
-  type ProYearSettingsValues,
-} from "@shared/pro-rules";
+  type ProfessionalYearSettingsValues,
+} from "@shared/professional-rules";
 import type { CompanyRegime } from "@server/generated/prisma/enums";
 
-type NumericKey = Exclude<keyof ProYearSettingsValues, "regime" | "irOptionFirstYear">;
+type NumericKey = Exclude<keyof ProfessionalYearSettingsValues, "regime" | "irOptionFirstYear">;
 type Unit = keyof typeof fr.settings.pro.units;
 
 /**
@@ -83,11 +83,11 @@ const GROUPS = {
 
 const REGIMES = Object.keys(fr.companyRegimes) as CompanyRegime[];
 
-export function ProYearSettingsForm() {
+export function ProfessionalYearSettingsForm() {
   const currentYear = new Date().getFullYear();
   const [year, setYear] = useState(currentYear);
-  const configured = useProYearsConfigured();
-  const settings = useProYearSettings(year);
+  const configured = useProfessionalYearsConfigured();
+  const settings = useProfessionalYearSettings(year);
 
   // Années proposées : celles déjà configurées + l'année dernière, l'année en cours et la suivante.
   const years = [
@@ -125,7 +125,7 @@ export function ProYearSettingsForm() {
       {settings.isError && <Alert color="red" title={fr.settings.pro.loadFailed} />}
       {settings.isSuccess && (
         // `key` : changer d'année remonte les champs, donc le brouillon repart des valeurs de l'année.
-        <ProYearFields
+        <ProfessionalYearFields
           key={year}
           year={year}
           initial={settings.data.values}
@@ -143,25 +143,25 @@ export function ProYearSettingsForm() {
   );
 }
 
-interface ProYearFieldsProps {
+interface ProfessionalYearFieldsProps {
   year: number;
-  initial: ProYearSettingsValues;
+  initial: ProfessionalYearSettingsValues;
   note: string;
   /** Valeurs déjà enregistrées pour cette année (sinon reprises : on peut enregistrer sans modifier). */
   isOwn: boolean;
 }
 
-function ProYearFields({ year, initial, note, isOwn }: ProYearFieldsProps) {
+function ProfessionalYearFields({ year, initial, note, isOwn }: ProfessionalYearFieldsProps) {
   // Brouillon local, en unités stockées (entiers) : copié des données serveur au montage.
-  const [draft, setDraft] = useState<ProYearSettingsValues>(initial);
-  const save = useSetProYearSettings();
+  const [draft, setDraft] = useState<ProfessionalYearSettingsValues>(initial);
+  const save = useSetProfessionalYearSettings();
 
-  const changed = (Object.keys(initial) as (keyof ProYearSettingsValues)[]).some(
+  const changed = (Object.keys(initial) as (keyof ProfessionalYearSettingsValues)[]).some(
     (key) => draft[key] !== initial[key],
   );
   const isDefault = (
-    Object.keys(DEFAULT_PRO_YEAR_SETTINGS) as (keyof ProYearSettingsValues)[]
-  ).every((key) => draft[key] === DEFAULT_PRO_YEAR_SETTINGS[key]);
+    Object.keys(DEFAULT_PROFESSIONAL_YEAR_SETTINGS) as (keyof ProfessionalYearSettingsValues)[]
+  ).every((key) => draft[key] === DEFAULT_PROFESSIONAL_YEAR_SETTINGS[key]);
   const invalidAreas = draft.officeAreaDm2 > draft.homeAreaDm2;
   const invalidKey = draft.mixedKeyNumerator > draft.mixedKeyDenominator;
   const canSave = (changed || !isOwn) && !invalidAreas && !invalidKey;
@@ -293,7 +293,7 @@ function ProYearFields({ year, initial, note, isOwn }: ProYearFieldsProps) {
         <Button
           variant="default"
           disabled={isDefault}
-          onClick={() => setDraft({ ...DEFAULT_PRO_YEAR_SETTINGS })}
+          onClick={() => setDraft({ ...DEFAULT_PROFESSIONAL_YEAR_SETTINGS })}
         >
           {fr.settings.pro.resetDefaults}
         </Button>

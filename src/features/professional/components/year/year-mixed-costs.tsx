@@ -3,18 +3,18 @@ import { Group, Paper, Stack, Text, Title } from "@mantine/core";
 import { TargetGauge } from "@/components/target-gauge";
 import { formatCents } from "@/lib/format";
 import { fr } from "@/lib/i18n/fr";
-import type { ProMonth } from "@server/lib/pro/types";
+import type { ProfessionalMonth } from "@server/lib/professional/types";
 
 /** « Frais mixtes · année » : par frais, prévu de l'année, payé en perso, dû, remboursé, reste. */
-export function YearMixedCosts({ months }: { months: readonly ProMonth[] }) {
+export function YearMixedCosts({ months }: { months: readonly ProfessionalMonth[] }) {
   const text = fr.professional.year.mixedCosts;
   const actualMonths = months.filter((month) => month.hasActual);
   const categories = months[0]?.mixedCosts.rows.map((row) => row.category) ?? [];
 
   const lines = categories.map((category, index) => {
     const sum = (
-      list: readonly ProMonth[],
-      pick: (row: ProMonth["mixedCosts"]["rows"][number]) => number,
+      list: readonly ProfessionalMonth[],
+      pick: (row: ProfessionalMonth["mixedCosts"]["rows"][number]) => number,
     ) => list.reduce((total, month) => total + pick(month.mixedCosts.rows[index]), 0);
     const due = sum(actualMonths, (row) => row.due.actual ?? 0);
     const paid = sum(actualMonths, (row) => row.paidCents ?? 0);

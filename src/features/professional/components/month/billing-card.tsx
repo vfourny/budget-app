@@ -7,7 +7,7 @@ import { TargetGauge } from "@/components/target-gauge";
 import { formatCents, formatDays } from "@/lib/format";
 import { fr } from "@/lib/i18n/fr";
 import { averageDailyRate } from "@shared/billing-days";
-import type { ClientBilling, ProMonth } from "@server/lib/pro/types";
+import type { ClientBilling, ProfessionalMonth } from "@server/lib/professional/types";
 
 /** TJM moyen d'une ligne (centimes) : montant / jours. */
 const dailyRate = (line: { days: number; amountCents: number }) =>
@@ -21,7 +21,7 @@ const calc = (line: { days: number; amountCents: number }) =>
  * HT et écart ; en bas, facturé TTC, encaissé dans le mois (catégorie « Encaissement client ») et
  * reste à encaisser cumulé (les clients paient 1 à 2 mois plus tard).
  */
-export function BillingCard({ month, action }: { month: ProMonth; action?: ReactNode }) {
+export function BillingCard({ month, action }: { month: ProfessionalMonth; action?: ReactNode }) {
   const text = fr.professional.billing;
   const clients = month.billing.clients;
 
@@ -124,7 +124,7 @@ function ClientRow({ client }: { client: ClientBilling }) {
 }
 
 /** Bas de carte : facturé TTC du mois, encaissé dans le mois, reste à encaisser cumulé. */
-function Collections({ month }: { month: ProMonth }) {
+function Collections({ month }: { month: ProfessionalMonth }) {
   const text = fr.professional.billing.collections;
   const { billing } = month;
   const receivables = billing.receivablesCents;
