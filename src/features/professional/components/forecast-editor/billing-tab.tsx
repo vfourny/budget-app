@@ -21,9 +21,10 @@ import {
   type BillingSource,
 } from "@/features/professional/hooks/use-forecast-editor";
 import { errorMessage } from "@/lib/errors";
-import { formatCents, formatHalfDays } from "@/lib/format";
+import { formatCents, formatDays } from "@/lib/format";
 import { fr } from "@/lib/i18n/fr";
 import type { Period } from "@/hooks/use-period-selection";
+import { billingAmount, DAY_STEP, MAX_BILLED_DAYS, roundToDayStep } from "@shared/billing-days";
 
 /** Ligne en cours d'édition : TJM en euros, jours décimaux (pas de 0,5) pour la saisie. */
 interface Line {
@@ -64,9 +65,13 @@ function linesReducer(lines: Line[], action: Action): Line[] {
   }
 }
 
-const halfDaysOf = (line: Line) => Math.round(line.days * 2);
+/** Jours enregistrés : la saisie arrondie à la demi-journée. */
+const daysOf = (line: Line) => roundToDayStep(line.days);
 const amountOf = (line: Line) =>
-  Math.round((halfDaysOf(line) * Math.round(line.dailyRateEuros * 100)) / 2);
+  billingAmount({
+    days: daysOf(line),
+    dailyRateCents: Math.round(line.dailyRateEuros * 100),
+  });
 
 interface BillingTabProps {
   period: Period;
@@ -92,7 +97,7 @@ export function BillingTab({ period, source }: BillingTabProps) {
       initial={lines.data.map((line) => ({
         clientName: line.clientName,
         dailyRateEuros: line.dailyRateCents / 100,
-        days: line.halfDays / 2,
+        days: line.days,
       }))}
     />
   );
@@ -110,7 +115,7 @@ function BillingLinesForm({ period, source, clients, initial }: BillingLinesForm
   const text = fr.professional.editor;
 
   const totalCents = lines.reduce((total, line) => total + amountOf(line), 0);
-  const totalHalfDays = lines.reduce((total, line) => total + halfDaysOf(line), 0);
+  const totalDays = lines.reduce((total, line) => total + daysOf(line), 0);
   const changed = JSON.stringify(lines) !== JSON.stringify(initial);
   const missingName = lines.some((line) => line.clientName.trim() === "");
   const clientNames = clients.map((client) => client.name);
@@ -125,7 +130,7 @@ function BillingLinesForm({ period, source, clients, initial }: BillingLinesForm
         lines: lines.map((line) => ({
           clientName: line.clientName.trim(),
           dailyRateCents: Math.round(line.dailyRateEuros * 100),
-          halfDays: halfDaysOf(line),
+          days: daysOf(line),
         })),
       },
       { onSuccess },
@@ -196,8 +201,8 @@ function BillingLinesForm({ period, source, clients, initial }: BillingLinesForm
                 <NumberInput
                   aria-label={text.billing.days}
                   min={0}
-                  max={31}
-                  step={0.5}
+                  max={MAX_BILLED_DAYS}
+                  step={DAY_STEP}
                   decimalScale={1}
                   decimalSeparator=","
                   value={line.days}
@@ -243,7 +248,7 @@ function BillingLinesForm({ period, source, clients, initial }: BillingLinesForm
           {text.billing.add}
         </Button>
         <Text size="sm" c="dimmed">
-          {totalText(formatCents(totalCents), formatHalfDays(totalHalfDays))}
+          {totalText(formatCents(totalCents), formatDays(totalDays))}
         </Text>
       </Group>
 

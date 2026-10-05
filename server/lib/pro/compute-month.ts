@@ -2,13 +2,13 @@ import { allocateRefunds } from "@server/lib/pro/allocate-refunds";
 import {
   amount,
   applyBp,
-  billingAmount,
   htFromTtc,
   mapAmount,
   subtractAmounts,
   sumAmounts,
 } from "@server/lib/pro/amounts";
 import { regimeOf } from "@server/lib/pro/regimes";
+import { billingAmount } from "@shared/billing-days";
 import type {
   Amount,
   BillingInput,
@@ -125,10 +125,8 @@ export function computeMonth(input: ProMonthInput): ProMonth {
     revenue,
     billing: {
       clients,
-      halfDays: sum(
-        clients.map((client) =>
-          hasActual ? (client.actual?.halfDays ?? 0) : client.forecast.halfDays,
-        ),
+      days: sum(
+        clients.map((client) => (hasActual ? (client.actual?.days ?? 0) : client.forecast.days)),
       ),
       invoicedCents: revenue.actual ?? 0,
       invoicedTtcCents: sum(clients.map((client) => client.ttcCents)),
@@ -176,7 +174,7 @@ function billingByClient(input: ProMonthInput): ClientBilling[] {
   const totals = (lines: readonly BillingInput[], clientName: string) => {
     const own = lines.filter((line) => line.clientName === clientName);
     return {
-      halfDays: sum(own.map((line) => line.halfDays)),
+      days: sum(own.map((line) => line.days)),
       amountCents: sum(own.map(billingAmount)),
     };
   };

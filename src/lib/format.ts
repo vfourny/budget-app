@@ -37,9 +37,9 @@ export function capitalizedMonthName(month: number): string {
 
 const dayFormat = new Intl.NumberFormat(LOCALE, { maximumFractionDigits: 1 });
 
-/** Demi-journées → jours lisibles : 41 → "20,5". */
-export function formatHalfDays(halfDays: number): string {
-  return dayFormat.format(halfDays / 2);
+/** Jours lisibles : 20.5 → "20,5". */
+export function formatDays(days: number): string {
+  return dayFormat.format(days);
 }
 
 const percentFormat = new Intl.NumberFormat(LOCALE, { maximumFractionDigits: 2 });
