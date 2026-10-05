@@ -1,7 +1,11 @@
-import { Group, Paper, SimpleGrid, Stack, Text, Title } from "@mantine/core";
+import { ActionIcon, Button, Group, Paper, SimpleGrid, Stack, Text, Title } from "@mantine/core";
+import { IconTrash } from "@tabler/icons-react";
+import { useState } from "react";
 
 import { InfoTip } from "@/components/info-tip";
 import { TargetGauge } from "@/components/target-gauge";
+import { TripForm } from "@/features/professional/components/month/trip-form";
+import { useDeleteTrip } from "@/features/professional/hooks/use-trips";
 import { formatCents, formatDate } from "@/lib/format";
 import { LOCALE, fr } from "@/lib/i18n/fr";
 import type { RouterOutputs } from "@/lib/trpc";
@@ -18,6 +22,12 @@ export function MileageCard({ month }: { month: MonthData }) {
   const rate = text.rateUnit(rateFormat.format(mileage.rateMilli / 1000));
   const delta = mileage.actualKm === null ? null : mileage.actualKm - mileage.forecastKm;
   const km = (value: number) => text.km(kmFormat.format(value));
+  const [adding, setAdding] = useState(false);
+  const deleteTrip = useDeleteTrip();
+  // Date proposée pour un nouveau trajet : aujourd'hui si on est dans le mois affiché, sinon le 1er.
+  const today = new Date();
+  const sameMonth = today.getFullYear() === month.year && today.getMonth() + 1 === month.month;
+  const defaultDate = `${month.year}-${String(month.month).padStart(2, "0")}-${String(sameMonth ? today.getDate() : 1).padStart(2, "0")}`;
 
   return (
     <Paper withBorder radius="lg" p={24} component="section" aria-label={text.title}>
@@ -84,9 +94,21 @@ export function MileageCard({ month }: { month: MonthData }) {
         </div>
       </SimpleGrid>
 
-      <Text size="sm" fw={600} mt={20} mb={8}>
-        {text.journal}
-      </Text>
+      <Group justify="space-between" mt={20} mb={8}>
+        <Text size="sm" fw={600}>
+          {text.journal}
+        </Text>
+        {!adding && (
+          <Button variant="subtle" size="compact-sm" onClick={() => setAdding(true)}>
+            {text.addTrip}
+          </Button>
+        )}
+      </Group>
+      {adding && (
+        <Paper withBorder radius="md" p={12} mb={12}>
+          <TripForm defaultDate={defaultDate} onDone={() => setAdding(false)} />
+        </Paper>
+      )}
       {month.trips.length === 0 ? (
         <Text size="sm" c="dimmed">
           {text.noTrips}
@@ -103,9 +125,21 @@ export function MileageCard({ month }: { month: MonthData }) {
                   {trip.reason}
                 </Text>
               </div>
-              <Text size="sm" fw={600}>
-                {km(trip.km)}
-              </Text>
+              <Group gap={4} wrap="nowrap">
+                <Text size="sm" fw={600}>
+                  {km(trip.km)}
+                </Text>
+                <ActionIcon
+                  variant="subtle"
+                  color="gray"
+                  size="sm"
+                  aria-label={text.trip.remove(trip.route)}
+                  loading={deleteTrip.isPending && deleteTrip.variables?.id === trip.id}
+                  onClick={() => deleteTrip.mutate({ id: trip.id })}
+                >
+                  <IconTrash size={14} />
+                </ActionIcon>
+              </Group>
             </Group>
           ))}
           <Group

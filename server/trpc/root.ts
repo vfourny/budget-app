@@ -6,6 +6,7 @@ import { proForecastRouter } from "@server/trpc/routers/pro-forecast";
 import { professionalRouter } from "@server/trpc/routers/professional";
 import { settingsRouter } from "@server/trpc/routers/settings";
 import { transactionRouter } from "@server/trpc/routers/transaction";
+import { tripRouter } from "@server/trpc/routers/trip";
 import { createTRPCRouter } from "@server/trpc/init";
 
 // Enregistrer chaque routeur de domaine ici.
@@ -18,6 +19,7 @@ export const appRouter = createTRPCRouter({
   proForecast: proForecastRouter,
   settings: settingsRouter,
   transaction: transactionRouter,
+  trip: tripRouter,
 });
 
 /** Type du routeur, importé (en `import type` uniquement) par le front pour l'inférence. */

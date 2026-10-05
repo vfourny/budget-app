@@ -140,6 +140,19 @@ export const professional = {
     gaugeAria: (actual: string, forecast: string) =>
       `${actual} km réalisés pour ${forecast} prévus`,
     journal: "Journal des trajets",
+    addTrip: "+ Ajouter un trajet",
+    trip: {
+      date: "Date",
+      route: "Trajet",
+      routePlaceholder: "Domicile ⇄ client",
+      reason: "Motif",
+      reasonPlaceholder: "Mission client",
+      km: "Km",
+      add: "Ajouter",
+      cancel: "Annuler",
+      remove: (route: string) => `Supprimer le trajet ${route}`,
+      failed: "Trajet non enregistré",
+    },
     noTrips: "Aucun trajet saisi pour ce mois.",
     total: "Total des trajets",
   },
@@ -191,6 +204,16 @@ export const professional = {
       areaKey: (share: string) => `surface ${share} %`,
       ratioKey: (numerator: number, denominator: number) => `clé ${numerator}/${denominator}`,
       total: (amount: string) => `Part Stygma prévue : ${amount}`,
+    },
+    mileage: {
+      hint: "Kilomètres professionnels prévus ce mois, à déclarer au barème kilométrique.",
+      month: "Mois",
+      forecastKm: "Km prévus",
+      lastYear: "Même mois N-1",
+      toDeclare: "À déclarer",
+      note: (rate: string) =>
+        `Pré-rempli avec les km du même mois l'an dernier. Barème : ${rate} (Réglages › Pro, par année). Les trajets réels s'ajoutent ensuite via « Ajouter un trajet ».`,
+      resetLastYear: "Revenir à N-1",
     },
     billing: {
       hintForecast:

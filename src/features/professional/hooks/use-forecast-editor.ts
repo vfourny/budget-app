@@ -46,3 +46,19 @@ export function useCopyForecastsToFollowingMonths() {
     onSuccess: invalidate,
   });
 }
+
+/** Km prévus d'un mois (saisie) et km réels du même mois N-1. */
+export function useMileageForecast(year: number, month: number) {
+  return useQuery(trpc.proForecast.mileage.queryOptions({ year, month }));
+}
+
+export function useSetMileage() {
+  return useMutation({ ...trpc.proForecast.setMileage.mutationOptions(), onSuccess: invalidate });
+}
+
+export function useCopyMileageToFollowingMonths() {
+  return useMutation({
+    ...trpc.proForecast.copyMileageToFollowingMonths.mutationOptions(),
+    onSuccess: invalidate,
+  });
+}
