@@ -1,13 +1,27 @@
-import { Alert, Button, Grid, Group, Paper, Select, Stack, Text, Title } from "@mantine/core";
+import {
+  Alert,
+  Button,
+  Grid,
+  Group,
+  Loader,
+  Paper,
+  Select,
+  Stack,
+  Text,
+  Title,
+} from "@mantine/core";
 import { Dropzone } from "@mantine/dropzone";
 import { IconAlertTriangle, IconFileSpreadsheet, IconUpload } from "@tabler/icons-react";
 import type { AccountType } from "@server/generated/prisma/enums";
 import { useState, type SubmitEvent } from "react";
 import { Link, useNavigate, useSearchParams } from "react-router";
 
+import { FormatReview } from "@/features/imports/components/format-review";
+import { useDetectCsvFormat } from "@/features/imports/hooks/use-detect-csv-format";
 import { useImportStatement } from "@/features/imports/hooks/use-import-statement";
-import { csvErrorMessage, errorMessage } from "@/lib/errors";
+import { appErrorCode, csvErrorMessage, errorMessage } from "@/lib/errors";
 import { fr } from "@/lib/i18n/fr";
+import type { CsvFormatConfig } from "@shared/csv-format";
 
 // Libellés des types de compte (dictionnaire aligné sur l'enum Prisma), pour le `<Select>`.
 const ACCOUNT_TYPE_OPTIONS = (Object.keys(fr.accountTypes) as AccountType[]).map((value) => ({
@@ -31,32 +45,61 @@ export function ImportForm() {
   );
   const [file, setFile] = useState<File | null>(null);
   const [fileRejected, setFileRejected] = useState(false);
+  // Texte du CSV soumis : gardé pour relancer l'import avec le format confirmé (CSV inconnu).
+  const [csvText, setCsvText] = useState<string | null>(null);
 
   const navigate = useNavigate();
   const importStatement = useImportStatement();
+  const detectFormat = useDetectCsvFormat();
 
   // Valeurs dérivées calculées pendant le rendu (≈ `computed`) : pas de `useState` en double.
   const canSubmit = accountType !== null && file !== null;
+  // Aucun format enregistré pour l'en-tête de ce fichier : l'IA le détecte, l'utilisateur confirme.
+  // Le panneau de détection reste affiché pendant l'import qui suit la confirmation (sinon il
+  // disparaîtrait le temps de la requête), et jusqu'au succès de cet import.
+  const unknownFormatError =
+    importStatement.isError && appErrorCode(importStatement.error) === "UNKNOWN_CSV_FORMAT";
+  const detecting = detectFormat.status !== "idle" && !importStatement.isSuccess;
+
+  // Tout s'est bien passé → direct à la relecture. Sinon on reste ici pour montrer l'avertissement.
+  const importOptions = {
+    onSuccess: (data: NonNullable<typeof importStatement.data>) => {
+      if (
+        data.errors.length === 0 &&
+        data.duplicateCount === 0 &&
+        data.categorizationError === null
+      ) {
+        void navigate(`/imports/${data.batchId}`);
+      }
+    },
+  };
 
   async function handleSubmit(event: SubmitEvent<HTMLFormElement>) {
     event.preventDefault(); // ≈ `@submit.prevent`
     if (!file || !accountType) return;
 
+    const text = await file.text();
+    setCsvText(text);
     importStatement.mutate(
-      { accountType, fileName: file.name, csvText: await file.text() },
+      { accountType, fileName: file.name, csvText: text },
       {
-        // Tout s'est bien passé → direct à la relecture. Sinon on reste ici pour montrer l'avertissement.
-        onSuccess: (data) => {
-          if (
-            data.errors.length === 0 &&
-            data.duplicateCount === 0 &&
-            data.categorizationError === null
-          ) {
-            void navigate(`/imports/${data.batchId}`);
-          }
+        ...importOptions,
+        onError: (error) => {
+          if (appErrorCode(error) === "UNKNOWN_CSV_FORMAT") detectFormat.mutate({ csvText: text });
         },
       },
     );
+  }
+
+  function handleConfirmFormat(format: { name: string; config: CsvFormatConfig }) {
+    if (!file || !accountType || csvText === null) return;
+    importStatement.mutate({ accountType, fileName: file.name, csvText, format }, importOptions);
+  }
+
+  function handleRetryDetection() {
+    if (csvText === null) return;
+    detectFormat.reset();
+    detectFormat.mutate({ csvText });
   }
 
   const result = importStatement.data;
@@ -72,7 +115,9 @@ export function ImportForm() {
               onDrop={(files) => {
                 setFile(files[0] ?? null);
                 setFileRejected(false);
+                setCsvText(null);
                 importStatement.reset();
+                detectFormat.reset();
               }}
               onReject={() => setFileRejected(true)}
               accept={CSV_ACCEPT}
@@ -121,7 +166,40 @@ export function ImportForm() {
           <Stack gap={18}>
             <Title order={2}>{fr.importForm.resultTitle}</Title>
 
-            {importStatement.isError && (
+            {detecting && detectFormat.isPending && (
+              <Group gap={12}>
+                <Loader size="sm" />
+                <Text c="dimmed">{fr.importForm.detecting}</Text>
+              </Group>
+            )}
+
+            {detecting && detectFormat.isError && (
+              <Alert
+                color="red"
+                icon={<IconAlertTriangle size={18} />}
+                title={fr.importForm.detectionFailedTitle}
+              >
+                <Stack gap={12}>
+                  {errorMessage(detectFormat.error)}
+                  <Group>
+                    <Button variant="default" onClick={handleRetryDetection}>
+                      {fr.importForm.retryDetection}
+                    </Button>
+                  </Group>
+                </Stack>
+              </Alert>
+            )}
+
+            {detecting && detectFormat.data && (
+              <FormatReview
+                detection={detectFormat.data}
+                isImporting={importStatement.isPending}
+                onConfirm={handleConfirmFormat}
+                onRetry={handleRetryDetection}
+              />
+            )}
+
+            {importStatement.isError && !unknownFormatError && (
               <Alert
                 color="red"
                 icon={<IconAlertTriangle size={18} />}
@@ -131,7 +209,9 @@ export function ImportForm() {
               </Alert>
             )}
 
-            {!result && !importStatement.isError && <Text c="dimmed">{fr.importForm.hint}</Text>}
+            {!result && !importStatement.isError && !detecting && (
+              <Text c="dimmed">{fr.importForm.hint}</Text>
+            )}
 
             {result && (
               <>

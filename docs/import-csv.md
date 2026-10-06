@@ -73,6 +73,22 @@ L'en-tête de l'export contient la colonne **« Solde » en double** (bug d'expo
 
 Export « Relevé de compte » : débit et crédit sont deux colonnes séparées, déjà signées (`-115,00` / `+8640,00`). Le libellé est composé `libellé simplifié — informations complémentaires` quand ces dernières existent (référence facture, tiers…).
 
-## Formats inconnus
+## Formats inconnus (détection par l'IA)
 
-Tant que la détection par IA n'est pas en place (PR suivante), un fichier d'une autre banque est refusé avec `UNKNOWN_CSV_FORMAT`. La détection enverra à Gemini l'en-tête et quelques lignes, puis l'écran d'import affichera un aperçu à confirmer avant d'enregistrer le `CsvFormat`.
+Un fichier dont l'empreinte n'est pas en base fait échouer `import.create` avec `UNKNOWN_CSV_FORMAT`. L'écran d'import enchaîne alors :
+
+1. `import.detectFormat` (`server/lib/csv/detect-format.ts`) : le délimiteur est deviné en code (séparateur le plus fréquent de la 1re ligne) ; Gemini ne reçoit que l'en-tête et 8 lignes, **déjà découpées et numérotées** (`[0] valeur | [1] valeur…`, pour gérer les noms de colonnes en double), et désigne les colonnes (date, libellés, montant signé ou débit/crédit), le format de date, le séparateur décimal et le nom de la banque. La réponse est validée par `csvFormatConfigSchema` ; une colonne hors du fichier est rejetée. Le parsing des montants reste du code déterministe.
+2. Le fichier complet est parsé avec ce mapping : aperçu des 5 premières lignes + contrôles (`checkParsedStatement`) : aucune ligne lisible (bloque la confirmation), lignes illisibles, dates avant 2000 ou dans le futur, libellés vides.
+3. L'utilisateur confirme (nom du format modifiable) : `import.create` reçoit `format`, importe, puis enregistre le `CsvFormat` (upsert sur l'empreinte). Les fichiers suivants de la même banque ne passent plus par l'IA.
+
+Rien n'est écrit en base tant que le format n'est pas confirmé et que le fichier n'a pas produit au moins une ligne lisible.
+
+Le parseur force **débit négatif / crédit positif** : les exports qui donnent le débit en positif sont donc lus correctement.
+
+### Limites
+
+- Pas de correction manuelle du mapping : en cas d'erreur, « Relancer la détection » (ou enrichir le prompt).
+- Signe d'une colonne `signed` inversé (rare) non géré.
+- Fichier sans en-tête : la détection fonctionne (`hasHeader: false`) mais l'empreinte (1re ligne = une opération) ne se retrouve pas : le format est redétecté à chaque import.
+- Dates `yyyy-mm-dd` / `dd/mm/yyyy` seulement ; UTF-8 seulement ; pas de lignes d'intro avant l'en-tête.
+- Confidentialité : l'en-tête et 8 lignes réelles (libellés, montants) partent chez Gemini, comme pour la catégorisation.

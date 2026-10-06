@@ -18,7 +18,8 @@ export type AppErrorCode =
   | "REMAINING_TO_REVIEW"
   | "GEMINI_QUOTA_EXCEEDED"
   | "GEMINI_REFUSED"
-  | "CATEGORIZATION_FAILED";
+  | "CATEGORIZATION_FAILED"
+  | "CSV_FORMAT_DETECTION_FAILED";
 
 /** Paramètres d'interpolation des codes qui en ont besoin (les autres n'en prennent pas). */
 export interface AppErrorParams {

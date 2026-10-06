@@ -1,4 +1,3 @@
-import { ApiError } from "@google/genai";
 import { z } from "zod";
 
 import type { TransactionCategory } from "@server/generated/prisma/enums";
@@ -10,6 +9,7 @@ import {
 } from "@server/lib/categorize/categorize-transactions";
 import { labelKey, normalizeLabel } from "@server/lib/categorize/normalize-label";
 import { gemini } from "@server/lib/gemini";
+import { geminiTRPCError } from "@server/lib/gemini-errors";
 import { createTRPCRouter, protectedProcedure } from "@server/trpc/init";
 
 /**
@@ -17,16 +17,6 @@ import { createTRPCRouter, protectedProcedure } from "@server/trpc/init";
  * carte), les plus récents d'abord. ~20 tokens par exemple, soit ~6 000 tokens au plafond.
  */
 const MAX_EXAMPLES = 300;
-
-/** Code précis selon l'erreur Gemini : inutile de « réessayer » une clé refusée. */
-function toTRPCError(error: unknown) {
-  const status = error instanceof ApiError ? error.status : undefined;
-  if (status === 429) return appError("TOO_MANY_REQUESTS", "GEMINI_QUOTA_EXCEEDED");
-  if (status === 400 || status === 401 || status === 403) {
-    return appError("PRECONDITION_FAILED", "GEMINI_REFUSED");
-  }
-  return appError("INTERNAL_SERVER_ERROR", "CATEGORIZATION_FAILED");
-}
 
 export const categorizeRouter = createTRPCRouter({
   /**
@@ -87,7 +77,7 @@ export const categorizeRouter = createTRPCRouter({
         results = await categorizeTransactions(gemini, batch.accountType, transactions, examples);
       } catch (error) {
         console.error("Catégorisation : échec de l'appel à l'IA", error);
-        throw toTRPCError(error);
+        throw geminiTRPCError(error, "CATEGORIZATION_FAILED");
       }
 
       // On regroupe les lignes qui reçoivent la même (catégorie, confiance arrondie à 0,01) pour

@@ -3,8 +3,8 @@ import { z } from "zod";
 const columnIndex = z.number().int().min(0).max(99);
 
 /** Comment extraire le montant d'une ligne : soit une colonne unique déjà signée, soit deux
- * colonnes débit/crédit — chacune déjà signée dans les exports observés (ex. "-115,00" /
- * "+8640,00"), une seule des deux étant renseignée par ligne. */
+ * colonnes débit/crédit (une seule renseignée par ligne). Le parseur force le débit négatif et le
+ * crédit positif, que la banque les signe ("-115,00" / "+8640,00") ou non ("115,00" / "8640,00"). */
 const amountColumnsSchema = z.discriminatedUnion("kind", [
   z.object({ kind: z.literal("signed"), column: columnIndex }),
   z.object({ kind: z.literal("debitCredit"), debit: columnIndex, credit: columnIndex }),
