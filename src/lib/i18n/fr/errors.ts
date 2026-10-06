@@ -21,6 +21,8 @@ export const errors = {
   TRANSACTION_NOT_FOUND: "Transaction introuvable.",
   TRIP_NOT_FOUND: "Trajet introuvable.",
   CATEGORY_NOT_ALLOWED: "Cette catégorie n'existe pas pour ce type de compte (perso / pro).",
+  UNKNOWN_CSV_FORMAT:
+    "Format de fichier inconnu : aucun format enregistré ne correspond à l'en-tête de ce CSV.",
   NO_READABLE_TRANSACTIONS:
     "Aucune transaction lisible dans ce fichier : format de banque incorrect ?",
   ALL_ROWS_ALREADY_IMPORTED: "Toutes les lignes de ce relevé sont déjà importées.",

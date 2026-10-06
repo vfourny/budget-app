@@ -1,11 +1,13 @@
 import type {
-  AmountColumns,
-  BankCsvConfig,
   CsvLineErrorCode,
   CsvParseError,
   ParsedBankStatement,
   ParsedTransaction,
 } from "@server/lib/csv/types";
+import type { AmountColumns, CsvFormatConfig } from "@shared/csv-format";
+
+/** Sépare les colonnes d'un libellé composé ("libellé simplifié — informations complémentaires"). */
+const LABEL_SEPARATOR = " — ";
 
 /** Erreur de lecture d'une ligne : un code (pas de texte) + la valeur fautive éventuelle. */
 class CsvLineError extends Error {
@@ -58,7 +60,7 @@ function splitCsvLine(line: string, delimiter: string): string[] {
  * concerné par la ligne). */
 function parseAmountToCents(
   raw: string,
-  decimalSeparator: BankCsvConfig["decimalSeparator"],
+  decimalSeparator: CsvFormatConfig["decimalSeparator"],
 ): number | null {
   const cleaned = raw.trim().replace(/\s/g, "");
   if (cleaned === "") return null;
@@ -70,7 +72,7 @@ function parseAmountToCents(
   return Math.round(value * 100);
 }
 
-function parseDate(raw: string, format: BankCsvConfig["dateFormat"]): Date {
+function parseDate(raw: string, format: CsvFormatConfig["dateFormat"]): Date {
   const parts = format === "yyyy-mm-dd" ? raw.split("-") : raw.split("/").reverse();
   const [year, month, day] = parts.map(Number);
   if (!year || !month || !day) throw new CsvLineError("INVALID_DATE", raw);
@@ -80,7 +82,7 @@ function parseDate(raw: string, format: BankCsvConfig["dateFormat"]): Date {
 function extractAmountCents(
   fields: string[],
   amount: AmountColumns,
-  decimalSeparator: BankCsvConfig["decimalSeparator"],
+  decimalSeparator: CsvFormatConfig["decimalSeparator"],
 ): number {
   if (amount.kind === "signed") {
     const value = parseAmountToCents(fields[amount.column], decimalSeparator);
@@ -95,11 +97,11 @@ function extractAmountCents(
   return value;
 }
 
-/** Parse un relevé CSV brut selon le mapping de colonnes d'une banque (voir `banks/`). Une
+/** Parse un relevé CSV brut selon le format de colonnes d'une banque (`CsvFormat` en base). Une
  * ligne illisible (date ou montant invalide) est écartée et reportée dans `errors` plutôt que
  * d'interrompre tout l'import : l'écran de relecture pourra la signaler pour correction
  * manuelle au lieu de bloquer les autres lignes valides. */
-export function parseBankStatement(csvText: string, config: BankCsvConfig): ParsedBankStatement {
+export function parseBankStatement(csvText: string, config: CsvFormatConfig): ParsedBankStatement {
   const lines = csvText.split(/\r?\n/).filter((line) => line.trim() !== "");
   const dataLines = config.hasHeader ? lines.slice(1) : lines;
 
@@ -110,20 +112,16 @@ export function parseBankStatement(csvText: string, config: BankCsvConfig): Pars
     const lineNumber = index + (config.hasHeader ? 2 : 1);
     try {
       const fields = splitCsvLine(line, config.delimiter);
-      const date = parseDate(fields[config.columns.date], config.dateFormat);
-      const label =
-        typeof config.columns.label === "number"
-          ? fields[config.columns.label]
-          : config.columns.label(fields);
-      const amountCents = extractAmountCents(
-        fields,
-        config.columns.amount,
-        config.decimalSeparator,
-      );
+      const date = parseDate(fields[config.dateColumn], config.dateFormat);
+      const label = config.labelColumns
+        .map((column) => fields[column]?.trim() ?? "")
+        .filter((field) => field !== "")
+        .join(LABEL_SEPARATOR);
+      const amountCents = extractAmountCents(fields, config.amount, config.decimalSeparator);
 
       transactions.push({
         date,
-        label: label.trim(),
+        label,
         amountCents,
         month: date.getUTCMonth() + 1,
         year: date.getUTCFullYear(),

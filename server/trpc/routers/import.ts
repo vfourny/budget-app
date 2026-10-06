@@ -4,7 +4,7 @@ import { appError } from "@server/lib/app-error";
 import { NEEDS_REVIEW_WHERE, needsReview } from "@server/lib/categorize/needs-review";
 import { AccountType } from "@server/generated/prisma/enums";
 import { removeAlreadyImported } from "@server/lib/csv/dedupe";
-import { getBankCsvConfig } from "@server/lib/csv/banks";
+import { findCsvFormat } from "@server/lib/csv/find-format";
 import { parseBankStatement } from "@server/lib/csv/parse-bank-statement";
 import { createTRPCRouter, protectedProcedure } from "@server/trpc/init";
 
@@ -23,7 +23,11 @@ export const importRouter = createTRPCRouter({
    * compteront que les imports VALIDATED.
    */
   create: protectedProcedure.input(createImportInputSchema).mutation(async ({ ctx, input }) => {
-    const config = getBankCsvConfig(input.accountType);
+    const userId = ctx.session.user.id;
+
+    // Le format des colonnes se retrouve par l'empreinte de l'en-tête, pas par la banque.
+    const config = await findCsvFormat(userId, input.csvText, ctx.db);
+    if (!config) throw appError("BAD_REQUEST", "UNKNOWN_CSV_FORMAT");
 
     const { transactions, errors } = parseBankStatement(input.csvText, config);
     if (transactions.length === 0) {
@@ -32,7 +36,6 @@ export const importRouter = createTRPCRouter({
 
     // Relevés qui se chevauchent : on n'importe pas deux fois la même ligne.
     const times = transactions.map((transaction) => transaction.date.getTime());
-    const userId = ctx.session.user.id;
     const existing = await ctx.db.transaction.findMany({
       where: {
         userId,
