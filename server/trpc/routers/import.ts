@@ -4,9 +4,14 @@ import { appError } from "@server/lib/app-error";
 import { NEEDS_REVIEW_WHERE, needsReview } from "@server/lib/categorize/needs-review";
 import { AccountType } from "@server/generated/prisma/enums";
 import { removeAlreadyImported } from "@server/lib/csv/dedupe";
+import { checkParsedStatement, detectCsvFormat } from "@server/lib/csv/detect-format";
 import { findCsvFormat } from "@server/lib/csv/find-format";
+import { csvFingerprint } from "@server/lib/csv/fingerprint";
 import { parseBankStatement } from "@server/lib/csv/parse-bank-statement";
+import { gemini } from "@server/lib/gemini";
+import { geminiTRPCError } from "@server/lib/gemini-errors";
 import { createTRPCRouter, protectedProcedure } from "@server/trpc/init";
+import { csvFormatConfigSchema } from "@shared/csv-format";
 
 /** Le CSV voyage en texte dans le JSON : un relevé fait quelques centaines de lignes, loin de la
  * limite Vercel (4,5 Mo). */
@@ -14,9 +19,46 @@ const createImportInputSchema = z.object({
   accountType: z.enum(AccountType),
   fileName: z.string().min(1).max(255),
   csvText: z.string().min(1).max(2_000_000),
+  /** Format confirmé par l'utilisateur après détection : enregistré (pour les prochains fichiers
+   * de la même banque) une fois le fichier lu avec succès. */
+  format: z
+    .object({ name: z.string().trim().min(1).max(60), config: csvFormatConfigSchema })
+    .optional(),
 });
 
+/** Nombre de lignes montrées dans l'aperçu du format détecté. */
+const PREVIEW_LINES = 5;
+
 export const importRouter = createTRPCRouter({
+  /**
+   * Format d'un CSV inconnu : l'IA désigne les colonnes (date, libellé, montant) à partir de
+   * l'en-tête et de quelques lignes, puis le fichier est parsé avec ce mapping pour fournir un
+   * aperçu et des contrôles de cohérence. Rien n'est écrit : le format n'est enregistré qu'à la
+   * confirmation, avec `create`.
+   */
+  detectFormat: protectedProcedure
+    .input(z.object({ csvText: createImportInputSchema.shape.csvText }))
+    .mutation(async ({ input }) => {
+      let detected;
+      try {
+        detected = await detectCsvFormat(gemini, input.csvText);
+      } catch (error) {
+        console.error("Détection du format CSV : échec", error);
+        throw geminiTRPCError(error, "CSV_FORMAT_DETECTION_FAILED");
+      }
+
+      const parsed = parseBankStatement(input.csvText, detected.config);
+      return {
+        bankName: detected.bankName,
+        config: detected.config,
+        columns: detected.columns,
+        transactionCount: parsed.transactions.length,
+        preview: parsed.transactions.slice(0, PREVIEW_LINES),
+        errors: parsed.errors.slice(0, PREVIEW_LINES),
+        checks: checkParsedStatement(parsed),
+      };
+    }),
+
   /**
    * Parse un relevé CSV et l'enregistre : un `ImportBatch` (PENDING_REVIEW) + ses `Transaction`
    * sans catégorie. La catégorisation IA et la relecture viennent ensuite ; les dashboards ne
@@ -25,13 +67,24 @@ export const importRouter = createTRPCRouter({
   create: protectedProcedure.input(createImportInputSchema).mutation(async ({ ctx, input }) => {
     const userId = ctx.session.user.id;
 
-    // Le format des colonnes se retrouve par l'empreinte de l'en-tête, pas par la banque.
-    const config = await findCsvFormat(userId, input.csvText, ctx.db);
+    // Le format des colonnes se retrouve par l'empreinte de l'en-tête, pas par la banque. Un format
+    // tout juste confirmé après détection prime sur celui (éventuel) déjà enregistré.
+    const config = input.format?.config ?? (await findCsvFormat(userId, input.csvText, ctx.db));
     if (!config) throw appError("BAD_REQUEST", "UNKNOWN_CSV_FORMAT");
 
     const { transactions, errors } = parseBankStatement(input.csvText, config);
     if (transactions.length === 0) {
       throw appError("BAD_REQUEST", "NO_READABLE_TRANSACTIONS");
+    }
+
+    // Le mapping a produit des lignes lisibles : on le retient pour les prochains fichiers.
+    if (input.format) {
+      const fingerprint = csvFingerprint(input.csvText);
+      await ctx.db.csvFormat.upsert({
+        where: { userId_fingerprint: { userId, fingerprint } },
+        create: { userId, fingerprint, name: input.format.name, config: input.format.config },
+        update: { name: input.format.name, config: input.format.config },
+      });
     }
 
     // Relevés qui se chevauchent : on n'importe pas deux fois la même ligne.

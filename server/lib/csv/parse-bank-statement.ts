@@ -23,7 +23,7 @@ class CsvLineError extends Error {
  * guillemet à l'intérieur d'un champ cité ne coupe pas la ligne, et `""` à l'intérieur d'un
  * champ cité est un guillemet échappé. Nécessaire ici car certains exports (BoursoBank) citent
  * des champs contenant d'autres ponctuations que le délimiteur. */
-function splitCsvLine(line: string, delimiter: string): string[] {
+export function splitCsvLine(line: string, delimiter: string): string[] {
   const fields: string[] = [];
   let current = "";
   let inQuotes = false;
@@ -92,9 +92,9 @@ function extractAmountCents(
 
   const debit = parseAmountToCents(fields[amount.debit], decimalSeparator);
   const credit = parseAmountToCents(fields[amount.credit], decimalSeparator);
-  const value = debit ?? credit;
-  if (value === null) throw new CsvLineError("EMPTY_DEBIT_CREDIT");
-  return value;
+  if (debit === null && credit === null) throw new CsvLineError("EMPTY_DEBIT_CREDIT");
+  // Débit toujours négatif, crédit toujours positif, que la banque signe la colonne débit ou non.
+  return Math.abs(credit ?? 0) - Math.abs(debit ?? 0);
 }
 
 /** Parse un relevé CSV brut selon le format de colonnes d'une banque (`CsvFormat` en base). Une

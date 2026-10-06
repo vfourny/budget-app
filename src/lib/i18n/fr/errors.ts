@@ -33,6 +33,8 @@ export const errors = {
   GEMINI_REFUSED:
     "Gemini a refusé la requête : clé API invalide ou modèle indisponible pour ce compte.",
   CATEGORIZATION_FAILED: "La catégorisation par l'IA a échoué, réessaie dans un instant.",
+  CSV_FORMAT_DETECTION_FAILED:
+    "La détection du format du fichier par l'IA a échoué, réessaie dans un instant.",
   // Pas des codes serveur : validation Zod rejetée, ou erreur réseau / inattendue.
   INVALID_INPUT: "Données invalides.",
   UNKNOWN: "Une erreur est survenue.",
