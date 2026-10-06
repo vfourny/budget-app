@@ -188,7 +188,7 @@ schéma Zod + modèle Prisma, ajout d'un widget dashboard).
 
 1. Scaffold (Vite + Nitro + CI + CLAUDE.md) → Prisma/Neon + schéma + seed → tRPC + TanStack Query (fait)
 2. Thème obsidian/platine + routing client (fait : Mantine + React Router, menu latéral de la maquette)
-3. Upload CSV (parser générique, mapping de colonnes par banque) (fait)
+3. Upload CSV (parser générique piloté par `CsvFormat`, formats en base) (fait)
 4. Route tRPC `categorize` (Gemini, few-shot sur transactions validées, JSON `category` (valeur de l'enum) + `confidence`) (fait)
 5. Écran de relecture : historique, tableau de correction, « Valider », suppression d'un import (fait)
 6. Dashboard Perso mois / année : totaux, transactions, par catégorie (fait) ; parts recommandées par enveloppe dans Réglages + jauges réel vs recommandé (fait) ; abonnements, IR (à faire)
@@ -208,10 +208,11 @@ Hors scope : synchro bancaire auto, multi-utilisateurs, émission de factures.
 - Neon : `DATABASE_URL` = URL pooled (runtime, adapter `@prisma/adapter-neon`),
   `DIRECT_URL` = URL directe (CLI Prisma / migrations, lue dans `prisma.config.ts`).
 - **Pas de modèle `BankAccount`** : seul compte le type **PERSONAL / PROFESSIONAL** (enum `AccountType`, porté par
-  `ImportBatch` et `Transaction`). La banque ne sert qu'à choisir le parseur CSV : elle est déduite du
-  type par la constante `BANK_BY_ACCOUNT_TYPE` (`server/lib/csv/banks`), jamais stockée. Plus tard
-  (appartements), le rattachement se fera par un `apartmentId` optionnel sur `Transaction` choisi à la
-  relecture, pas via un compte bancaire. Supprimer un `ImportBatch` supprime ses transactions.
+  `ImportBatch` et `Transaction`). La banque n'est jamais stockée ni codée : le format des colonnes d'un CSV est une
+  donnée (`CsvFormat`, `shared/csv-format.ts`), retrouvée par l'empreinte de l'en-tête du fichier (`server/lib/csv/`),
+  donc changer de banque ne demande aucun développement. Plus tard (appartements), le rattachement se fera par un
+  `apartmentId` optionnel sur `Transaction` choisi à la relecture, pas via un compte bancaire. Supprimer un
+  `ImportBatch` supprime ses transactions.
 - **Mantine plutôt que PrimeReact** (décidé le 2026-10-01) : PrimeReact 11 est devenu sans style et
   sous licence PrimeUI (clé à renouveler), la 10 (MIT) n'est plus qu'en maintenance et a des
   couleurs codées en dur à écraser composant par composant. Mantine (MIT) se thématise par un

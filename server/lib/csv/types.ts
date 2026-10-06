@@ -25,29 +25,3 @@ export interface ParsedBankStatement {
   transactions: ParsedTransaction[];
   errors: CsvParseError[];
 }
-
-/** Comment extraire le montant d'une ligne : soit une colonne unique déjà signée, soit deux
- * colonnes débit/crédit — chacune déjà signée dans les exports observés (ex. "-115,00" /
- * "+8640,00"), une seule des deux étant renseignée par ligne. */
-export type AmountColumns =
-  { kind: "signed"; column: number } | { kind: "debitCredit"; debit: number; credit: number };
-
-interface BankCsvColumns {
-  date: number;
-  /** Index de colonne, ou fonction pour composer un libellé plus riche (ex. concaténer avec
-   * un champ "informations complémentaires") — utile pour la catégorisation automatique. */
-  label: number | ((fields: string[]) => string);
-  amount: AmountColumns;
-}
-
-/** Mapping de colonnes propre à une banque. Ajouter une banque = ajouter un fichier dans
- * `banks/` + une entrée dans `banks/index.ts`, sans toucher au parseur générique. */
-export interface BankCsvConfig {
-  /** Nom de la banque ; sert de clé dans `BANK_CSV_CONFIGS`. */
-  bank: string;
-  delimiter: string;
-  hasHeader: boolean;
-  dateFormat: "yyyy-mm-dd" | "dd/mm/yyyy";
-  decimalSeparator: "," | ".";
-  columns: BankCsvColumns;
-}

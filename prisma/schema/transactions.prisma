@@ -78,6 +78,25 @@ model ImportBatch {
   @@index([userId])
 }
 
+/// Format d'export CSV connu d'un utilisateur : l'empreinte de l'en-tête du fichier → comment lire
+/// ses colonnes. Un fichier dont l'empreinte est connue est parsé sans passer par l'IA ; sinon le
+/// format est détecté, confirmé par l'utilisateur puis enregistré ici.
+model CsvFormat {
+  id          String   @id @default(cuid())
+  userId      String
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  /// SHA-256 de la 1re ligne du fichier (voir `csvFingerprint`).
+  fingerprint String
+  /// Nom indicatif (ex. « BoursoBank »), jamais utilisé pour choisir le parseur.
+  name        String
+  /// `CsvFormatConfig` (`shared/csv-format.ts`), revalidé par Zod à chaque lecture.
+  config      Json
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@unique([userId, fingerprint])
+}
+
 model Transaction {
   id                 String               @id @default(cuid())
   userId             String

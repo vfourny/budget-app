@@ -17,6 +17,7 @@ model User {
   envelopeShares   EnvelopeShare[]
   importBatches    ImportBatch[]
   transactions     Transaction[]
+  csvFormats       CsvFormat[]
   professionalYearSettings  ProfessionalYearSettings[]
   billingLines     BillingLine[]
   monthlyForecasts MonthlyForecast[]
