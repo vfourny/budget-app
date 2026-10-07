@@ -35,4 +35,35 @@ export const transactionRouter = createTRPCRouter({
       });
       return { id: input.id };
     }),
+
+  /**
+   * Rattache une ligne d'un relevé appartement à un autre appartement (un compte peut porter
+   * plusieurs biens, R11). Refusé une fois l'import validé ou pour un compte non appartement.
+   */
+  setApartment: protectedProcedure
+    .input(z.object({ id: z.string().min(1), apartmentId: z.string().min(1) }))
+    .mutation(async ({ ctx, input }) => {
+      const userId = ctx.session.user.id;
+      const transaction = await ctx.db.transaction.findFirst({
+        where: { id: input.id, userId },
+        select: { accountType: true, importBatch: { select: { status: true } } },
+      });
+      if (!transaction) throw appError("NOT_FOUND", "TRANSACTION_NOT_FOUND");
+      if (transaction.importBatch?.status === "VALIDATED") {
+        throw appError("BAD_REQUEST", "IMPORT_ALREADY_VALIDATED");
+      }
+      if (transaction.accountType !== "APARTMENT") {
+        throw appError("BAD_REQUEST", "APARTMENT_NOT_ALLOWED");
+      }
+      const apartment = await ctx.db.apartment.findFirst({
+        where: { id: input.apartmentId, userId },
+        select: { id: true },
+      });
+      if (!apartment) throw appError("NOT_FOUND", "APARTMENT_NOT_FOUND");
+      await ctx.db.transaction.update({
+        where: { id: input.id },
+        data: { apartmentId: apartment.id },
+      });
+      return { id: input.id };
+    }),
 });

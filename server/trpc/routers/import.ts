@@ -3,6 +3,7 @@ import { z } from "zod";
 import { appError } from "@server/lib/app-error";
 import { NEEDS_REVIEW_WHERE, needsReview } from "@server/lib/categorize/needs-review";
 import { AccountType } from "@server/generated/prisma/enums";
+import { matchLoanTransaction } from "@server/lib/apartments/loan";
 import { removeAlreadyImported } from "@server/lib/csv/dedupe";
 import { checkParsedStatement, detectCsvFormat } from "@server/lib/csv/detect-format";
 import { findCsvFormat } from "@server/lib/csv/find-format";
@@ -17,6 +18,8 @@ import { csvFormatConfigSchema } from "@shared/csv-format";
  * limite Vercel (4,5 Mo). */
 const createImportInputSchema = z.object({
   accountType: z.enum(AccountType),
+  /** Appartement du relevé : obligatoire pour un compte appartement, ignoré sinon (R11). */
+  apartmentId: z.string().min(1).nullish(),
   fileName: z.string().min(1).max(255),
   csvText: z.string().min(1).max(2_000_000),
   /** Format confirmé par l'utilisateur après détection : enregistré (pour les prochains fichiers
@@ -69,6 +72,18 @@ export const importRouter = createTRPCRouter({
 
     // Le format des colonnes se retrouve par l'empreinte de l'en-tête, pas par la banque. Un format
     // tout juste confirmé après détection prime sur celui (éventuel) déjà enregistré.
+    // Un relevé appartement est rattaché à un bien de l'utilisateur ; les autres comptes n'en ont pas.
+    let apartmentId: string | null = null;
+    if (input.accountType === "APARTMENT") {
+      if (!input.apartmentId) throw appError("BAD_REQUEST", "APARTMENT_REQUIRED");
+      const apartment = await ctx.db.apartment.findFirst({
+        where: { id: input.apartmentId, userId },
+        select: { id: true },
+      });
+      if (!apartment) throw appError("NOT_FOUND", "APARTMENT_NOT_FOUND");
+      apartmentId = apartment.id;
+    }
+
     const config = input.format?.config ?? (await findCsvFormat(userId, input.csvText, ctx.db));
     if (!config) throw appError("BAD_REQUEST", "UNKNOWN_CSV_FORMAT");
 
@@ -107,6 +122,7 @@ export const importRouter = createTRPCRouter({
       data: {
         userId,
         accountType: input.accountType,
+        apartmentId,
         fileName: input.fileName,
         transactions: {
           createMany: {
@@ -114,6 +130,7 @@ export const importRouter = createTRPCRouter({
               ...transaction,
               userId,
               accountType: input.accountType,
+              apartmentId,
             })),
           },
         },
@@ -180,11 +197,20 @@ export const importRouter = createTRPCRouter({
               amountCents: true,
               category: true,
               categoryConfidence: true,
+              apartmentId: true,
+              year: true,
+              month: true,
             },
           },
         },
       });
       if (!batch) throw appError("NOT_FOUND", "IMPORT_NOT_FOUND");
+
+      // Échéances de prêt d'un relevé appartement : comparées au tableau d'amortissement (R7).
+      const apartments =
+        batch.accountType === "APARTMENT"
+          ? await ctx.db.apartment.findMany({ where: { userId: ctx.session.user.id } })
+          : [];
 
       return {
         id: batch.id,
@@ -192,10 +218,23 @@ export const importRouter = createTRPCRouter({
         status: batch.status,
         createdAt: batch.createdAt,
         accountType: batch.accountType,
-        transactions: batch.transactions.map((transaction) => ({
-          ...transaction,
-          needsReview: needsReview(transaction),
-        })),
+        transactions: batch.transactions.map(({ year, month, ...transaction }) => {
+          const apartment = apartments.find(
+            (candidate) => candidate.id === transaction.apartmentId,
+          );
+          return {
+            ...transaction,
+            needsReview: needsReview(transaction),
+            loanMatch:
+              apartment && transaction.category === "APT_LOAN_REPAYMENT"
+                ? matchLoanTransaction(apartment, {
+                    year,
+                    month,
+                    amountCents: transaction.amountCents,
+                  })
+                : null,
+          };
+        }),
       };
     }),
 

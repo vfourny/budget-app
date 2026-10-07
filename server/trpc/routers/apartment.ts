@@ -81,6 +81,15 @@ export const apartmentRouter = createTRPCRouter({
       }));
     }),
 
+  /** Id et nom des appartements, pour les sélecteurs (import, relecture). */
+  options: protectedProcedure.query(({ ctx }) =>
+    ctx.db.apartment.findMany({
+      where: { userId: ctx.session.user.id },
+      orderBy: [{ acquiredAt: "asc" }, { name: "asc" }],
+      select: { id: true, name: true },
+    }),
+  ),
+
   /** Crée ou met à jour un appartement et son solde de début d'année, en une transaction SQL. */
   save: protectedProcedure.input(saveSchema).mutation(async ({ ctx, input }) => {
     const userId = ctx.session.user.id;
