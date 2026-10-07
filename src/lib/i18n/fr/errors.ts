@@ -20,6 +20,9 @@ export const errors = {
   IMPORT_ALREADY_VALIDATED: "Cet import est déjà validé.",
   TRANSACTION_NOT_FOUND: "Transaction introuvable.",
   TRIP_NOT_FOUND: "Trajet introuvable.",
+  APARTMENT_NOT_FOUND: "Appartement introuvable.",
+  APARTMENT_HAS_TRANSACTIONS:
+    "Cet appartement porte encore des transactions ou des relevés : détache-les avant de le supprimer.",
   CATEGORY_NOT_ALLOWED: "Cette catégorie n'existe pas pour ce type de compte (perso / pro).",
   UNKNOWN_CSV_FORMAT:
     "Format de fichier inconnu : aucun format enregistré ne correspond à l'en-tête de ce CSV.",
