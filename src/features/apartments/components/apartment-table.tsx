@@ -52,7 +52,7 @@ function line(
 }
 
 /** Sections du tableau (R2) : solde, loyers, crédit (si prêt), charges fixes, annuelles (si le mois en contient), autres. */
-function sectionsOf(apartment: ApartmentView): Section[] {
+function sectionsOf(apartment: ApartmentView, view: "month" | "year"): Section[] {
   const { forecast, actual } = apartment;
   const rows = text.rows;
   const managed = apartment.managerName !== null;
@@ -66,7 +66,7 @@ function sectionsOf(apartment: ApartmentView): Section[] {
       rows: [
         {
           key: "openingBalance",
-          label: rows.openingBalance,
+          label: view === "year" ? rows.openingBalanceYear : rows.openingBalance,
           forecast: forecast.openingBalanceCents,
           actual: actual ? actual.openingBalanceCents : null,
           sign: 1,
@@ -81,7 +81,7 @@ function sectionsOf(apartment: ApartmentView): Section[] {
         line("ownerContribution", rows.ownerContribution, 1, forecast, actual),
         {
           key: "closingBalance",
-          label: rows.closingBalance,
+          label: view === "year" ? rows.closingBalanceYear : rows.closingBalance,
           forecast: forecast.closingBalanceCents,
           actual: actual ? actual.closingBalanceCents : null,
           sign: 1,
@@ -155,6 +155,21 @@ function sectionsOf(apartment: ApartmentView): Section[] {
       line("other", rows.other, -1, forecast, actual),
     ],
   });
+  // Hors résultat : le dépôt de garantie vient des Réglages, il n'a pas d'écart (vue année seulement).
+  if (view === "year") {
+    sections.push({
+      key: "offResult",
+      rows: [
+        {
+          key: "deposit",
+          label: rows.deposit,
+          forecast: apartment.depositCents,
+          actual: actual ? apartment.depositCents : null,
+          sign: 1,
+        },
+      ],
+    });
+  }
   return sections;
 }
 
@@ -162,7 +177,13 @@ function sectionsOf(apartment: ApartmentView): Section[] {
  * Tableau Prévisionnel / Réalisé / Écart d'un appartement (R2). Écart = réalisé − prévisionnel sur
  * des montants signés : défavorable en rouge, favorable en vert, nul « — » (R5).
  */
-export function ApartmentTable({ apartment }: { apartment: ApartmentView }) {
+export function ApartmentTable({
+  apartment,
+  view,
+}: {
+  apartment: ApartmentView;
+  view: "month" | "year";
+}) {
   return (
     <Table.ScrollContainer minWidth={560}>
       <Table verticalSpacing="xs" horizontalSpacing="md" aria-label={text.aria(apartment.name)}>
@@ -175,7 +196,7 @@ export function ApartmentTable({ apartment }: { apartment: ApartmentView }) {
           </Table.Tr>
         </Table.Thead>
         <Table.Tbody>
-          {sectionsOf(apartment).map((section) => (
+          {sectionsOf(apartment, view).map((section) => (
             <Fragment key={section.key}>
               <Table.Tr>
                 <Table.Th colSpan={4} scope="colgroup" c="gold.6" fz="xs" tt="uppercase" pt={16}>

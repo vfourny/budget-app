@@ -15,7 +15,7 @@ import type { ApartmentCategory } from "@shared/account-categories";
  * transaction. `satisfies Record<ApartmentCategory, …>` : `tsc` échoue si une catégorie du compte
  * appartement n'est pas rangée.
  */
-export const APARTMENT_CATEGORY_LINES = {
+const APARTMENT_CATEGORY_LINES = {
   APT_RENT_RECEIVED: "rentReceived",
   APT_LOAN_REPAYMENT: "loanRepayment",
   APT_LOAN_INSURANCE: "loanInsurance",

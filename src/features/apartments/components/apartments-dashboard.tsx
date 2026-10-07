@@ -7,10 +7,12 @@ import { PageHeader, PageTitleAccent } from "@/components/page-header";
 import { PeriodPicker } from "@/components/period-picker";
 import { TransactionsTable } from "@/components/transactions-table";
 import { ApartmentCard } from "@/features/apartments/components/apartment-card";
+import { LmnpThresholds } from "@/features/apartments/components/lmnp-thresholds";
 import { ApartmentKpis } from "@/features/apartments/components/apartment-kpis";
 import {
   useApartmentPeriods,
   useApartmentsMonth,
+  useApartmentsYear,
 } from "@/features/apartments/hooks/use-apartments-dashboard";
 import { usePeriodSelection, type Period } from "@/hooks/use-period-selection";
 import { capitalizedMonthName } from "@/lib/format";
@@ -86,9 +88,41 @@ export function ApartmentsDashboard() {
           onApartmentChange={setApartmentId}
         />
       ) : (
-        <Text c="dimmed">{fr.apartments.yearSoon}</Text>
+        <YearContent
+          year={selected.year}
+          apartmentId={apartmentId}
+          onApartmentChange={setApartmentId}
+        />
       )}
     </>
+  );
+}
+
+interface PillsProps {
+  options: readonly { id: string; name: string }[];
+  apartmentId: string | null;
+  onApartmentChange: (apartmentId: string | null) => void;
+}
+
+/** Pastilles « Tous (n) » + une par appartement actif sur la période. */
+function ApartmentPills({ options, apartmentId, onApartmentChange }: PillsProps) {
+  return (
+    <Chip.Group
+      multiple={false}
+      value={apartmentId ?? "all"}
+      onChange={(value) => onApartmentChange(value === "all" ? null : value)}
+    >
+      <Group gap={8} role="group" aria-label={fr.apartments.filtersAria}>
+        <Chip value="all" variant="light">
+          {fr.apartments.all(options.length)}
+        </Chip>
+        {options.map((option) => (
+          <Chip key={option.id} value={option.id} variant="light">
+            {option.name}
+          </Chip>
+        ))}
+      </Group>
+    </Chip.Group>
   );
 }
 
@@ -107,28 +141,17 @@ function MonthContent({ period, apartmentId, onApartmentChange }: MonthContentPr
   const { options, apartments, kpis, transactions } = month.data;
   return (
     <Stack gap={16}>
-      <Chip.Group
-        multiple={false}
-        value={apartmentId ?? "all"}
-        onChange={(value) => onApartmentChange(value === "all" ? null : value)}
-      >
-        <Group gap={8} role="group" aria-label={fr.apartments.filtersAria}>
-          <Chip value="all" variant="light">
-            {fr.apartments.all(options.length)}
-          </Chip>
-          {options.map((option) => (
-            <Chip key={option.id} value={option.id} variant="light">
-              {option.name}
-            </Chip>
-          ))}
-        </Group>
-      </Chip.Group>
+      <ApartmentPills
+        options={options}
+        apartmentId={apartmentId}
+        onApartmentChange={onApartmentChange}
+      />
 
       {apartments.length === 0 ? (
         <Text c="dimmed">{fr.apartments.noneActive}</Text>
       ) : (
         <>
-          <ApartmentKpis kpis={kpis} />
+          <ApartmentKpis kpis={kpis} view="month" />
           {apartments.map((apartment) => (
             <ApartmentCard key={apartment.id} apartment={apartment} period={period} />
           ))}
@@ -136,6 +159,47 @@ function MonthContent({ period, apartmentId, onApartmentChange }: MonthContentPr
       )}
 
       <TransactionsTable transactions={transactions} emptyText={fr.apartments.transactions.empty} />
+    </Stack>
+  );
+}
+
+function YearContent({
+  year,
+  apartmentId,
+  onApartmentChange,
+}: {
+  year: number;
+  apartmentId: string | null;
+  onApartmentChange: (apartmentId: string | null) => void;
+}) {
+  const data = useApartmentsYear(year, apartmentId);
+
+  if (data.isPending) return <Loader color="gold" />;
+  if (data.isError) return <Alert color="red" title={fr.apartments.loadPeriodFailed} />;
+
+  const { options, apartments, kpis, thresholds } = data.data;
+  return (
+    <Stack gap={16}>
+      <ApartmentPills
+        options={options}
+        apartmentId={apartmentId}
+        onApartmentChange={onApartmentChange}
+      />
+      {apartments.length === 0 ? (
+        <Text c="dimmed">{fr.apartments.noneActive}</Text>
+      ) : (
+        <>
+          <ApartmentKpis kpis={kpis} view="year" />
+          {apartments.map((apartment) => (
+            <ApartmentCard
+              key={apartment.id}
+              apartment={apartment}
+              period={{ year, month: null }}
+            />
+          ))}
+        </>
+      )}
+      {thresholds && <LmnpThresholds thresholds={thresholds} />}
     </Stack>
   );
 }
