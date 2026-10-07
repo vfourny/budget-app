@@ -78,6 +78,7 @@ const ACCOUNT_CATEGORIES = {
 
 type AccountCategory<T extends AccountType> = (typeof ACCOUNT_CATEGORIES)[T][number];
 export type ProfessionalCategory = AccountCategory<"PROFESSIONAL">;
+export type ApartmentCategory = AccountCategory<"APARTMENT">;
 
 type AssertNever<T extends never> = T;
 
