@@ -21,6 +21,7 @@ export const errors = {
   TRANSACTION_NOT_FOUND: "Transaction introuvable.",
   TRIP_NOT_FOUND: "Trajet introuvable.",
   APARTMENT_NOT_FOUND: "Appartement introuvable.",
+  APARTMENT_NO_MANAGER: "Cet appartement est en direct : il n'a pas de facture de gérance.",
   APARTMENT_REQUIRED: "Choisis l'appartement de ce relevé.",
   APARTMENT_NOT_ALLOWED:
     "Seules les lignes d'un relevé appartement se rattachent à un appartement.",

@@ -1,5 +1,5 @@
 import type { Apartment } from "@server/generated/prisma/client";
-import { loanSchedule, splitLoanPayment } from "@shared/apartment-loan";
+import { loanSchedule, splitLoanPayment, type LoanTerms } from "@shared/apartment-loan";
 
 /** Champs d'un appartement utiles au prêt (un sous-ensemble du modèle Prisma). */
 type LoanApartment = Pick<
@@ -48,4 +48,19 @@ export function matchLoanTransaction(
     apartment.creditInsuranceCents,
   );
   return { recognized: split.recognized, expectedCents: installment.paymentCents };
+}
+
+/**
+ * Capital remboursé (jauge de la carte, R6) : somme des capitaux des échéances du tableau jusqu'au
+ * mois `through` inclus, indépendamment des transactions. `null` pour un bien sans prêt.
+ */
+export function capitalRepaid(
+  loan: LoanTerms | null,
+  through: { year: number; month: number },
+): { repaidCents: number; principalCents: number } | null {
+  if (!loan) return null;
+  const repaidCents = loanSchedule(loan)
+    .filter((row) => row.year * 12 + row.month <= through.year * 12 + through.month)
+    .reduce((sum, row) => sum + row.capitalCents, 0);
+  return { repaidCents, principalCents: loan.principalCents };
 }
