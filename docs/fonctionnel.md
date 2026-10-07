@@ -68,7 +68,7 @@ Points d'attention :
 
 ## Type de compte
 
-Chaque import et chaque transaction porte un **type** : `PERSONAL` ou `PROFESSIONAL` (Stygma). C'est la seule notion
+Chaque import et chaque transaction porte un **type** : `PERSONAL`, `PROFESSIONAL` (Stygma) ou `APARTMENT` (compte dédié aux appartements). C'est la seule notion
 de « compte » de l'app : il n'y a pas de table de comptes bancaires. La banque n'est pas stockée ; elle sert uniquement
 à choisir le **mapping CSV** à l'import (voir [import-csv.md](./import-csv.md)) et se déduit du type :
 
@@ -76,9 +76,11 @@ de « compte » de l'app : il n'y a pas de table de comptes bancaires. La banque
 | -------------- | ------------------- |
 | `PERSONAL`     | BoursoBank          |
 | `PROFESSIONAL` | Banque Populaire    |
+| `APARTMENT`    | compte dédié        |
 
-Évolution prévue (gestion des appartements) : une catégorie « appartement » et un rattachement choisi par transaction à
-la relecture (`apartmentId` optionnel), indépendamment du compte bancaire d'origine.
+Un relevé `APARTMENT` est rattaché à un appartement à l'import (`ImportBatch.apartmentId`), modifiable ligne par ligne à
+la relecture (`Transaction.apartmentId`, obligatoire pour ce type de compte). Ses transactions n'entrent jamais dans les
+enveloppes du budget perso (les dashboards perso filtrent sur `PERSONAL`).
 
 ## Transactions
 
@@ -222,3 +224,25 @@ de l'année.
   compte de résultat simplifié (12 mois + Final) ; catégories, frais mixtes et km cumulés.
 - Mockup de référence : artboard « Dashboard pro — Stygma SAS » du canvas Claude Design. Plan de réalisation :
   [plan-professional.md](./plan-professional.md).
+
+## Appartements (`/apartments`)
+
+Suivi de **trésorerie** des biens en location (comme l'onglet « Toulouse » de l'ancien tableur), sans fiscalité ni
+rappels (déclaration = comptable). Règles détaillées et hypothèses : [plan-appartements.md](./plan-appartements.md).
+
+- **Réglages › Appartements** (`/settings?tab=apt`) : par bien, régime (étiquette), gérant (vide = en direct), mois
+  d'acquisition, prix, loyer prévu brut, dépôt, frais de gérance (%), assurance emprunteur, taxe foncière et CFE
+  annuelles, solde du compte au 1er janvier, prêt à taux fixe (synthèse : mensualité, 1ʳᵉ échéance, intérêts totaux).
+- **Import** : type de compte « Appartement » + choix de l'appartement. Les catégories `APT_*` sont proposées ; le
+  virement d'apport vers ce compte se catégorise « Apport appartement » côté perso (enveloppe épargne long terme).
+  À la relecture, une échéance de prêt est reconnue si elle est à ±1 € de la mensualité du tableau d'amortissement.
+- **Vue mois** (mois clos seulement) : pour chaque appartement actif (à partir du mois d'acquisition), tableau
+  Prévisionnel / Réalisé / Écart (solde, loyers, crédit, charges), jauge du capital remboursé, facture de gérance
+  saisie à la main (le loyer arrive net de frais), 2 KPI (loyers nets perçus, effort d'épargne nécessaire) et les
+  transactions rattachées.
+- **Vue année** : mêmes colonnes sur les mois clos, rendements brut / net sur le prix d'achat, dépôt de garantie, et
+  seuils LMNP (plafond micro-BIC, seuil LMP) indicatifs.
+- **Prévisionnel** : loyer, gérance, échéance du prêt, assurance ; taxe foncière en octobre, CFE en décembre ; charges
+  mensuelles = réel du même mois N-1, sinon moyenne des autres mois clos, sinon 0.
+- **Solde** : solde fin de mois = début + différentiel + apport ; il doit coïncider avec le solde bancaire. L'effort
+  d'épargne annuel est la somme des efforts mensuels.

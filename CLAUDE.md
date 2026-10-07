@@ -72,13 +72,14 @@ src/                   # FRONT — SPA React, tourne uniquement dans le navigate
   lib/                 # utilitaires front : trpc.ts (client + queryClient), theme.ts (thème Mantine)…
     i18n/fr/           # TOUS les textes de l'UI (dictionnaires typés) + plural.ts (accord en nombre)
   styles/global.css    # règles CSS globales (le thème, lui, est dans lib/theme.ts)
-shared/                # code pur partagé front + back (personal-rules.ts, professional-rules.ts, account-categories.ts, billing-days.ts), alias @shared/
+shared/                # code pur partagé front + back (personal-rules.ts, professional-rules.ts, apartment-rules.ts, apartment-loan.ts, account-categories.ts, billing-days.ts), alias @shared/
 server/                # BACKEND — Nitro, mêmes conventions que le server/ de Nuxt
   api/                 # routes HTTP : server/api/health.ts → GET /api/health
     trpc/[...path].ts  # point d'entrée HTTP de tRPC
   trpc/                # init.ts (contexte, procédures), root.ts (appRouter), routers/<domaine>.ts
   lib/                 # db.ts (PrismaClient singleton), env.ts (validation Zod des variables)
     pro/               # dashboard Pro : load-year (requêtes) + compute-month (calcul pur) + regimes/
+    apartments/        # dashboard Appartements : load-period (requêtes) + compute-month / compute-period / thresholds (purs) + loan
   generated/prisma/    # client Prisma généré — gitignoré, ne pas éditer
 prisma/                # schema/ (un .prisma par domaine), migrations/, seed.ts + seeds/ (un fichier par domaine)
 prisma.config.ts       # config CLI Prisma 7 (URL directe pour les migrations)
@@ -98,6 +99,10 @@ nitro.config.ts        # serverDir: ./server
   lignes de revenus, par `key`) : uniquement dans `shared/personal-rules.ts`, jamais en dur ailleurs. Aucun libellé dedans :
   les textes sont dans `@/lib/i18n/fr`. Équivalent pro : `shared/professional-rules.ts` (TVA par charge, frais mixtes, groupes
   du prévisionnel) et `shared/account-categories.ts` (catégories proposées par type de compte).
+- **Calculs du dashboard Appartements** : même principe, dans `server/lib/apartments/` (purs : `compute-month`, `compute-period`,
+  `thresholds`) ; requêtes dans `load-period.ts`, assemblage dans `build-view.ts`. Règles (catégorie → ligne du tableau, seuils,
+  tolérance de rapprochement) dans `shared/apartment-rules.ts` ; prêt dans `shared/apartment-loan.ts`. Référence métier :
+  `docs/plan-appartements.md` (R1 à R12).
 - **Calculs du dashboard Pro** : fonctions **pures** dans `server/lib/professional/` (aucun accès base) ;
   les requêtes restent dans `load-year.ts`. Un statut juridique = un `ProfessionalRegime` (`server/lib/professional/regimes/`).
 - **Données** : toujours via tRPC + TanStack Query. **Pas de `fetch` dans un `useEffect`.**
@@ -196,6 +201,10 @@ schéma Zod + modèle Prisma, ajout d'un widget dashboard).
    dashboard mois / année (CA, TVA, bénéfice, facturation & encaissements, catégories, frais mixtes, km), éditeur du
    prévisionnel ; à venir : régimes IS / EURL, TVA à l'encaissement
 
+8. Appartements (fait, voir `docs/plan-appartements.md`) : type de compte `APARTMENT`, Réglages (bien + prêt), import / relecture
+   avec rattachement, dashboard `/apartments` mois / année (prévu / réalisé / écart, KPI, rendements, seuils LMNP) ; hors
+   périmètre : fiscalité, rappels
+
 Hors scope : synchro bancaire auto, multi-utilisateurs, émission de factures.
 
 ## Décisions
@@ -210,9 +219,10 @@ Hors scope : synchro bancaire auto, multi-utilisateurs, émission de factures.
 - **Pas de modèle `BankAccount`** : seul compte le type **PERSONAL / PROFESSIONAL** (enum `AccountType`, porté par
   `ImportBatch` et `Transaction`). La banque n'est jamais stockée ni codée : le format des colonnes d'un CSV est une
   donnée (`CsvFormat`, `shared/csv-format.ts`), retrouvée par l'empreinte de l'en-tête du fichier (`server/lib/csv/`),
-  donc changer de banque ne demande aucun développement. Plus tard (appartements), le rattachement se fera par un
-  `apartmentId` optionnel sur `Transaction` choisi à la relecture, pas via un compte bancaire. Supprimer un
-  `ImportBatch` supprime ses transactions.
+  donc changer de banque ne demande aucun développement. Les appartements ont leur propre type de compte `APARTMENT` ;
+  le rattachement à un bien passe par `apartmentId` (sur `ImportBatch`, défaut de l'import, et sur `Transaction`,
+  modifiable ligne par ligne à la relecture), pas par un compte bancaire. Supprimer un `ImportBatch` supprime ses
+  transactions.
 - **Mantine plutôt que PrimeReact** (décidé le 2026-10-01) : PrimeReact 11 est devenu sans style et
   sous licence PrimeUI (clé à renouveler), la 10 (MIT) n'est plus qu'en maintenance et a des
   couleurs codées en dur à écraser composant par composant. Mantine (MIT) se thématise par un
@@ -228,3 +238,10 @@ Hors scope : synchro bancaire auto, multi-utilisateurs, émission de factures.
   2e enum ; prévisionnel sans saisie = réel du même mois N-1 ; salaire et cotisations calculés depuis les règles de
   l'année (les prélèvements URSSAF / PAS… ne comptent pas dans les charges) ; clients en texte libre dans la facturation
   (pas de table) ; jours facturés en `Float` par pas de 0,5 (exact en binaire, pas de demi-journées entières) ; encaissé = crédits `CLIENT_PAYMENT` du mois, reste à encaisser = solde cumulé facturé TTC − encaissé ; graphiques en CSS (pas de lib).
+- **Appartements (2026-10-07)** : trésorerie seulement (pas de fiscalité). Hypothèses retenues : mois clos = antérieur au mois
+  en cours ; prévu des charges mensuelles = réel N-1, sinon moyenne des autres mois clos, sinon 0 ; prêt à taux fixe, assurance
+  emprunteur prélevée à part (sauf échéance reconnue avec assurance) ; rendement sur le prix d'achat seul ; « Apport appartement »
+  (perso) dans l'enveloppe épargne long terme. Le loyer arrive net : les frais viennent de la facture de gérance saisie à la
+  main (`ManagementInvoice`), sans effet sur le solde. Une échéance de prêt prélevée est ventilée (intérêts du tableau, capital =
+  le reste) pour que le solde calculé reste égal au solde bancaire. Un appartement ne se supprime pas tant qu'il porte des
+  transactions ou des relevés (`onDelete: Restrict`).
