@@ -127,7 +127,7 @@ export const settings = {
     deleteFailed: "Suppression impossible",
     delete: "Supprimer",
     confirmDelete: "Confirmer la suppression",
-    units: { euros: "€", percent: "%", months: "mois" },
+    units: { percent: "%", months: "mois" },
     fields: {
       kind: "Régime de location",
       kindHint: "Simple étiquette : aucune règle de calcul n'en dépend pour l'instant.",

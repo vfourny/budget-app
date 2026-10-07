@@ -5,6 +5,7 @@ export const nav = {
   brandInitial: "B",
   personal: "Perso",
   professional: "Pro",
+  apartments: "Appartements",
   imports: "Imports",
   settings: "Réglages",
   /** Libellé du bouton de thème = l'action du prochain clic (Système → Clair → Sombre). */

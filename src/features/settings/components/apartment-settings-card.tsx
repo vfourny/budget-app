@@ -14,6 +14,7 @@ import {
 } from "@mantine/core";
 import { useState } from "react";
 
+import { EuroField } from "@/components/euro-field";
 import { useDeleteApartment, useSaveApartment } from "@/features/settings/hooks/use-apartments";
 import { errorMessage } from "@/lib/errors";
 import { formatCents } from "@/lib/format";
@@ -40,33 +41,6 @@ function defaultLoan(acquiredAt: Date): Loan {
     // Première échéance le mois suivant l'acquisition, le 5 par défaut.
     firstDueDate: new Date(Date.UTC(acquiredAt.getUTCFullYear(), acquiredAt.getUTCMonth() + 1, 5)),
   };
-}
-
-/** Champ en euros : la base stocke des centimes entiers, le formulaire affiche des euros. */
-function EuroField(props: {
-  label: string;
-  description?: string;
-  cents: number;
-  allowNegative?: boolean;
-  onChange: (cents: number) => void;
-}) {
-  return (
-    <NumberInput
-      label={props.label}
-      description={props.description}
-      inputWrapperOrder={["label", "input", "description"]}
-      suffix={` ${text.units.euros}`}
-      thousandSeparator=" "
-      decimalSeparator=","
-      decimalScale={2}
-      min={props.allowNegative ? undefined : 0}
-      step={10}
-      value={props.cents / 100}
-      onChange={(value) =>
-        props.onChange(Math.round((typeof value === "number" ? value : 0) * 100))
-      }
-    />
-  );
 }
 
 /** Champ en points de base : affiché en pourcentage (300 → 3 %). */
