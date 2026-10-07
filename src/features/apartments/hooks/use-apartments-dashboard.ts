@@ -12,6 +12,11 @@ export function useApartmentsMonth(year: number, month: number, apartmentId: str
   return useQuery(trpc.apartmentDashboard.month.queryOptions({ year, month, apartmentId }));
 }
 
+/** Une année : colonnes sur les mois clos, rendements et seuils LMNP. */
+export function useApartmentsYear(year: number, apartmentId: string | null) {
+  return useQuery(trpc.apartmentDashboard.year.queryOptions({ year, apartmentId }));
+}
+
 /** Saisit la facture de gérance d'un mois (R12) puis rafraîchit le dashboard. */
 export function useSetManagementInvoice() {
   return useMutation({

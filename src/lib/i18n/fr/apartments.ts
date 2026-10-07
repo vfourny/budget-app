@@ -15,7 +15,6 @@ export const apartments = {
   noneActive: "Aucun appartement actif sur cette période.",
   filtersAria: "Filtrer par appartement",
   all: (count: number) => `Tous (${count})`,
-  yearSoon: "La vue année arrive.",
   kpis: {
     rent: {
       label: "Loyers nets perçus",
@@ -31,6 +30,8 @@ export const apartments = {
       tip: "Somme des efforts mensuels : pour chaque mois, ce qu'il faut apporter pour que le compte appartement ne passe pas sous son solde (max(0, −différentiel)). Un mois excédentaire ne compense pas un mois déficitaire. La jauge compare l'apport réel (« Apport fonds perso ») à l'effort nécessaire.",
       hintMonth: (forecast: string) =>
         `À apporter ce mois-ci pour équilibrer le compte · prévu ${forecast}`,
+      hintYear: (perMonth: string, forecast: string) =>
+        `Soit ${perMonth} par mois en moyenne · prévu ${forecast}`,
       none: "Aucun apport nécessaire : le bien s'autofinance sur la période.",
       covered: (surplus: string) => `L'apport couvre l'effort (+ ${surplus})`,
       missing: (amount: string) => `Il manque ${amount} d'apport`,
@@ -47,6 +48,11 @@ export const apartments = {
     capitalOf: (repaid: string, total: string, percent: string) =>
       `${repaid} sur ${total} · ${percent} %`,
     capitalAria: (percent: string) => `Capital remboursé : ${percent} %`,
+    grossYield: "Rendement brut",
+    netYield: "Rendement net",
+    yieldTip:
+      "Rendement annualisé sur les mois clos, sur le prix d'achat seul (hors frais). Brut : loyers bruts perçus. Net : loyers bruts moins les charges hors crédit (gérance, charges, taxe foncière, CFE…), hors capital, intérêts et assurance emprunteur.",
+    yieldTipAria: (name: string) => `Comment est calculé « ${name} » ?`,
   },
   table: {
     aria: (name: string) => `Prévisionnel, réalisé et écart de ${name}`,
@@ -59,12 +65,16 @@ export const apartments = {
       fixed: "Charges fixes",
       annual: "Charges annuelles",
       other: "Autres charges",
+      offResult: "Hors résultat",
     },
     rows: {
       openingBalance: "Solde début de mois",
+      openingBalanceYear: "Solde début d'année",
       differential: "Différentiel généré",
       ownerContribution: "Apport fonds perso",
       closingBalance: "Solde fin de mois",
+      closingBalanceYear: "Solde à ce jour",
+      deposit: "Dépôt de garantie à restituer",
       grossRent: "Loyers bruts",
       grossRentSub: "perçus + frais de gérance",
       managementFees: "Frais de gérance",
@@ -84,6 +94,19 @@ export const apartments = {
       regularization: "Régularisation de charges",
       other: "Autres (non listé)",
     },
+  },
+  thresholds: {
+    title: "Seuils LMNP",
+    note: "À titre indicatif, à valider avec le comptable : recettes de janvier au dernier mois clos des appartements meublés. La condition « plus de 50 % des revenus professionnels » du statut LMP n'est pas calculée.",
+    receipts: (amount: string) => `${amount} de recettes`,
+    projection: (amount: string) => `Projection sur l'année : ${amount}`,
+    microBic: "Plafond micro-BIC",
+    microBicOf: (ceiling: string) => `sur ${ceiling}`,
+    lmp: "Seuil LMP",
+    lmpOf: (threshold: string) => `sur ${threshold}`,
+    over: "Dépassé",
+    gaugeAria: (name: string, receipts: string, limit: string) =>
+      `${name} : ${receipts} sur ${limit}`,
   },
   invoice: {
     title: "Facture de gérance",

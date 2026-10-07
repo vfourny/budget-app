@@ -13,7 +13,7 @@ type Kpis = RouterOutputs["apartmentDashboard"]["month"]["kpis"];
  * Les deux KPI de l'écran (R8) : loyers nets perçus (jauge perçus bruts / dus) et effort d'épargne
  * nécessaire (jauge apport réel / effort).
  */
-export function ApartmentKpis({ kpis }: { kpis: Kpis }) {
+export function ApartmentKpis({ kpis, view }: { kpis: Kpis; view: "month" | "year" }) {
   const { rent, effort } = kpis;
   const text = fr.apartments.kpis;
   const percent =
@@ -75,7 +75,12 @@ export function ApartmentKpis({ kpis }: { kpis: Kpis }) {
           hint={
             effort.actualCents === 0 && effort.forecastCents === 0
               ? text.effort.none
-              : text.effort.hintMonth(formatCents(effort.forecastCents))
+              : view === "year"
+                ? text.effort.hintYear(
+                    formatCents(effort.perMonthCents),
+                    formatCents(effort.forecastCents),
+                  )
+                : text.effort.hintMonth(formatCents(effort.forecastCents))
           }
         >
           {effort.actualCents > 0 && (
