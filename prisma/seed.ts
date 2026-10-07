@@ -2,6 +2,7 @@ import "dotenv/config";
 
 import { db } from "@server/lib/db";
 
+import { seedApartments } from "./seeds/apartments";
 import { seedCsvFormats } from "./seeds/csv-formats";
 import { seedIncomeTaxBrackets } from "./seeds/income-tax";
 import { seedProfessionalBilling } from "./seeds/professional-billing";
@@ -17,6 +18,7 @@ try {
   const userId = await seedUser();
   await seedCsvFormats(userId);
   await seedProfessionalBilling(userId);
+  await seedApartments(userId);
 } catch (error) {
   console.error(error instanceof Error ? error.message : error);
   process.exitCode = 1;

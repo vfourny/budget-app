@@ -5,24 +5,27 @@
 // (`prisma/seeds/user.ts`, inscription publique désactivée). `IncomeTaxBracket` reste global (barème légal).
 
 model User {
-  id               String            @id
-  name             String
-  email            String            @unique
-  emailVerified    Boolean           @default(false)
-  image            String?
-  createdAt        DateTime          @default(now())
-  updatedAt        DateTime          @updatedAt
-  sessions         Session[]
-  accounts         Account[]
-  envelopeShares   EnvelopeShare[]
-  importBatches    ImportBatch[]
-  transactions     Transaction[]
-  csvFormats       CsvFormat[]
-  professionalYearSettings  ProfessionalYearSettings[]
-  billingLines     BillingLine[]
-  monthlyForecasts MonthlyForecast[]
-  mileageForecasts MileageForecast[]
-  trips            Trip[]
+  id                       String                     @id
+  name                     String
+  email                    String                     @unique
+  emailVerified            Boolean                    @default(false)
+  image                    String?
+  createdAt                DateTime                   @default(now())
+  updatedAt                DateTime                   @updatedAt
+  sessions                 Session[]
+  accounts                 Account[]
+  envelopeShares           EnvelopeShare[]
+  importBatches            ImportBatch[]
+  transactions             Transaction[]
+  csvFormats               CsvFormat[]
+  professionalYearSettings ProfessionalYearSettings[]
+  billingLines             BillingLine[]
+  monthlyForecasts         MonthlyForecast[]
+  mileageForecasts         MileageForecast[]
+  trips                    Trip[]
+  apartments               Apartment[]
+  apartmentYearOpenings    ApartmentYearOpening[]
+  managementInvoices       ManagementInvoice[]
 }
 
 model Session {

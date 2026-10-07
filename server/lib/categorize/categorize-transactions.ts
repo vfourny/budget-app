@@ -71,6 +71,8 @@ const ACCOUNT_CONTEXT = {
   PERSONAL: "le compte bancaire personnel de Valentin Fourny",
   PROFESSIONAL:
     "le compte bancaire professionnel de sa société Stygma SAS (freelance développeur, président assimilé salarié)",
+  APARTMENT:
+    "le compte bancaire dédié à ses appartements en location (loyers reçus nets de gérance, prêt immobilier, charges)",
 } as const satisfies Record<AccountType, string>;
 
 const systemPrompt = (

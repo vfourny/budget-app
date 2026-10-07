@@ -1,0 +1,79 @@
+// ─── Appartements (suivi de trésorerie des biens en location) ───────────────────────────────────
+// Règles métier : `docs/plan-appartements.md` (R1 à R12). Montants en centimes (entiers), taux en
+// points de base (3,00 % = 300). Les relevés du compte appartement sont des `ImportBatch` /
+// `Transaction` de type `AccountType.APARTMENT`, rattachés à un `Apartment`.
+
+/// Étiquette du régime de location (V1 : aucune règle n'en dépend).
+enum ApartmentKind {
+  FURNISHED // Location meublée (LMNP)
+  UNFURNISHED // Location nue
+  SCI // SCI
+}
+
+model Apartment {
+  id                   String        @id @default(cuid())
+  userId               String
+  user                 User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  name                 String
+  kind                 ApartmentKind
+  /// Nom du gérant ; `null` = location en direct (ni facture de gérance, ni ligne de frais).
+  managerName          String?
+  /// 1er jour du mois d'acquisition : l'appartement est actif à partir de ce mois (inclus).
+  acquiredAt           DateTime      @db.Date
+  priceCents           Int
+  /// Loyer mensuel prévu, brut de frais de gérance.
+  rentCents            Int
+  depositCents         Int           @default(0)
+  /// Frais de gérance en points de base du loyer (7,00 % = 700), pour le prévisionnel.
+  managementFeeBps     Int           @default(0)
+  /// Assurance emprunteur mensuelle, prélevée à part de l'échéance du prêt.
+  creditInsuranceCents Int           @default(0)
+  /// Montants annuels, comptés le mois de paiement (taxe foncière : octobre, CFE : décembre).
+  propertyTaxCents     Int           @default(0)
+  cfeCents             Int           @default(0)
+
+  // Prêt à taux fixe : tous les champs sont renseignés ensemble, ou aucun (bien sans prêt).
+  loanPrincipalCents Int?
+  loanRateBps        Int?
+  loanTermMonths     Int?
+  loanFirstDueDate   DateTime? @db.Date
+
+  createdAt          DateTime               @default(now())
+  updatedAt          DateTime               @updatedAt
+  yearOpenings       ApartmentYearOpening[]
+  managementInvoices ManagementInvoice[]
+  importBatches      ImportBatch[]
+  transactions       Transaction[]
+
+  @@index([userId])
+}
+
+/// Solde réel du compte appartement au 1er janvier, saisi chaque année (0 à défaut).
+model ApartmentYearOpening {
+  userId              String
+  user                User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  apartmentId         String
+  apartment           Apartment @relation(fields: [apartmentId], references: [id], onDelete: Cascade)
+  year                Int       @db.SmallInt
+  /// Centimes, signé.
+  openingBalanceCents Int
+
+  @@id([apartmentId, year])
+  @@index([userId])
+}
+
+/// Facture de gérance d'un mois, saisie à la main : le loyer arrive net, ses frais n'apparaissent
+/// pas dans le relevé (R12). Ce ne sont pas des transactions.
+model ManagementInvoice {
+  userId         String
+  user           User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  apartmentId    String
+  apartment      Apartment @relation(fields: [apartmentId], references: [id], onDelete: Cascade)
+  year           Int       @db.SmallInt
+  month          Int       @db.SmallInt
+  feesCents      Int
+  extraFeesCents Int       @default(0)
+
+  @@id([apartmentId, year, month])
+  @@index([userId])
+}

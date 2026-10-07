@@ -4,6 +4,7 @@
 enum AccountType {
   PERSONAL // Perso
   PROFESSIONAL // Pro (Stygma)
+  APARTMENT // Compte dédié aux appartements (chaque ligne est rattachée à un appartement)
 }
 
 /// Catégorie d'une transaction (liste figée, colonnes du Google Sheet). Le libellé affiché et
@@ -55,6 +56,21 @@ enum TransactionCategory {
   DISABILITY_COVER // Prévoyance
   WITHHOLDING_TAX // Prélèvement à la source (DGFIP PAS)
   VAT_PAYMENT // Paiement de la TVA
+  // ── Compte appartement : catégories proposées seulement pour les relevés appartement
+  // (`ENERGY` et `INTERNET` y sont réutilisées).
+  APT_RENT_RECEIVED // Loyer net reçu (crédit, déjà net des frais de gérance)
+  APT_LOAN_REPAYMENT // Échéance du prêt immobilier (capital + intérêts)
+  APT_LOAN_INSURANCE // Assurance emprunteur
+  APT_HOME_INSURANCE // Assurance habitation
+  APT_CONDO_FEES // Charges de copropriété
+  APT_PROPERTY_TAX // Taxe foncière
+  APT_CFE // CFE
+  APT_BANK_FEES // Frais bancaires du compte appartement
+  APT_REGULARIZATION // Régularisation de charges (débit ou remboursement)
+  APT_OWNER_CONTRIBUTION // Apport fonds perso (crédit : virement reçu du compte perso)
+  APT_OTHER // Autres (non listé)
+  // ── Compte perso : virement vers le compte appartement.
+  APARTMENT_CONTRIBUTION // Apport appartement
 }
 
 enum ImportStatus {
@@ -73,6 +89,9 @@ model ImportBatch {
   status       ImportStatus  @default(PENDING_REVIEW)
   createdAt    DateTime      @default(now())
   validatedAt  DateTime?
+  /// Appartement choisi à l'import (compte APARTMENT) : proposé par défaut à chaque ligne.
+  apartmentId  String?
+  apartment    Apartment?    @relation(fields: [apartmentId], references: [id], onDelete: Restrict)
   transactions Transaction[]
 
   @@index([userId])
@@ -115,6 +134,9 @@ model Transaction {
   categoryConfidence Float?
   importBatchId      String?
   importBatch        ImportBatch?         @relation(fields: [importBatchId], references: [id], onDelete: Cascade)
+  /// Appartement rattaché : obligatoire pour `accountType = APARTMENT` (vérifié par l'app).
+  apartmentId        String?
+  apartment          Apartment?           @relation(fields: [apartmentId], references: [id], onDelete: Restrict)
   createdAt          DateTime             @default(now())
   updatedAt          DateTime             @updatedAt
 
@@ -122,4 +144,5 @@ model Transaction {
   @@index([userId, accountType, year, month])
   @@index([category])
   @@index([importBatchId])
+  @@index([userId, apartmentId, year, month])
 }
