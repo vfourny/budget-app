@@ -73,4 +73,24 @@ export const CATEGORY_HINTS = {
     "Prélèvement à la source de l'impôt sur le revenu sur salaire : DGFIP avec mention PAS / DSN.",
   VAT_PAYMENT:
     "Paiement de la TVA à l'État : DGFIP ou SIE (service des impôts des entreprises) avec mention TVA.",
+  // ── Compte appartement (biens en location) ──
+  APT_RENT_RECEIVED:
+    "Crédit : virement de loyer reçu d'un locataire ou d'une agence de gestion locative (déjà net des frais de gérance).",
+  APT_LOAN_REPAYMENT:
+    "Débit : échéance mensuelle du prêt immobilier (capital + intérêts), prélèvement de la banque prêteuse.",
+  APT_LOAN_INSURANCE:
+    "Débit : assurance emprunteur du prêt immobilier, si prélevée à part de l'échéance.",
+  APT_HOME_INSURANCE: "Assurance habitation / propriétaire non occupant (PNO) de l'appartement.",
+  APT_CONDO_FEES: "Charges de copropriété : appels de fonds du syndic.",
+  APT_PROPERTY_TAX: "Taxe foncière (DGFIP), payée en octobre en général.",
+  APT_CFE: "Cotisation foncière des entreprises (CFE), payée en décembre en général.",
+  APT_BANK_FEES: "Frais et cotisations bancaires du compte appartement.",
+  APT_REGULARIZATION:
+    "Régularisation de charges de copropriété ou du locataire (débit, ou remboursement en crédit).",
+  APT_OWNER_CONTRIBUTION:
+    "Crédit : virement d'apport reçu du compte perso de Valentin Fourny pour couvrir le déficit du bien.",
+  APT_OTHER: "Autre mouvement du compte appartement qui ne rentre dans aucune autre catégorie.",
+  // ── Compte perso : apport vers le compte appartement ──
+  APARTMENT_CONTRIBUTION:
+    "Débit : virement du compte perso vers le compte dédié aux appartements (apport pour couvrir l'effort d'épargne d'un bien).",
 } as const satisfies Record<TransactionCategory, string>;

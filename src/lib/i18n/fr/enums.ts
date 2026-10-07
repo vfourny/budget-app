@@ -1,6 +1,7 @@
 import type { RevenueLineKey } from "@shared/personal-rules";
 import type {
   AccountType,
+  ApartmentKind,
   CompanyRegime,
   Envelope,
   ImportStatus,
@@ -17,7 +18,15 @@ import type {
 export const accountTypes = {
   PERSONAL: "Perso",
   PROFESSIONAL: "Pro (Stygma)",
+  APARTMENT: "Appartement",
 } as const satisfies Record<AccountType, string>;
+
+/** Régime de location d'un appartement (simple étiquette en V1). */
+export const apartmentKinds = {
+  FURNISHED: "LMNP",
+  UNFURNISHED: "Location nue",
+  SCI: "SCI",
+} as const satisfies Record<ApartmentKind, string>;
 
 /** Statut juridique et fiscal de la société (Réglages › Pro). */
 export const companyRegimes = {
@@ -94,6 +103,20 @@ export const categories = {
   DISABILITY_COVER: "Prévoyance",
   WITHHOLDING_TAX: "Prélèvement à la source",
   VAT_PAYMENT: "TVA",
+  // Compte appartement
+  APT_RENT_RECEIVED: "Loyer reçu",
+  APT_LOAN_REPAYMENT: "Remboursement du prêt",
+  APT_LOAN_INSURANCE: "Assurance emprunteur",
+  APT_HOME_INSURANCE: "Assurance habitation",
+  APT_CONDO_FEES: "Charges de copropriété",
+  APT_PROPERTY_TAX: "Taxe foncière",
+  APT_CFE: "CFE",
+  APT_BANK_FEES: "Frais bancaires",
+  APT_REGULARIZATION: "Régularisation de charges",
+  APT_OWNER_CONTRIBUTION: "Apport fonds perso",
+  APT_OTHER: "Autres (non listé)",
+  // Compte perso : virement vers le compte appartement
+  APARTMENT_CONTRIBUTION: "Apport appartement",
 } as const satisfies Record<TransactionCategory, string>;
 
 /** Lignes du détail de la card Revenus (clés de `REVENUE_LINES` dans personal-rules + « other »). */

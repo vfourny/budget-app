@@ -5,7 +5,7 @@ import type { AccountType, TransactionCategory } from "@server/generated/prisma/
  * et une liste par type de compte (`ACCOUNT_CATEGORIES`). Sert au sélecteur de la relecture, au
  * prompt Gemini et à la validation de `setCategory`.
  *
- * Une catégorie peut figurer dans plusieurs comptes. Ajouter un type de compte (appartements…) :
+ * Une catégorie peut figurer dans plusieurs comptes. Ajouter un type de compte :
  * l'ajouter à l'enum `AccountType`, `tsc` impose alors sa liste ici.
  * Ajouter une catégorie à l'enum : `tsc` impose de la ranger dans au moins un compte.
  */
@@ -35,6 +35,7 @@ const ACCOUNT_CATEGORIES = {
     "PROFESSIONAL_REFUND",
     "TRAINING",
     "SHORT_TERM_SAVINGS",
+    "APARTMENT_CONTRIBUTION",
   ],
   PROFESSIONAL: [
     "CLIENT_PAYMENT",
@@ -57,6 +58,21 @@ const ACCOUNT_CATEGORIES = {
     "DISABILITY_COVER",
     "WITHHOLDING_TAX",
     "VAT_PAYMENT",
+  ],
+  APARTMENT: [
+    "APT_RENT_RECEIVED",
+    "APT_LOAN_REPAYMENT",
+    "APT_LOAN_INSURANCE",
+    "APT_HOME_INSURANCE",
+    "APT_CONDO_FEES",
+    "APT_PROPERTY_TAX",
+    "APT_CFE",
+    "APT_BANK_FEES",
+    "APT_REGULARIZATION",
+    "APT_OWNER_CONTRIBUTION",
+    "APT_OTHER",
+    "ENERGY",
+    "INTERNET",
   ],
 } as const satisfies Record<AccountType, readonly TransactionCategory[]>;
 

@@ -33,7 +33,8 @@ export const ENVELOPE_CATEGORIES = {
   LEISURE: ["RESTAURANT", "NIGHTLIFE", "LEISURE", "CLOTHING_CARE", "OTHER_SUBSCRIPTIONS"],
   TRAINING: ["TRAINING"],
   SAFETY_SAVINGS: ["SHORT_TERM_SAVINGS"],
-  LONG_TERM_SAVINGS: ["LONG_TERM_SAVINGS"],
+  // « Apport appartement » : virement vers le compte appartement (hypothèse H6 du plan appartements).
+  LONG_TERM_SAVINGS: ["LONG_TERM_SAVINGS", "APARTMENT_CONTRIBUTION"],
 } as const satisfies Record<Envelope, readonly TransactionCategory[]>;
 
 /**

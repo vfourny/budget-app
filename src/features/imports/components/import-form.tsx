@@ -24,10 +24,13 @@ import { fr } from "@/lib/i18n/fr";
 import type { CsvFormatConfig } from "@shared/csv-format";
 
 // Libellés des types de compte (dictionnaire aligné sur l'enum Prisma), pour le `<Select>`.
-const ACCOUNT_TYPE_OPTIONS = (Object.keys(fr.accountTypes) as AccountType[]).map((value) => ({
-  value,
-  label: fr.accountTypes[value],
-}));
+// Le type « Appartement » n'est proposé qu'avec le choix de l'appartement (PR « feat/import-apartment »).
+const ACCOUNT_TYPE_OPTIONS = (Object.keys(fr.accountTypes) as AccountType[])
+  .filter((value) => value !== "APARTMENT")
+  .map((value) => ({
+    value,
+    label: fr.accountTypes[value],
+  }));
 
 // Les navigateurs annoncent un CSV sous plusieurs types MIME (Windows : application/vnd.ms-excel) :
 // on filtre donc aussi sur l'extension.

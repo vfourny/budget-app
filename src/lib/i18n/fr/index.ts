@@ -2,6 +2,7 @@ import { auth } from "./auth";
 import { common } from "./common";
 import {
   accountTypes,
+  apartmentKinds,
   categories,
   companyRegimes,
   envelopes,
@@ -71,6 +72,7 @@ export const fr = {
   professional,
   transactions,
   accountTypes,
+  apartmentKinds,
   companyRegimes,
   importStatus,
   envelopes,
