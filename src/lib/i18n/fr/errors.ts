@@ -21,6 +21,9 @@ export const errors = {
   TRANSACTION_NOT_FOUND: "Transaction introuvable.",
   TRIP_NOT_FOUND: "Trajet introuvable.",
   APARTMENT_NOT_FOUND: "Appartement introuvable.",
+  APARTMENT_REQUIRED: "Choisis l'appartement de ce relevé.",
+  APARTMENT_NOT_ALLOWED:
+    "Seules les lignes d'un relevé appartement se rattachent à un appartement.",
   APARTMENT_HAS_TRANSACTIONS:
     "Cet appartement porte encore des transactions ou des relevés : détache-les avant de le supprimer.",
   CATEGORY_NOT_ALLOWED: "Cette catégorie n'existe pas pour ce type de compte (perso / pro).",

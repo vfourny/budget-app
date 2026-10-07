@@ -1,5 +1,6 @@
 import {
   Alert,
+  Anchor,
   Button,
   Grid,
   Group,
@@ -16,6 +17,7 @@ import type { AccountType } from "@server/generated/prisma/enums";
 import { useState, type SubmitEvent } from "react";
 import { Link, useNavigate, useSearchParams } from "react-router";
 
+import { useApartmentOptions } from "@/features/apartments/hooks/use-apartment-options";
 import { FormatReview } from "@/features/imports/components/format-review";
 import { useDetectCsvFormat } from "@/features/imports/hooks/use-detect-csv-format";
 import { useImportStatement } from "@/features/imports/hooks/use-import-statement";
@@ -24,13 +26,10 @@ import { fr } from "@/lib/i18n/fr";
 import type { CsvFormatConfig } from "@shared/csv-format";
 
 // Libellés des types de compte (dictionnaire aligné sur l'enum Prisma), pour le `<Select>`.
-// Le type « Appartement » n'est proposé qu'avec le choix de l'appartement (PR « feat/import-apartment »).
-const ACCOUNT_TYPE_OPTIONS = (Object.keys(fr.accountTypes) as AccountType[])
-  .filter((value) => value !== "APARTMENT")
-  .map((value) => ({
-    value,
-    label: fr.accountTypes[value],
-  }));
+const ACCOUNT_TYPE_OPTIONS = (Object.keys(fr.accountTypes) as AccountType[]).map((value) => ({
+  value,
+  label: fr.accountTypes[value],
+}));
 
 // Les navigateurs annoncent un CSV sous plusieurs types MIME (Windows : application/vnd.ms-excel) :
 // on filtre donc aussi sur l'extension.
@@ -46,6 +45,9 @@ export function ImportForm() {
     ACCOUNT_TYPE_OPTIONS.find((option) => option.value === searchParams.get("accountType"))
       ?.value ?? null,
   );
+  // Appartement du relevé (compte « Appartement » seulement) : rattache toutes ses lignes (R11).
+  const [apartmentId, setApartmentId] = useState<string | null>(null);
+  const apartments = useApartmentOptions();
   const [file, setFile] = useState<File | null>(null);
   const [fileRejected, setFileRejected] = useState(false);
   // Texte du CSV soumis : gardé pour relancer l'import avec le format confirmé (CSV inconnu).
@@ -56,7 +58,9 @@ export function ImportForm() {
   const detectFormat = useDetectCsvFormat();
 
   // Valeurs dérivées calculées pendant le rendu (≈ `computed`) : pas de `useState` en double.
-  const canSubmit = accountType !== null && file !== null;
+  const needsApartment = accountType === "APARTMENT";
+  const canSubmit =
+    accountType !== null && file !== null && (!needsApartment || apartmentId !== null);
   // Aucun format enregistré pour l'en-tête de ce fichier : l'IA le détecte, l'utilisateur confirme.
   // Le panneau de détection reste affiché pendant l'import qui suit la confirmation (sinon il
   // disparaîtrait le temps de la requête), et jusqu'au succès de cet import.
@@ -84,7 +88,12 @@ export function ImportForm() {
     const text = await file.text();
     setCsvText(text);
     importStatement.mutate(
-      { accountType, fileName: file.name, csvText: text },
+      {
+        accountType,
+        apartmentId: needsApartment ? apartmentId : null,
+        fileName: file.name,
+        csvText: text,
+      },
       {
         ...importOptions,
         onError: (error) => {
@@ -96,7 +105,16 @@ export function ImportForm() {
 
   function handleConfirmFormat(format: { name: string; config: CsvFormatConfig }) {
     if (!file || !accountType || csvText === null) return;
-    importStatement.mutate({ accountType, fileName: file.name, csvText, format }, importOptions);
+    importStatement.mutate(
+      {
+        accountType,
+        apartmentId: needsApartment ? apartmentId : null,
+        fileName: file.name,
+        csvText,
+        format,
+      },
+      importOptions,
+    );
   }
 
   function handleRetryDetection() {
@@ -156,6 +174,28 @@ export function ImportForm() {
               onChange={(value) => setAccountType(value as AccountType | null)}
               allowDeselect={false}
             />
+
+            {needsApartment && (
+              <Select
+                label={fr.importForm.apartment}
+                placeholder={fr.importForm.apartmentPlaceholder}
+                description={fr.importForm.apartmentHint}
+                inputWrapperOrder={["label", "input", "description"]}
+                data={(apartments.data ?? []).map(({ id, name }) => ({ value: id, label: name }))}
+                value={apartmentId}
+                onChange={setApartmentId}
+                allowDeselect={false}
+                error={apartments.isSuccess && apartments.data.length === 0}
+              />
+            )}
+            {needsApartment && apartments.isSuccess && apartments.data.length === 0 && (
+              <Text size="sm" c="dimmed">
+                {fr.importForm.noApartment}{" "}
+                <Anchor component={Link} to="/settings?tab=apt" size="sm">
+                  {fr.importForm.addApartment}
+                </Anchor>
+              </Text>
+            )}
 
             <Button type="submit" disabled={!canSubmit} loading={importStatement.isPending}>
               {fr.importForm.submit}

@@ -17,9 +17,11 @@ import { Link, useNavigate } from "react-router";
 
 import { PageHeader } from "@/components/page-header";
 import { DeleteImportButton } from "@/features/imports/components/delete-import-button";
+import { useApartmentOptions } from "@/features/apartments/hooks/use-apartment-options";
 import {
   useImportReview,
   useRunCategorization,
+  useSetApartment,
   useSetCategory,
   useValidateImport,
 } from "@/features/review/hooks/use-import-review";
@@ -47,6 +49,8 @@ const CATEGORY_OPTIONS = Object.fromEntries(
 export function ImportReview({ importId }: { importId: string }) {
   const review = useImportReview(importId);
   const setCategory = useSetCategory(importId);
+  const setApartment = useSetApartment(importId);
+  const apartments = useApartmentOptions();
   const validateImport = useValidateImport(importId);
   const runCategorization = useRunCategorization(importId);
   const navigate = useNavigate();
@@ -57,6 +61,12 @@ export function ImportReview({ importId }: { importId: string }) {
 
   const batch = review.data;
   const locked = batch.status === "VALIDATED";
+  // Colonne « Appartement » : uniquement pour un relevé du compte appartement (R11).
+  const showApartment = batch.accountType === "APARTMENT";
+  const apartmentOptions = (apartments.data ?? []).map(({ id, name }) => ({
+    value: id,
+    label: name,
+  }));
 
   // Valeurs dérivées calculées pendant le rendu (≈ `computed`).
   const toReviewCount = batch.transactions.filter((row) => row.needsReview).length;
@@ -117,6 +127,7 @@ export function ImportReview({ importId }: { importId: string }) {
               <Table.Th>{fr.common.label}</Table.Th>
               <Table.Th ta="right">{fr.common.amount}</Table.Th>
               <Table.Th>{fr.common.category}</Table.Th>
+              {showApartment && <Table.Th>{fr.review.columns.apartment}</Table.Th>}
               <Table.Th ta="right">{fr.review.columns.confidence}</Table.Th>
             </Table.Tr>
           </Table.Thead>
@@ -146,7 +157,33 @@ export function ImportReview({ importId }: { importId: string }) {
                     }}
                     error={row.category === null}
                   />
+                  {row.loanMatch && (
+                    <Text size="xs" mt={4} c={row.loanMatch.recognized ? "teal.4" : "amber.4"}>
+                      {row.loanMatch.recognized
+                        ? fr.review.loanMatch.recognized
+                        : fr.review.loanMatch.notRecognized(
+                            formatCents(row.loanMatch.expectedCents),
+                          )}
+                    </Text>
+                  )}
                 </Table.Td>
+                {showApartment && (
+                  <Table.Td>
+                    <Select
+                      aria-label={fr.review.apartmentOf(row.label)}
+                      placeholder={fr.review.apartmentPlaceholder}
+                      size="sm"
+                      w={160}
+                      data={apartmentOptions}
+                      value={row.apartmentId}
+                      allowDeselect={false}
+                      disabled={locked}
+                      onChange={(value) => {
+                        if (value) setApartment.mutate({ id: row.id, apartmentId: value });
+                      }}
+                    />
+                  </Table.Td>
+                )}
                 <Table.Td ta="right">
                   <Group gap={8} justify="flex-end" wrap="nowrap">
                     <ConfidenceBadge
@@ -175,7 +212,9 @@ export function ImportReview({ importId }: { importId: string }) {
           </Table.Tbody>
         </Table>
 
-        {setCategory.isError && <Alert color="red" m={16} title={fr.review.correctionFailed} />}
+        {(setCategory.isError || setApartment.isError) && (
+          <Alert color="red" m={16} title={fr.review.correctionFailed} />
+        )}
 
         {(validateImport.isError || runCategorization.isError) && (
           <Alert color="red" m={16} title={fr.review.actionFailed}>
