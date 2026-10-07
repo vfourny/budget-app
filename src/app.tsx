@@ -7,6 +7,7 @@ import { ImportPage } from "@/pages/import-page";
 import { ImportReviewPage } from "@/pages/import-review-page";
 import { ImportsPage } from "@/pages/imports-page";
 import { PersonalPage } from "@/pages/personal-page";
+import { ApartmentsPage } from "@/pages/apartments-page";
 import { ProfessionalPage } from "@/pages/professional-page";
 import { SettingsPage } from "@/pages/settings-page";
 
@@ -23,6 +24,7 @@ export function App() {
           <Route index element={<Navigate to="/personal" replace />} />
           <Route path="personal" element={<PersonalPage />} />
           <Route path="professional" element={<ProfessionalPage />} />
+          <Route path="apartments" element={<ApartmentsPage />} />
           <Route path="imports" element={<ImportsPage />} />
           <Route path="imports/new" element={<ImportPage />} />
           <Route path="imports/:importId" element={<ImportReviewPage />} />

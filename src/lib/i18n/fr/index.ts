@@ -1,3 +1,4 @@
+import { apartments } from "./apartments";
 import { auth } from "./auth";
 import { common } from "./common";
 import {
@@ -60,6 +61,7 @@ const monthsShort = [
  * vérifiés par `satisfies Record<Enum, string>` (voir `enums.ts`).
  */
 export const fr = {
+  apartments,
   auth,
   common,
   nav,

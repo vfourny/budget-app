@@ -1,6 +1,7 @@
 import { ActionIcon, AppShell, NavLink } from "@mantine/core";
 import {
   IconBriefcase,
+  IconBuilding,
   IconInbox,
   IconLayoutDashboard,
   IconLogout,
@@ -24,6 +25,7 @@ interface NavItem {
 const MAIN_NAV = [
   { to: "/personal", label: fr.nav.personal, icon: IconLayoutDashboard },
   { to: "/professional", label: fr.nav.professional, icon: IconBriefcase },
+  { to: "/apartments", label: fr.nav.apartments, icon: IconBuilding },
   { to: "/imports", label: fr.nav.imports, icon: IconInbox },
 ] as const satisfies readonly NavItem[];
 

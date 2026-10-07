@@ -4,6 +4,7 @@ export const common = {
   confirm: "Confirmer",
   save: "Enregistrer",
   saved: "Enregistré.",
+  euro: "€",
   loadingFailed: "Chargement impossible.",
   seeDetails: "Voir le détail →",
   // Intitulés de colonnes / de montants

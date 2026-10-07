@@ -15,6 +15,8 @@ export interface TransactionRow {
   /** Centimes, signé : négatif = débit. */
   amountCents: number;
   category: TransactionCategory | null;
+  /** Nom de l'appartement rattaché : la colonne « Appartement » n'apparaît que s'il est renseigné. */
+  apartmentName?: string;
 }
 
 type SortKey = "date" | "label" | "category" | "amount";
@@ -77,6 +79,7 @@ export function TransactionsTable({ transactions, emptyText }: TransactionsTable
     debits: transactions.filter(FILTERS.debits).length,
     toCheck: transactions.filter(FILTERS.toCheck).length,
   } satisfies Record<Filter, number>;
+  const showApartment = transactions.some((row) => row.apartmentName !== undefined);
   const creditsCents = transactions.reduce((sum, row) => sum + Math.max(0, row.amountCents), 0);
   const debitsCents = transactions.reduce((sum, row) => sum + Math.max(0, -row.amountCents), 0);
   const rows = transactions.filter(FILTERS[filter]).sort((a, b) => {
@@ -139,6 +142,7 @@ export function TransactionsTable({ transactions, emptyText }: TransactionsTable
                     </UnstyledButton>
                   </Table.Th>
                 ))}
+                {showApartment && <Table.Th>{fr.transactions.apartment}</Table.Th>}
               </Table.Tr>
             </Table.Thead>
             <Table.Tbody>
@@ -169,6 +173,7 @@ export function TransactionsTable({ transactions, emptyText }: TransactionsTable
                     {row.amountCents > 0 ? "+ " : "− "}
                     {formatCents(Math.abs(row.amountCents))}
                   </Table.Td>
+                  {showApartment && <Table.Td>{row.apartmentName}</Table.Td>}
                 </Table.Tr>
               ))}
             </Table.Tbody>

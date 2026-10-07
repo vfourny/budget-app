@@ -103,6 +103,7 @@ export const REVENUE_LINES = [
 const TO_CHECK_CATEGORIES = [
   "OTHER",
   "PROFESSIONAL_OTHER",
+  "APT_OTHER",
 ] as const satisfies readonly TransactionCategory[];
 
 /** Clé d'une ligne de revenus (`"other"` = le reste). Libellés : `@/lib/i18n/fr`. */
