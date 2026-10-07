@@ -128,6 +128,37 @@ export const apartmentRouter = createTRPCRouter({
     });
   }),
 
+  /**
+   * Facture de gérance d'un mois (R12), saisie à la main : frais de gérance + frais supplémentaires.
+   * Refusée pour un appartement en direct (sans gérant).
+   */
+  setManagementInvoice: protectedProcedure
+    .input(
+      z.object({
+        apartmentId: z.string().min(1),
+        year: z.number().int().min(2000).max(2100),
+        month: z.number().int().min(1).max(12),
+        feesCents: cents,
+        extraFeesCents: cents,
+      }),
+    )
+    .mutation(async ({ ctx, input }) => {
+      const userId = ctx.session.user.id;
+      const { apartmentId, year, month, ...fees } = input;
+      const apartment = await ctx.db.apartment.findFirst({
+        where: { id: apartmentId, userId },
+        select: { managerName: true },
+      });
+      if (!apartment) throw appError("NOT_FOUND", "APARTMENT_NOT_FOUND");
+      if (apartment.managerName === null) throw appError("BAD_REQUEST", "APARTMENT_NO_MANAGER");
+      await ctx.db.managementInvoice.upsert({
+        where: { apartmentId_year_month: { apartmentId, year, month } },
+        create: { userId, apartmentId, year, month, ...fees },
+        update: fees,
+      });
+      return { apartmentId, year, month };
+    }),
+
   /** Refusé tant que l'appartement porte des transactions ou des relevés (R11) : les détacher d'abord. */
   delete: protectedProcedure
     .input(z.object({ id: z.string().min(1) }))

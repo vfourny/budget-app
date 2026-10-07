@@ -1,3 +1,4 @@
+import type { TransactionCategory } from "@server/generated/prisma/enums";
 import type { ApartmentCategory } from "@shared/account-categories";
 
 /*
@@ -31,6 +32,15 @@ export const APARTMENT_CATEGORY_LINES = {
 } as const satisfies Record<ApartmentCategory, string>;
 
 export type ApartmentLineKey = (typeof APARTMENT_CATEGORY_LINES)[ApartmentCategory];
+
+/**
+ * Ligne du tableau d'une transaction (R2). Sans catégorie (ou hors liste du compte appartement), elle
+ * compte en « Autres » (R4) : elle reste signalée « À vérifier » dans les listes de transactions.
+ */
+export function apartmentLineOf(category: TransactionCategory | null): ApartmentLineKey {
+  const entry = Object.entries(APARTMENT_CATEGORY_LINES).find(([key]) => key === category);
+  return entry?.[1] ?? "other";
+}
 
 /**
  * Lignes de charges par section du tableau (R2), dans l'ordre d'affichage. Toutes entrent dans le
