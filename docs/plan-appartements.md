@@ -1,5 +1,10 @@
 # Plan d'action — Appartements (LMNP)
 
+> **Statut : réalisé** (PR 1 à 8, branches empilées `feat/apartment-model` → `chore/apartments-docs`). Écarts avec ce
+> plan : l'échéance de prêt prélevée est ventilée avec le capital = montant − intérêts − assurance (le solde reste égal au
+> solde bancaire, l'écart d'arrondi ≤ 1 € va dans le capital) ; la jauge « capital remboursé » est plafonnée au dernier mois
+> clos ; les tables `ApartmentYearOpening` et `ManagementInvoice` portent aussi `userId`.
+>
 > Rédigé le 2026-10-07 à partir de la maquette (canvas Claude Design « Budget — maquette MVP », artboards
 > **Appartements**, **Réglages** et **Relecture**), de `CLAUDE.md`, `docs/` et du code de `main` (493001b).
 > Objectif : livrer l'écran `/apartments` en **PR courtes empilées**, en réutilisant l'existant (relecture,

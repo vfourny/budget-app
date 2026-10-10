@@ -14,6 +14,7 @@ export const transactions = {
     toCheck: (count: number) => `À vérifier (${count})`,
   },
   toCheck: "À vérifier",
+  apartment: "Appartement",
   empty: "Aucune transaction pour ce mois.",
   emptyFilter: "Aucune transaction pour ce filtre.",
 } as const;

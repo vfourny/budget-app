@@ -1,3 +1,5 @@
+import { apartmentRouter } from "@server/trpc/routers/apartment";
+import { apartmentDashboardRouter } from "@server/trpc/routers/apartment-dashboard";
 import { categorizeRouter } from "@server/trpc/routers/categorize";
 import { importRouter } from "@server/trpc/routers/import";
 import { personalRouter } from "@server/trpc/routers/personal";
@@ -10,6 +12,8 @@ import { createTRPCRouter } from "@server/trpc/init";
 
 // Enregistrer chaque routeur de domaine ici.
 export const appRouter = createTRPCRouter({
+  apartment: apartmentRouter,
+  apartmentDashboard: apartmentDashboardRouter,
   categorize: categorizeRouter,
   import: importRouter,
   personal: personalRouter,

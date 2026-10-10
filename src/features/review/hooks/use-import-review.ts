@@ -18,6 +18,14 @@ export function useSetCategory(importId: string) {
   });
 }
 
+/** Rattache une ligne à un autre appartement (relevé appartement) puis rafraîchit la relecture. */
+export function useSetApartment(importId: string) {
+  return useMutation({
+    ...trpc.transaction.setApartment.mutationOptions(),
+    onSuccess: () => queryClient.invalidateQueries(trpc.import.get.queryFilter({ id: importId })),
+  });
+}
+
 /** Valide l'import : il passe « Terminé » et compte dans les dashboards. */
 export function useValidateImport(importId: string) {
   return useMutation({

@@ -16,6 +16,8 @@ export function useImportStatement() {
   return useMutation({
     mutationFn: async (input: {
       accountType: AccountType;
+      /** Appartement du relevé (compte appartement) ; `null` sinon. */
+      apartmentId?: string | null;
       fileName: string;
       csvText: string;
       /** Format confirmé après détection (CSV inconnu) : enregistré par le serveur. */
