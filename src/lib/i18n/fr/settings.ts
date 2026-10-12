@@ -4,7 +4,7 @@ export const settings = {
   title: 'Réglages',
   tabs: {
     personal: 'Perso',
-    professional: 'Pro · Stygma',
+    professional: 'Pro',
     apartments: 'Appartements',
   },
   shares: {
