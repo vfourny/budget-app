@@ -168,7 +168,8 @@ nitro.config.ts        # serverDir: ./server
 ## Workflow Git / PR
 
 - **Une fonctionnalité = une branche = une PR**, diff court (relisible en quelques minutes).
-  Branches : `feat/…`, `fix/…`, `chore/…`. Commits : Conventional Commits.
+  Branches : `feat/…`, `fix/…`, `chore/…`. Commits : Conventional Commits **avec scope obligatoire**
+  (`feat(import): …`), vérifiés par commitlint (config du toolkit) dans le hook `commit-msg`.
 - Si une étape est trop grosse, découpe en **PR empilées** (la PR N+1 cible la branche N).
 - Avant toute PR : self-review du diff, `pnpm check` + `pnpm build` verts, puis
   `/ship-pr`. Ne présenter que du vert.

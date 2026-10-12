@@ -13,3 +13,8 @@ pre-commit:
       glob: "*.{ts,tsx,js,jsx,mjs,cjs,json,md,css,yml,yaml}"
       run: pnpm exec prettier --write --ignore-unknown {staged_files}
       stage_fixed: true
+
+commit-msg:
+  commands:
+    commitlint:
+      run: pnpm exec commitlint --edit {1}
