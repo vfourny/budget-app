@@ -9,6 +9,7 @@ export function allocateRefunds(paidCents: number, dues: readonly number[]): num
     left -= share;
     return share;
   });
-  if (left > 0 && allocated.length > 0) allocated[allocated.length - 1] += left;
+  const last = allocated.length - 1;
+  if (left > 0 && last >= 0) allocated[last] = (allocated[last] ?? 0) + left;
   return allocated;
 }

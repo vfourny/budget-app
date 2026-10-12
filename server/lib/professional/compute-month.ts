@@ -218,5 +218,5 @@ function mixedCostRows(input: ProfessionalMonthInput): MixedCostRow[] {
         rows.map((row) => row.due.actual ?? 0),
       )
     : null;
-  return rows.map((row, index) => ({ ...row, paidCents: paid ? paid[index] : null }));
+  return rows.map((row, index) => ({ ...row, paidCents: paid?.[index] ?? null }));
 }

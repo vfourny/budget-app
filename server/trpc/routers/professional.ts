@@ -54,6 +54,8 @@ export const professionalRouter = createTRPCRouter({
         }),
       ]);
       const month = months[input.month - 1];
+      // loadProfessionalYear renvoie toujours les 12 mois : jamais atteint.
+      if (!month) throw new Error(`Missing month ${input.month}`);
       // Cumul des km réalisés depuis janvier (mois passés et mois affiché).
       const mileageToDate = months.slice(0, input.month).reduce(
         (total, m) => ({

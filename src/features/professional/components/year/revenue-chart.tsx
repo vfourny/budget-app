@@ -80,7 +80,7 @@ export function RevenueChart({
   );
 }
 
-function Legend({ className, label }: { className: string; label: string }) {
+function Legend({ className, label }: { className?: string; label: string }) {
   return (
     <Group gap={6} wrap="nowrap">
       <span className={className} aria-hidden />

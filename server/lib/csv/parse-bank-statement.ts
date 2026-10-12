@@ -85,13 +85,13 @@ function extractAmountCents(
   decimalSeparator: CsvFormatConfig["decimalSeparator"],
 ): number {
   if (amount.kind === "signed") {
-    const value = parseAmountToCents(fields[amount.column], decimalSeparator);
+    const value = parseAmountToCents(fields[amount.column] ?? "", decimalSeparator);
     if (value === null) throw new CsvLineError("MISSING_AMOUNT");
     return value;
   }
 
-  const debit = parseAmountToCents(fields[amount.debit], decimalSeparator);
-  const credit = parseAmountToCents(fields[amount.credit], decimalSeparator);
+  const debit = parseAmountToCents(fields[amount.debit] ?? "", decimalSeparator);
+  const credit = parseAmountToCents(fields[amount.credit] ?? "", decimalSeparator);
   if (debit === null && credit === null) throw new CsvLineError("EMPTY_DEBIT_CREDIT");
   // Débit toujours négatif, crédit toujours positif, que la banque signe la colonne débit ou non.
   return Math.abs(credit ?? 0) - Math.abs(debit ?? 0);
@@ -112,7 +112,7 @@ export function parseBankStatement(csvText: string, config: CsvFormatConfig): Pa
     const lineNumber = index + (config.hasHeader ? 2 : 1);
     try {
       const fields = splitCsvLine(line, config.delimiter);
-      const date = parseDate(fields[config.dateColumn], config.dateFormat);
+      const date = parseDate(fields[config.dateColumn] ?? "", config.dateFormat);
       const label = config.labelColumns
         .map((column) => fields[column]?.trim() ?? "")
         .filter((field) => field !== "")

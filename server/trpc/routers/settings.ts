@@ -26,8 +26,8 @@ const incomeTaxBracketsSchema = z
   .min(1)
   .refine(
     (brackets) =>
-      brackets[0].fromCents === 0 &&
-      brackets.every((b, i) => i === 0 || b.fromCents > brackets[i - 1].fromCents),
+      brackets[0]?.fromCents === 0 &&
+      brackets.every((b, i) => i === 0 || b.fromCents > (brackets[i - 1]?.fromCents ?? 0)),
     { message: "Brackets must start at 0 and have strictly increasing thresholds." },
   );
 

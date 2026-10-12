@@ -1,21 +1,14 @@
 {
+  "extends": "@vfourny/node-toolkit/tsconfig/base",
   "compilerOptions": {
     "target": "es2023",
     "lib": ["ES2023", "DOM", "DOM.Iterable"],
-    "module": "esnext",
-    "moduleResolution": "bundler",
     "types": ["vite/client", "node"],
     "jsx": "react-jsx",
-    "strict": true,
     "noEmit": true,
-    "skipLibCheck": true,
+    "allowJs": false,
     "allowImportingTsExtensions": true,
-    "verbatimModuleSyntax": true,
     "moduleDetection": "force",
-    "resolveJsonModule": true,
-    "noUnusedLocals": true,
-    "noUnusedParameters": true,
-    "noFallthroughCasesInSwitch": true,
     "paths": {
       "@/*": ["./src/*"],
       "@server/*": ["./server/*"],

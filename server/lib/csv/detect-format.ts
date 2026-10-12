@@ -117,10 +117,11 @@ export async function detectCsvFormat(
   csvText: string,
 ): Promise<DetectedCsvFormat> {
   const lines = csvLines(csvText);
-  if (lines.length === 0) throw new Error("Fichier vide.");
+  const header = lines[0];
+  if (header === undefined) throw new Error("Fichier vide.");
 
-  const delimiter = guessDelimiter(lines[0]);
-  const columns = splitCsvLine(lines[0], delimiter).map((field) => field.trim());
+  const delimiter = guessDelimiter(header);
+  const columns = splitCsvLine(header, delimiter).map((field) => field.trim());
 
   const response = await client.models.generateContent({
     model: env.GEMINI_MODEL,
