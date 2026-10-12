@@ -1,9 +1,9 @@
 import { Paper, Table, Text, Title } from '@mantine/core'
+import type { ProfessionalMonth } from '@server/lib/professional/types'
 
 import { finalOf } from '@/features/professional/final-amount'
 import { formatEurosRounded, shortMonthName } from '@/lib/format'
 import { fr } from '@/lib/i18n/fr'
-import type { ProfessionalMonth } from '@server/lib/professional/types'
 
 import classes from './income-statement.module.css'
 
@@ -59,22 +59,22 @@ export function IncomeStatement({
   const text = fr.professional.year.statement
   return (
     <Paper
-      withBorder
-      radius="lg"
-      p={24}
-      mb={16}
-      component="section"
       aria-label={text.title}
+      component="section"
+      mb={16}
+      p={24}
+      radius="lg"
+      withBorder
     >
       <Title order={2}>{text.title}</Title>
-      <Text size="xs" c="dimmed" mb={16}>
+      <Text c="dimmed" mb={16} size="xs">
         {text.subtitle}
       </Text>
       <Table.ScrollContainer minWidth={1100}>
         <Table
-          verticalSpacing="xs"
-          horizontalSpacing="xs"
           className={classes.table}
+          horizontalSpacing="xs"
+          verticalSpacing="xs"
         >
           <Table.Thead>
             <Table.Tr>
@@ -90,21 +90,21 @@ export function IncomeStatement({
           <Table.Tbody>
             {ROWS.map((row) => (
               <Table.Tr key={row.key}>
-                <Table.Th scope="row" c={row.color} fw={row.strong ? 700 : 500}>
+                <Table.Th c={row.color} fw={row.strong ? 700 : 500} scope="row">
                   {text.rows[row.key]}
                 </Table.Th>
                 {months.map((month) => (
                   <Table.Td
-                    key={month.month}
-                    ta="right"
                     c={month.hasActual ? undefined : 'dimmed'}
                     fs={month.hasActual ? undefined : 'italic'}
                     fw={row.strong ? 600 : undefined}
+                    key={month.month}
+                    ta="right"
                   >
                     {formatEurosRounded(row.value(month))}
                   </Table.Td>
                 ))}
-                <Table.Td ta="right" fw={700} c={row.color}>
+                <Table.Td c={row.color} fw={700} ta="right">
                   {formatEurosRounded(
                     months.reduce(
                       (total, month) => total + row.value(month),

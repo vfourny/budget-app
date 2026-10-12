@@ -1,11 +1,10 @@
-import { z } from 'zod'
-
 import { aggregatePeriod } from '@server/lib/dashboard/aggregate'
 import {
   periodsWithData,
   validatedTransactions,
 } from '@server/lib/dashboard/scope'
 import { createTRPCRouter, protectedProcedure } from '@server/trpc/init'
+import { z } from 'zod'
 
 export const personalRouter = createTRPCRouter({
   /** Mois ayant des données (du plus récent au plus ancien) : alimente le sélecteur de période. */

@@ -1,9 +1,9 @@
 import { Table, Text } from '@mantine/core'
+import type { ApartmentLines } from '@server/lib/apartments/types'
 import { Fragment } from 'react'
 
 import { formatCents } from '@/lib/format'
 import { fr } from '@/lib/i18n/fr'
-import type { ApartmentLines } from '@server/lib/apartments/types'
 import type { RouterOutputs } from '@/lib/trpc'
 
 type ApartmentView =
@@ -14,13 +14,13 @@ type Column = ApartmentView['forecast']
 type Sign = 1 | -1
 
 interface Row {
-  key: string
-  label: string
-  sub?: string
-  forecast: number
   /** `null` = pas de réalisé (mois à venir). */
   actual: number | null
+  forecast: number
+  key: string
+  label: string
   sign: Sign
+  sub?: string
   total?: boolean
 }
 
@@ -206,9 +206,9 @@ export function ApartmentTable({
   return (
     <Table.ScrollContainer minWidth={560}>
       <Table
-        verticalSpacing="xs"
-        horizontalSpacing="md"
         aria-label={text.aria(apartment.name)}
+        horizontalSpacing="md"
+        verticalSpacing="xs"
       >
         <Table.Thead>
           <Table.Tr>
@@ -223,12 +223,12 @@ export function ApartmentTable({
             <Fragment key={section.key}>
               <Table.Tr>
                 <Table.Th
-                  colSpan={4}
-                  scope="colgroup"
                   c="gold.6"
+                  colSpan={4}
                   fz="xs"
-                  tt="uppercase"
                   pt={16}
+                  scope="colgroup"
+                  tt="uppercase"
                 >
                   {text.sections[section.key]}
                 </Table.Th>
@@ -252,31 +252,28 @@ function TableLine({ row }: { row: Row }) {
 
   return (
     <Table.Tr>
-      <Table.Th scope="row" fw={bold ?? 400}>
-        <Text span size="sm" fw={bold}>
+      <Table.Th fw={bold ?? 400} scope="row">
+        <Text fw={bold} size="sm" span>
           {row.label}
         </Text>
         {row.sub && (
-          <Text span size="xs" c="dimmed" ml={6}>
+          <Text c="dimmed" ml={6} size="xs" span>
             · {row.sub}
           </Text>
         )}
       </Table.Th>
       <Table.Td
-        ta="right"
         c="dimmed"
         fw={bold}
         style={{ whiteSpace: 'nowrap' }}
+        ta="right"
       >
         {money(row.forecast)}
       </Table.Td>
-      <Table.Td ta="right" fw={bold ?? 600} style={{ whiteSpace: 'nowrap' }}>
+      <Table.Td fw={bold ?? 600} style={{ whiteSpace: 'nowrap' }} ta="right">
         {row.actual === null ? '—' : money(row.actual)}
       </Table.Td>
       <Table.Td
-        ta="right"
-        fw={bold}
-        style={{ whiteSpace: 'nowrap' }}
         c={
           delta === null || delta === 0
             ? 'dimmed'
@@ -284,6 +281,9 @@ function TableLine({ row }: { row: Row }) {
               ? 'teal.4'
               : 'red.4'
         }
+        fw={bold}
+        style={{ whiteSpace: 'nowrap' }}
+        ta="right"
       >
         {delta === null || delta === 0
           ? '—'

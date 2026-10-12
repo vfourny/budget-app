@@ -33,47 +33,47 @@ export function LmnpThresholds({ thresholds }: { thresholds: Thresholds }) {
 
   return (
     <Paper
-      withBorder
-      radius="lg"
-      p={24}
-      component="section"
       aria-label={text.title}
+      component="section"
+      p={24}
+      radius="lg"
+      withBorder
     >
       <Stack gap={16}>
         <Title order={2}>{text.title}</Title>
-        <Text size="sm" c="dimmed">
+        <Text c="dimmed" size="sm">
           {text.receipts(receipts)} ·{' '}
           {text.projection(formatCents(thresholds.projectedCents))}
         </Text>
         {gauges.map((gauge) => (
-          <Stack key={gauge.key} gap={6}>
+          <Stack gap={6} key={gauge.key}>
             <Group justify="space-between">
-              <Text size="sm" fw={600}>
+              <Text fw={600} size="sm">
                 {gauge.name}
               </Text>
               <Text
-                size="sm"
                 c={
                   thresholds.receiptsCents > gauge.limit ? 'amber.4' : 'dimmed'
                 }
+                size="sm"
               >
                 {gauge.of}
                 {thresholds.receiptsCents > gauge.limit && ` · ${text.over}`}
               </Text>
             </Group>
             <TargetGauge
-              real={thresholds.receiptsCents}
-              target={gauge.limit}
-              goal="atMost"
               ariaLabel={text.gaugeAria(
                 gauge.name,
                 receipts,
                 formatCents(gauge.limit),
               )}
+              goal="atMost"
+              real={thresholds.receiptsCents}
+              target={gauge.limit}
             />
           </Stack>
         ))}
-        <Text size="xs" c="dimmed">
+        <Text c="dimmed" size="xs">
           {text.note}
         </Text>
       </Stack>

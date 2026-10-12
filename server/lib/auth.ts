@@ -1,8 +1,7 @@
-import { betterAuth } from 'better-auth'
-import { prismaAdapter } from 'better-auth/adapters/prisma'
-
 import { db } from '@server/lib/db'
 import { env } from '@server/lib/env'
+import { betterAuth } from 'better-auth'
+import { prismaAdapter } from 'better-auth/adapters/prisma'
 
 /**
  * Better Auth, monté sur `/api/auth/*` (`server/api/auth/[...all].ts`). Sessions en cookie

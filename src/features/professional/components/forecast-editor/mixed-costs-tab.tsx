@@ -1,14 +1,14 @@
 import { Text } from '@mantine/core'
-
-import { ForecastAmountsForm } from '@/features/professional/components/forecast-editor/forecast-amounts-form'
-import type { Period } from '@/hooks/use-period-selection'
-import { formatBp, formatCents } from '@/lib/format'
-import { fr } from '@/lib/i18n/fr'
 import {
   MIXED_COSTS,
   mixedShareBp,
   type ProfessionalYearSettingsValues,
 } from '@shared/professional-rules'
+
+import { ForecastAmountsForm } from '@/features/professional/components/forecast-editor/forecast-amounts-form'
+import type { Period } from '@/hooks/use-period-selection'
+import { formatBp, formatCents } from '@/lib/format'
+import { fr } from '@/lib/i18n/fr'
 
 /** Onglet « Frais mixtes » : dépenses perso prévues et part remboursée par Stygma. */
 export function MixedCostsTab({
@@ -28,18 +28,11 @@ export function MixedCostsTab({
 
   return (
     <ForecastAmountsForm
-      period={period}
-      group="mixedCosts"
-      rows={costs.map((cost) => cost.category)}
-      reference="lastYear"
-      hint={text.hint}
-      headers={{ category: text.category, amount: text.amount }}
-      extraHeaders={[text.key, text.share]}
       extraCells={(category, view) => {
         const cost = shareOf(category)
         if (!cost) return ['', '']
         return [
-          <Text key="key" size="sm" c="dimmed">
+          <Text c="dimmed" key="key" size="sm">
             {cost.key === 'area'
               ? text.areaKey(formatBp(cost.shareBp))
               : text.ratioKey(
@@ -47,16 +40,23 @@ export function MixedCostsTab({
                   settings.mixedKeyDenominator,
                 )}
           </Text>,
-          <Text key="share" size="sm" fw={600}>
+          <Text fw={600} key="share" size="sm">
             {formatCents(
               Math.round((view.valueOf(category) * cost.shareBp) / 10_000),
             )}
           </Text>,
         ]
       }}
+      extraHeaders={[text.key, text.share]}
+      group="mixedCosts"
+      headers={{ category: text.category, amount: text.amount }}
+      hint={text.hint}
+      period={period}
+      reference="lastYear"
+      rows={costs.map((cost) => cost.category)}
     >
       {({ view }) => (
-        <Text size="sm" fw={600} ta="right">
+        <Text fw={600} size="sm" ta="right">
           {text.total(
             formatCents(
               costs.reduce(

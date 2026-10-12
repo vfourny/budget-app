@@ -33,18 +33,18 @@ export function IncomeTaxBracketsForm() {
     <Stack gap={16}>
       <div>
         <Title order={3}>{fr.settings.incomeTax.title}</Title>
-        <Text size="sm" c="dimmed">
+        <Text c="dimmed" size="sm">
           {fr.settings.incomeTax.description}
         </Text>
       </div>
       <NumberInput
-        label={fr.settings.incomeTax.year}
-        w={120}
-        min={2000}
-        max={2100}
         allowDecimal={false}
-        value={year}
+        label={fr.settings.incomeTax.year}
+        max={2100}
+        min={2000}
         onChange={(value) => typeof value === 'number' && setYear(value)}
+        value={year}
+        w={120}
       />
       {brackets.isPending && <Loader color="gold" />}
       {brackets.isError && (
@@ -53,12 +53,12 @@ export function IncomeTaxBracketsForm() {
       {brackets.isSuccess && (
         // `key` : changer d'année remonte le formulaire, donc `useState` repart des données de l'année.
         <BracketsFields
-          key={year}
-          year={year}
           initial={brackets.data.map((b) => ({
             fromEuros: b.fromCents / 100,
             ratePercent: b.ratePercent,
           }))}
+          key={year}
+          year={year}
         />
       )}
     </Stack>
@@ -89,46 +89,46 @@ function BracketsFields({ year, initial }: { year: number; initial: Row[] }) {
     <Stack gap={12}>
       {isEmpty && <Alert color="amber">{fr.settings.incomeTax.empty}</Alert>}
       {draft.map((row, index) => (
-        <Group key={index} gap={12} align="flex-end">
+        <Group align="flex-end" gap={12} key={index}>
           <NumberInput
-            label={index === 0 ? fr.settings.incomeTax.from : undefined}
-            aria-label={fr.settings.incomeTax.from}
-            suffix=" €"
-            thousandSeparator=" "
-            min={0}
             allowDecimal={false}
+            aria-label={fr.settings.incomeTax.from}
             disabled={index === 0}
-            w={160}
-            value={row.fromEuros}
+            label={index === 0 ? fr.settings.incomeTax.from : undefined}
+            min={0}
             onChange={(value) =>
               update(index, {
                 fromEuros: typeof value === 'number' ? value : 0,
               })
             }
+            suffix=" €"
+            thousandSeparator=" "
+            value={row.fromEuros}
+            w={160}
           />
           <NumberInput
-            label={index === 0 ? fr.settings.incomeTax.rate : undefined}
-            aria-label={fr.settings.incomeTax.rate}
-            suffix=" %"
-            min={0}
-            max={100}
             allowDecimal={false}
-            w={110}
-            value={row.ratePercent}
+            aria-label={fr.settings.incomeTax.rate}
+            label={index === 0 ? fr.settings.incomeTax.rate : undefined}
+            max={100}
+            min={0}
             onChange={(value) =>
               update(index, {
                 ratePercent: typeof value === 'number' ? value : 0,
               })
             }
+            suffix=" %"
+            value={row.ratePercent}
+            w={110}
           />
           {index > 0 && (
             <ActionIcon
-              variant="default"
-              size="lg"
               aria-label={fr.settings.incomeTax.removeBracket}
               onClick={() =>
                 setDraft((rows) => rows.filter((_, i) => i !== index))
               }
+              size="lg"
+              variant="default"
             >
               <IconTrash size={16} />
             </ActionIcon>
@@ -136,7 +136,7 @@ function BracketsFields({ year, initial }: { year: number; initial: Row[] }) {
         </Group>
       ))}
       {!valid && (
-        <Text size="sm" c="red.4">
+        <Text c="red.4" size="sm">
           {fr.settings.incomeTax.invalid}
         </Text>
       )}
@@ -146,13 +146,12 @@ function BracketsFields({ year, initial }: { year: number; initial: Row[] }) {
         </Alert>
       )}
       {save.isSuccess && !changed && (
-        <Text size="sm" c="teal.4">
+        <Text c="teal.4" size="sm">
           {fr.common.saved}
         </Text>
       )}
       <Group>
         <Button
-          variant="default"
           leftSection={<IconPlus size={16} />}
           onClick={() =>
             setDraft((rows) => [
@@ -163,6 +162,7 @@ function BracketsFields({ year, initial }: { year: number; initial: Row[] }) {
               },
             ])
           }
+          variant="default"
         >
           {fr.settings.incomeTax.addBracket}
         </Button>

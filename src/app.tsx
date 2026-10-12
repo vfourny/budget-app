@@ -2,12 +2,12 @@ import { Navigate, Route, Routes } from 'react-router'
 
 import { RequireAuth } from '@/features/auth/components/require-auth'
 import { AppLayout } from '@/features/layout/components/app-layout'
-import { LoginPage } from '@/pages/login-page'
+import { ApartmentsPage } from '@/pages/apartments-page'
 import { ImportPage } from '@/pages/import-page'
 import { ImportReviewPage } from '@/pages/import-review-page'
 import { ImportsPage } from '@/pages/imports-page'
+import { LoginPage } from '@/pages/login-page'
 import { PersonalPage } from '@/pages/personal-page'
-import { ApartmentsPage } from '@/pages/apartments-page'
 import { ProfessionalPage } from '@/pages/professional-page'
 import { SettingsPage } from '@/pages/settings-page'
 
@@ -17,18 +17,18 @@ import { SettingsPage } from '@/pages/settings-page'
 export function App() {
   return (
     <Routes>
-      <Route path="login" element={<LoginPage />} />
+      <Route element={<LoginPage />} path="login" />
       <Route element={<RequireAuth />}>
         <Route element={<AppLayout />}>
           {/* Pas d'accueil : `/` redirige vers le dashboard Perso. */}
-          <Route index element={<Navigate to="/personal" replace />} />
-          <Route path="personal" element={<PersonalPage />} />
-          <Route path="professional" element={<ProfessionalPage />} />
-          <Route path="apartments" element={<ApartmentsPage />} />
-          <Route path="imports" element={<ImportsPage />} />
-          <Route path="imports/new" element={<ImportPage />} />
-          <Route path="imports/:importId" element={<ImportReviewPage />} />
-          <Route path="settings" element={<SettingsPage />} />
+          <Route element={<Navigate replace to="/personal" />} index />
+          <Route element={<PersonalPage />} path="personal" />
+          <Route element={<ProfessionalPage />} path="professional" />
+          <Route element={<ApartmentsPage />} path="apartments" />
+          <Route element={<ImportsPage />} path="imports" />
+          <Route element={<ImportPage />} path="imports/new" />
+          <Route element={<ImportReviewPage />} path="imports/:importId" />
+          <Route element={<SettingsPage />} path="settings" />
         </Route>
       </Route>
     </Routes>

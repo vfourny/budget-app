@@ -1,10 +1,9 @@
-import { loanSchedule, type LoanInstallment } from '@shared/apartment-loan'
 import {
-  MONTHLY_CHARGE_LINES,
   actualLines,
   computeMonth,
-  type MonthResult,
+  MONTHLY_CHARGE_LINES,
   type MonthlyChargeBasis,
+  type MonthResult,
 } from '@server/lib/apartments/compute-month'
 import {
   isActiveIn,
@@ -12,13 +11,14 @@ import {
   type YearMonth,
 } from '@server/lib/apartments/period'
 import {
-  ZERO_LINES,
   type ApartmentColumn,
   type ApartmentLines,
   type ApartmentRecord,
   type ApartmentTransaction,
   type ManagementInvoiceRecord,
+  ZERO_LINES,
 } from '@server/lib/apartments/types'
+import { type LoanInstallment, loanSchedule } from '@shared/apartment-loan'
 
 const monthKey = (year: number, month: number) => `${year}-${month}`
 
@@ -53,14 +53,14 @@ function monthlyChargeBasis(
 
 export interface ApartmentYearInput {
   apartment: ApartmentRecord
-  year: number
+  /** Factures de gérance de `year`, par mois. */
+  invoices: ReadonlyMap<number, ManagementInvoiceRecord>
   now: YearMonth
   /** Solde réel du compte au 1er janvier de `year` (0 si non saisi, R5). */
   openingBalanceCents: number
   /** Transactions validées de l'appartement, de `year - 1` et `year` (le prévu s'appuie sur N-1). */
   transactions: readonly ApartmentTransaction[]
-  /** Factures de gérance de `year`, par mois. */
-  invoices: ReadonlyMap<number, ManagementInvoiceRecord>
+  year: number
 }
 
 /**
@@ -146,15 +146,15 @@ function sumColumns(columns: readonly ApartmentColumn[]): ApartmentColumn {
 }
 
 export interface ApartmentPeriodColumns {
-  forecast: ApartmentColumn
   /** `null` si la période ne contient aucun mois clos (vue mois d'un mois à venir). */
   actual: ApartmentColumn | null
   /** Nombre de mois clos de la période. */
   closedMonths: number
-  /** Loyers dus (R8) : loyer prévu brut × mois clos. */
-  rentDueCents: number
+  forecast: ApartmentColumn
   /** Mois clos d'un bien géré sans facture de gérance saisie (R12). */
   missingInvoiceMonths: number[]
+  /** Loyers dus (R8) : loyer prévu brut × mois clos. */
+  rentDueCents: number
 }
 
 /**
@@ -171,7 +171,9 @@ export function periodColumns(
     forecast: sumColumns(forecastMonths.map((month) => month.forecast)),
     actual:
       closed.length > 0
-        ? sumColumns(closed.map((month) => month.actual!))
+        ? sumColumns(
+            closed.flatMap((month) => (month.actual ? [month.actual] : [])),
+          )
         : null,
     closedMonths: closed.length,
     rentDueCents: apartment.rentCents * closed.length,

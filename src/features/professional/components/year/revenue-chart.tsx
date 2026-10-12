@@ -1,9 +1,9 @@
 import { Group, Paper, Text, Title, Tooltip } from '@mantine/core'
+import type { ProfessionalMonth } from '@server/lib/professional/types'
 
 import { finalOf } from '@/features/professional/final-amount'
 import { formatCents, monthName, shortMonthName } from '@/lib/format'
 import { fr } from '@/lib/i18n/fr'
-import type { ProfessionalMonth } from '@server/lib/professional/types'
 
 import classes from './revenue-chart.module.css'
 
@@ -31,12 +31,12 @@ export function RevenueChart({
 
   return (
     <Paper
-      withBorder
-      radius="lg"
-      p={24}
-      mb={16}
-      component="section"
       aria-label={text.title}
+      component="section"
+      mb={16}
+      p={24}
+      radius="lg"
+      withBorder
     >
       <Group justify="space-between" mb={20}>
         <Title order={2}>{text.title}</Title>
@@ -53,7 +53,7 @@ export function RevenueChart({
           <Legend className={classes.legendCharges} label={text.charges} />
         </Group>
       </Group>
-      <div className={classes.chart} role="img" aria-label={text.aria(year)}>
+      <div aria-label={text.aria(year)} className={classes.chart} role="img">
         {months.map((month) => (
           <Tooltip
             key={month.month}
@@ -82,7 +82,7 @@ export function RevenueChart({
                   />
                 )}
               </div>
-              <Text size="xs" c="dimmed" ta="center">
+              <Text c="dimmed" size="xs" ta="center">
                 {shortMonthName(month.month)}
               </Text>
             </div>
@@ -96,8 +96,8 @@ export function RevenueChart({
 function Legend({ className, label }: { className?: string; label: string }) {
   return (
     <Group gap={6} wrap="nowrap">
-      <span className={className} aria-hidden />
-      <Text size="xs" c="dimmed">
+      <span aria-hidden className={className} />
+      <Text c="dimmed" size="xs">
         {label}
       </Text>
     </Group>

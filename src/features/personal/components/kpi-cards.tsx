@@ -1,17 +1,17 @@
 import { Anchor, Grid } from '@mantine/core'
+import type { Envelope } from '@server/generated/prisma/enums'
+import type { PeriodTotals } from '@server/lib/dashboard/aggregate'
+import { isSavingsEnvelope, SAVINGS_ENVELOPES } from '@shared/personal-rules'
 import { Link } from 'react-router'
 
 import { KpiCard, KpiLine } from '@/components/kpi-card'
 import { EnvelopeGauge } from '@/features/personal/components/envelope-gauge'
-import { useIncomeTaxBrackets } from '@/features/settings/hooks/use-income-tax-brackets'
 import { useEnvelopeShares } from '@/features/settings/hooks/use-envelope-shares'
-import { SAVINGS_ENVELOPES, isSavingsEnvelope } from '@shared/personal-rules'
+import { useIncomeTaxBrackets } from '@/features/settings/hooks/use-income-tax-brackets'
 import { ENVELOPE_ORDER, envelopeSourceText } from '@/lib/envelopes'
 import { formatCents } from '@/lib/format'
 import { fr } from '@/lib/i18n/fr'
 import { estimateIncomeTaxCents } from '@/lib/income-tax'
-import type { Envelope } from '@server/generated/prisma/enums'
-import type { PeriodTotals } from '@server/lib/dashboard/aggregate'
 
 type Overview = PeriodTotals & { monthsWithData: number }
 
@@ -53,6 +53,7 @@ export function KpiCards({
       return (
         <EnvelopeGauge
           key={envelope}
+          kind={kind}
           name={fr.envelopes[envelope]}
           realCents={realCents}
           recommendedCents={Math.round(
@@ -60,7 +61,6 @@ export function KpiCards({
           )}
           recommendedPercent={shares[envelope]}
           sourceText={envelopeSourceText(envelope)}
-          kind={kind}
         />
       )
     })
@@ -74,13 +74,13 @@ export function KpiCards({
   const annualRevenueCents = Math.round((overview.revenueCents / months) * 12)
 
   return (
-    <Grid gap={16} mb={16} align="stretch">
+    <Grid align="stretch" gap={16} mb={16}>
       <Grid.Col span={topSpan}>
         <KpiCard
-          label={fr.common.revenues}
-          value={formatCents(overview.revenueCents)}
           color="blue.3"
           hint={fr.personal.kpi.revenuesHint}
+          label={fr.common.revenues}
+          value={formatCents(overview.revenueCents)}
         >
           {overview.revenueLines.map((line) => (
             <KpiLine
@@ -93,27 +93,27 @@ export function KpiCards({
       </Grid.Col>
       <Grid.Col span={topSpan}>
         <KpiCard
+          hint={fr.personal.kpi.expensesHint}
           label={
             view === 'month'
               ? fr.personal.kpi.expensesMonth
               : fr.personal.kpi.expensesYear
           }
           value={formatCents(overview.expenseCents)}
-          hint={fr.personal.kpi.expensesHint}
         >
           {gauges(EXPENSE_ENVELOPES, 'expense')}
         </KpiCard>
       </Grid.Col>
       <Grid.Col span={topSpan}>
         <KpiCard
+          color="gold.6"
+          hint={fr.personal.kpi.savingsHint(savingsRate)}
           label={
             view === 'month'
               ? fr.personal.kpi.savingsMonth
               : fr.personal.kpi.savingsYear
           }
           value={formatCents(overview.savingsCents)}
-          color="gold.6"
-          hint={fr.personal.kpi.savingsHint(savingsRate)}
         >
           {gauges(SAVINGS_ENVELOPES, 'savings')}
         </KpiCard>
@@ -122,25 +122,23 @@ export function KpiCards({
         <>
           <Grid.Col span={bottomSpan}>
             <KpiCard
+              hint={fr.personal.kpi.monthsWithData(overview.monthsWithData)}
               label={fr.personal.kpi.averageExpense}
               value={formatCents(Math.round(overview.expenseCents / months))}
-              hint={fr.personal.kpi.monthsWithData(overview.monthsWithData)}
             />
           </Grid.Col>
           <Grid.Col span={bottomSpan}>
             {brackets.data && brackets.data.length > 0 ? (
               <KpiCard
+                color="blue.3"
+                hint={fr.personal.kpi.incomeTaxHint}
                 label={fr.personal.kpi.incomeTax(year)}
                 value={formatCents(
                   estimateIncomeTaxCents(annualRevenueCents, brackets.data),
                 )}
-                color="blue.3"
-                hint={fr.personal.kpi.incomeTaxHint}
               />
             ) : (
               <KpiCard
-                label={fr.personal.kpi.incomeTax(year)}
-                value={brackets.isPending ? '…' : '—'}
                 color="blue.3"
                 hint={
                   brackets.isError
@@ -149,9 +147,11 @@ export function KpiCards({
                       ? fr.personal.kpi.incomeTaxMissing(year)
                       : ''
                 }
+                label={fr.personal.kpi.incomeTax(year)}
+                value={brackets.isPending ? '…' : '—'}
               >
                 {brackets.isSuccess && (
-                  <Anchor component={Link} to="/settings" size="sm" c="amber.4">
+                  <Anchor c="amber.4" component={Link} size="sm" to="/settings">
                     {fr.personal.kpi.incomeTaxMissingLink}
                   </Anchor>
                 )}

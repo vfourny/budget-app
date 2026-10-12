@@ -12,13 +12,14 @@ import {
   Title,
 } from '@mantine/core'
 import { Dropzone } from '@mantine/dropzone'
+import type { AccountType } from '@server/generated/prisma/enums'
+import type { CsvFormatConfig } from '@shared/csv-format'
 import {
   IconAlertTriangle,
   IconFileSpreadsheet,
   IconUpload,
 } from '@tabler/icons-react'
-import type { AccountType } from '@server/generated/prisma/enums'
-import { useState, type SubmitEvent } from 'react'
+import { type SubmitEvent, useState } from 'react'
 import { Link, useNavigate, useSearchParams } from 'react-router'
 
 import { useApartmentOptions } from '@/features/apartments/hooks/use-apartment-options'
@@ -27,7 +28,6 @@ import { useDetectCsvFormat } from '@/features/imports/hooks/use-detect-csv-form
 import { useImportStatement } from '@/features/imports/hooks/use-import-statement'
 import { appErrorCode, csvErrorMessage, errorMessage } from '@/lib/errors'
 import { fr } from '@/lib/i18n/fr'
-import type { CsvFormatConfig } from '@shared/csv-format'
 
 // Libellés des types de compte (dictionnaire aligné sur l'enum Prisma), pour le `<Select>`.
 const ACCOUNT_TYPE_OPTIONS = (
@@ -147,15 +147,18 @@ export function ImportForm() {
       <Grid.Col span={{ base: 12, md: 5 }}>
         <Paper
           component="form"
-          withBorder
-          radius="lg"
-          p={28}
           onSubmit={handleSubmit}
+          p={28}
+          radius="lg"
+          withBorder
         >
           <Stack gap={22}>
             <Title order={2}>{fr.importForm.fileTitle}</Title>
 
             <Dropzone
+              accept={CSV_ACCEPT}
+              aria-label={fr.importForm.dropzoneAria}
+              multiple={false}
               onDrop={(files) => {
                 setFile(files[0] ?? null)
                 setFileRejected(false)
@@ -164,10 +167,7 @@ export function ImportForm() {
                 detectFormat.reset()
               }}
               onReject={() => setFileRejected(true)}
-              accept={CSV_ACCEPT}
-              multiple={false}
               radius="md"
-              aria-label={fr.importForm.dropzoneAria}
             >
               <Group gap={14} wrap="nowrap">
                 {file ? (
@@ -179,7 +179,7 @@ export function ImportForm() {
                   <Text fw={600} truncate>
                     {file ? file.name : fr.importForm.dropHere}
                   </Text>
-                  <Text size="xs" c="dimmed">
+                  <Text c="dimmed" size="xs">
                     {file
                       ? `${fr.importForm.fileSize(file.size)} · ${fr.importForm.clickToChange}`
                       : fr.importForm.orClickToChoose}
@@ -188,51 +188,51 @@ export function ImportForm() {
               </Group>
             </Dropzone>
             {fileRejected && (
-              <Text size="sm" c="red.4">
+              <Text c="red.4" size="sm">
                 {fr.importForm.notACsv}
               </Text>
             )}
 
             <Select
-              label={fr.importForm.accountType}
-              placeholder={fr.importForm.accountTypePlaceholder}
-              data={ACCOUNT_TYPE_OPTIONS}
-              value={accountType}
-              onChange={(value) => setAccountType(value as AccountType | null)}
               allowDeselect={false}
+              data={ACCOUNT_TYPE_OPTIONS}
+              label={fr.importForm.accountType}
+              onChange={(value) => setAccountType(value as AccountType | null)}
+              placeholder={fr.importForm.accountTypePlaceholder}
+              value={accountType}
             />
 
             {needsApartment && (
               <Select
-                label={fr.importForm.apartment}
-                placeholder={fr.importForm.apartmentPlaceholder}
-                description={fr.importForm.apartmentHint}
-                inputWrapperOrder={['label', 'input', 'description']}
+                allowDeselect={false}
                 data={(apartments.data ?? []).map(({ id, name }) => ({
                   value: id,
                   label: name,
                 }))}
-                value={apartmentId}
-                onChange={setApartmentId}
-                allowDeselect={false}
+                description={fr.importForm.apartmentHint}
                 error={apartments.isSuccess && apartments.data.length === 0}
+                inputWrapperOrder={['label', 'input', 'description']}
+                label={fr.importForm.apartment}
+                onChange={setApartmentId}
+                placeholder={fr.importForm.apartmentPlaceholder}
+                value={apartmentId}
               />
             )}
             {needsApartment &&
               apartments.isSuccess &&
               apartments.data.length === 0 && (
-                <Text size="sm" c="dimmed">
+                <Text c="dimmed" size="sm">
                   {fr.importForm.noApartment}{' '}
-                  <Anchor component={Link} to="/settings?tab=apt" size="sm">
+                  <Anchor component={Link} size="sm" to="/settings?tab=apt">
                     {fr.importForm.addApartment}
                   </Anchor>
                 </Text>
               )}
 
             <Button
-              type="submit"
               disabled={!canSubmit}
               loading={importStatement.isPending}
+              type="submit"
             >
               {fr.importForm.submit}
             </Button>
@@ -241,7 +241,7 @@ export function ImportForm() {
       </Grid.Col>
 
       <Grid.Col span={{ base: 12, md: 7 }}>
-        <Paper withBorder radius="lg" p={28} h="100%">
+        <Paper h="100%" p={28} radius="lg" withBorder>
           <Stack gap={18}>
             <Title order={2}>{fr.importForm.resultTitle}</Title>
 
@@ -261,7 +261,7 @@ export function ImportForm() {
                 <Stack gap={12}>
                   {errorMessage(detectFormat.error)}
                   <Group>
-                    <Button variant="default" onClick={handleRetryDetection}>
+                    <Button onClick={handleRetryDetection} variant="default">
                       {fr.importForm.retryDetection}
                     </Button>
                   </Group>
@@ -295,7 +295,7 @@ export function ImportForm() {
             {result && (
               <>
                 <div>
-                  <Text fz={44} fw={600} lh={1} c="gold.6">
+                  <Text c="gold.6" fw={600} fz={44} lh={1}>
                     {result.importedCount}
                   </Text>
                   <Text c="dimmed" mt={6}>

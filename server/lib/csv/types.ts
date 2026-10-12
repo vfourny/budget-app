@@ -17,15 +17,15 @@ export type CsvLineErrorCode =
   | 'UNKNOWN'
 
 export interface CsvParseError {
+  code: CsvLineErrorCode
   /** Numéro de ligne dans le fichier source (1-based, en-tête compris). */
   line: number
-  code: CsvLineErrorCode
+  raw: string
   /** Valeur fautive (montant ou date brut) pour `INVALID_*`, sinon vide. */
   value: string
-  raw: string
 }
 
 export interface ParsedBankStatement {
-  transactions: ParsedTransaction[]
   errors: CsvParseError[]
+  transactions: ParsedTransaction[]
 }

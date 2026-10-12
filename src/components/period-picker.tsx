@@ -2,20 +2,20 @@ import { ActionIcon, Group, SegmentedControl, Select } from '@mantine/core'
 import { IconChevronLeft, IconChevronRight } from '@tabler/icons-react'
 
 import {
-  periodKey,
   type Period,
+  periodKey,
   type PeriodView,
 } from '@/hooks/use-period-selection'
 import { monthName } from '@/lib/format'
 import { fr } from '@/lib/i18n/fr'
 
 interface PeriodPickerProps {
-  view: PeriodView
+  onSelect: (period: Period) => void
   onViewChange: (view: PeriodView) => void
   /** Périodes proposées, de la plus récente à la plus ancienne. */
   periods: readonly Period[]
   selected: Period
-  onSelect: (period: Period) => void
+  view: PeriodView
 }
 
 /**
@@ -51,44 +51,44 @@ export function PeriodPicker({
   return (
     <Group gap={12}>
       <SegmentedControl
-        value={view}
-        onChange={(value) => onViewChange(value as PeriodView)}
         data={[
           { value: 'month', label: fr.period.views.month },
           { value: 'year', label: fr.period.views.year },
         ]}
+        onChange={(value) => onViewChange(value as PeriodView)}
+        value={view}
       />
       {view === 'month' ? (
         <Group gap={6}>
           <ActionIcon
-            variant="default"
-            size="lg"
             aria-label={fr.period.previousMonth}
             disabled={!previousMonth}
             onClick={() => previousMonth && onSelect(previousMonth)}
+            size="lg"
+            variant="default"
           >
             <IconChevronLeft size={16} />
           </ActionIcon>
           <Select
-            aria-label={fr.period.month}
-            w={190}
             allowDeselect={false}
+            aria-label={fr.period.month}
             data={periods.map((period) => ({
               value: periodKey(period),
               label: `${monthName(period.month)} ${period.year}`,
             }))}
-            value={periodKey(selected)}
             onChange={(value) => {
               const period = periods.find((p) => periodKey(p) === value)
               if (period) onSelect(period)
             }}
+            value={periodKey(selected)}
+            w={190}
           />
           <ActionIcon
-            variant="default"
-            size="lg"
             aria-label={fr.period.nextMonth}
             disabled={!nextMonth}
             onClick={() => nextMonth && onSelect(nextMonth)}
+            size="lg"
+            variant="default"
           >
             <IconChevronRight size={16} />
           </ActionIcon>
@@ -96,20 +96,20 @@ export function PeriodPicker({
       ) : (
         <Group gap={6}>
           <ActionIcon
-            variant="default"
-            size="lg"
             aria-label={fr.period.previousYear}
             disabled={yearIndex <= 0}
             onClick={() => selectYear(years[yearIndex - 1])}
+            size="lg"
+            variant="default"
           >
             <IconChevronLeft size={16} />
           </ActionIcon>
           <ActionIcon
-            variant="default"
-            size="lg"
             aria-label={fr.period.nextYear}
             disabled={yearIndex >= years.length - 1}
             onClick={() => selectYear(years[yearIndex + 1])}
+            size="lg"
+            variant="default"
           >
             <IconChevronRight size={16} />
           </ActionIcon>

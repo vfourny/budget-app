@@ -10,17 +10,17 @@ export function ImportsPage() {
   return (
     <>
       <PageHeader
-        eyebrow={fr.imports.eyebrow}
-        title={fr.imports.title}
         actions={
           <Button
             component={Link}
-            to="/imports/new"
             leftSection={<IconPlus size={16} />}
+            to="/imports/new"
           >
             {fr.imports.newImport}
           </Button>
         }
+        eyebrow={fr.imports.eyebrow}
+        title={fr.imports.title}
       />
       <ImportsTable />
     </>

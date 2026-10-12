@@ -1,8 +1,8 @@
 import type { Apartment } from '@server/generated/prisma/client'
 import {
   loanSchedule,
-  splitLoanPayment,
   type LoanTerms,
+  splitLoanPayment,
 } from '@shared/apartment-loan'
 
 /** Champs d'un appartement utiles au prêt (un sous-ensemble du modèle Prisma). */
@@ -16,10 +16,10 @@ type LoanApartment = Pick<
 >
 
 export interface LoanMatch {
-  /** Montant prélevé reconnu comme l'échéance attendue du mois (R7) ? */
-  recognized: boolean
   /** Mensualité attendue d'après le tableau d'amortissement (hors assurance). */
   expectedCents: number
+  /** Montant prélevé reconnu comme l'échéance attendue du mois (R7) ? */
+  recognized: boolean
 }
 
 /**

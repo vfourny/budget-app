@@ -1,12 +1,10 @@
-import { z } from 'zod'
-
+import { AccountType } from '@server/generated/prisma/enums'
+import { matchLoanTransaction } from '@server/lib/apartments/loan'
 import { appError } from '@server/lib/app-error'
 import {
   NEEDS_REVIEW_WHERE,
   needsReview,
 } from '@server/lib/categorize/needs-review'
-import { AccountType } from '@server/generated/prisma/enums'
-import { matchLoanTransaction } from '@server/lib/apartments/loan'
 import { removeAlreadyImported } from '@server/lib/csv/dedupe'
 import {
   checkParsedStatement,
@@ -19,6 +17,7 @@ import { gemini } from '@server/lib/gemini'
 import { geminiTRPCError } from '@server/lib/gemini-errors'
 import { createTRPCRouter, protectedProcedure } from '@server/trpc/init'
 import { csvFormatConfigSchema } from '@shared/csv-format'
+import { z } from 'zod'
 
 /** Le CSV voyage en texte dans le JSON : un relevé fait quelques centaines de lignes, loin de la
  * limite Vercel (4,5 Mo). */

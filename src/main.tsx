@@ -24,14 +24,17 @@ import { queryClient } from '@/lib/trpc'
 //   thème du système (`auto`) ; un choix forcé clair / sombre est mémorisé par Mantine dans le
 //   localStorage (bouton dans la barre latérale, voir `ColorSchemeToggle`).
 // StrictMode (dev uniquement) monte les composants deux fois pour débusquer les effets mal nettoyés.
-createRoot(document.getElementById('root')!).render(
+const rootElement = document.getElementById('root')
+if (!rootElement) throw new Error('Missing #root element in index.html')
+
+createRoot(rootElement).render(
   <StrictMode>
     <QueryClientProvider client={queryClient}>
       <BrowserRouter>
         <MantineProvider
-          theme={theme}
           cssVariablesResolver={cssVariablesResolver}
           defaultColorScheme="auto"
+          theme={theme}
         >
           <App />
         </MantineProvider>

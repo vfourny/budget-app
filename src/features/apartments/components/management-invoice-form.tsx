@@ -8,10 +8,10 @@ import { fr } from '@/lib/i18n/fr'
 
 interface ManagementInvoiceFormProps {
   apartmentId: string
-  year: number
-  month: number
   /** Facture déjà saisie pour ce mois, `null` sinon. */
   invoice: { feesCents: number; extraFeesCents: number } | null
+  month: number
+  year: number
 }
 
 /**
@@ -35,26 +35,26 @@ export function ManagementInvoiceForm({
     extraFees !== invoice.extraFeesCents
 
   return (
-    <Paper withBorder radius="md" p={16}>
+    <Paper p={16} radius="md" withBorder>
       <Stack gap={12}>
         <div>
           <Group gap={8}>
             <Title order={4}>{text.title}</Title>
             {invoice === null && (
-              <Text size="xs" c="amber.4">
+              <Text c="amber.4" size="xs">
                 {text.missing}
               </Text>
             )}
           </Group>
-          <Text size="sm" c="dimmed">
+          <Text c="dimmed" size="sm">
             {text.description}
           </Text>
         </div>
         <Group align="flex-end" gap={16}>
-          <EuroField label={text.fees} cents={fees} onChange={setFees} />
+          <EuroField cents={fees} label={text.fees} onChange={setFees} />
           <EuroField
-            label={text.extraFees}
             cents={extraFees}
+            label={text.extraFees}
             onChange={setExtraFees}
           />
           <Button

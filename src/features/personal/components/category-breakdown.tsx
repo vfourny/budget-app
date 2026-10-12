@@ -1,9 +1,9 @@
 import { Group, Paper, Progress, Stack, Text, Title } from '@mantine/core'
-
+import type { TransactionCategory } from '@server/generated/prisma/enums'
 import { CATEGORY_CARD_CATEGORIES } from '@shared/personal-rules'
+
 import { formatCents } from '@/lib/format'
 import { fr } from '@/lib/i18n/fr'
-import type { TransactionCategory } from '@server/generated/prisma/enums'
 
 interface CategoryBreakdownProps {
   overview: {
@@ -27,8 +27,8 @@ export function CategoryBreakdown({ overview }: CategoryBreakdownProps) {
   const total = rows.reduce((sum, row) => sum + row.cents, 0)
 
   return (
-    <Paper withBorder radius="lg" p={28}>
-      <Title order={2} mb={20}>
+    <Paper p={28} radius="lg" withBorder>
+      <Title mb={20} order={2}>
         {fr.personal.breakdown.title}
       </Title>
       <Stack gap={16}>
@@ -36,17 +36,17 @@ export function CategoryBreakdown({ overview }: CategoryBreakdownProps) {
           <div key={category}>
             <Group justify="space-between" mb={6}>
               <Text size="sm">{fr.categories[category]}</Text>
-              <Text size="sm" fw={600}>
+              <Text fw={600} size="sm">
                 {formatCents(cents)}
-                <Text span size="xs" c="dimmed" ml={8}>
+                <Text c="dimmed" ml={8} size="xs" span>
                   {total > 0 ? Math.round((cents / total) * 100) : 0} %
                 </Text>
               </Text>
             </Group>
             <Progress
-              value={max > 0 ? (cents / max) * 100 : 0}
               color="gold"
               size="sm"
+              value={max > 0 ? (cents / max) * 100 : 0}
             />
           </div>
         ))}

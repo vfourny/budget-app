@@ -1,8 +1,7 @@
-import { fetchRequestHandler } from '@trpc/server/adapters/fetch'
-import { defineHandler } from 'nitro/h3'
-
 import { createTRPCContext } from '@server/trpc/init'
 import { appRouter } from '@server/trpc/root'
+import { fetchRequestHandler } from '@trpc/server/adapters/fetch'
+import { defineHandler } from 'nitro/h3'
 
 // Route catch-all (comme dans Nuxt) : /api/trpc/<domaine>.<proc>, /api/trpc/xxx… arrivent ici.
 // `event.req` est une Request standard, que l'adapter fetch de tRPC sait traiter directement.

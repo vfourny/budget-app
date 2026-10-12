@@ -1,14 +1,14 @@
+import { createTRPCRouter } from '@server/trpc/init'
 import { apartmentRouter } from '@server/trpc/routers/apartment'
 import { apartmentDashboardRouter } from '@server/trpc/routers/apartment-dashboard'
 import { categorizeRouter } from '@server/trpc/routers/categorize'
 import { importRouter } from '@server/trpc/routers/import'
 import { personalRouter } from '@server/trpc/routers/personal'
-import { professionalForecastRouter } from '@server/trpc/routers/professional-forecast'
 import { professionalRouter } from '@server/trpc/routers/professional'
+import { professionalForecastRouter } from '@server/trpc/routers/professional-forecast'
 import { settingsRouter } from '@server/trpc/routers/settings'
 import { transactionRouter } from '@server/trpc/routers/transaction'
 import { tripRouter } from '@server/trpc/routers/trip'
-import { createTRPCRouter } from '@server/trpc/init'
 
 // Enregistrer chaque routeur de domaine ici.
 export const appRouter = createTRPCRouter({

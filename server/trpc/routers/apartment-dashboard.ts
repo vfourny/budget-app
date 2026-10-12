@@ -1,9 +1,8 @@
-import { z } from 'zod'
-
 import { buildApartmentsView } from '@server/lib/apartments/build-view'
 import { loadApartmentData } from '@server/lib/apartments/load-period'
 import { currentYearMonth, isMonthClosed } from '@server/lib/apartments/period'
 import { createTRPCRouter, protectedProcedure } from '@server/trpc/init'
+import { z } from 'zod'
 
 const yearSchema = z.number().int().min(2000).max(2100)
 const apartmentFilter = z.string().min(1).nullish()

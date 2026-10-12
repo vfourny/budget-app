@@ -6,10 +6,10 @@ import {
 
 /** Règles d'une année + leur origine : saisies pour l'année, reprises d'une année antérieure, ou défaut. */
 export interface ResolvedProfessionalYearSettings {
-  values: ProfessionalYearSettingsValues
-  source: 'own' | 'inherited' | 'default'
   /** Année d'où viennent les valeurs (`null` = valeurs par défaut). */
   fromYear: number | null
+  source: 'own' | 'inherited' | 'default'
+  values: ProfessionalYearSettingsValues
 }
 
 /**
@@ -24,6 +24,7 @@ export async function resolveProfessionalYearSettings(
   const row = await db.professionalYearSettings.findFirst({
     where: { userId, year: { lte: year } },
     orderBy: { year: 'desc' },
+    omit: { userId: true },
   })
   if (!row)
     return {
@@ -31,6 +32,6 @@ export async function resolveProfessionalYearSettings(
       source: 'default',
       fromYear: null,
     }
-  const { userId: _userId, year: fromYear, ...values } = row
+  const { year: fromYear, ...values } = row
   return { values, source: fromYear === year ? 'own' : 'inherited', fromYear }
 }

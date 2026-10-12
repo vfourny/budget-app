@@ -1,9 +1,9 @@
-import type { ProfessionalCategory } from '@shared/account-categories'
+import type { ProfessionalYearSettings } from '@server/generated/prisma/browser'
 import type {
   CompanyRegime,
   TransactionCategory,
 } from '@server/generated/prisma/enums'
-import type { ProfessionalYearSettings } from '@server/generated/prisma/browser'
+import type { ProfessionalCategory } from '@shared/account-categories'
 
 /*
  * ✏️ RÈGLES DU COMPTE PRO (Stygma) : constantes partagées front + serveur (fichier pur, sans

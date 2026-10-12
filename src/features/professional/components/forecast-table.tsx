@@ -1,10 +1,10 @@
 import { Table, Text } from '@mantine/core'
+import type { ForecastActual } from '@server/lib/professional/types'
 import { Fragment } from 'react'
 
 import type { GaugeGoal } from '@/components/target-gauge'
 import { formatCents } from '@/lib/format'
 import { fr } from '@/lib/i18n/fr'
-import type { ForecastActual } from '@server/lib/professional/types'
 
 import classes from './forecast-table.module.css'
 
@@ -12,12 +12,12 @@ import classes from './forecast-table.module.css'
 type ForecastRowTone = 'normal' | 'detail' | 'memo' | 'total'
 
 export interface ForecastRow {
-  key: string
-  label: string
-  sub?: string
   amount: ForecastActual
   /** Sens favorable de l'écart : `atMost` pour une charge (moins = mieux). */
   goal: GaugeGoal
+  key: string
+  label: string
+  sub?: string
   tone?: ForecastRowTone
 }
 
@@ -36,7 +36,7 @@ export function ForecastTable({
   const columns = fr.professional.categories.columns
   return (
     <Table.ScrollContainer minWidth={560}>
-      <Table verticalSpacing="xs" horizontalSpacing="md">
+      <Table horizontalSpacing="md" verticalSpacing="xs">
         <Table.Thead>
           <Table.Tr>
             <Table.Th>{columns.category}</Table.Th>
@@ -50,12 +50,12 @@ export function ForecastTable({
             <Fragment key={group.key}>
               <Table.Tr>
                 <Table.Th
-                  colSpan={4}
-                  scope="colgroup"
                   c="gold.6"
+                  colSpan={4}
                   fz="xs"
-                  tt="uppercase"
                   pt={16}
+                  scope="colgroup"
+                  tt="uppercase"
                 >
                   {group.label}
                 </Table.Th>
@@ -81,31 +81,28 @@ function Row({ row }: { row: ForecastRow }) {
 
   return (
     <Table.Tr>
-      <Table.Th scope="row" fw={bold ?? 400}>
-        <Text span size="sm" c={muted ? 'dimmed' : undefined} fw={bold}>
+      <Table.Th fw={bold ?? 400} scope="row">
+        <Text c={muted ? 'dimmed' : undefined} fw={bold} size="sm" span>
           {row.label}
         </Text>
         {row.sub && (
-          <Text span size="xs" c="dimmed" ml={6}>
+          <Text c="dimmed" ml={6} size="xs" span>
             · {row.sub}
           </Text>
         )}
       </Table.Th>
-      <Table.Td ta="right" c="dimmed" fw={bold} className={classes.number}>
+      <Table.Td c="dimmed" className={classes.number} fw={bold} ta="right">
         {formatCents(amount.forecast)}
       </Table.Td>
       <Table.Td
-        ta="right"
-        fw={bold ?? 600}
         c={muted ? 'dimmed' : undefined}
         className={classes.number}
+        fw={bold ?? 600}
+        ta="right"
       >
         {amount.actual === null ? '—' : formatCents(amount.actual)}
       </Table.Td>
       <Table.Td
-        ta="right"
-        fw={bold}
-        className={classes.number}
         c={
           delta === null || delta === 0
             ? 'dimmed'
@@ -113,6 +110,9 @@ function Row({ row }: { row: ForecastRow }) {
               ? 'teal.4'
               : 'red.4'
         }
+        className={classes.number}
+        fw={bold}
+        ta="right"
       >
         {delta === null
           ? '—'

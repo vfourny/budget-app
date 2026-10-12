@@ -1,7 +1,7 @@
 /** Mois civil (1-12). */
 export interface YearMonth {
-  year: number
   month: number
+  year: number
 }
 
 /** Mois en cours (UTC) : un mois est « clos » quand il lui est antérieur (R1, hypothèse H1). */

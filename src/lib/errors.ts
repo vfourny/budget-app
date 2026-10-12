@@ -1,9 +1,9 @@
-import { TRPCClientError } from '@trpc/client'
-
-import { fr } from '@/lib/i18n/fr'
 import type { AppErrorCode } from '@server/lib/app-error'
 import type { CsvParseError } from '@server/lib/csv/types'
 import type { AppRouter } from '@server/trpc/root'
+import { TRPCClientError } from '@trpc/client'
+
+import { fr } from '@/lib/i18n/fr'
 
 /**
  * Message à afficher pour une erreur d'appel tRPC : le serveur renvoie un **code** (`appError` dans

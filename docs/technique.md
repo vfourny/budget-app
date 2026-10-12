@@ -43,7 +43,7 @@ Pourquoi pas Next.js : app mono-utilisateur derrière une auth, sans SEO. SSR et
 
 **Lecture** : `useQuery(trpc.<domaine>.<proc>.queryOptions())`, encapsulé dans un hook de feature ; gérer `isPending` / `isError` dans le composant.
 **Écriture** : `useMutation(trpc.x.y.mutationOptions())` + invalidation ciblée.
-**Interdit** : `fetch` dans un `useEffect`. `useEffect` est réservé à la synchro avec un système externe (oxlint le signale sinon).
+**Interdit** : `fetch` dans un `useEffect`. `useEffect` est réservé à la synchro avec un système externe (ESLint le signale sinon).
 
 **Ajouter une route tRPC** :
 
@@ -133,13 +133,13 @@ Chaque PR qui introduit un pattern React le documente dans sa section « Notes R
 
 - **Une fonctionnalité = une branche = une PR** courte (`feat/…`, `fix/…`, `chore/…`), Conventional Commits. Trop gros → PR empilées.
 - `pnpm check` (lint + typecheck + format + i18n), puis `pnpm build` doivent être verts avant `/ship-pr`.
-- **oxlint** (pas ESLint) avec `rules-of-hooks` et `exhaustive-deps` en erreur ; `no-console` en warning sauf `warn` / `error`.
-- **lefthook** (pre-commit) : oxlint `--fix` puis Prettier sur les fichiers stagés. Ne pas contourner avec `--no-verify`.
-- **Hook Claude Code** (`.claude/hooks/check.sh`) : Prettier + oxlint `--fix` + `tsc` après chaque édition.
+- **ESLint** (config `@vfourny/node-toolkit/eslint/react`, `--max-warnings 0`) : règles des hooks React (`rules-of-hooks`, `exhaustive-deps`, `set-state-in-effect`…), tri des imports / props / interfaces ; `no-console` en warning sauf `warn` / `error`.
+- **lefthook** (pre-commit) : ESLint `--fix` puis Prettier ; (commit-msg) : commitlint sur les fichiers stagés. Ne pas contourner avec `--no-verify`.
+- **Hook Claude Code** (`.claude/hooks/check.sh`) : Prettier + ESLint `--fix` + `tsc` après chaque édition.
 - **CI GitHub Actions** : lint, typecheck, format, tests, build sur chaque PR et push sur `main`.
 - Nitro 3 est en **beta** : version épinglée exactement dans `package.json`, ne pas la monter sans test.
 
 ## Pièges connus
 
 - **Colonne « Solde » en double** dans l'export BoursoBank : on mappe par index de colonne, pas par nom d'en-tête (voir [import-csv.md](./import-csv.md)).
-- **`pnpm lint` et `pnpm build`** utilisent des binaires natifs (oxlint, esbuild) : ne pas les lancer depuis une VM Linux sur un `node_modules` installé sous macOS, et inversement.
+- **`pnpm lint` et `pnpm build`** utilisent des binaires natifs (esbuild, résolveur d'imports d'ESLint) : ne pas les lancer depuis une VM Linux sur un `node_modules` installé sous macOS, et inversement.

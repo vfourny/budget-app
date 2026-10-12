@@ -1,6 +1,7 @@
-import { plural, pluralize } from '@/lib/i18n/plural'
 import type { DetectionCheckCode } from '@server/lib/csv/detect-format'
 import type { CsvFormatConfig } from '@shared/csv-format'
+
+import { plural, pluralize } from '@/lib/i18n/plural'
 
 /** Historique des imports, formulaire d'import et suppression. */
 export const imports = {

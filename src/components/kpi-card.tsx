@@ -2,27 +2,27 @@ import { Group, Paper, Stack, Text } from '@mantine/core'
 import type { ReactNode } from 'react'
 
 interface KpiCardProps {
-  label: ReactNode
-  value: string
-  hint?: ReactNode
+  children?: ReactNode
   /** Couleur du chiffre (token Mantine, ex. `"gold.6"`). */
   color?: string
-  children?: ReactNode
+  hint?: ReactNode
+  label: ReactNode
+  value: string
 }
 
 /** Carte d'indicateur : libellé, grand chiffre, aide, puis un détail optionnel (lignes, jauges). */
 export function KpiCard({ label, value, hint, color, children }: KpiCardProps) {
   return (
-    <Paper withBorder radius="lg" p={24} h="100%">
+    <Paper h="100%" p={24} radius="lg" withBorder>
       <Stack gap={6}>
-        <Text size="sm" c="dimmed" component="div">
+        <Text c="dimmed" component="div" size="sm">
           {label}
         </Text>
-        <Text fz={30} fw={600} lh={1.1} c={color}>
+        <Text c={color} fw={600} fz={30} lh={1.1}>
           {value}
         </Text>
         {hint && (
-          <Text size="xs" c="dimmed" component="div">
+          <Text c="dimmed" component="div" size="xs">
             {hint}
           </Text>
         )}
@@ -48,10 +48,10 @@ export function KpiLine({
 }) {
   return (
     <Group justify="space-between" wrap="nowrap">
-      <Text size="sm" c="dimmed" component="div">
+      <Text c="dimmed" component="div" size="sm">
         {name}
       </Text>
-      <Text size="sm" fw={600} c={color}>
+      <Text c={color} fw={600} size="sm">
         {value}
       </Text>
     </Group>

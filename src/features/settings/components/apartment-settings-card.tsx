@@ -12,6 +12,8 @@ import {
   TextInput,
   Title,
 } from '@mantine/core'
+import type { ApartmentKind } from '@server/generated/prisma/enums'
+import { loanSchedule } from '@shared/apartment-loan'
 import { useState } from 'react'
 
 import { EuroField } from '@/components/euro-field'
@@ -23,8 +25,6 @@ import { errorMessage } from '@/lib/errors'
 import { formatCents } from '@/lib/format'
 import { fr } from '@/lib/i18n/fr'
 import type { RouterOutputs } from '@/lib/trpc'
-import type { ApartmentKind } from '@server/generated/prisma/enums'
-import { loanSchedule } from '@shared/apartment-loan'
 
 export type ApartmentValues = Omit<
   RouterOutputs['apartment']['list'][number],
@@ -62,21 +62,21 @@ function PercentField(props: {
 }) {
   return (
     <NumberInput
-      label={props.label}
+      decimalScale={2}
+      decimalSeparator=","
       description={props.description}
       inputWrapperOrder={['label', 'input', 'description']}
-      suffix={` ${text.units.percent}`}
-      decimalSeparator=","
-      decimalScale={2}
-      min={0}
+      label={props.label}
       max={100}
-      step={0.05}
-      value={props.bps / 100}
+      min={0}
       onChange={(value) =>
         props.onChange(
           Math.round((typeof value === 'number' ? value : 0) * 100),
         )
       }
+      step={0.05}
+      suffix={` ${text.units.percent}`}
+      value={props.bps / 100}
     />
   )
 }
@@ -89,10 +89,10 @@ interface ApartmentSettingsCardProps {
   /** Absent = nouveau bien (pas encore enregistré). */
   id?: string
   initial: ApartmentValues
-  openingYear: number
+  onCancel?: () => void
   /** Appelé après l'enregistrement d'un nouveau bien (la liste prend le relais de la carte). */
   onCreated?: () => void
-  onCancel?: () => void
+  openingYear: number
 }
 
 export function ApartmentSettingsCard({
@@ -143,36 +143,34 @@ export function ApartmentSettingsCard({
   }
 
   return (
-    <Paper withBorder radius="lg" p={28}>
+    <Paper p={28} radius="lg" withBorder>
       <Stack gap={20}>
         <Title order={3}>{draft.name.trim() || text.newTitle}</Title>
 
         <SimpleGrid cols={{ base: 1, sm: 2, lg: 3 }} spacing={16}>
           <TextInput
             label={text.fields.name}
-            value={draft.name}
             onChange={(event) => set('name', event.currentTarget.value)}
+            value={draft.name}
           />
           <Select
-            label={text.fields.kind}
+            allowDeselect={false}
+            data={KIND_OPTIONS}
             description={text.fields.kindHint}
             inputWrapperOrder={['label', 'input', 'description']}
-            data={KIND_OPTIONS}
-            allowDeselect={false}
-            value={draft.kind}
+            label={text.fields.kind}
             onChange={(value) => value && set('kind', value as ApartmentKind)}
+            value={draft.kind}
           />
           <TextInput
-            label={text.fields.manager}
             description={text.fields.managerHint}
             inputWrapperOrder={['label', 'input', 'description']}
-            value={draft.managerName}
+            label={text.fields.manager}
             onChange={(event) => set('managerName', event.currentTarget.value)}
+            value={draft.managerName}
           />
           <TextInput
-            type="month"
             label={text.fields.acquiredAt}
-            value={toMonthValue(draft.acquiredAt)}
             onChange={(event) => {
               const [year, month] = event.currentTarget.value
                 .split('-')
@@ -180,43 +178,45 @@ export function ApartmentSettingsCard({
               if (year && month)
                 set('acquiredAt', new Date(Date.UTC(year, month - 1, 1)))
             }}
+            type="month"
+            value={toMonthValue(draft.acquiredAt)}
           />
           <EuroField
-            label={text.fields.price}
             cents={draft.priceCents}
+            label={text.fields.price}
             onChange={(value) => set('priceCents', value)}
           />
           <EuroField
-            label={text.fields.rent}
             cents={draft.rentCents}
+            label={text.fields.rent}
             onChange={(value) => set('rentCents', value)}
           />
           <EuroField
-            label={text.fields.deposit}
             cents={draft.depositCents}
+            label={text.fields.deposit}
             onChange={(value) => set('depositCents', value)}
           />
           <PercentField
-            label={text.fields.managementFee}
-            description={text.fields.managementFeeHint}
             bps={draft.managementFeeBps}
+            description={text.fields.managementFeeHint}
+            label={text.fields.managementFee}
             onChange={(value) => set('managementFeeBps', value)}
           />
           <EuroField
-            label={text.fields.propertyTax}
             cents={draft.propertyTaxCents}
+            label={text.fields.propertyTax}
             onChange={(value) => set('propertyTaxCents', value)}
           />
           <EuroField
-            label={text.fields.cfe}
             cents={draft.cfeCents}
+            label={text.fields.cfe}
             onChange={(value) => set('cfeCents', value)}
           />
           <EuroField
-            label={text.fields.openingBalance(openingYear)}
-            description={text.fields.openingBalanceHint}
-            cents={draft.openingBalanceCents}
             allowNegative
+            cents={draft.openingBalanceCents}
+            description={text.fields.openingBalanceHint}
+            label={text.fields.openingBalance(openingYear)}
             onChange={(value) => set('openingBalanceCents', value)}
           />
         </SimpleGrid>
@@ -224,8 +224,8 @@ export function ApartmentSettingsCard({
         <Stack gap={12}>
           <Title order={4}>{text.loan.title}</Title>
           <Switch
-            label={text.loan.enabled}
             checked={draft.loan !== null}
+            label={text.loan.enabled}
             onChange={(event) =>
               set(
                 'loan',
@@ -239,30 +239,28 @@ export function ApartmentSettingsCard({
             <>
               <SimpleGrid cols={{ base: 1, sm: 2, lg: 3 }} spacing={16}>
                 <EuroField
-                  label={text.loan.principal}
                   cents={draft.loan.principalCents}
+                  label={text.loan.principal}
                   onChange={(value) => setLoan({ principalCents: value })}
                 />
                 <PercentField
-                  label={text.loan.rate}
                   bps={draft.loan.rateBps}
+                  label={text.loan.rate}
                   onChange={(value) => setLoan({ rateBps: value })}
                 />
                 <NumberInput
-                  label={text.loan.term}
-                  suffix={` ${text.units.months}`}
-                  min={1}
-                  max={600}
                   allowDecimal={false}
-                  value={draft.loan.termMonths}
+                  label={text.loan.term}
+                  max={600}
+                  min={1}
                   onChange={(value) =>
                     typeof value === 'number' && setLoan({ termMonths: value })
                   }
+                  suffix={` ${text.units.months}`}
+                  value={draft.loan.termMonths}
                 />
                 <TextInput
-                  type="date"
                   label={text.loan.firstDue}
-                  value={toDayValue(draft.loan.firstDueDate)}
                   onChange={(event) => {
                     const date = new Date(
                       `${event.currentTarget.value}T00:00:00Z`,
@@ -270,19 +268,21 @@ export function ApartmentSettingsCard({
                     if (!Number.isNaN(date.getTime()))
                       setLoan({ firstDueDate: date })
                   }}
+                  type="date"
+                  value={toDayValue(draft.loan.firstDueDate)}
                 />
                 <EuroField
-                  label={text.loan.insurance}
-                  description={text.loan.insuranceHint}
                   cents={draft.creditInsuranceCents}
+                  description={text.loan.insuranceHint}
+                  label={text.loan.insurance}
                   onChange={(value) => set('creditInsuranceCents', value)}
                 />
               </SimpleGrid>
               {first && (
                 <Alert
                   color="gold"
-                  variant="light"
                   title={text.loan.summaryTitle}
+                  variant="light"
                 >
                   <Stack gap={2}>
                     <Text size="sm">
@@ -317,7 +317,7 @@ export function ApartmentSettingsCard({
           </Alert>
         )}
         {save.isSuccess && !changed && (
-          <Text size="sm" c="teal.4">
+          <Text c="teal.4" size="sm">
             {fr.common.saved}
           </Text>
         )}
@@ -327,7 +327,7 @@ export function ApartmentSettingsCard({
             {fr.common.save}
           </Button>
           {id === undefined ? (
-            <Button variant="default" onClick={onCancel}>
+            <Button onClick={onCancel} variant="default">
               {fr.common.cancel}
             </Button>
           ) : confirmingDelete ? (
@@ -340,17 +340,17 @@ export function ApartmentSettingsCard({
                 {text.confirmDelete}
               </Button>
               <Button
-                variant="default"
                 onClick={() => setConfirmingDelete(false)}
+                variant="default"
               >
                 {fr.common.cancel}
               </Button>
             </>
           ) : (
             <Button
-              variant="subtle"
               color="red"
               onClick={() => setConfirmingDelete(true)}
+              variant="subtle"
             >
               {text.delete}
             </Button>

@@ -1,18 +1,18 @@
-import { splitLoanPayment, type LoanInstallment } from '@shared/apartment-loan'
 import {
-  APARTMENT_CHARGE_LINES,
-  CFE_MONTH,
-  PROPERTY_TAX_MONTH,
-  apartmentLineOf,
-} from '@shared/apartment-rules'
-import {
-  ZERO_LINES,
   type ApartmentColumn,
   type ApartmentLines,
   type ApartmentRecord,
   type ApartmentTransaction,
   type ManagementInvoiceRecord,
+  ZERO_LINES,
 } from '@server/lib/apartments/types'
+import { type LoanInstallment, splitLoanPayment } from '@shared/apartment-loan'
+import {
+  APARTMENT_CHARGE_LINES,
+  apartmentLineOf,
+  CFE_MONTH,
+  PROPERTY_TAX_MONTH,
+} from '@shared/apartment-rules'
 
 /**
  * Lignes de charges mensuelles dont le prévu vient de l'historique (R3, H2) : électricité,
@@ -75,11 +75,11 @@ function toColumn(
 
 interface MonthContext {
   apartment: ApartmentRecord
-  schedule: readonly LoanInstallment[]
-  year: number
   month: number
   /** Solde du compte au début du mois (chaîné par `computeApartmentYear`). */
   openingBalanceCents: number
+  schedule: readonly LoanInstallment[]
+  year: number
 }
 
 /**
@@ -180,16 +180,16 @@ function forecastLines(
 }
 
 export interface MonthResult {
-  year: number
-  month: number
+  actual: ApartmentColumn | null
   /** Mois antérieur au mois en cours : seul un mois clos a un réalisé (R1). */
   closed: boolean
   forecast: ApartmentColumn
-  actual: ApartmentColumn | null
   /** Facture de gérance (R12) saisie, `null` sinon ou si le bien est en direct. */
   invoice: ManagementInvoiceRecord | null
   /** Mois clos d'un bien géré sans facture saisie (« Facture de gérance à saisir »). */
   missingManagementInvoice: boolean
+  month: number
+  year: number
 }
 
 /**

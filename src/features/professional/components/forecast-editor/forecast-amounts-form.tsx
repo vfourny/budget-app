@@ -9,7 +9,9 @@ import {
   Table,
   Text,
 } from '@mantine/core'
-import { useState, type ReactNode } from 'react'
+import type { TransactionCategory } from '@server/generated/prisma/enums'
+import type { ForecastGroup } from '@shared/professional-rules'
+import { type ReactNode, useState } from 'react'
 
 import {
   useCopyForecastsToFollowingMonths,
@@ -20,8 +22,6 @@ import type { Period } from '@/hooks/use-period-selection'
 import { errorMessage } from '@/lib/errors'
 import { formatCents } from '@/lib/format'
 import { fr } from '@/lib/i18n/fr'
-import type { TransactionCategory } from '@server/generated/prisma/enums'
-import type { ForecastGroup } from '@shared/professional-rules'
 
 /** Saisie par catégorie : `null` = pas de saisie (valeur par défaut N-1). En centimes. */
 type Overrides = Partial<Record<TransactionCategory, number | null>>
@@ -32,24 +32,24 @@ interface AmountsView {
 }
 
 interface ForecastAmountsFormProps {
-  period: Period
-  group: ForecastGroup
-  /** Catégories affichées dans le tableau (les autres du groupe peuvent être rendues dans `children`). */
-  rows: readonly TransactionCategory[]
-  /** Colonne repère : réel du mois précédent ou même mois N-1. */
-  reference: 'previousMonth' | 'lastYear'
-  hint: string
-  /** En-têtes des deux premières colonnes (défaut : « Charge », « Prévu (€ HT) »). */
-  headers?: { category: string; amount: string }
-  /** Colonnes en plus (clé de répartition, part Stygma…) : en-têtes et cellules. */
-  extraHeaders?: string[]
-  extraCells?: (category: TransactionCategory, view: AmountsView) => ReactNode[]
   /** Contenu sous le tableau (totaux, champ BNC…), avec accès au brouillon. */
   children?: (draft: {
     view: AmountsView
     overrides: Overrides
     setAmount: (category: TransactionCategory, cents: number | null) => void
   }) => ReactNode
+  extraCells?: (category: TransactionCategory, view: AmountsView) => ReactNode[]
+  /** Colonnes en plus (clé de répartition, part Stygma…) : en-têtes et cellules. */
+  extraHeaders?: string[]
+  group: ForecastGroup
+  /** En-têtes des deux premières colonnes (défaut : « Charge », « Prévu (€ HT) »). */
+  headers?: { category: string; amount: string }
+  hint: string
+  period: Period
+  /** Colonne repère : réel du mois précédent ou même mois N-1. */
+  reference: 'previousMonth' | 'lastYear'
+  /** Catégories affichées dans le tableau (les autres du groupe peuvent être rendues dans `children`). */
+  rows: readonly TransactionCategory[]
 }
 
 /**
@@ -141,7 +141,7 @@ function AmountsFields({
 
   return (
     <Stack gap={16}>
-      <Text size="sm" c="dimmed">
+      <Text c="dimmed" size="sm">
         {hint}
       </Text>
       <Table verticalSpacing="xs">
@@ -171,7 +171,7 @@ function AmountsFields({
                   <Group gap={6} wrap="nowrap">
                     <Text size="sm">{fr.categories[category]}</Text>
                     {modified && (
-                      <Badge size="xs" variant="light" color="gold" tt="none">
+                      <Badge color="gold" size="xs" tt="none" variant="light">
                         {text.amounts.modified}
                       </Badge>
                     )}
@@ -182,11 +182,9 @@ function AmountsFields({
                     aria-label={text.amounts.amountAria(
                       fr.categories[category],
                     )}
-                    w={140}
-                    min={0}
                     decimalScale={2}
                     decimalSeparator=","
-                    value={view.valueOf(category) / 100}
+                    min={0}
                     onChange={(input) =>
                       setAmount(
                         category,
@@ -195,9 +193,11 @@ function AmountsFields({
                         ),
                       )
                     }
+                    value={view.valueOf(category) / 100}
+                    w={140}
                   />
                 </Table.Td>
-                <Table.Td ta="right" c="dimmed">
+                <Table.Td c="dimmed" ta="right">
                   {formatCents(
                     reference === 'previousMonth'
                       ? (value?.previousMonthCents ?? 0)
@@ -223,37 +223,37 @@ function AmountsFields({
         </Alert>
       )}
       {copy.isSuccess && !changed && (
-        <Text size="sm" c="teal.4">
+        <Text c="teal.4" size="sm">
           {text.appliedNext}
         </Text>
       )}
       {save.isSuccess && !changed && !copy.isSuccess && (
-        <Text size="sm" c="teal.4">
+        <Text c="teal.4" size="sm">
           {text.saved}
         </Text>
       )}
 
       <Group justify="flex-end">
         <Button
-          variant="subtle"
           disabled={!hasOverride}
           onClick={() =>
             setOverrides(
               Object.fromEntries(values.map((value) => [value.category, null])),
             )
           }
+          variant="subtle"
         >
           {text.amounts.resetLastYear}
         </Button>
         {period.month < 12 && (
           <Button
-            variant="default"
             loading={copy.isPending}
             onClick={() =>
               saveAll(() =>
                 copy.mutate({ year: period.year, month: period.month, group }),
               )
             }
+            variant="default"
           >
             {text.applyNext}
           </Button>

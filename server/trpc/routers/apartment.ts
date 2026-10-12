@@ -1,8 +1,7 @@
-import { z } from 'zod'
-
 import { ApartmentKind } from '@server/generated/prisma/enums'
 import { appError } from '@server/lib/app-error'
 import { createTRPCRouter, protectedProcedure } from '@server/trpc/init'
+import { z } from 'zod'
 
 const cents = z.number().int().min(0).max(2_000_000_000)
 

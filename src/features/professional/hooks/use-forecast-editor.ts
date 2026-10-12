@@ -1,8 +1,8 @@
+import type { BillingKind } from '@server/generated/prisma/enums'
+import type { ForecastGroup } from '@shared/professional-rules'
 import { useMutation, useQuery } from '@tanstack/react-query'
 
 import { queryClient, trpc } from '@/lib/trpc'
-import type { BillingKind } from '@server/generated/prisma/enums'
-import type { ForecastGroup } from '@shared/professional-rules'
 
 /** Une saisie du prévisionnel change le dashboard Pro et les autres saisies : on rafraîchit les deux. */
 const invalidate = () =>

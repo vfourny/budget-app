@@ -1,11 +1,9 @@
-import { z } from 'zod'
-
 import type { TransactionCategory } from '@server/generated/prisma/enums'
 import { appError } from '@server/lib/app-error'
 import {
-  LOW_CONFIDENCE_THRESHOLD,
-  categorizeTransactions,
   type CategorizeExample,
+  categorizeTransactions,
+  LOW_CONFIDENCE_THRESHOLD,
 } from '@server/lib/categorize/categorize-transactions'
 import {
   labelKey,
@@ -14,6 +12,7 @@ import {
 import { gemini } from '@server/lib/gemini'
 import { geminiTRPCError } from '@server/lib/gemini-errors'
 import { createTRPCRouter, protectedProcedure } from '@server/trpc/init'
+import { z } from 'zod'
 
 /**
  * Nombre maximum d'exemples validés montrés à l'IA : un par libellé distinct (hors date et n° de

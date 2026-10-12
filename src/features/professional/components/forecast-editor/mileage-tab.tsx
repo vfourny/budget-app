@@ -19,7 +19,7 @@ import {
 import type { Period } from '@/hooks/use-period-selection'
 import { errorMessage } from '@/lib/errors'
 import { capitalizedMonthName, formatCents } from '@/lib/format'
-import { LOCALE, fr } from '@/lib/i18n/fr'
+import { fr, LOCALE } from '@/lib/i18n/fr'
 
 const rateFormat = new Intl.NumberFormat(LOCALE, { maximumFractionDigits: 3 })
 
@@ -37,20 +37,20 @@ export function MileageTab({
     return <Alert color="red" title={fr.professional.editor.loadFailed} />
   return (
     <MileageFields
+      initial={mileage.data.overrideKm}
       key={`${period.year}-${period.month}`}
+      lastYearKm={mileage.data.lastYearKm}
       period={period}
       rateMilli={rateMilli}
-      initial={mileage.data.overrideKm}
-      lastYearKm={mileage.data.lastYearKm}
     />
   )
 }
 
 interface MileageFieldsProps {
-  period: Period
-  rateMilli: number
   initial: number | null
   lastYearKm: number
+  period: Period
+  rateMilli: number
 }
 
 function MileageFields({
@@ -76,7 +76,7 @@ function MileageFields({
 
   return (
     <Stack gap={16}>
-      <Text size="sm" c="dimmed">
+      <Text c="dimmed" size="sm">
         {text.mileage.hint}
       </Text>
       <Table verticalSpacing="xs">
@@ -94,7 +94,7 @@ function MileageFields({
               <Group gap={6}>
                 <Text size="sm">{`${capitalizedMonthName(period.month)} ${period.year}`}</Text>
                 {km !== null && (
-                  <Badge size="xs" variant="light" color="gold" tt="none">
+                  <Badge color="gold" size="xs" tt="none" variant="light">
                     {text.amounts.modified}
                   </Badge>
                 )}
@@ -102,26 +102,26 @@ function MileageFields({
             </Table.Td>
             <Table.Td>
               <NumberInput
-                aria-label={text.mileage.forecastKm}
-                w={140}
-                min={0}
                 allowDecimal={false}
-                value={shownKm}
+                aria-label={text.mileage.forecastKm}
+                min={0}
                 onChange={(value) =>
                   setKm(typeof value === 'number' ? value : 0)
                 }
+                value={shownKm}
+                w={140}
               />
             </Table.Td>
-            <Table.Td ta="right" c="dimmed">
+            <Table.Td c="dimmed" ta="right">
               {fr.professional.mileage.km(String(lastYearKm))}
             </Table.Td>
-            <Table.Td ta="right" fw={600}>
+            <Table.Td fw={600} ta="right">
               {formatCents(Math.round((shownKm * rateMilli) / 10))}
             </Table.Td>
           </Table.Tr>
         </Table.Tbody>
       </Table>
-      <Text size="xs" c="dimmed">
+      <Text c="dimmed" size="xs">
         {text.mileage.note(rate)}
       </Text>
 
@@ -131,27 +131,26 @@ function MileageFields({
         </Alert>
       )}
       {copy.isSuccess && !changed && (
-        <Text size="sm" c="teal.4">
+        <Text c="teal.4" size="sm">
           {text.appliedNext}
         </Text>
       )}
       {save.isSuccess && !changed && !copy.isSuccess && (
-        <Text size="sm" c="teal.4">
+        <Text c="teal.4" size="sm">
           {text.saved}
         </Text>
       )}
 
       <Group justify="flex-end">
         <Button
-          variant="subtle"
           disabled={km === null}
           onClick={() => setKm(null)}
+          variant="subtle"
         >
           {text.mileage.resetLastYear}
         </Button>
         {period.month < 12 && (
           <Button
-            variant="default"
             loading={copy.isPending}
             onClick={() =>
               saveKm(() =>
@@ -162,6 +161,7 @@ function MileageFields({
                 }),
               )
             }
+            variant="default"
           >
             {text.applyNext}
           </Button>

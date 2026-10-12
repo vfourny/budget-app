@@ -30,37 +30,37 @@ export function ApartmentKpis({
   const surplus = effort.contributionCents - effort.actualCents
 
   return (
-    <Grid gap={16} align="stretch">
+    <Grid align="stretch" gap={16}>
       <Grid.Col span={{ base: 12, md: 6 }}>
         <KpiCard
-          label={
-            <Group gap={4} wrap="nowrap">
-              {text.rent.label}
-              <InfoTip
-                label={text.rent.tip}
-                ariaLabel={fr.professional.howComputed(text.rent.label)}
-              />
-            </Group>
-          }
-          value={formatCents(rent.netReceivedCents)}
           hint={text.rent.hint(
             formatCents(rent.grossReceivedCents),
             formatCents(rent.dueCents),
             percent,
             formatCents(rent.managementFeesCents),
           )}
+          label={
+            <Group gap={4} wrap="nowrap">
+              {text.rent.label}
+              <InfoTip
+                ariaLabel={fr.professional.howComputed(text.rent.label)}
+                label={text.rent.tip}
+              />
+            </Group>
+          }
+          value={formatCents(rent.netReceivedCents)}
         >
           <Stack gap={6}>
             <TargetGauge
-              real={rent.grossReceivedCents}
-              target={rent.dueCents}
-              goal="atLeast"
               ariaLabel={text.rent.gaugeAria(
                 formatCents(rent.grossReceivedCents),
                 formatCents(rent.dueCents),
               )}
+              goal="atLeast"
+              real={rent.grossReceivedCents}
+              target={rent.dueCents}
             />
-            <Text size="xs" c={missingRent > 0 ? 'amber.4' : 'teal.4'}>
+            <Text c={missingRent > 0 ? 'amber.4' : 'teal.4'} size="xs">
               {missingRent > 0
                 ? text.rent.missing(formatCents(missingRent))
                 : text.rent.complete}
@@ -70,16 +70,6 @@ export function ApartmentKpis({
       </Grid.Col>
       <Grid.Col span={{ base: 12, md: 6 }}>
         <KpiCard
-          label={
-            <Group gap={4} wrap="nowrap">
-              {text.effort.label}
-              <InfoTip
-                label={text.effort.tip}
-                ariaLabel={fr.professional.howComputed(text.effort.label)}
-              />
-            </Group>
-          }
-          value={formatCents(effort.actualCents)}
           hint={
             effort.actualCents === 0 && effort.forecastCents === 0
               ? text.effort.none
@@ -90,19 +80,29 @@ export function ApartmentKpis({
                   )
                 : text.effort.hintMonth(formatCents(effort.forecastCents))
           }
+          label={
+            <Group gap={4} wrap="nowrap">
+              {text.effort.label}
+              <InfoTip
+                ariaLabel={fr.professional.howComputed(text.effort.label)}
+                label={text.effort.tip}
+              />
+            </Group>
+          }
+          value={formatCents(effort.actualCents)}
         >
           {effort.actualCents > 0 && (
             <Stack gap={6}>
               <TargetGauge
-                real={effort.contributionCents}
-                target={effort.actualCents}
-                goal="atLeast"
                 ariaLabel={text.effort.gaugeAria(
                   formatCents(effort.contributionCents),
                   formatCents(effort.actualCents),
                 )}
+                goal="atLeast"
+                real={effort.contributionCents}
+                target={effort.actualCents}
               />
-              <Text size="xs" c={surplus >= 0 ? 'teal.4' : 'amber.4'}>
+              <Text c={surplus >= 0 ? 'teal.4' : 'amber.4'} size="xs">
                 {surplus >= 0
                   ? text.effort.covered(formatCents(surplus))
                   : text.effort.missing(formatCents(-surplus))}

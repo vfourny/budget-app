@@ -6,7 +6,7 @@ import {
   Text,
   TextInput,
 } from '@mantine/core'
-import { useState, type SubmitEvent } from 'react'
+import { type SubmitEvent, useState } from 'react'
 
 import { useCreateTrip } from '@/features/professional/hooks/use-trips'
 import { errorMessage } from '@/lib/errors'
@@ -39,51 +39,51 @@ export function TripForm({ defaultDate, onDone }: TripFormProps) {
   return (
     <form onSubmit={submit}>
       <Stack gap={8}>
-        <Group gap={8} align="flex-end" grow>
+        <Group align="flex-end" gap={8} grow>
           <TextInput
-            type="date"
             label={text.date}
-            value={date}
             onChange={(event) => setDate(event.currentTarget.value)}
             required
+            type="date"
+            value={date}
           />
           <NumberInput
+            allowDecimal={false}
             label={text.km}
             min={1}
-            allowDecimal={false}
-            value={km ?? ''}
             onChange={(value) =>
               setKm(typeof value === 'number' ? value : null)
             }
             required
+            value={km ?? ''}
           />
         </Group>
         <TextInput
           label={text.route}
-          placeholder={text.routePlaceholder}
-          value={route}
           onChange={(event) => setRoute(event.currentTarget.value)}
+          placeholder={text.routePlaceholder}
           required
+          value={route}
         />
         <TextInput
           label={text.reason}
+          onChange={(event) => setReason(event.currentTarget.value)}
           placeholder={text.reasonPlaceholder}
           value={reason}
-          onChange={(event) => setReason(event.currentTarget.value)}
         />
         {create.isError && (
-          <Text size="sm" c="red.4">
+          <Text c="red.4" size="sm">
             {text.failed} : {errorMessage(create.error)}
           </Text>
         )}
-        <Group justify="flex-end" gap={8}>
-          <Button variant="subtle" onClick={onDone}>
+        <Group gap={8} justify="flex-end">
+          <Button onClick={onDone} variant="subtle">
             {text.cancel}
           </Button>
           <Button
-            type="submit"
-            loading={create.isPending}
             disabled={!route.trim() || !km}
+            loading={create.isPending}
+            type="submit"
           >
             {text.add}
           </Button>

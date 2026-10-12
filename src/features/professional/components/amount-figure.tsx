@@ -1,21 +1,21 @@
 import { Group, Stack, Text } from '@mantine/core'
+import type { ForecastActual } from '@server/lib/professional/types'
 
 import { DeltaBadge } from '@/components/delta-badge'
 import { InfoTip } from '@/components/info-tip'
 import type { GaugeGoal } from '@/components/target-gauge'
 import { formatCents } from '@/lib/format'
 import { fr } from '@/lib/i18n/fr'
-import type { ForecastActual } from '@server/lib/professional/types'
 
 interface AmountFigureProps {
-  label: string
-  tip: string
   amount: ForecastActual
-  /** Sens de l'écart réel − prévu (voir `DeltaBadge`) ; sans `goal`, pas de pastille d'écart. */
-  goal?: GaugeGoal
   /** Couleur du chiffre (token Mantine). */
   color?: string
+  /** Sens de l'écart réel − prévu (voir `DeltaBadge`) ; sans `goal`, pas de pastille d'écart. */
+  goal?: GaugeGoal
+  label: string
   size?: 'md' | 'lg'
+  tip: string
 }
 
 /**
@@ -34,20 +34,20 @@ export function AmountFigure({
   return (
     <Stack gap={2}>
       <Group gap={4} wrap="nowrap">
-        <Text size="sm" c="dimmed">
+        <Text c="dimmed" size="sm">
           {label}
         </Text>
-        <InfoTip label={tip} ariaLabel={fr.professional.howComputed(label)} />
+        <InfoTip ariaLabel={fr.professional.howComputed(label)} label={tip} />
       </Group>
       <Text
-        fz={size === 'lg' ? 26 : 18}
-        fw={size === 'lg' ? 600 : 700}
         c={isForecast ? 'dimmed' : color}
+        fw={size === 'lg' ? 600 : 700}
+        fz={size === 'lg' ? 26 : 18}
       >
         {formatCents(amount.actual ?? amount.forecast)}
       </Text>
       <Group gap={6}>
-        <Text size="xs" c="dimmed">
+        <Text c="dimmed" size="xs">
           {isForecast
             ? fr.professional.forecastOnly
             : fr.professional.forecastSub(formatCents(amount.forecast))}

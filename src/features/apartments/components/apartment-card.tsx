@@ -24,22 +24,22 @@ export function ApartmentCard({ apartment, period }: ApartmentCardProps) {
   const managed = apartment.managerName !== null
   return (
     <Paper
-      withBorder
-      radius="lg"
-      p={24}
-      component="section"
       aria-label={apartment.name}
+      component="section"
+      p={24}
+      radius="lg"
+      withBorder
     >
       <Stack gap={20}>
-        <Group justify="space-between" align="flex-start" wrap="nowrap">
+        <Group align="flex-start" justify="space-between" wrap="nowrap">
           <div>
             <Group gap={10}>
               <Title order={2}>{apartment.name}</Title>
-              <Badge variant="light" color="gold">
+              <Badge color="gold" variant="light">
                 {fr.apartmentKinds[apartment.kind]}
               </Badge>
             </Group>
-            <Text size="sm" c="dimmed">
+            <Text c="dimmed" size="sm">
               {managed
                 ? text.managedBy(apartment.managerName ?? '')
                 : text.direct}
@@ -53,9 +53,9 @@ export function ApartmentCard({ apartment, period }: ApartmentCardProps) {
           </div>
           <Button
             component={Link}
+            size="compact-sm"
             to="/settings?tab=apt"
             variant="default"
-            size="compact-sm"
           >
             {fr.apartments.settings}
           </Button>
@@ -63,33 +63,33 @@ export function ApartmentCard({ apartment, period }: ApartmentCardProps) {
 
         {apartment.capital && (
           <LoanGauge
-            repaidCents={apartment.capital.repaidCents}
             principalCents={apartment.capital.principalCents}
+            repaidCents={apartment.capital.repaidCents}
           />
         )}
 
         {apartment.yields && (
           <Group gap={8}>
-            <Badge variant="light" color="teal" tt="none">
+            <Badge color="teal" tt="none" variant="light">
               {text.grossYield} {formatBp(apartment.yields.grossBps)} %
             </Badge>
-            <Badge variant="light" color="teal" tt="none">
+            <Badge color="teal" tt="none" variant="light">
               {text.netYield} {formatBp(apartment.yields.netBps)} %
             </Badge>
             <InfoTip
-              label={text.yieldTip}
               ariaLabel={text.yieldTipAria(text.netYield)}
+              label={text.yieldTip}
             />
           </Group>
         )}
 
         {managed && period.month !== null && apartment.closedMonths > 0 && (
           <ManagementInvoiceForm
-            key={`${apartment.id}-${period.year}-${period.month}`}
             apartmentId={apartment.id}
-            year={period.year}
-            month={period.month}
             invoice={apartment.invoice}
+            key={`${apartment.id}-${period.year}-${period.month}`}
+            month={period.month}
+            year={period.year}
           />
         )}
 

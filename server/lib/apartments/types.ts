@@ -6,41 +6,41 @@ import type { LoanTerms } from '@shared/apartment-loan'
 
 /** Appartement tel que les calculs le lisent (centimes, points de base). */
 export interface ApartmentRecord {
+  acquiredAt: Date
+  cfeCents: number
+  creditInsuranceCents: number
+  depositCents: number
   id: string
-  name: string
   kind: ApartmentKind
+  loan: LoanTerms | null
+  managementFeeBps: number
   /** `null` = location en direct : ni facture de gérance, ni frais. */
   managerName: string | null
-  acquiredAt: Date
+  name: string
   priceCents: number
-  rentCents: number
-  depositCents: number
-  managementFeeBps: number
-  creditInsuranceCents: number
   propertyTaxCents: number
-  cfeCents: number
-  loan: LoanTerms | null
+  rentCents: number
 }
 
 /** Transaction validée rattachée à un appartement. */
 export interface ApartmentTransaction {
-  id: string
-  date: Date
-  label: string
   /** Centimes, signé : négatif = débit. */
   amountCents: number
-  category: TransactionCategory | null
   apartmentId: string
-  year: number
+  category: TransactionCategory | null
+  date: Date
+  id: string
+  label: string
   month: number
+  year: number
 }
 
 /** Facture de gérance saisie à la main (R12). */
 export interface ManagementInvoiceRecord {
   apartmentId: string
-  month: number
-  feesCents: number
   extraFeesCents: number
+  feesCents: number
+  month: number
 }
 
 /**
@@ -48,23 +48,23 @@ export interface ManagementInvoiceRecord {
  * `netRent` = loyer net reçu (virements `APT_RENT_RECEIVED`) ; `grossRent` = net + frais de gérance.
  */
 export interface ApartmentLines {
-  grossRent: number
-  netRent: number
-  managementFees: number
-  extraManagementFees: number
-  loanCapital: number
-  loanInterest: number
-  loanInsurance: number
+  bankFees: number
+  cfe: number
+  condoFees: number
   electricity: number
+  extraManagementFees: number
+  grossRent: number
   homeInsurance: number
   internetBox: number
-  condoFees: number
-  propertyTax: number
-  cfe: number
-  bankFees: number
-  regularization: number
+  loanCapital: number
+  loanInsurance: number
+  loanInterest: number
+  managementFees: number
+  netRent: number
   other: number
   ownerContribution: number
+  propertyTax: number
+  regularization: number
 }
 
 export const ZERO_LINES = {
@@ -89,13 +89,13 @@ export const ZERO_LINES = {
 
 /** Une colonne du tableau (Prévisionnel ou Réalisé) : lignes + différentiel, effort et soldes (R5). */
 export interface ApartmentColumn {
-  lines: ApartmentLines
-  /** Capital + intérêts + assurance emprunteur. */
-  loanTotalCents: number
+  closingBalanceCents: number
   /** Loyer net − crédit − charges (R5) ; ne dépend pas de l'apport. */
   differentialCents: number
   /** `max(0, −différentiel)` du mois ; sur plusieurs mois, somme des efforts mensuels. */
   effortCents: number
+  lines: ApartmentLines
+  /** Capital + intérêts + assurance emprunteur. */
+  loanTotalCents: number
   openingBalanceCents: number
-  closingBalanceCents: number
 }

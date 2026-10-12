@@ -9,17 +9,17 @@ Flux cible : **upload d'un relevé CSV → catégorisation par l'IA (Gemini) →
 
 ## Stack
 
-| Couche      | Choix                                                                        |
-| ----------- | ---------------------------------------------------------------------------- |
-| Front       | React 19 (SPA) + Vite 8, TypeScript 6                                        |
-| Backend     | Nitro 3 (`nitro/vite`, dossier `server/`, conventions Nuxt)                  |
-| API         | tRPC 11 + Zod 4, TanStack Query 5                                            |
-| DB          | Prisma 7 + PostgreSQL Neon (`@prisma/adapter-neon`)                          |
-| UI          | Mantine 9 + React Router 8, thème sombre « obsidian / platine », accent doré |
-| Auth        | Better Auth (mono-utilisateur) — pas encore en place                         |
-| IA          | API Gemini (catégorisation des lignes de relevé)                             |
-| Hébergement | Vercel (Hobby) + Neon (Free)                                                 |
-| Qualité     | oxlint, Prettier, `tsc`, lefthook, GitHub Actions                            |
+| Couche      | Choix                                                                                   |
+| ----------- | --------------------------------------------------------------------------------------- |
+| Front       | React 19 (SPA) + Vite 8, TypeScript 6                                                   |
+| Backend     | Nitro 3 (`nitro/vite`, dossier `server/`, conventions Nuxt)                             |
+| API         | tRPC 11 + Zod 4, TanStack Query 5                                                       |
+| DB          | Prisma 7 + PostgreSQL Neon (`@prisma/adapter-neon`)                                     |
+| UI          | Mantine 9 + React Router 8, thème sombre « obsidian / platine », accent doré            |
+| Auth        | Better Auth (mono-utilisateur) — pas encore en place                                    |
+| IA          | API Gemini (catégorisation des lignes de relevé)                                        |
+| Hébergement | Vercel (Hobby) + Neon (Free)                                                            |
+| Qualité     | ESLint, Prettier, `tsc`, commitlint (`@vfourny/node-toolkit`), lefthook, GitHub Actions |
 
 ## Démarrage rapide
 
@@ -40,7 +40,7 @@ pnpm dev                    # front + API sur http://localhost:5173 (API sous /a
 | `pnpm check`      | lint + typecheck + format:check (avant toute PR)              |
 | `pnpm build`      | Build de prod (`.output/`, ou `.vercel/output` sur Vercel)    |
 | `pnpm preview`    | Sert le build de prod localement                              |
-| `pnpm lint:fix`   | Autofix oxlint                                                |
+| `pnpm lint:fix`   | Autofix ESLint                                                |
 | `pnpm format`     | `prettier --write`                                            |
 | `pnpm db:migrate` | `prisma migrate dev` (crée + applique une migration)          |
 | `pnpm db:deploy`  | `prisma migrate deploy` (applique les migrations existantes)  |

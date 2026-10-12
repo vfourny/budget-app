@@ -1,13 +1,13 @@
 import { Group, NumberInput, Paper, Stack, Text } from '@mantine/core'
+import {
+  PROFESSIONAL_CHARGE_CATEGORIES,
+  type ProfessionalYearSettingsValues,
+} from '@shared/professional-rules'
 
 import { ForecastAmountsForm } from '@/features/professional/components/forecast-editor/forecast-amounts-form'
 import type { Period } from '@/hooks/use-period-selection'
 import { formatBp, formatCents } from '@/lib/format'
 import { fr } from '@/lib/i18n/fr'
-import {
-  PROFESSIONAL_CHARGE_CATEGORIES,
-  type ProfessionalYearSettingsValues,
-} from '@shared/professional-rules'
 
 /** Onglet « Charges & rémunération » : prévu HT par charge pro + BNC prévu. */
 export function ChargesTab({
@@ -20,19 +20,19 @@ export function ChargesTab({
   const text = fr.professional.editor.charges
   return (
     <ForecastAmountsForm
-      period={period}
       group="charges"
-      rows={PROFESSIONAL_CHARGE_CATEGORIES}
-      reference="previousMonth"
       hint={text.hint}
+      period={period}
+      reference="previousMonth"
+      rows={PROFESSIONAL_CHARGE_CATEGORIES}
     >
       {({ view, setAmount }) => (
         <Stack gap={12}>
           <Group justify="space-between">
-            <Text size="sm" c="dimmed">
+            <Text c="dimmed" size="sm">
               {text.mixedNote}
             </Text>
-            <Text size="sm" fw={600}>
+            <Text fw={600} size="sm">
               {text.total(
                 formatCents(
                   PROFESSIONAL_CHARGE_CATEGORIES.reduce(
@@ -43,11 +43,11 @@ export function ChargesTab({
               )}
             </Text>
           </Group>
-          <Paper withBorder radius="md" p={16}>
+          <Paper p={16} radius="md" withBorder>
             <Text fw={600} mb={4}>
               {text.remuneration}
             </Text>
-            <Text size="xs" c="dimmed" mb={12}>
+            <Text c="dimmed" mb={12} size="xs">
               {text.salaryNote(
                 formatCents(settings.grossSalaryCents),
                 formatBp(settings.employerContributionBp),
@@ -55,21 +55,21 @@ export function ChargesTab({
               )}
             </Text>
             <NumberInput
-              label={text.bnc}
-              description={text.bncHint}
-              inputWrapperOrder={['label', 'input', 'description']}
-              w={260}
-              min={0}
-              step={100}
               decimalScale={2}
               decimalSeparator=","
-              value={view.valueOf('BNC_WITHDRAWAL') / 100}
+              description={text.bncHint}
+              inputWrapperOrder={['label', 'input', 'description']}
+              label={text.bnc}
+              min={0}
               onChange={(input) =>
                 setAmount(
                   'BNC_WITHDRAWAL',
                   Math.round((typeof input === 'number' ? input : 0) * 100),
                 )
               }
+              step={100}
+              value={view.valueOf('BNC_WITHDRAWAL') / 100}
+              w={260}
             />
           </Paper>
         </Stack>

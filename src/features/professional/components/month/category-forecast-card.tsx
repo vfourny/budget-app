@@ -1,4 +1,6 @@
 import { Paper, Title } from '@mantine/core'
+import type { TransactionCategory } from '@server/generated/prisma/enums'
+import type { ProfessionalMonth } from '@server/lib/professional/types'
 
 import {
   ForecastTable,
@@ -6,8 +8,6 @@ import {
 } from '@/features/professional/components/forecast-table'
 import { formatBp, formatCents } from '@/lib/format'
 import { fr } from '@/lib/i18n/fr'
-import type { ProfessionalMonth } from '@server/lib/professional/types'
-import type { TransactionCategory } from '@server/generated/prisma/enums'
 
 /** Groupes du tableau « Prévisionnel vs réel · par catégorie » d'un mois. */
 function monthForecastGroups(month: ProfessionalMonth): ForecastTableGroup[] {
@@ -124,13 +124,13 @@ function monthForecastGroups(month: ProfessionalMonth): ForecastTableGroup[] {
 export function CategoryForecastCard({ month }: { month: ProfessionalMonth }) {
   return (
     <Paper
-      withBorder
-      radius="lg"
-      p={24}
-      component="section"
       aria-label={fr.professional.categories.title}
+      component="section"
+      p={24}
+      radius="lg"
+      withBorder
     >
-      <Title order={2} mb={8}>
+      <Title mb={8} order={2}>
         {fr.professional.categories.title}
       </Title>
       <ForecastTable groups={monthForecastGroups(month)} />

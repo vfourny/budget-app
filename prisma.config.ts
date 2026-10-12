@@ -1,4 +1,5 @@
 import 'dotenv/config'
+
 import { defineConfig } from 'prisma/config'
 
 // Prisma 7 : la CLI (migrate, studio) lit sa config ici, plus dans le schéma.

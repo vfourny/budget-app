@@ -1,6 +1,7 @@
+import { fileURLToPath } from 'node:url'
+
 import react from '@vitejs/plugin-react'
 import { nitro } from 'nitro/vite'
-import { fileURLToPath } from 'node:url'
 import { defineConfig } from 'vite'
 
 // Vite sert le front React (SPA) ; le plugin Nitro ajoute le backend (dossier server/)

@@ -1,12 +1,12 @@
 import { ActionIcon, AppShell, NavLink } from '@mantine/core'
 import {
+  type Icon,
   IconBriefcase,
   IconBuilding,
   IconInbox,
   IconLayoutDashboard,
   IconLogout,
   IconSettings,
-  type Icon,
 } from '@tabler/icons-react'
 import { useQueryClient } from '@tanstack/react-query'
 import { Link, Outlet, useLocation, useNavigate } from 'react-router'
@@ -17,9 +17,9 @@ import { authClient } from '@/lib/auth-client'
 import { fr } from '@/lib/i18n/fr'
 
 interface NavItem {
-  to: string
-  label: string
   icon: Icon
+  label: string
+  to: string
 }
 
 const MAIN_NAV = [
@@ -42,14 +42,14 @@ function NavItemLink({ to, label, icon: IconComponent }: NavItem) {
 
   return (
     <NavLink
-      component={Link}
-      to={to}
-      label={label}
       active={active}
-      leftSection={
-        <IconComponent size={18} stroke={1.8} className={classes.linkIcon} />
-      }
       classNames={{ root: classes.link }}
+      component={Link}
+      label={label}
+      leftSection={
+        <IconComponent className={classes.linkIcon} size={18} stroke={1.8} />
+      }
+      to={to}
     />
   )
 }
@@ -71,7 +71,7 @@ export function AppLayout() {
 
   return (
     <AppShell navbar={{ width: 240, breakpoint: 0 }} padding={48}>
-      <AppShell.Navbar className={classes.navbar} aria-label={fr.nav.ariaLabel}>
+      <AppShell.Navbar aria-label={fr.nav.ariaLabel} className={classes.navbar}>
         <div className={classes.brand}>
           <div className={classes.brandMark}>{fr.nav.brandInitial}</div>
           <span className={classes.brandName}>{fr.nav.brandName}</span>
@@ -90,11 +90,11 @@ export function AppLayout() {
           <span style={{ flexGrow: 1 }}>{userName}</span>
           <ColorSchemeToggle />
           <ActionIcon
-            variant="subtle"
-            color="gray"
             aria-label={fr.auth.logout}
-            title={fr.auth.logout}
+            color="gray"
             onClick={() => void handleLogout()}
+            title={fr.auth.logout}
+            variant="subtle"
           >
             <IconLogout size={18} stroke={1.8} />
           </ActionIcon>

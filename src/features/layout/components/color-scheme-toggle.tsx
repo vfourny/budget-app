@@ -1,7 +1,7 @@
 import {
   ActionIcon,
-  useMantineColorScheme,
   type MantineColorScheme,
+  useMantineColorScheme,
 } from '@mantine/core'
 import { IconDeviceDesktop, IconMoon, IconSun } from '@tabler/icons-react'
 
@@ -34,11 +34,11 @@ export function ColorSchemeToggle() {
 
   return (
     <ActionIcon
-      variant="subtle"
-      color="gray"
       aria-label={label}
-      title={label}
+      color="gray"
       onClick={() => setColorScheme(next)}
+      title={label}
+      variant="subtle"
     >
       <Icon size={18} stroke={1.8} />
     </ActionIcon>
