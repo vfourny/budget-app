@@ -90,21 +90,21 @@ const CONDO_DEBITS_CENTS = [4_800, 33_291] as const
 const INITIAL_CONTRIBUTION_CENTS = 250_000
 const MONTHLY_CONTRIBUTION_CENTS = 75_000
 
-export interface SeedTransaction {
+interface SeedTransaction {
   amountCents: number
   category: TransactionCategory
   date: Date
   label: string
 }
 
-export interface SeedStatement {
+interface SeedStatement {
   /** 1-12. */
   month: number
   /** Triées par date. */
   transactions: SeedTransaction[]
 }
 
-export interface SeedManagementInvoice {
+interface SeedManagementInvoice {
   feesCents: number
   month: number
 }
