@@ -61,7 +61,6 @@ const AREA = {
   step: 0.5,
   max: 1000,
 } as const
-const DAYS = { unit: 'days', scale: 1, decimals: 0, step: 1, max: 31 } as const
 
 const FIELDS = {
   grossSalaryCents: {
@@ -78,8 +77,6 @@ const FIELDS = {
   profitSocialChargesBp: PERCENT,
   officeAreaDm2: AREA,
   homeAreaDm2: AREA,
-  mixedKeyNumerator: DAYS,
-  mixedKeyDenominator: DAYS,
   mileageRateMilli: {
     unit: 'eurosPerKm',
     scale: 1000,
@@ -99,13 +96,7 @@ const GROUPS = {
     'withholdingTaxBp',
   ],
   profit: ['profitSocialChargesBp'],
-  mixedCosts: [
-    'officeAreaDm2',
-    'homeAreaDm2',
-    'mixedKeyNumerator',
-    'mixedKeyDenominator',
-    'mileageRateMilli',
-  ],
+  mixedCosts: ['officeAreaDm2', 'homeAreaDm2', 'mileageRateMilli'],
 } as const satisfies Record<
   keyof typeof fr.settings.pro.groups,
   readonly NumericKey[]
@@ -210,8 +201,7 @@ function ProfessionalYearFields({
     ) as (keyof ProfessionalYearSettingsValues)[]
   ).every((key) => draft[key] === DEFAULT_PROFESSIONAL_YEAR_SETTINGS[key])
   const invalidAreas = draft.officeAreaDm2 > draft.homeAreaDm2
-  const invalidKey = draft.mixedKeyNumerator > draft.mixedKeyDenominator
-  const canSave = (changed || !isOwn) && !invalidAreas && !invalidKey
+  const canSave = (changed || !isOwn) && !invalidAreas
 
   const exercise = year - draft.irOptionFirstYear + 1
   const irHint =
@@ -331,7 +321,6 @@ function ProfessionalYearFields({
       {invalidAreas && (
         <Alert color="red" title={fr.settings.pro.invalidAreas} />
       )}
-      {invalidKey && <Alert color="red" title={fr.settings.pro.invalidKey} />}
       {save.isError && (
         <Alert color="red" title={fr.settings.pro.saveFailed}>
           {errorMessage(save.error)}

@@ -138,7 +138,7 @@ reste des débits sont des **dépenses**.
   Remboursement pro, Autre remboursement, + « Autres » s'il reste des crédits non rangés), Épargne du mois (+ % des
   revenus) ; tableau des transactions triable ; dépenses par catégorie (toutes les catégories de la liste, même à 0 €).
 - **Ordre des cartes** (mois et année) : Revenus, Dépenses, Épargne.
-- **Vue année** : mêmes totaux sur l'année choisie, sur deux lignes (3 + 2) : plus la dépense moyenne par mois (mois ayant des données) et l'**IR estimé** (barème progressif 1 part de l'année affichée, appliqué au revenu annualisé = cumul / mois avec données × 12, sans abattement ni réductions). Le barème est stocké en base (table `IncomeTaxBracket`, une ligne par tranche et par année) et se saisit dans **Réglages** ; le barème de chaque année est inséré par le seed (`prisma/seeds/income-tax.ts`, `INCOME_TAX_BRACKETS_BY_YEAR`, 2025 et 2026 pour l'instant) : **il faudra y ajouter chaque nouvelle année** puis relancer `pnpm db:seed` (sur develop et production), ou le saisir dans Réglages. Si l'année affichée n'a pas de barème, la card affiche « Barème de l'IR <année> non renseigné » avec un lien vers Réglages.
+- **Vue année** : mêmes totaux sur l'année choisie, sur deux lignes (3 + 2) : plus la dépense moyenne par mois (mois ayant des données) et l'**IR estimé** (barème progressif 1 part de l'année affichée, appliqué au revenu annualisé = cumul / mois avec données × 12, sans abattement ni réductions). Le barème est une donnée du code (`shared/income-tax.ts`, `INCOME_TAX_BRACKETS_BY_YEAR`, 2025 et 2026 pour l'instant), pas une saisie : **chaque nouvelle année s'ajoute par une PR**. Si l'année affichée n'a pas de barème, la card affiche « Barème de l'IR <année> non renseigné ».
 
 - Les parts recommandées (méthode des 5 comptes) se règlent dans **Réglages** (le total doit faire exactement 100 %).
   Les 5 enveloppes sont toujours affichées avec leur jauge, même à 0 €.
@@ -179,8 +179,8 @@ prévisionnel s'affiche (bandeau « Mois à venir »). Ne comptent que les trans
 
 Un jeu de règles **par année** (`ProfessionalYearSettings`) : régime (seule la **SAS à l'IR** est calculée ; IS et EURL
 « Bientôt »), première année de l'option IR (5 exercices max), salaire brut mensuel, taux patronal, salarial, net
-imposable, PAS, charges sociales sur la quote-part de bénéfice, surfaces bureau / logement, clé n/d des autres frais
-mixtes, barème km. Une année non configurée reprend la dernière année configurée avant elle, sinon les valeurs par
+imposable, PAS, charges sociales sur la quote-part de bénéfice, surfaces bureau / logement, barème km (la clé des autres frais
+mixtes est fixe : 5/7, `MIXED_COSTS_KEY`). Une année non configurée reprend la dernière année configurée avant elle, sinon les valeurs par
 défaut (`DEFAULT_PROFESSIONAL_YEAR_SETTINGS`).
 
 ### Règles de calcul (SAS à l'IR)
@@ -204,7 +204,7 @@ défaut (`DEFAULT_PROFESSIONAL_YEAR_SETTINGS`).
 - **Bénéfice** = CA HT − charges pro − salaires bruts − cotisations patronales. **Reste en trésorerie** = bénéfice −
   BNC prélevés. **Charges sociales sur bénéfice** = taux × max(0, bénéfice), réglées en perso.
 - **Frais mixtes** : dû = dépense **perso** du mois (Loyer, Internet, Télécom, Énergie) × quote-part (loyer : surface
-  bureau / logement ; autres : clé n/d). Les remboursements reçus sont répartis dans l'ordre loyer → internet →
+  bureau / logement ; autres : clé fixe 5/7). Les remboursements reçus sont répartis dans l'ordre loyer → internet →
   téléphone → énergie.
 - **Frais km** : km réels = somme des trajets du journal ; montant = km × barème de l'année.
 

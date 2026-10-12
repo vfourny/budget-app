@@ -22,26 +22,6 @@ const envelopeSharesSchema = z
     },
   )
 
-const incomeTaxBracketsSchema = z
-  .array(
-    z.object({
-      fromCents: z.number().int().min(0),
-      ratePercent: z.number().int().min(0).max(100),
-    }),
-  )
-  .min(1)
-  .refine(
-    (brackets) =>
-      brackets[0]?.fromCents === 0 &&
-      brackets.every(
-        (b, i) => i === 0 || b.fromCents > (brackets[i - 1]?.fromCents ?? 0),
-      ),
-    {
-      message:
-        'Brackets must start at 0 and have strictly increasing thresholds.',
-    },
-  )
-
 const basisPoints = z.number().int().min(0).max(100_00)
 
 /** Règles pro d'une année : entiers uniquement (centimes, points de base, dm², millièmes d'€). */
@@ -57,15 +37,10 @@ const professionalYearSettingsSchema = z
     profitSocialChargesBp: basisPoints,
     officeAreaDm2: z.number().int().min(0).max(500_00),
     homeAreaDm2: z.number().int().min(1).max(1000_00),
-    mixedKeyNumerator: z.number().int().min(0).max(31),
-    mixedKeyDenominator: z.number().int().min(1).max(31),
     mileageRateMilli: z.number().int().min(0).max(5000),
   })
   .refine((values) => values.officeAreaDm2 <= values.homeAreaDm2, {
     message: 'The office cannot be larger than the home.',
-  })
-  .refine((values) => values.mixedKeyNumerator <= values.mixedKeyDenominator, {
-    message: 'The mixed costs key cannot exceed 1.',
   })
 
 export const settingsRouter = createTRPCRouter({
@@ -95,35 +70,6 @@ export const settingsRouter = createTRPCRouter({
           }),
         ),
       )
-      return input
-    }),
-
-  /** Barème de l'IR d'une année, trié par seuil ; tableau vide si jamais renseigné. */
-  incomeTaxBrackets: protectedProcedure
-    .input(z.object({ year: z.number().int() }))
-    .query(({ ctx, input }) =>
-      ctx.db.incomeTaxBracket.findMany({
-        where: { year: input.year },
-        orderBy: { fromCents: 'asc' },
-        select: { fromCents: true, ratePercent: true },
-      }),
-    ),
-
-  /** Remplace le barème d'une année (suppression + création en une seule transaction SQL). */
-  setIncomeTaxBrackets: protectedProcedure
-    .input(
-      z.object({ year: z.number().int(), brackets: incomeTaxBracketsSchema }),
-    )
-    .mutation(async ({ ctx, input }) => {
-      await ctx.db.$transaction([
-        ctx.db.incomeTaxBracket.deleteMany({ where: { year: input.year } }),
-        ctx.db.incomeTaxBracket.createMany({
-          data: input.brackets.map((bracket) => ({
-            year: input.year,
-            ...bracket,
-          })),
-        }),
-      ])
       return input
     }),
 

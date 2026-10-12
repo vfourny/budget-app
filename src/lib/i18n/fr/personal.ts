@@ -19,8 +19,6 @@ export const personal = {
     incomeTax: (year: number) => `IR estimé ${year}`,
     incomeTaxHint: 'Barème 1 part, avant réductions',
     incomeTaxMissing: (year: number) => `Barème de l'IR ${year} non renseigné.`,
-    incomeTaxMissingLink: 'Le renseigner dans Réglages',
-    incomeTaxLoadFailed: "Barème de l'IR indisponible.",
   },
   // Jauges réel vs recommandé
   gauge: {
