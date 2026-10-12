@@ -4,6 +4,7 @@ import { db } from '@server/lib/db'
 
 import { seedApartments, seedToulouseStatements2025 } from './seeds/apartments'
 import { seedCsvFormats } from './seeds/csv-formats'
+import { seedPersonal2025 } from './seeds/personal-2025'
 import { seedProfessionalBilling } from './seeds/professional-billing'
 import { seedProfessionalTrips } from './seeds/professional-trips'
 import { seedUser } from './seeds/user'
@@ -20,6 +21,7 @@ try {
   await seedProfessionalTrips(userId)
   await seedApartments(userId)
   await seedToulouseStatements2025(userId)
+  await seedPersonal2025(userId)
 } catch (error) {
   console.error(error instanceof Error ? error.message : error)
   process.exitCode = 1
