@@ -24,8 +24,6 @@ export const accountTypes = {
 /** Régime de location d'un appartement (simple étiquette en V1). */
 export const apartmentKinds = {
   FURNISHED: 'LMNP',
-  UNFURNISHED: 'Location nue',
-  SCI: 'SCI',
 } as const satisfies Record<ApartmentKind, string>
 
 /** Statut juridique et fiscal de la société (Réglages › Pro). */
