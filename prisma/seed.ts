@@ -2,7 +2,7 @@ import 'dotenv/config'
 
 import { db } from '@server/lib/db'
 
-import { seedApartments } from './seeds/apartments'
+import { seedApartments, seedToulouseStatements2025 } from './seeds/apartments'
 import { seedCsvFormats } from './seeds/csv-formats'
 import { seedProfessionalBilling } from './seeds/professional-billing'
 import { seedUser } from './seeds/user'
@@ -17,6 +17,7 @@ try {
   await seedCsvFormats(userId)
   await seedProfessionalBilling(userId)
   await seedApartments(userId)
+  await seedToulouseStatements2025(userId)
 } catch (error) {
   console.error(error instanceof Error ? error.message : error)
   process.exitCode = 1
