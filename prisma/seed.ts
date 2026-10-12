@@ -5,6 +5,7 @@ import { db } from '@server/lib/db'
 import { seedApartments } from './seeds/apartments'
 import { seedCsvFormats } from './seeds/csv-formats'
 import { seedProfessionalBilling } from './seeds/professional-billing'
+import { seedProfessionalTrips } from './seeds/professional-trips'
 import { seedUser } from './seeds/user'
 
 // Seed : lancé automatiquement par `pnpm db:reset` (prisma migrate reset) ou à la main avec
@@ -16,6 +17,7 @@ try {
   const userId = await seedUser()
   await seedCsvFormats(userId)
   await seedProfessionalBilling(userId)
+  await seedProfessionalTrips(userId)
   await seedApartments(userId)
 } catch (error) {
   console.error(error instanceof Error ? error.message : error)
