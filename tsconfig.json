@@ -1,20 +1,14 @@
 {
-  "extends": "@vfourny/node-toolkit/tsconfig/base",
+  "extends": "@vfourny/node-toolkit/tsconfig/react",
   "compilerOptions": {
     "target": "es2023",
     "lib": ["ES2023", "DOM", "DOM.Iterable"],
     "types": ["vite/client", "node"],
-    "jsx": "react-jsx",
-    "noEmit": true,
-    "allowJs": false,
-    "allowImportingTsExtensions": true,
-    "moduleDetection": "force",
     "paths": {
       "@/*": ["./src/*"],
       "@server/*": ["./server/*"],
       "@shared/*": ["./shared/*"]
     }
   },
-  "include": ["src", "server", "shared", "prisma", "*.ts"],
-  "exclude": ["node_modules", ".output", ".vercel", "dist"]
+  "exclude": ["node_modules", "dist", ".output", ".vercel", ".pnpm-store", "Claude outputs"]
 }
