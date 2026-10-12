@@ -1,6 +1,7 @@
 import {
   Alert,
   Button,
+  Collapse,
   Group,
   NumberInput,
   Paper,
@@ -11,9 +12,12 @@ import {
   Text,
   TextInput,
   Title,
+  UnstyledButton,
 } from '@mantine/core'
+import { useDisclosure } from '@mantine/hooks'
 import type { ApartmentKind } from '@server/generated/prisma/enums'
 import { loanSchedule } from '@shared/apartment-loan'
+import { IconChevronDown } from '@tabler/icons-react'
 import { useState } from 'react'
 
 import { EuroField } from '@/components/euro-field'
@@ -105,6 +109,8 @@ export function ApartmentSettingsCard({
   // Brouillon local copié des données serveur au montage (≈ un `ref` Vue qu'on ne synchronise pas).
   const [draft, setDraft] = useState<ApartmentValues>(initial)
   const [confirmingDelete, setConfirmingDelete] = useState(false)
+  // Repliée par défaut, sauf un nouveau bien (≈ un `ref(false)` + `v-show` dans `<Transition>`).
+  const [opened, { toggle }] = useDisclosure(id === undefined)
   const save = useSaveApartment()
   const remove = useDeleteApartment()
 
@@ -144,219 +150,240 @@ export function ApartmentSettingsCard({
 
   return (
     <Paper p={28} radius="lg" withBorder>
-      <Stack gap={20}>
-        <Title order={3}>{draft.name.trim() || text.newTitle}</Title>
-
-        <SimpleGrid cols={{ base: 1, sm: 2, lg: 3 }} spacing={16}>
-          <TextInput
-            label={text.fields.name}
-            onChange={(event) => set('name', event.currentTarget.value)}
-            value={draft.name}
-          />
-          <Select
-            allowDeselect={false}
-            data={KIND_OPTIONS}
-            description={text.fields.kindHint}
-            inputWrapperOrder={['label', 'input', 'description']}
-            label={text.fields.kind}
-            onChange={(value) => value && set('kind', value as ApartmentKind)}
-            value={draft.kind}
-          />
-          <TextInput
-            description={text.fields.managerHint}
-            inputWrapperOrder={['label', 'input', 'description']}
-            label={text.fields.manager}
-            onChange={(event) => set('managerName', event.currentTarget.value)}
-            value={draft.managerName}
-          />
-          <TextInput
-            label={text.fields.acquiredAt}
-            onChange={(event) => {
-              const [year, month] = event.currentTarget.value
-                .split('-')
-                .map(Number)
-              if (year && month)
-                set('acquiredAt', new Date(Date.UTC(year, month - 1, 1)))
+      <UnstyledButton aria-expanded={opened} onClick={toggle} w="100%">
+        <Group justify="space-between" wrap="nowrap">
+          <Title order={3}>{draft.name.trim() || text.newTitle}</Title>
+          <IconChevronDown
+            style={{
+              transform: opened ? 'rotate(180deg)' : undefined,
+              transition: 'transform 200ms ease',
             }}
-            type="month"
-            value={toMonthValue(draft.acquiredAt)}
           />
-          <EuroField
-            cents={draft.priceCents}
-            label={text.fields.price}
-            onChange={(value) => set('priceCents', value)}
-          />
-          <EuroField
-            cents={draft.rentCents}
-            label={text.fields.rent}
-            onChange={(value) => set('rentCents', value)}
-          />
-          <EuroField
-            cents={draft.depositCents}
-            label={text.fields.deposit}
-            onChange={(value) => set('depositCents', value)}
-          />
-          <PercentField
-            bps={draft.managementFeeBps}
-            description={text.fields.managementFeeHint}
-            label={text.fields.managementFee}
-            onChange={(value) => set('managementFeeBps', value)}
-          />
-          <EuroField
-            cents={draft.propertyTaxCents}
-            label={text.fields.propertyTax}
-            onChange={(value) => set('propertyTaxCents', value)}
-          />
-          <EuroField
-            cents={draft.cfeCents}
-            label={text.fields.cfe}
-            onChange={(value) => set('cfeCents', value)}
-          />
-          <EuroField
-            allowNegative
-            cents={draft.openingBalanceCents}
-            description={text.fields.openingBalanceHint}
-            label={text.fields.openingBalance(openingYear)}
-            onChange={(value) => set('openingBalanceCents', value)}
-          />
-        </SimpleGrid>
+        </Group>
+      </UnstyledButton>
+      {/* `Collapse` garde le contenu monté : le brouillon survit au repli. */}
+      <Collapse expanded={opened}>
+        <Stack gap={20} pt={20}>
+          <SimpleGrid cols={{ base: 1, sm: 2, lg: 3 }} spacing={16}>
+            <TextInput
+              label={text.fields.name}
+              onChange={(event) => set('name', event.currentTarget.value)}
+              value={draft.name}
+            />
+            <Select
+              allowDeselect={false}
+              data={KIND_OPTIONS}
+              description={text.fields.kindHint}
+              inputWrapperOrder={['label', 'input', 'description']}
+              label={text.fields.kind}
+              onChange={(value) => value && set('kind', value as ApartmentKind)}
+              value={draft.kind}
+            />
+            <TextInput
+              description={text.fields.managerHint}
+              inputWrapperOrder={['label', 'input', 'description']}
+              label={text.fields.manager}
+              onChange={(event) =>
+                set('managerName', event.currentTarget.value)
+              }
+              value={draft.managerName}
+            />
+            <TextInput
+              label={text.fields.acquiredAt}
+              onChange={(event) => {
+                const [year, month] = event.currentTarget.value
+                  .split('-')
+                  .map(Number)
+                if (year && month)
+                  set('acquiredAt', new Date(Date.UTC(year, month - 1, 1)))
+              }}
+              type="month"
+              value={toMonthValue(draft.acquiredAt)}
+            />
+            <EuroField
+              cents={draft.priceCents}
+              label={text.fields.price}
+              onChange={(value) => set('priceCents', value)}
+            />
+            <EuroField
+              cents={draft.rentCents}
+              label={text.fields.rent}
+              onChange={(value) => set('rentCents', value)}
+            />
+            <EuroField
+              cents={draft.depositCents}
+              label={text.fields.deposit}
+              onChange={(value) => set('depositCents', value)}
+            />
+            <PercentField
+              bps={draft.managementFeeBps}
+              description={text.fields.managementFeeHint}
+              label={text.fields.managementFee}
+              onChange={(value) => set('managementFeeBps', value)}
+            />
+            <EuroField
+              cents={draft.propertyTaxCents}
+              label={text.fields.propertyTax}
+              onChange={(value) => set('propertyTaxCents', value)}
+            />
+            <EuroField
+              cents={draft.cfeCents}
+              label={text.fields.cfe}
+              onChange={(value) => set('cfeCents', value)}
+            />
+            <EuroField
+              allowNegative
+              cents={draft.openingBalanceCents}
+              description={text.fields.openingBalanceHint}
+              label={text.fields.openingBalance(openingYear)}
+              onChange={(value) => set('openingBalanceCents', value)}
+            />
+          </SimpleGrid>
 
-        <Stack gap={12}>
-          <Title order={4}>{text.loan.title}</Title>
-          <Switch
-            checked={draft.loan !== null}
-            label={text.loan.enabled}
-            onChange={(event) =>
-              set(
-                'loan',
-                event.currentTarget.checked
-                  ? defaultLoan(draft.acquiredAt)
-                  : null,
-              )
-            }
-          />
-          {draft.loan && (
-            <>
-              <SimpleGrid cols={{ base: 1, sm: 2, lg: 3 }} spacing={16}>
-                <EuroField
-                  cents={draft.loan.principalCents}
-                  label={text.loan.principal}
-                  onChange={(value) => setLoan({ principalCents: value })}
-                />
-                <PercentField
-                  bps={draft.loan.rateBps}
-                  label={text.loan.rate}
-                  onChange={(value) => setLoan({ rateBps: value })}
-                />
-                <NumberInput
-                  allowDecimal={false}
-                  label={text.loan.term}
-                  max={600}
-                  min={1}
-                  onChange={(value) =>
-                    typeof value === 'number' && setLoan({ termMonths: value })
-                  }
-                  suffix={` ${text.units.months}`}
-                  value={draft.loan.termMonths}
-                />
-                <TextInput
-                  label={text.loan.firstDue}
-                  onChange={(event) => {
-                    const date = new Date(
-                      `${event.currentTarget.value}T00:00:00Z`,
-                    )
-                    if (!Number.isNaN(date.getTime()))
-                      setLoan({ firstDueDate: date })
-                  }}
-                  type="date"
-                  value={toDayValue(draft.loan.firstDueDate)}
-                />
-                <EuroField
-                  cents={draft.creditInsuranceCents}
-                  description={text.loan.insuranceHint}
-                  label={text.loan.insurance}
-                  onChange={(value) => set('creditInsuranceCents', value)}
-                />
-              </SimpleGrid>
-              {first && (
-                <Alert
-                  color="gold"
-                  title={text.loan.summaryTitle}
-                  variant="light"
-                >
-                  <Stack gap={2}>
-                    <Text size="sm">
-                      {text.loan.monthlyPayment(
-                        formatCents(first.paymentCents),
-                      )}
-                    </Text>
-                    <Text size="sm">
-                      {text.loan.firstInstallment(
-                        formatCents(first.capitalCents),
-                        formatCents(first.interestCents),
-                      )}
-                    </Text>
-                    <Text size="sm">
-                      {text.loan.totalInterest(formatCents(totalInterestCents))}
-                    </Text>
-                  </Stack>
-                </Alert>
-              )}
-            </>
+          <Stack gap={12}>
+            <Title order={4}>{text.loan.title}</Title>
+            <Switch
+              checked={draft.loan !== null}
+              label={text.loan.enabled}
+              onChange={(event) =>
+                set(
+                  'loan',
+                  event.currentTarget.checked
+                    ? defaultLoan(draft.acquiredAt)
+                    : null,
+                )
+              }
+            />
+            {draft.loan && (
+              <>
+                <SimpleGrid cols={{ base: 1, sm: 2, lg: 3 }} spacing={16}>
+                  <EuroField
+                    cents={draft.loan.principalCents}
+                    label={text.loan.principal}
+                    onChange={(value) => setLoan({ principalCents: value })}
+                  />
+                  <PercentField
+                    bps={draft.loan.rateBps}
+                    label={text.loan.rate}
+                    onChange={(value) => setLoan({ rateBps: value })}
+                  />
+                  <NumberInput
+                    allowDecimal={false}
+                    label={text.loan.term}
+                    max={600}
+                    min={1}
+                    onChange={(value) =>
+                      typeof value === 'number' &&
+                      setLoan({ termMonths: value })
+                    }
+                    suffix={` ${text.units.months}`}
+                    value={draft.loan.termMonths}
+                  />
+                  <TextInput
+                    label={text.loan.firstDue}
+                    onChange={(event) => {
+                      const date = new Date(
+                        `${event.currentTarget.value}T00:00:00Z`,
+                      )
+                      if (!Number.isNaN(date.getTime()))
+                        setLoan({ firstDueDate: date })
+                    }}
+                    type="date"
+                    value={toDayValue(draft.loan.firstDueDate)}
+                  />
+                  <EuroField
+                    cents={draft.creditInsuranceCents}
+                    description={text.loan.insuranceHint}
+                    label={text.loan.insurance}
+                    onChange={(value) => set('creditInsuranceCents', value)}
+                  />
+                </SimpleGrid>
+                {first && (
+                  <Alert
+                    color="gold"
+                    title={text.loan.summaryTitle}
+                    variant="light"
+                  >
+                    <Stack gap={2}>
+                      <Text size="sm">
+                        {text.loan.monthlyPayment(
+                          formatCents(first.paymentCents),
+                        )}
+                      </Text>
+                      <Text size="sm">
+                        {text.loan.firstInstallment(
+                          formatCents(first.capitalCents),
+                          formatCents(first.interestCents),
+                        )}
+                      </Text>
+                      <Text size="sm">
+                        {text.loan.totalInterest(
+                          formatCents(totalInterestCents),
+                        )}
+                      </Text>
+                    </Stack>
+                  </Alert>
+                )}
+              </>
+            )}
+          </Stack>
+
+          {save.isError && (
+            <Alert color="red" title={text.saveFailed}>
+              {errorMessage(save.error)}
+            </Alert>
           )}
-        </Stack>
+          {remove.isError && (
+            <Alert color="red" title={text.deleteFailed}>
+              {errorMessage(remove.error)}
+            </Alert>
+          )}
+          {save.isSuccess && !changed && (
+            <Text c="teal.4" size="sm">
+              {fr.common.saved}
+            </Text>
+          )}
 
-        {save.isError && (
-          <Alert color="red" title={text.saveFailed}>
-            {errorMessage(save.error)}
-          </Alert>
-        )}
-        {remove.isError && (
-          <Alert color="red" title={text.deleteFailed}>
-            {errorMessage(remove.error)}
-          </Alert>
-        )}
-        {save.isSuccess && !changed && (
-          <Text c="teal.4" size="sm">
-            {fr.common.saved}
-          </Text>
-        )}
-
-        <Group>
-          <Button disabled={!canSave} loading={save.isPending} onClick={submit}>
-            {fr.common.save}
-          </Button>
-          {id === undefined ? (
-            <Button onClick={onCancel} variant="default">
-              {fr.common.cancel}
+          <Group>
+            <Button
+              disabled={!canSave}
+              loading={save.isPending}
+              onClick={submit}
+            >
+              {fr.common.save}
             </Button>
-          ) : confirmingDelete ? (
-            <>
-              <Button
-                color="red"
-                loading={remove.isPending}
-                onClick={() => remove.mutate({ id })}
-              >
-                {text.confirmDelete}
-              </Button>
-              <Button
-                onClick={() => setConfirmingDelete(false)}
-                variant="default"
-              >
+            {id === undefined ? (
+              <Button onClick={onCancel} variant="default">
                 {fr.common.cancel}
               </Button>
-            </>
-          ) : (
-            <Button
-              color="red"
-              onClick={() => setConfirmingDelete(true)}
-              variant="subtle"
-            >
-              {text.delete}
-            </Button>
-          )}
-        </Group>
-      </Stack>
+            ) : confirmingDelete ? (
+              <>
+                <Button
+                  color="red"
+                  loading={remove.isPending}
+                  onClick={() => remove.mutate({ id })}
+                >
+                  {text.confirmDelete}
+                </Button>
+                <Button
+                  onClick={() => setConfirmingDelete(false)}
+                  variant="default"
+                >
+                  {fr.common.cancel}
+                </Button>
+              </>
+            ) : (
+              <Button
+                color="red"
+                onClick={() => setConfirmingDelete(true)}
+                variant="subtle"
+              >
+                {text.delete}
+              </Button>
+            )}
+          </Group>
+        </Stack>
+      </Collapse>
     </Paper>
   )
 }
