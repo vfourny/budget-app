@@ -1,22 +1,13 @@
 import { Group, NumberInput, Paper, Stack, Text } from '@mantine/core'
-import {
-  PROFESSIONAL_CHARGE_CATEGORIES,
-  type ProfessionalYearSettingsValues,
-} from '@shared/professional-rules'
+import { PROFESSIONAL_CHARGE_CATEGORIES } from '@shared/professional-rules'
 
 import { ForecastAmountsForm } from '@/features/professional/components/forecast-editor/forecast-amounts-form'
 import type { Period } from '@/hooks/use-period-selection'
-import { formatBp, formatCents } from '@/lib/format'
+import { formatCents } from '@/lib/format'
 import { fr } from '@/lib/i18n/fr'
 
-/** Onglet « Charges & rémunération » : prévu HT par charge pro + BNC prévu. */
-export function ChargesTab({
-  period,
-  settings,
-}: {
-  period: Period
-  settings: ProfessionalYearSettingsValues
-}) {
+/** Onglet « Charges & BNC » : prévu HT par charge pro + BNC prévu. */
+export function ChargesTab({ period }: { period: Period }) {
   const text = fr.professional.editor.charges
   return (
     <ForecastAmountsForm
@@ -48,11 +39,7 @@ export function ChargesTab({
               {text.remuneration}
             </Text>
             <Text c="dimmed" mb={12} size="xs">
-              {text.salaryNote(
-                formatCents(settings.grossSalaryCents),
-                formatBp(settings.employerContributionBp),
-                formatBp(settings.withholdingTaxBp),
-              )}
+              {text.salaryNote}
             </Text>
             <NumberInput
               decimalScale={2}

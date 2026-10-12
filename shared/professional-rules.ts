@@ -23,7 +23,6 @@ export type ProfessionalYearSettingsValues = Omit<
 export const DEFAULT_PROFESSIONAL_YEAR_SETTINGS = {
   regime: 'SAS_IR',
   irOptionFirstYear: 2026,
-  grossSalaryCents: 80_000,
   employerContributionBp: 4460,
   employeeContributionBp: 2160,
   taxableNetBp: 8730,

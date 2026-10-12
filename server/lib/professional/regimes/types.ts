@@ -21,5 +21,9 @@ export interface ProfessionalRegime {
     profitCents: number,
     settings: ProfessionalYearSettingsValues,
   ): number
-  remuneration(settings: ProfessionalYearSettingsValues): Remuneration
+  /** Rémunération du mois pour un salaire brut donné (prévu dans l'éditeur, `SalaryForecast`). */
+  remuneration(
+    grossSalaryCents: number,
+    settings: ProfessionalYearSettingsValues,
+  ): Remuneration
 }

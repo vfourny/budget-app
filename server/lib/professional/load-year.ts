@@ -71,6 +71,7 @@ export async function loadProfessionalYear(
     forecasts,
     mileageForecasts,
     trips,
+    salaryForecasts,
   ] = await Promise.all([
     db.transaction.groupBy({
       by: ['year', 'month', 'category'],
@@ -126,6 +127,10 @@ export async function loadProfessionalYear(
       where: { userId, year: years },
       _sum: { km: true },
     }),
+    // Décembre N-1 a besoin du salaire de N-2 (valeur par défaut).
+    db.salaryForecast.findMany({
+      where: { userId, year: { gte: year - 2, lte: year } },
+    }),
   ])
 
   const professionalDebits: MonthCategoryCents = new Map()
@@ -155,6 +160,12 @@ export async function loadProfessionalYear(
     trips.map((row) => [monthIndex(row.year, row.month), row._sum.km ?? 0]),
   )
   const forecastKm = new Map(mileageForecasts.map((row) => [row.month, row.km]))
+  const grossSalary = new Map(
+    salaryForecasts.map((row) => [
+      monthIndex(row.year, row.month),
+      row.grossSalaryCents,
+    ]),
+  )
 
   const billing = (
     kind: 'FORECAST' | 'ACTUAL',
@@ -236,6 +247,10 @@ export async function loadProfessionalYear(
     collections: {
       receivedCents: received.get(monthIndex(y, month)) ?? 0,
       countedCents: counted(monthIndex(y, month)),
+    },
+    salary: {
+      forecastCents: grossSalary.get(monthIndex(y, month)) ?? null,
+      lastYearCents: grossSalary.get(monthIndex(y - 1, month)) ?? 0,
     },
     mileage: {
       tripsKm: tripsKm.get(monthIndex(y, month)) ?? 0,

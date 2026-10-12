@@ -65,6 +65,27 @@ export function useCopyForecastsToFollowingMonths() {
   })
 }
 
+/** Salaire brut prévu d'un mois (saisie) et brut du même mois N-1. */
+export function useSalaryForecast(year: number, month: number) {
+  return useQuery(
+    trpc.professionalForecast.salary.queryOptions({ year, month }),
+  )
+}
+
+export function useSetSalary() {
+  return useMutation({
+    ...trpc.professionalForecast.setSalary.mutationOptions(),
+    onSuccess: invalidate,
+  })
+}
+
+export function useCopySalaryToFollowingMonths() {
+  return useMutation({
+    ...trpc.professionalForecast.copySalaryToFollowingMonths.mutationOptions(),
+    onSuccess: invalidate,
+  })
+}
+
 /** Km prévus d'un mois (saisie) et km réels du même mois N-1. */
 export function useMileageForecast(year: number, month: number) {
   return useQuery(

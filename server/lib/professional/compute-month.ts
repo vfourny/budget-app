@@ -73,7 +73,10 @@ export function computeMonth(input: ProfessionalMonthInput): ProfessionalMonth {
 
   // ── Rémunération ───────────────────────────────────────────────────────────────────────────
   const regime = regimeOf(settings.regime)
-  const pay = regime.remuneration(settings)
+  const pay = regime.remuneration(
+    input.salary.forecastCents ?? input.salary.lastYearCents,
+    settings,
+  )
   const fixed = (cents: number) => amount(cents, actualOrNull(cents))
   const employerContributions = fixed(pay.employerContributionsCents)
   const remuneration = {

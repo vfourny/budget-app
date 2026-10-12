@@ -7,11 +7,13 @@ import { BillingTab } from '@/features/professional/components/forecast-editor/b
 import { ChargesTab } from '@/features/professional/components/forecast-editor/charges-tab'
 import { MileageTab } from '@/features/professional/components/forecast-editor/mileage-tab'
 import { MixedCostsTab } from '@/features/professional/components/forecast-editor/mixed-costs-tab'
+import { SalaryTab } from '@/features/professional/components/forecast-editor/salary-tab'
 import type { Period } from '@/hooks/use-period-selection'
 import { capitalizedMonthName } from '@/lib/format'
 import { fr } from '@/lib/i18n/fr'
 
-export type EditorTab = 'billing' | 'charges' | 'mixedCosts' | 'mileage'
+export type EditorTab =
+  'billing' | 'charges' | 'salary' | 'mixedCosts' | 'mileage'
 
 export interface EditorTarget {
   source: BillingKind
@@ -24,7 +26,7 @@ interface ForecastEditorModalProps {
   initial: EditorTarget
   onClose: () => void
   period: Period
-  /** Règles de l'année (salaire, taux) : rappelées dans l'onglet Charges. */
+  /** Règles de l'année (taux, surfaces, barème km) : utilisées par les onglets. */
   settings: ProfessionalYearSettingsValues
 }
 
@@ -66,6 +68,7 @@ export function ForecastEditorModal({
         <Tabs.List aria-label={text.tabsAria} mb={16}>
           <Tabs.Tab value="billing">{text.tabs.billing}</Tabs.Tab>
           <Tabs.Tab value="charges">{text.tabs.charges}</Tabs.Tab>
+          <Tabs.Tab value="salary">{text.tabs.salary}</Tabs.Tab>
           <Tabs.Tab value="mixedCosts">{text.tabs.mixedCosts}</Tabs.Tab>
           <Tabs.Tab value="mileage">{text.tabs.mileage}</Tabs.Tab>
         </Tabs.List>
@@ -89,7 +92,10 @@ export function ForecastEditorModal({
           </Stack>
         </Tabs.Panel>
         <Tabs.Panel value="charges">
-          <ChargesTab period={period} settings={settings} />
+          <ChargesTab period={period} />
+        </Tabs.Panel>
+        <Tabs.Panel value="salary">
+          <SalaryTab period={period} settings={settings} />
         </Tabs.Panel>
         <Tabs.Panel value="mixedCosts">
           <MixedCostsTab period={period} settings={settings} />
