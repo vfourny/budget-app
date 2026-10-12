@@ -32,7 +32,7 @@ function buildApartment(
     id: apartment.id,
     name: apartment.name,
     kind: apartment.kind,
-    managerName: apartment.managerName,
+    managed: apartment.managed,
     acquiredAt: apartment.acquiredAt,
     priceCents: apartment.priceCents,
     rentCents: apartment.rentCents,
