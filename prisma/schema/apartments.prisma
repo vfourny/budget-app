@@ -3,11 +3,9 @@
 // points de base (3,00 % = 300). Les relevés du compte appartement sont des `ImportBatch` /
 // `Transaction` de type `AccountType.APARTMENT`, rattachés à un `Apartment`.
 
-/// Étiquette du régime de location (V1 : aucune règle n'en dépend).
+/// Régime de location. Seul le LMNP existe pour l'instant : une nouvelle valeur viendra avec ses règles.
 enum ApartmentKind {
   FURNISHED // Location meublée (LMNP)
-  UNFURNISHED // Location nue
-  SCI // SCI
 }
 
 model Apartment {
