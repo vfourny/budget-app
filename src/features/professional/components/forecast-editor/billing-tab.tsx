@@ -10,6 +10,13 @@ import {
   Table,
   Text,
 } from '@mantine/core'
+import type { BillingKind } from '@server/generated/prisma/enums'
+import {
+  billingAmount,
+  DAY_STEP,
+  MAX_BILLED_DAYS,
+  roundToDayStep,
+} from '@shared/billing-days'
 import { IconTrash } from '@tabler/icons-react'
 import { useReducer } from 'react'
 
@@ -19,17 +26,10 @@ import {
   useCopyBillingToFollowingMonths,
   useSetBillingLines,
 } from '@/features/professional/hooks/use-forecast-editor'
+import type { Period } from '@/hooks/use-period-selection'
 import { errorMessage } from '@/lib/errors'
 import { formatCents, formatDays } from '@/lib/format'
 import { fr } from '@/lib/i18n/fr'
-import type { Period } from '@/hooks/use-period-selection'
-import {
-  billingAmount,
-  DAY_STEP,
-  MAX_BILLED_DAYS,
-  roundToDayStep,
-} from '@shared/billing-days'
-import type { BillingKind } from '@server/generated/prisma/enums'
 
 /** Ligne en cours d'édition : TJM en euros, jours décimaux (pas de 0,5) pour la saisie. */
 interface Line {
@@ -39,7 +39,10 @@ interface Line {
 }
 
 /** Client déjà saisi dans une facturation : nom + TJM de sa ligne la plus récente. */
-type KnownClient = { name: string; lastDailyRateCents: number }
+interface KnownClient {
+  lastDailyRateCents: number
+  name: string
+}
 
 /**
  * Brouillon des lignes, géré par un reducer : toutes les modifications passent par `dispatch`
@@ -96,15 +99,15 @@ export function BillingTab({ period, source }: BillingTabProps) {
   return (
     <BillingLinesForm
       // Remonté quand on change de source ou de mois : le brouillon repart des données serveur.
-      key={`${period.year}-${period.month}-${source}`}
-      period={period}
-      source={source}
       clients={clients.data}
       initial={lines.data.map((line) => ({
         clientName: line.clientName,
         dailyRateEuros: line.dailyRateCents / 100,
         days: line.days,
       }))}
+      key={`${period.year}-${period.month}-${source}`}
+      period={period}
+      source={source}
     />
   )
 }
@@ -153,7 +156,7 @@ function BillingLinesForm({
 
   return (
     <Stack gap={16}>
-      <Text size="sm" c="dimmed">
+      <Text c="dimmed" size="sm">
         {source === 'FORECAST'
           ? text.billing.hintForecast
           : text.billing.hintActual}
@@ -177,9 +180,7 @@ function BillingLinesForm({
                     reprend son dernier TJM. */}
                 <Autocomplete
                   aria-label={text.billing.client}
-                  placeholder={text.billing.clientPlaceholder}
                   data={clientNames}
-                  value={line.clientName}
                   error={line.clientName.trim() === ''}
                   onChange={(value) =>
                     dispatch({
@@ -202,16 +203,16 @@ function BillingLinesForm({
                       })
                     }
                   }}
+                  placeholder={text.billing.clientPlaceholder}
+                  value={line.clientName}
                 />
               </Table.Td>
               <Table.Td>
                 <NumberInput
                   aria-label={text.billing.dailyRate}
-                  min={0}
-                  step={10}
                   decimalScale={2}
                   decimalSeparator=","
-                  value={line.dailyRateEuros}
+                  min={0}
                   onChange={(value) =>
                     dispatch({
                       type: 'update',
@@ -221,17 +222,17 @@ function BillingLinesForm({
                       },
                     })
                   }
+                  step={10}
+                  value={line.dailyRateEuros}
                 />
               </Table.Td>
               <Table.Td>
                 <NumberInput
                   aria-label={text.billing.days}
-                  min={0}
-                  max={MAX_BILLED_DAYS}
-                  step={DAY_STEP}
                   decimalScale={1}
                   decimalSeparator=","
-                  value={line.days}
+                  max={MAX_BILLED_DAYS}
+                  min={0}
                   onChange={(value) =>
                     dispatch({
                       type: 'update',
@@ -239,17 +240,19 @@ function BillingLinesForm({
                       patch: { days: typeof value === 'number' ? value : 0 },
                     })
                   }
+                  step={DAY_STEP}
+                  value={line.days}
                 />
               </Table.Td>
-              <Table.Td ta="right" fw={600}>
+              <Table.Td fw={600} ta="right">
                 {formatCents(amountOf(line))}
               </Table.Td>
               <Table.Td>
                 <ActionIcon
-                  variant="subtle"
-                  color="gray"
                   aria-label={text.billing.remove}
+                  color="gray"
                   onClick={() => dispatch({ type: 'remove', index })}
+                  variant="subtle"
                 >
                   <IconTrash size={16} />
                 </ActionIcon>
@@ -262,7 +265,6 @@ function BillingLinesForm({
       <Group justify="space-between">
         {/* Nouvelle ligne pré-remplie avec le client de la dernière ligne (souvent le même). */}
         <Button
-          variant="subtle"
           onClick={() =>
             dispatch({
               type: 'add',
@@ -272,10 +274,11 @@ function BillingLinesForm({
                 ) ?? clients[0],
             })
           }
+          variant="subtle"
         >
           {text.billing.add}
         </Button>
-        <Text size="sm" c="dimmed">
+        <Text c="dimmed" size="sm">
           {totalText(formatCents(totalCents), formatDays(totalDays))}
         </Text>
       </Group>
@@ -286,12 +289,12 @@ function BillingLinesForm({
         </Alert>
       )}
       {copy.isSuccess && !changed && (
-        <Text size="sm" c="teal.4">
+        <Text c="teal.4" size="sm">
           {text.appliedNext}
         </Text>
       )}
       {save.isSuccess && !changed && !copy.isSuccess && (
-        <Text size="sm" c="teal.4">
+        <Text c="teal.4" size="sm">
           {text.saved}
         </Text>
       )}
@@ -299,7 +302,6 @@ function BillingLinesForm({
       <Group justify="flex-end">
         {source === 'FORECAST' && period.month < 12 && (
           <Button
-            variant="default"
             disabled={missingName}
             loading={copy.isPending}
             // Enregistre d'abord le mois affiché, puis le recopie sur la fin de l'année.
@@ -308,6 +310,7 @@ function BillingLinesForm({
                 copy.mutate({ year: period.year, month: period.month }),
               )
             }
+            variant="default"
           >
             {text.applyNext}
           </Button>

@@ -18,7 +18,7 @@ export function RequireAuth() {
     )
   }
   if (!session) {
-    return <Navigate to="/login" replace />
+    return <Navigate replace to="/login" />
   }
   return <Outlet />
 }

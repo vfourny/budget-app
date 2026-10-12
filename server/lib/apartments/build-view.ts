@@ -1,23 +1,23 @@
-import { capitalRepaid } from '@server/lib/apartments/loan'
+import type { MonthResult } from '@server/lib/apartments/compute-month'
 import {
+  type ApartmentPeriodColumns,
   computeApartmentYear,
   periodColumns,
   yieldsBps,
-  type ApartmentPeriodColumns,
 } from '@server/lib/apartments/compute-period'
 import type { LoadedApartmentData } from '@server/lib/apartments/load-period'
+import { capitalRepaid } from '@server/lib/apartments/loan'
 import { currentYearMonth, type YearMonth } from '@server/lib/apartments/period'
 import { computeThresholds } from '@server/lib/apartments/thresholds'
 import type { ApartmentRecord } from '@server/lib/apartments/types'
-import type { MonthResult } from '@server/lib/apartments/compute-month'
 
 interface ViewParams {
-  year: number
-  /** `null` = vue année (mois clos de l'année). */
-  month: number | null
   /** Pastille : un seul appartement (`null` = tous). Les seuils LMNP ignorent ce filtre. */
   apartmentId: string | null
+  /** `null` = vue année (mois clos de l'année). */
+  month: number | null
   now?: YearMonth
+  year: number
 }
 
 /** Un appartement actif sur la période, avec ses colonnes Prévisionnel / Réalisé. */

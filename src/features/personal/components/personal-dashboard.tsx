@@ -9,9 +9,9 @@ import { FixedChargesCard } from '@/features/personal/components/fixed-charges-c
 import { KpiCards } from '@/features/personal/components/kpi-cards'
 import { useOverview, usePeriods } from '@/features/personal/hooks/use-personal'
 import {
-  usePeriodSelection,
   type Period,
   type PeriodView,
+  usePeriodSelection,
 } from '@/hooks/use-period-selection'
 import { capitalizedMonthName } from '@/lib/format'
 import { fr } from '@/lib/i18n/fr'
@@ -31,7 +31,7 @@ export function PersonalDashboard() {
     return (
       <>
         <PageHeader eyebrow={fr.personal.eyebrow} title={fr.nav.personal} />
-        <Paper withBorder radius="lg" p={28}>
+        <Paper p={28} radius="lg" withBorder>
           <Group justify="space-between">
             <span>{fr.personal.empty}</span>
             <Button component={Link} to="/imports/new" variant="default">
@@ -46,6 +46,15 @@ export function PersonalDashboard() {
   return (
     <>
       <PageHeader
+        actions={
+          <PeriodPicker
+            onSelect={select}
+            onViewChange={setView}
+            periods={periods.data}
+            selected={selected}
+            view={view}
+          />
+        }
         eyebrow={
           view === 'month' ? fr.period.eyebrowMonth : fr.period.eyebrowYear
         }
@@ -55,17 +64,8 @@ export function PersonalDashboard() {
             <PageTitleAccent>{selected.year}</PageTitleAccent>
           </>
         }
-        actions={
-          <PeriodPicker
-            view={view}
-            onViewChange={setView}
-            periods={periods.data}
-            selected={selected}
-            onSelect={select}
-          />
-        }
       />
-      <PeriodContent view={view} period={selected} />
+      <PeriodContent period={selected} view={view} />
     </>
   )
 }
@@ -82,9 +82,9 @@ function PeriodContent({ view, period }: { view: PeriodView; period: Period }) {
 
   return (
     <>
-      <KpiCards view={view} year={period.year} overview={overview.data} />
+      <KpiCards overview={overview.data} view={view} year={period.year} />
       <FixedChargesCard fixedCharges={overview.data.fixedCharges} />
-      <Grid mt={16} gap={16}>
+      <Grid gap={16} mt={16}>
         {view === 'month' && (
           <Grid.Col span={{ base: 12, lg: 8 }}>
             <TransactionsTable transactions={overview.data.transactions} />

@@ -39,7 +39,7 @@ export function ApartmentsSettingsForm() {
     <Stack gap={16}>
       <div>
         <Title order={3}>{fr.settings.apartments.title}</Title>
-        <Text size="sm" c="dimmed">
+        <Text c="dimmed" size="sm">
           {fr.settings.apartments.description}
         </Text>
       </div>
@@ -49,7 +49,7 @@ export function ApartmentsSettingsForm() {
         <Alert color="red" title={fr.settings.apartments.loadFailed} />
       )}
       {apartments.isSuccess && apartments.data.length === 0 && !adding && (
-        <Text size="sm" c="dimmed">
+        <Text c="dimmed" size="sm">
           {fr.settings.apartments.empty}
         </Text>
       )}
@@ -57,25 +57,25 @@ export function ApartmentsSettingsForm() {
         apartments.data.map(({ id, ...values }) => (
           // `key` : le brouillon d'une carte repart des données serveur si le bien change.
           <ApartmentSettingsCard
-            key={id}
             id={id}
             initial={values}
+            key={id}
             openingYear={openingYear}
           />
         ))}
       {adding && (
         <ApartmentSettingsCard
           initial={emptyApartment()}
-          openingYear={openingYear}
-          onCreated={() => setAdding(false)}
           onCancel={() => setAdding(false)}
+          onCreated={() => setAdding(false)}
+          openingYear={openingYear}
         />
       )}
       {apartments.isSuccess && !adding && (
         <Button
-          w="fit-content"
-          variant="default"
           onClick={() => setAdding(true)}
+          variant="default"
+          w="fit-content"
         >
           {fr.settings.apartments.add}
         </Button>

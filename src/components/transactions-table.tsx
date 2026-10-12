@@ -7,24 +7,24 @@ import {
   Text,
   UnstyledButton,
 } from '@mantine/core'
+import type { TransactionCategory } from '@server/generated/prisma/enums'
+import { isToCheck } from '@shared/personal-rules'
 import { useState } from 'react'
 
-import { isToCheck } from '@shared/personal-rules'
 import { formatCents, formatDate } from '@/lib/format'
-import { LOCALE, fr } from '@/lib/i18n/fr'
-import type { TransactionCategory } from '@server/generated/prisma/enums'
+import { fr, LOCALE } from '@/lib/i18n/fr'
 
 import classes from './transactions-table.module.css'
 
 export interface TransactionRow {
-  id: string
-  date: Date
-  label: string
   /** Centimes, signé : négatif = débit. */
   amountCents: number
-  category: TransactionCategory | null
   /** Nom de l'appartement rattaché : la colonne « Appartement » n'apparaît que s'il est renseigné. */
   apartmentName?: string
+  category: TransactionCategory | null
+  date: Date
+  id: string
+  label: string
 }
 
 type SortKey = 'date' | 'label' | 'category' | 'amount'
@@ -66,9 +66,9 @@ const FIRST_DIRECTION = {
 } as const satisfies Record<SortKey, 'asc' | 'desc'>
 
 interface TransactionsTableProps {
-  transactions: readonly TransactionRow[]
   /** Message quand il n'y a aucune transaction (défaut : « Aucune transaction pour ce mois. »). */
   emptyText?: string
+  transactions: readonly TransactionRow[]
 }
 
 /**
@@ -124,17 +124,17 @@ export function TransactionsTable({
 
   return (
     <Paper
-      id="transactions"
-      component="section"
-      withBorder
-      radius="lg"
       className={classes.card}
+      component="section"
+      id="transactions"
+      radius="lg"
+      withBorder
     >
       <div className={classes.header}>
-        <Group justify="space-between" align="baseline" gap={8}>
+        <Group align="baseline" gap={8} justify="space-between">
           <Text fw={600}>{fr.transactions.title}</Text>
           {transactions.length > 0 && (
-            <Text size="sm" c="dimmed">
+            <Text c="dimmed" size="sm">
               {fr.transactions.summary(
                 transactions.length,
                 formatCents(creditsCents),
@@ -145,15 +145,15 @@ export function TransactionsTable({
         </Group>
         {transactions.length > 0 && (
           <SegmentedControl
-            mt={12}
-            size="xs"
             aria-label={fr.transactions.filtersAria}
-            value={filter}
-            onChange={(value) => setFilter(value as Filter)}
             data={(Object.keys(FILTERS) as Filter[]).map((key) => ({
               value: key,
               label: fr.transactions.filters[key](counts[key]),
             }))}
+            mt={12}
+            onChange={(value) => setFilter(value as Filter)}
+            size="xs"
+            value={filter}
           />
         )}
       </div>
@@ -165,7 +165,7 @@ export function TransactionsTable({
         </Text>
       ) : (
         <Table.ScrollContainer minWidth={560}>
-          <Table verticalSpacing="sm" horizontalSpacing="lg">
+          <Table horizontalSpacing="lg" verticalSpacing="sm">
             <Table.Thead>
               <Table.Tr>
                 {COLUMNS.map((column) => (
@@ -199,17 +199,17 @@ export function TransactionsTable({
                   <Table.Td>
                     <Group gap={6} wrap="nowrap">
                       <Badge
+                        className={classes.badge}
                         color="gray"
                         variant="light"
-                        className={classes.badge}
                       >
                         {categoryLabel(row) || fr.common.noCategory}
                       </Badge>
                       {isToCheck(row.category) && (
                         <Badge
+                          className={classes.badge}
                           color="amber"
                           variant="light"
-                          className={classes.badge}
                         >
                           {fr.transactions.toCheck}
                         </Badge>
@@ -217,10 +217,10 @@ export function TransactionsTable({
                     </Group>
                   </Table.Td>
                   <Table.Td
-                    ta="right"
-                    fw={600}
                     c={row.amountCents > 0 ? 'teal.4' : undefined}
                     className={classes.nowrap}
+                    fw={600}
+                    ta="right"
                   >
                     {row.amountCents > 0 ? '+ ' : '− '}
                     {formatCents(Math.abs(row.amountCents))}

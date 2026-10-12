@@ -8,16 +8,16 @@ import {
   sumAmounts,
 } from '@server/lib/professional/amounts'
 import { regimeOf } from '@server/lib/professional/regimes'
-import { billingAmount } from '@shared/billing-days'
 import type {
-  ForecastActual,
   BillingInput,
   ChargeRow,
   ClientBilling,
+  ForecastActual,
   MixedCostRow,
   ProfessionalMonth,
   ProfessionalMonthInput,
 } from '@server/lib/professional/types'
+import { billingAmount } from '@shared/billing-days'
 import {
   COLLECTED_VAT_BP,
   EMPLOYER_CONTRIBUTION_SPLIT_BP,

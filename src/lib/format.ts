@@ -1,4 +1,4 @@
-import { LOCALE, fr } from '@/lib/i18n/fr'
+import { fr, LOCALE } from '@/lib/i18n/fr'
 
 const dateFormat = new Intl.DateTimeFormat(LOCALE, {
   day: '2-digit',

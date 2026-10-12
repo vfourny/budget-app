@@ -11,12 +11,12 @@ export function LoginPage() {
 
   // Déjà connecté : inutile de montrer le formulaire.
   if (!isPending && session) {
-    return <Navigate to="/personal" replace />
+    return <Navigate replace to="/personal" />
   }
 
   return (
     <Center mih="100vh" p="md">
-      <Paper w="100%" maw={420} p="xl" withBorder>
+      <Paper maw={420} p="xl" w="100%" withBorder>
         <PageHeader eyebrow={fr.auth.eyebrow} title={fr.auth.title} />
         <LoginForm />
       </Paper>

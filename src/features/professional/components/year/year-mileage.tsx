@@ -1,8 +1,8 @@
 import { Paper, SimpleGrid, Text, Title, Tooltip } from '@mantine/core'
+import type { ProfessionalMonth } from '@server/lib/professional/types'
 
 import { formatCents, monthName, shortMonthName } from '@/lib/format'
-import { LOCALE, fr } from '@/lib/i18n/fr'
-import type { ProfessionalMonth } from '@server/lib/professional/types'
+import { fr, LOCALE } from '@/lib/i18n/fr'
 
 import classes from './year-mileage.module.css'
 
@@ -40,36 +40,36 @@ export function YearMileage({
 
   return (
     <Paper
-      withBorder
-      radius="lg"
-      p={24}
-      component="section"
       aria-label={text.title}
+      component="section"
+      p={24}
+      radius="lg"
+      withBorder
     >
-      <Title order={2} mb={16}>
+      <Title mb={16} order={2}>
         {text.title}
       </Title>
-      <SimpleGrid cols={2} spacing={16} mb={16}>
+      <SimpleGrid cols={2} mb={16} spacing={16}>
         <div>
-          <Text size="xs" c="dimmed">
+          <Text c="dimmed" size="xs">
             {text.toDate}
           </Text>
           <Text fw={600}>{km(toDateKm)}</Text>
-          <Text size="xs" c="dimmed">
+          <Text c="dimmed" size="xs">
             {formatCents(toDateCents)}
           </Text>
         </div>
         <div>
-          <Text size="xs" c="dimmed">
+          <Text c="dimmed" size="xs">
             {text.yearForecast}
           </Text>
           <Text fw={600}>{km(yearKm)}</Text>
-          <Text size="xs" c="dimmed">
+          <Text c="dimmed" size="xs">
             {formatCents(yearCents)}
           </Text>
         </div>
       </SimpleGrid>
-      <div className={classes.bars} role="img" aria-label={text.barsAria}>
+      <div aria-label={text.barsAria} className={classes.bars} role="img">
         {months.map((month) => (
           <Tooltip
             key={month.month}
@@ -84,14 +84,14 @@ export function YearMileage({
                 data-forecast={!month.hasActual || undefined}
                 style={{ height: `${(kmOf(month) / max) * 100}%` }}
               />
-              <Text size="xs" c="dimmed" ta="center">
+              <Text c="dimmed" size="xs" ta="center">
                 {shortMonthName(month.month).charAt(0).toUpperCase()}
               </Text>
             </div>
           </Tooltip>
         ))}
       </div>
-      <Text size="xs" c="dimmed" mt={12}>
+      <Text c="dimmed" mt={12} size="xs">
         {fr.professional.mileage.rate(
           fr.professional.mileage.rateUnit(rateFormat.format(rateMilli / 1000)),
         )}

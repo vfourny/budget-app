@@ -1,9 +1,8 @@
-import { z } from 'zod'
-
 import { TransactionCategory } from '@server/generated/prisma/enums'
 import { appError } from '@server/lib/app-error'
-import { isCategoryOf } from '@shared/account-categories'
 import { createTRPCRouter, protectedProcedure } from '@server/trpc/init'
+import { isCategoryOf } from '@shared/account-categories'
+import { z } from 'zod'
 
 export const transactionRouter = createTRPCRouter({
   /**

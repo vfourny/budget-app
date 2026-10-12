@@ -1,5 +1,4 @@
 import { GoogleGenAI } from '@google/genai'
-
 import { env } from '@server/lib/env'
 
 /** Client Gemini partagé (la clé est validée au démarrage par `env.ts`). */

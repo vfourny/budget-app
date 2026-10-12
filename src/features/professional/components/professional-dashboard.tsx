@@ -21,8 +21,8 @@ import { PageHeader, PageTitleAccent } from '@/components/page-header'
 import { PeriodPicker } from '@/components/period-picker'
 import { TransactionsTable } from '@/components/transactions-table'
 import {
-  ForecastEditorModal,
   type EditorTarget,
+  ForecastEditorModal,
 } from '@/features/professional/components/forecast-editor/forecast-editor-modal'
 import { BillingCard } from '@/features/professional/components/month/billing-card'
 import { CategoryForecastCard } from '@/features/professional/components/month/category-forecast-card'
@@ -32,17 +32,17 @@ import { ProfitCard } from '@/features/professional/components/month/profit-card
 import { RevenueKpiCard } from '@/features/professional/components/month/revenue-kpi-card'
 import { VatCard } from '@/features/professional/components/month/vat-card'
 import { IncomeStatement } from '@/features/professional/components/year/income-statement'
+import { RevenueChart } from '@/features/professional/components/year/revenue-chart'
 import { YearCategories } from '@/features/professional/components/year/year-categories'
+import { YearKpis } from '@/features/professional/components/year/year-kpis'
 import { YearMileage } from '@/features/professional/components/year/year-mileage'
 import { YearMixedCosts } from '@/features/professional/components/year/year-mixed-costs'
-import { RevenueChart } from '@/features/professional/components/year/revenue-chart'
-import { YearKpis } from '@/features/professional/components/year/year-kpis'
 import {
   useProfessionalMonth,
   useProfessionalPeriods,
   useProfessionalYear,
 } from '@/features/professional/hooks/use-professional'
-import { usePeriodSelection, type Period } from '@/hooks/use-period-selection'
+import { type Period, usePeriodSelection } from '@/hooks/use-period-selection'
 import { capitalizedMonthName } from '@/lib/format'
 import { fr } from '@/lib/i18n/fr'
 
@@ -65,6 +65,28 @@ export function ProfessionalDashboard() {
   return (
     <>
       <PageHeader
+        actions={
+          <Group gap={12}>
+            <Tooltip label={fr.professional.importStatement}>
+              <ActionIcon
+                aria-label={fr.professional.importStatement}
+                component={Link}
+                size="lg"
+                to={IMPORT_PROFESSIONAL_URL}
+                variant="default"
+              >
+                <IconUpload size={16} />
+              </ActionIcon>
+            </Tooltip>
+            <PeriodPicker
+              onSelect={select}
+              onViewChange={setView}
+              periods={periods.data}
+              selected={selected}
+              view={view}
+            />
+          </Group>
+        }
         eyebrow={fr.professional.eyebrow(
           view === 'month' ? fr.period.eyebrowMonth : fr.period.eyebrowYear,
         )}
@@ -73,28 +95,6 @@ export function ProfessionalDashboard() {
             {view === 'month' && `${capitalizedMonthName(selected.month)} `}
             <PageTitleAccent>{selected.year}</PageTitleAccent>
           </>
-        }
-        actions={
-          <Group gap={12}>
-            <Tooltip label={fr.professional.importStatement}>
-              <ActionIcon
-                component={Link}
-                to={IMPORT_PROFESSIONAL_URL}
-                variant="default"
-                size="lg"
-                aria-label={fr.professional.importStatement}
-              >
-                <IconUpload size={16} />
-              </ActionIcon>
-            </Tooltip>
-            <PeriodPicker
-              view={view}
-              onViewChange={setView}
-              periods={periods.data}
-              selected={selected}
-              onSelect={select}
-            />
-          </Group>
         }
       />
       {view === 'month' ? (
@@ -125,24 +125,24 @@ function MonthContent({ period }: { period: Period }) {
       )}
       <Group justify="flex-end" mb={12}>
         <Button
-          variant="default"
-          size="compact-sm"
           leftSection={<IconEdit size={14} />}
           onClick={() => setEditor({ tab: 'billing', source: 'FORECAST' })}
+          size="compact-sm"
+          variant="default"
         >
           {fr.professional.editor.open}
         </Button>
         <Button
           component="a"
           href="#transactions"
-          variant="subtle"
-          size="compact-sm"
           leftSection={<IconListDetails size={14} />}
+          size="compact-sm"
+          variant="subtle"
         >
           {fr.professional.transactionsLink(data.transactions.length)}
         </Button>
       </Group>
-      <Grid gap={16} mb={16} align="stretch">
+      <Grid align="stretch" gap={16} mb={16}>
         <Grid.Col span={{ base: 12, lg: 7 }}>
           <RevenueKpiCard month={data} />
         </Grid.Col>
@@ -154,20 +154,20 @@ function MonthContent({ period }: { period: Period }) {
         </Grid.Col>
         <Grid.Col span={12}>
           <BillingCard
-            month={data}
             action={
               data.hasActual && (
                 <Button
-                  variant="light"
-                  size="compact-sm"
                   onClick={() =>
                     setEditor({ tab: 'billing', source: 'ACTUAL' })
                   }
+                  size="compact-sm"
+                  variant="light"
                 >
                   {fr.professional.editor.enterActual}
                 </Button>
               )
             }
+            month={data}
           />
         </Grid.Col>
         <Grid.Col span={{ base: 12, lg: 7 }}>
@@ -181,18 +181,18 @@ function MonthContent({ period }: { period: Period }) {
         </Grid.Col>
       </Grid>
       <TransactionsTable
-        transactions={data.transactions}
         emptyText={
           data.hasActual ? undefined : fr.professional.futureTransactions
         }
+        transactions={data.transactions}
       />
       {editor && (
         <ForecastEditorModal
-          period={period}
           hasActual={data.hasActual}
-          settings={data.settings}
           initial={editor}
           onClose={() => setEditor(null)}
+          period={period}
+          settings={data.settings}
         />
       )}
     </>
@@ -209,9 +209,9 @@ function YearContent({ year }: { year: number }) {
   return (
     <>
       <YearKpis months={months.data} />
-      <RevenueChart year={year} months={months.data} />
+      <RevenueChart months={months.data} year={year} />
       <IncomeStatement months={months.data} />
-      <Grid gap={16} align="flex-start">
+      <Grid align="flex-start" gap={16}>
         <Grid.Col span={{ base: 12, lg: 7 }}>
           <YearCategories months={months.data} />
         </Grid.Col>

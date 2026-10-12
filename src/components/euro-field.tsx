@@ -3,11 +3,11 @@ import { NumberInput } from '@mantine/core'
 import { fr } from '@/lib/i18n/fr'
 
 interface EuroFieldProps {
-  label: string
-  description?: string
+  allowNegative?: boolean
   /** Centimes : la base stocke des entiers, le champ affiche des euros. */
   cents: number
-  allowNegative?: boolean
+  description?: string
+  label: string
   onChange: (cents: number) => void
 }
 
@@ -21,19 +21,19 @@ export function EuroField({
 }: EuroFieldProps) {
   return (
     <NumberInput
-      label={label}
+      decimalScale={2}
+      decimalSeparator=","
       description={description}
       inputWrapperOrder={['label', 'input', 'description']}
-      suffix={` ${fr.common.euro}`}
-      thousandSeparator=" "
-      decimalSeparator=","
-      decimalScale={2}
+      label={label}
       min={allowNegative ? undefined : 0}
-      step={10}
-      value={cents / 100}
       onChange={(value) =>
         onChange(Math.round((typeof value === 'number' ? value : 0) * 100))
       }
+      step={10}
+      suffix={` ${fr.common.euro}`}
+      thousandSeparator=" "
+      value={cents / 100}
     />
   )
 }

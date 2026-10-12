@@ -1,10 +1,10 @@
 import { Group, Paper, Stack, Text, ThemeIcon } from '@mantine/core'
+import type { PeriodTotals } from '@server/lib/dashboard/aggregate'
 import { IconBolt, IconHome, IconPhone, IconWifi } from '@tabler/icons-react'
 import type { ComponentType } from 'react'
 
 import { formatCents } from '@/lib/format'
 import { fr } from '@/lib/i18n/fr'
-import type { PeriodTotals } from '@server/lib/dashboard/aggregate'
 
 type FixedCharge = PeriodTotals['fixedCharges'][number]
 type FixedChargeCategory = FixedCharge['category']
@@ -33,38 +33,38 @@ export function FixedChargesCard({
 
   return (
     <Paper
-      component="section"
       aria-label={fr.personal.fixedCharges.title}
-      withBorder
-      radius="lg"
+      component="section"
+      mb={16}
       px={24}
       py={16}
-      mb={16}
+      radius="lg"
+      withBorder
     >
-      <Group gap={28} align="center">
+      <Group align="center" gap={28}>
         {fixedCharges.map(({ category, cents }) => {
           const { Icon, color } = STYLE[category]
           return (
-            <Group key={category} gap={10} wrap="nowrap">
-              <ThemeIcon variant="light" color={color} size={30} radius="md">
+            <Group gap={10} key={category} wrap="nowrap">
+              <ThemeIcon color={color} radius="md" size={30} variant="light">
                 <Icon size={14} />
               </ThemeIcon>
               <div>
-                <Text size="xs" c="dimmed">
+                <Text c="dimmed" size="xs">
                   {fr.categories[category]}
                 </Text>
-                <Text size="sm" fw={600}>
+                <Text fw={600} size="sm">
                   {formatCents(cents)}
                 </Text>
               </div>
             </Group>
           )
         })}
-        <Stack gap={0} ml="auto" align="flex-end">
-          <Text size="xs" c="dimmed">
+        <Stack align="flex-end" gap={0} ml="auto">
+          <Text c="dimmed" size="xs">
             {fr.personal.fixedCharges.total}
           </Text>
-          <Text size="sm" fw={700} c="gold.6">
+          <Text c="gold.6" fw={700} size="sm">
             {formatCents(total)}
           </Text>
         </Stack>

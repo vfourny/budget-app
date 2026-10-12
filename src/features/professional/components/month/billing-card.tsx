@@ -7,6 +7,11 @@ import {
   Text,
   Title,
 } from '@mantine/core'
+import type {
+  ClientBilling,
+  ProfessionalMonth,
+} from '@server/lib/professional/types'
+import { averageDailyRate } from '@shared/billing-days'
 import type { ReactNode } from 'react'
 
 import { DeltaBadge } from '@/components/delta-badge'
@@ -14,11 +19,6 @@ import { InfoTip } from '@/components/info-tip'
 import { TargetGauge } from '@/components/target-gauge'
 import { formatCents, formatDays } from '@/lib/format'
 import { fr } from '@/lib/i18n/fr'
-import { averageDailyRate } from '@shared/billing-days'
-import type {
-  ClientBilling,
-  ProfessionalMonth,
-} from '@server/lib/professional/types'
 
 /** TJM moyen d'une ligne (centimes) : montant / jours. */
 const dailyRate = (line: { days: number; amountCents: number }) =>
@@ -44,11 +44,11 @@ export function BillingCard({
 
   return (
     <Paper
-      withBorder
-      radius="lg"
-      p={24}
-      component="section"
       aria-label={text.title}
+      component="section"
+      p={24}
+      radius="lg"
+      withBorder
     >
       <Group justify="space-between" mb={16}>
         <Title order={2}>{text.title}</Title>
@@ -58,7 +58,7 @@ export function BillingCard({
         <Text c="dimmed">{text.empty}</Text>
       ) : (
         <Table.ScrollContainer minWidth={640}>
-          <Table verticalSpacing="md" horizontalSpacing="md">
+          <Table horizontalSpacing="md" verticalSpacing="md">
             <Table.Thead>
               <Table.Tr>
                 <Table.Th>{text.columns.client}</Table.Th>
@@ -67,10 +67,10 @@ export function BillingCard({
                   <Group gap={4} wrap="nowrap">
                     {text.columns.amount}
                     <InfoTip
-                      label={text.amountTip}
                       ariaLabel={fr.professional.howComputed(
                         text.columns.amount,
                       )}
+                      label={text.amountTip}
                     />
                   </Group>
                 </Table.Th>
@@ -78,7 +78,7 @@ export function BillingCard({
             </Table.Thead>
             <Table.Tbody>
               {clients.map((client) => (
-                <ClientRow key={client.clientName} client={client} />
+                <ClientRow client={client} key={client.clientName} />
               ))}
             </Table.Tbody>
           </Table>
@@ -98,7 +98,7 @@ function ClientRow({ client }: { client: ClientBilling }) {
       <Table.Td>
         <Text fw={600}>{client.clientName}</Text>
         {client.ttcCents > 0 && (
-          <Text size="xs" c="dimmed">
+          <Text c="dimmed" size="xs">
             {client.actual
               ? text.ttc(formatCents(client.ttcCents))
               : text.forecastTtc(formatCents(client.ttcCents))}
@@ -106,11 +106,11 @@ function ClientRow({ client }: { client: ClientBilling }) {
         )}
       </Table.Td>
       <Table.Td>
-        <Text size="sm" fw={600}>
+        <Text fw={600} size="sm">
           {text.calc(...calc(shown))}
         </Text>
         {client.actual && (
-          <Text size="xs" c="dimmed">
+          <Text c="dimmed" size="xs">
             {text.forecastCalc(...calc(client.forecast))}
           </Text>
         )}
@@ -118,10 +118,10 @@ function ClientRow({ client }: { client: ClientBilling }) {
       <Table.Td miw={220}>
         <Stack gap={6}>
           <Group gap={8} wrap="nowrap">
-            <Text fw={600} c={client.actual ? undefined : 'dimmed'}>
+            <Text c={client.actual ? undefined : 'dimmed'} fw={600}>
               {formatCents(shown.amountCents)}
             </Text>
-            <Text size="xs" c="dimmed">
+            <Text c="dimmed" size="xs">
               {fr.professional.forecastSub(
                 formatCents(client.forecast.amountCents),
               )}
@@ -135,14 +135,14 @@ function ClientRow({ client }: { client: ClientBilling }) {
             )}
           </Group>
           <TargetGauge
-            real={client.actual?.amountCents ?? null}
-            target={client.forecast.amountCents}
-            goal="atLeast"
             ariaLabel={text.gaugeAria(
               client.clientName,
               formatCents(client.actual?.amountCents ?? 0),
               formatCents(client.forecast.amountCents),
             )}
+            goal="atLeast"
+            real={client.actual?.amountCents ?? null}
+            target={client.forecast.amountCents}
           />
         </Stack>
       </Table.Td>
@@ -159,36 +159,36 @@ function Collections({ month }: { month: ProfessionalMonth }) {
   return (
     <SimpleGrid
       cols={{ base: 1, sm: 3 }}
-      spacing={16}
       mt={16}
       pt={16}
+      spacing={16}
       style={{ borderTop: '1px solid var(--app-border)' }}
     >
       <div>
-        <Text size="xs" c="dimmed">
+        <Text c="dimmed" size="xs">
           {month.hasActual ? text.invoiced : text.toInvoice}
         </Text>
         <Text fw={600}>{formatCents(billing.invoicedTtcCents)}</Text>
       </div>
       <div>
-        <Text size="xs" c="dimmed">
+        <Text c="dimmed" size="xs">
           {text.collected}
         </Text>
-        <Text fw={600} c={month.hasActual ? 'teal.4' : 'dimmed'}>
+        <Text c={month.hasActual ? 'teal.4' : 'dimmed'} fw={600}>
           {month.hasActual ? formatCents(billing.collectedTtcCents) : '—'}
         </Text>
       </div>
       <div>
         <Group gap={4} wrap="nowrap">
-          <Text size="xs" c="dimmed">
+          <Text c="dimmed" size="xs">
             {text.receivables}
           </Text>
           <InfoTip
-            label={text.receivablesTip}
             ariaLabel={fr.professional.howComputed(text.receivables)}
+            label={text.receivablesTip}
           />
         </Group>
-        <Text fw={600} c={receivables ? 'red.4' : 'dimmed'}>
+        <Text c={receivables ? 'red.4' : 'dimmed'} fw={600}>
           {receivables === null ? '—' : formatCents(receivables)}
         </Text>
       </div>

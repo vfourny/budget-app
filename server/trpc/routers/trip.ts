@@ -1,7 +1,6 @@
-import { z } from 'zod'
-
 import { appError } from '@server/lib/app-error'
 import { createTRPCRouter, protectedProcedure } from '@server/trpc/init'
+import { z } from 'zod'
 
 export const tripRouter = createTRPCRouter({
   /** Ajoute un trajet au journal des frais kilométriques (km réels de son mois). */

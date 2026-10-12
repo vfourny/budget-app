@@ -6,6 +6,8 @@ import { formatCents } from '@/lib/format'
 import { fr } from '@/lib/i18n/fr'
 
 interface EnvelopeGaugeProps {
+  /** Dépense : « bien » si on reste sous le recommandé. Épargne : « bien » si on l'atteint. */
+  kind: 'expense' | 'savings'
   name: string
   realCents: number
   recommendedCents: number
@@ -13,8 +15,6 @@ interface EnvelopeGaugeProps {
   recommendedPercent: number
   /** D'où vient le montant réel (liste des catégories comptées). */
   sourceText: string
-  /** Dépense : « bien » si on reste sous le recommandé. Épargne : « bien » si on l'atteint. */
-  kind: 'expense' | 'savings'
 }
 
 /** Jauge d'une enveloppe : nom + info-bulle, réel / recommandé, barre réel vs recommandé. */
@@ -30,31 +30,31 @@ export function EnvelopeGauge({
     <div>
       <Group justify="space-between" mb={4} wrap="nowrap">
         <Group gap={4} wrap="nowrap">
-          <Text size="sm" c="dimmed">
+          <Text c="dimmed" size="sm">
             {name}
           </Text>
           <InfoTip
-            label={fr.personal.gauge.tooltip(sourceText, recommendedPercent)}
             ariaLabel={fr.personal.gauge.howComputed(name)}
+            label={fr.personal.gauge.tooltip(sourceText, recommendedPercent)}
           />
         </Group>
-        <Text size="sm" fw={600}>
+        <Text fw={600} size="sm">
           {formatCents(realCents)}
-          <Text span size="xs" c="dimmed" fw={400}>
+          <Text c="dimmed" fw={400} size="xs" span>
             {' '}
             / {formatCents(recommendedCents)}
           </Text>
         </Text>
       </Group>
       <TargetGauge
-        real={realCents}
-        target={recommendedCents}
-        goal={kind === 'savings' ? 'atLeast' : 'atMost'}
         ariaLabel={fr.personal.gauge.aria(
           name,
           formatCents(realCents),
           formatCents(recommendedCents),
         )}
+        goal={kind === 'savings' ? 'atLeast' : 'atMost'}
+        real={realCents}
+        target={recommendedCents}
       />
     </div>
   )

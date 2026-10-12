@@ -7,14 +7,14 @@ import { PageHeader, PageTitleAccent } from '@/components/page-header'
 import { PeriodPicker } from '@/components/period-picker'
 import { TransactionsTable } from '@/components/transactions-table'
 import { ApartmentCard } from '@/features/apartments/components/apartment-card'
-import { LmnpThresholds } from '@/features/apartments/components/lmnp-thresholds'
 import { ApartmentKpis } from '@/features/apartments/components/apartment-kpis'
+import { LmnpThresholds } from '@/features/apartments/components/lmnp-thresholds'
 import {
   useApartmentPeriods,
   useApartmentsMonth,
   useApartmentsYear,
 } from '@/features/apartments/hooks/use-apartments-dashboard'
-import { usePeriodSelection, type Period } from '@/hooks/use-period-selection'
+import { type Period, usePeriodSelection } from '@/hooks/use-period-selection'
 import { capitalizedMonthName } from '@/lib/format'
 import { fr } from '@/lib/i18n/fr'
 
@@ -35,6 +35,27 @@ export function ApartmentsDashboard() {
 
   const header = (
     <PageHeader
+      actions={
+        <Group gap={12}>
+          <Button
+            component={Link}
+            leftSection={<IconPlus size={16} />}
+            to={SETTINGS_URL}
+            variant="default"
+          >
+            {fr.apartments.addApartment}
+          </Button>
+          {selected && (
+            <PeriodPicker
+              onSelect={select}
+              onViewChange={setView}
+              periods={periods.data}
+              selected={selected}
+              view={view}
+            />
+          )}
+        </Group>
+      }
       eyebrow={fr.apartments.eyebrow(
         view === 'month' ? fr.period.eyebrowMonth : fr.period.eyebrowYear,
       )}
@@ -47,27 +68,6 @@ export function ApartmentsDashboard() {
         ) : (
           fr.apartments.title
         )
-      }
-      actions={
-        <Group gap={12}>
-          <Button
-            component={Link}
-            to={SETTINGS_URL}
-            variant="default"
-            leftSection={<IconPlus size={16} />}
-          >
-            {fr.apartments.addApartment}
-          </Button>
-          {selected && (
-            <PeriodPicker
-              view={view}
-              onViewChange={setView}
-              periods={periods.data}
-              selected={selected}
-              onSelect={select}
-            />
-          )}
-        </Group>
       }
     />
   )
@@ -86,15 +86,15 @@ export function ApartmentsDashboard() {
       {header}
       {view === 'month' ? (
         <MonthContent
-          period={selected}
           apartmentId={apartmentId}
           onApartmentChange={setApartmentId}
+          period={selected}
         />
       ) : (
         <YearContent
-          year={selected.year}
           apartmentId={apartmentId}
           onApartmentChange={setApartmentId}
+          year={selected.year}
         />
       )}
     </>
@@ -102,9 +102,9 @@ export function ApartmentsDashboard() {
 }
 
 interface PillsProps {
-  options: readonly { id: string; name: string }[]
   apartmentId: string | null
   onApartmentChange: (apartmentId: string | null) => void
+  options: readonly { id: string; name: string }[]
 }
 
 /** Pastilles « Tous (n) » + une par appartement actif sur la période. */
@@ -116,10 +116,10 @@ function ApartmentPills({
   return (
     <Chip.Group
       multiple={false}
-      value={apartmentId ?? 'all'}
       onChange={(value) => onApartmentChange(value === 'all' ? null : value)}
+      value={apartmentId ?? 'all'}
     >
-      <Group gap={8} role="group" aria-label={fr.apartments.filtersAria}>
+      <Group aria-label={fr.apartments.filtersAria} gap={8} role="group">
         <Chip value="all" variant="light">
           {fr.apartments.all(options.length)}
         </Chip>
@@ -134,9 +134,9 @@ function ApartmentPills({
 }
 
 interface MonthContentProps {
-  period: Period
   apartmentId: string | null
   onApartmentChange: (apartmentId: string | null) => void
+  period: Period
 }
 
 function MonthContent({
@@ -154,9 +154,9 @@ function MonthContent({
   return (
     <Stack gap={16}>
       <ApartmentPills
-        options={options}
         apartmentId={apartmentId}
         onApartmentChange={onApartmentChange}
+        options={options}
       />
 
       {apartments.length === 0 ? (
@@ -166,8 +166,8 @@ function MonthContent({
           <ApartmentKpis kpis={kpis} view="month" />
           {apartments.map((apartment) => (
             <ApartmentCard
-              key={apartment.id}
               apartment={apartment}
+              key={apartment.id}
               period={period}
             />
           ))}
@@ -175,8 +175,8 @@ function MonthContent({
       )}
 
       <TransactionsTable
-        transactions={transactions}
         emptyText={fr.apartments.transactions.empty}
+        transactions={transactions}
       />
     </Stack>
   )
@@ -201,9 +201,9 @@ function YearContent({
   return (
     <Stack gap={16}>
       <ApartmentPills
-        options={options}
         apartmentId={apartmentId}
         onApartmentChange={onApartmentChange}
+        options={options}
       />
       {apartments.length === 0 ? (
         <Text c="dimmed">{fr.apartments.noneActive}</Text>
@@ -212,8 +212,8 @@ function YearContent({
           <ApartmentKpis kpis={kpis} view="year" />
           {apartments.map((apartment) => (
             <ApartmentCard
-              key={apartment.id}
               apartment={apartment}
+              key={apartment.id}
               period={{ year, month: null }}
             />
           ))}

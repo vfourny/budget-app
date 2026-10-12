@@ -1,19 +1,19 @@
-import type { db as Db } from '@server/lib/db'
-import { validatedTransactions } from '@server/lib/dashboard/scope'
 import type {
   ApartmentRecord,
   ApartmentTransaction,
   ManagementInvoiceRecord,
 } from '@server/lib/apartments/types'
+import { validatedTransactions } from '@server/lib/dashboard/scope'
+import type { db as Db } from '@server/lib/db'
 
 export interface LoadedApartmentData {
   apartments: ApartmentRecord[]
-  /** Transactions validées rattachées à un appartement, de `year - 1` et `year`. */
-  transactions: ApartmentTransaction[]
-  /** Solde du compte au 1er janvier de `year`, par appartement. */
-  openings: Map<string, number>
   /** Factures de gérance de `year` : appartement → mois → facture. */
   invoices: Map<string, Map<number, ManagementInvoiceRecord>>
+  /** Solde du compte au 1er janvier de `year`, par appartement. */
+  openings: Map<string, number>
+  /** Transactions validées rattachées à un appartement, de `year - 1` et `year`. */
+  transactions: ApartmentTransaction[]
 }
 
 /** Charge tout ce qu'il faut pour calculer les appartements d'une année (requêtes uniquement, aucun calcul). */

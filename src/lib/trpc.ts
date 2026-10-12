@@ -1,12 +1,11 @@
+// `import type` : seul le type du routeur traverse la frontière front/back, aucun code serveur
+// n'est embarqué dans le bundle navigateur.
+import type { AppRouter } from '@server/trpc/root'
 import { QueryClient } from '@tanstack/react-query'
 import { createTRPCClient, httpBatchLink } from '@trpc/client'
 import type { inferRouterOutputs } from '@trpc/server'
 import { createTRPCOptionsProxy } from '@trpc/tanstack-react-query'
 import superjson from 'superjson'
-
-// `import type` : seul le type du routeur traverse la frontière front/back, aucun code serveur
-// n'est embarqué dans le bundle navigateur.
-import type { AppRouter } from '@server/trpc/root'
 
 /** Cache TanStack Query de l'app (≈ un store global de requêtes, avec cache et refetch). */
 export const queryClient = new QueryClient({

@@ -1,13 +1,13 @@
 import { Badge, Group, Paper, Stack, Text, Title } from '@mantine/core'
+import type {
+  MixedCostRow,
+  ProfessionalMonth,
+} from '@server/lib/professional/types'
 
 import { InfoTip } from '@/components/info-tip'
 import { TargetGauge } from '@/components/target-gauge'
 import { formatBp, formatCents, formatSquareMeters } from '@/lib/format'
 import { fr } from '@/lib/i18n/fr'
-import type {
-  MixedCostRow,
-  ProfessionalMonth,
-} from '@server/lib/professional/types'
 
 type Status = keyof typeof fr.professional.mixedCosts.status
 
@@ -47,20 +47,20 @@ export function MixedCostsCard({ month }: { month: ProfessionalMonth }) {
 
   return (
     <Paper
-      withBorder
-      radius="lg"
-      p={24}
-      component="section"
       aria-label={text.title}
+      component="section"
+      p={24}
+      radius="lg"
+      withBorder
     >
       <Group gap={4} wrap="nowrap">
         <Title order={2}>{text.title}</Title>
         <InfoTip
-          label={text.tip(areaText, ratioText)}
           ariaLabel={fr.professional.howComputed(text.title)}
+          label={text.tip(areaText, ratioText)}
         />
       </Group>
-      <Text size="sm" c="dimmed" mb={16}>
+      <Text c="dimmed" mb={16} size="sm">
         {text.description}
       </Text>
       <Stack gap={14}>
@@ -75,26 +75,26 @@ export function MixedCostsCard({ month }: { month: ProfessionalMonth }) {
                 <Group gap={6} wrap="nowrap">
                   <Text size="sm">{label}</Text>
                   <InfoTip
+                    ariaLabel={fr.professional.howComputed(label)}
                     label={text.lineTip(
                       formatCents(row.spent.actual ?? row.spent.forecast),
                       formatCents(due),
                       key,
                     )}
-                    ariaLabel={fr.professional.howComputed(label)}
                   />
                   {/* Rien à rembourser (pas de dépense ce mois-ci) : pas de statut. */}
                   {due > 0 && (
                     <Badge
-                      size="sm"
-                      variant="light"
                       color={STATUS_COLOR[status]}
+                      size="sm"
                       tt="none"
+                      variant="light"
                     >
                       {text.status[status]}
                     </Badge>
                   )}
                 </Group>
-                <Text size="sm" fw={600}>
+                <Text fw={600} size="sm">
                   {row.paidCents === null
                     ? text.forecastDue(formatCents(due))
                     : text.paidOfDue(
@@ -104,14 +104,14 @@ export function MixedCostsCard({ month }: { month: ProfessionalMonth }) {
                 </Text>
               </Group>
               <TargetGauge
-                real={row.paidCents}
-                target={due}
-                goal="atLeast"
                 ariaLabel={text.gaugeAria(
                   label,
                   formatCents(row.paidCents ?? 0),
                   formatCents(due),
                 )}
+                goal="atLeast"
+                real={row.paidCents}
+                target={due}
               />
             </div>
           )
@@ -123,10 +123,10 @@ export function MixedCostsCard({ month }: { month: ProfessionalMonth }) {
         pt={12}
         style={{ borderTop: '1px solid var(--app-border)' }}
       >
-        <Text size="sm" c="dimmed">
+        <Text c="dimmed" size="sm">
           {text.left}
         </Text>
-        <Text fw={700} c={month.hasActual && left > 0 ? 'red.4' : 'teal.4'}>
+        <Text c={month.hasActual && left > 0 ? 'red.4' : 'teal.4'} fw={700}>
           {formatCents(left)}
         </Text>
       </Group>

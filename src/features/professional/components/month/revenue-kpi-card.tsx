@@ -1,18 +1,18 @@
 import { Group, Paper, SimpleGrid, Stack, Text } from '@mantine/core'
+import type { ProfessionalMonth } from '@server/lib/professional/types'
+import { COLLECTED_VAT_BP } from '@shared/professional-rules'
 
 import { DeltaBadge } from '@/components/delta-badge'
 import { InfoTip } from '@/components/info-tip'
 import { TargetGauge } from '@/components/target-gauge'
 import { formatCents, formatDays } from '@/lib/format'
 import { fr } from '@/lib/i18n/fr'
-import { COLLECTED_VAT_BP } from '@shared/professional-rules'
-import type { ProfessionalMonth } from '@server/lib/professional/types'
 
 interface Stat {
-  label: string
-  value: string
-  sub?: string
   color?: string
+  label: string
+  sub?: string
+  value: string
 }
 
 /**
@@ -73,36 +73,36 @@ export function RevenueKpiCard({ month }: { month: ProfessionalMonth }) {
       ]
 
   return (
-    <Paper withBorder radius="lg" p={24} h="100%">
+    <Paper h="100%" p={24} radius="lg" withBorder>
       <Stack gap={8}>
         <Group gap={4}>
-          <Text size="sm" c="dimmed">
+          <Text c="dimmed" size="sm">
             {text.title}
           </Text>
           <InfoTip
-            label={text.tip}
             ariaLabel={fr.professional.howComputed(text.title)}
+            label={text.tip}
           />
         </Group>
         <Text
-          fz={30}
-          fw={600}
-          lh={1.1}
           c={revenue.actual === null ? 'dimmed' : 'gold.6'}
+          fw={600}
+          fz={30}
+          lh={1.1}
         >
           {formatCents(revenue.actual ?? revenue.forecast)}
         </Text>
         <TargetGauge
-          real={revenue.actual}
-          target={revenue.forecast}
-          goal="atLeast"
           ariaLabel={text.gaugeAria(
             formatCents(revenue.actual ?? 0),
             formatCents(revenue.forecast),
           )}
+          goal="atLeast"
+          real={revenue.actual}
+          target={revenue.forecast}
         />
         <Group gap={8}>
-          <Text size="xs" c="dimmed">
+          <Text c="dimmed" size="xs">
             {revenue.actual === null
               ? fr.professional.forecastLabel
               : fr.professional.forecastValue(formatCents(revenue.forecast))}
@@ -115,17 +115,17 @@ export function RevenueKpiCard({ month }: { month: ProfessionalMonth }) {
             />
           )}
         </Group>
-        <SimpleGrid cols={{ base: 2, sm: 4 }} spacing={16} mt={12}>
+        <SimpleGrid cols={{ base: 2, sm: 4 }} mt={12} spacing={16}>
           {stats.map((stat) => (
             <div key={stat.label}>
-              <Text size="xs" c="dimmed">
+              <Text c="dimmed" size="xs">
                 {stat.label}
               </Text>
-              <Text fw={600} c={stat.color}>
+              <Text c={stat.color} fw={600}>
                 {stat.value}
               </Text>
               {stat.sub && (
-                <Text size="xs" c="dimmed">
+                <Text c="dimmed" size="xs">
                   {stat.sub}
                 </Text>
               )}

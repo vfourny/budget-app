@@ -4,16 +4,16 @@ import type { db as Db } from '@server/lib/db'
 import { htFromTtc } from '@server/lib/professional/amounts'
 import {
   FORECAST_GROUPS,
-  PROFESSIONAL_CHARGE_VAT_BP,
   type ForecastGroup,
+  PROFESSIONAL_CHARGE_VAT_BP,
 } from '@shared/professional-rules'
 
 export interface ForecastValue {
   category: TransactionCategory
-  /** Montant saisi pour le mois, `null` = valeur par défaut. */
-  overrideCents: number | null
   /** Valeur par défaut : réel du même mois l'année précédente. */
   lastYearCents: number
+  /** Montant saisi pour le mois, `null` = valeur par défaut. */
+  overrideCents: number | null
   /** Réel du mois précédent (repère dans l'éditeur). */
   previousMonthCents: number
 }

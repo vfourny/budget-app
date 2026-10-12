@@ -1,10 +1,10 @@
 import { Grid } from '@mantine/core'
+import type { ProfessionalMonth } from '@server/lib/professional/types'
 
 import { KpiCard } from '@/components/kpi-card'
 import { finalOf, sumFinal } from '@/features/professional/final-amount'
 import { formatCents, monthName } from '@/lib/format'
-import { LOCALE, fr } from '@/lib/i18n/fr'
-import type { ProfessionalMonth } from '@server/lib/professional/types'
+import { fr, LOCALE } from '@/lib/i18n/fr'
 
 const kmFormat = new Intl.NumberFormat(LOCALE)
 
@@ -66,14 +66,14 @@ export function YearKpis({ months }: { months: readonly ProfessionalMonth[] }) {
   ]
 
   return (
-    <Grid gap={16} mb={16} align="stretch">
+    <Grid align="stretch" gap={16} mb={16}>
       {cards.map((card) => (
         <Grid.Col key={card.label} span={{ base: 12, sm: 6, lg: 3 }}>
           <KpiCard
+            color={card.color}
+            hint={card.hint}
             label={card.label}
             value={card.value}
-            hint={card.hint}
-            color={card.color}
           />
         </Grid.Col>
       ))}

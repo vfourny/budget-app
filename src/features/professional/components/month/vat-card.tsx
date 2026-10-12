@@ -1,13 +1,13 @@
 import { Group, Paper, Progress, Stack, Text } from '@mantine/core'
+import type {
+  ForecastActual,
+  ProfessionalMonth,
+} from '@server/lib/professional/types'
 
 import { InfoTip } from '@/components/info-tip'
 import { AmountFigure } from '@/features/professional/components/amount-figure'
 import { formatCents } from '@/lib/format'
 import { fr } from '@/lib/i18n/fr'
-import type {
-  ForecastActual,
-  ProfessionalMonth,
-} from '@server/lib/professional/types'
 
 /** Carte « TVA à reverser » : collectée − déductible = à reverser, prévu vs réel. */
 export function VatCard({ month }: { month: ProfessionalMonth }) {
@@ -41,40 +41,40 @@ export function VatCard({ month }: { month: ProfessionalMonth }) {
   ] as const
 
   return (
-    <Paper withBorder radius="lg" p={24} h="100%">
+    <Paper h="100%" p={24} radius="lg" withBorder>
       <Stack gap={16}>
         <div>
           <Group gap={4}>
-            <Text size="sm" c="dimmed">
+            <Text c="dimmed" size="sm">
               {text.title}
             </Text>
             <InfoTip
-              label={text.tip}
               ariaLabel={fr.professional.howComputed(text.title)}
+              label={text.tip}
             />
           </Group>
           <Text
-            fz={30}
-            fw={600}
-            lh={1.1}
             c={vat.due.actual === null ? 'dimmed' : undefined}
+            fw={600}
+            fz={30}
+            lh={1.1}
           >
             {formatCents(shown(vat.due))}
           </Text>
         </div>
         {lines.map((line) => (
-          <Stack key={line.label} gap={6}>
+          <Stack gap={6} key={line.label}>
             <AmountFigure
-              label={line.label}
-              tip={line.tip}
               amount={line.amount}
               goal={line.goal}
+              label={line.label}
+              tip={line.tip}
             />
             <Progress
-              value={(Math.max(0, shown(line.amount)) / scale) * 100}
+              aria-hidden
               color={line.color}
               size="sm"
-              aria-hidden
+              value={(Math.max(0, shown(line.amount)) / scale) * 100}
             />
           </Stack>
         ))}

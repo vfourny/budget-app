@@ -1,8 +1,7 @@
-import { z } from 'zod'
-
 import { validatedTransactions } from '@server/lib/dashboard/scope'
 import { loadProfessionalYear } from '@server/lib/professional/load-year'
 import { createTRPCRouter, protectedProcedure } from '@server/trpc/init'
+import { z } from 'zod'
 
 const yearSchema = z.number().int().min(2000).max(2100)
 

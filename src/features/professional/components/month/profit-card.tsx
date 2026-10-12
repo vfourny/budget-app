@@ -1,13 +1,13 @@
 import { Group, Paper, SimpleGrid, Stack, Text, Tooltip } from '@mantine/core'
+import type {
+  ForecastActual,
+  ProfessionalMonth,
+} from '@server/lib/professional/types'
 
 import { InfoTip } from '@/components/info-tip'
 import { AmountFigure } from '@/features/professional/components/amount-figure'
 import { formatBp, formatCents } from '@/lib/format'
 import { fr } from '@/lib/i18n/fr'
-import type {
-  ForecastActual,
-  ProfessionalMonth,
-} from '@server/lib/professional/types'
 
 import classes from './profit-card.module.css'
 
@@ -57,57 +57,57 @@ export function ProfitCard({ month }: { month: ProfessionalMonth }) {
 
   return (
     <Paper
-      withBorder
-      radius="lg"
-      p={24}
-      component="section"
       aria-label={text.title}
+      component="section"
+      p={24}
+      radius="lg"
+      withBorder
     >
       <Stack gap={20}>
         <Group gap={4}>
-          <Text size="sm" c="dimmed">
+          <Text c="dimmed" size="sm">
             {text.title}
           </Text>
           <InfoTip
-            label={text.tip}
             ariaLabel={fr.professional.howComputed(text.title)}
+            label={text.tip}
           />
         </Group>
 
         <SimpleGrid cols={{ base: 2, sm: 3, lg: 5 }} spacing={16}>
           <AmountFigure
-            label={text.revenue}
-            tip={text.revenueTip}
             amount={month.revenue}
             goal="atLeast"
+            label={text.revenue}
+            tip={text.revenueTip}
           />
           <AmountFigure
-            label={text.charges}
-            tip={text.chargesTip}
             amount={month.charges.total}
             goal="atMost"
+            label={text.charges}
+            tip={text.chargesTip}
           />
           <AmountFigure
+            amount={month.remuneration.grossSalary}
             label={text.salary}
             tip={text.salaryTip}
-            amount={month.remuneration.grossSalary}
           />
           <AmountFigure
+            amount={month.remuneration.employerContributions}
             label={text.employer}
             tip={text.employerTip}
-            amount={month.remuneration.employerContributions}
           />
           <AmountFigure
-            label={text.title}
-            tip={text.profitTip}
             amount={month.profit}
-            goal="atLeast"
             color="gold.6"
+            goal="atLeast"
+            label={text.title}
             size="lg"
+            tip={text.profitTip}
           />
         </SimpleGrid>
 
-        <div className={classes.split} role="img" aria-label={text.splitAria}>
+        <div aria-label={text.splitAria} className={classes.split} role="img">
           {segments.map((segment) => (
             <Tooltip
               key={segment.key}
@@ -125,30 +125,30 @@ export function ProfitCard({ month }: { month: ProfessionalMonth }) {
         </div>
 
         <SimpleGrid
+          className={classes.after}
           cols={{ base: 1, sm: 3 }}
           spacing={16}
-          className={classes.after}
         >
           <AmountFigure
+            amount={month.remuneration.bncWithdrawal}
             label={text.bnc}
             tip={text.bncTip}
-            amount={month.remuneration.bncWithdrawal}
           />
           <AmountFigure
+            amount={month.retained}
+            color="teal.4"
+            goal="atLeast"
             label={text.retained}
             tip={text.retainedTip}
-            amount={month.retained}
-            goal="atLeast"
-            color="teal.4"
           />
           <Stack gap={2}>
             <AmountFigure
-              label={text.socialCharges}
-              tip={text.socialChargesTip}
               amount={month.profitSocialCharges}
               color="red.4"
+              label={text.socialCharges}
+              tip={text.socialChargesTip}
             />
-            <Text size="xs" c="dimmed">
+            <Text c="dimmed" size="xs">
               {text.socialChargesSub(
                 formatBp(month.settings.profitSocialChargesBp),
               )}

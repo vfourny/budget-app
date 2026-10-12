@@ -8,16 +8,16 @@ import {
   Text,
   Title,
 } from '@mantine/core'
+import type { Envelope } from '@server/generated/prisma/enums'
+import { DEFAULT_ENVELOPE_PERCENTS } from '@shared/personal-rules'
 import { useState } from 'react'
 
 import {
   useEnvelopeShares,
   useSetEnvelopeShares,
 } from '@/features/settings/hooks/use-envelope-shares'
-import { DEFAULT_ENVELOPE_PERCENTS } from '@shared/personal-rules'
 import { errorMessage } from '@/lib/errors'
 import { fr } from '@/lib/i18n/fr'
-import type { Envelope } from '@server/generated/prisma/enums'
 
 type Shares = Record<Envelope, number>
 
@@ -51,32 +51,32 @@ function SharesFields({ initial }: { initial: Shares }) {
     <Stack gap={16}>
       <div>
         <Title order={3}>{fr.settings.shares.title}</Title>
-        <Text size="sm" c="dimmed">
+        <Text c="dimmed" size="sm">
           {fr.settings.shares.description}
         </Text>
       </div>
 
       {envelopes.map((envelope) => (
         <NumberInput
+          allowDecimal={false}
           key={envelope}
           label={fr.envelopes[envelope]}
-          suffix=" %"
-          min={0}
           max={100}
-          allowDecimal={false}
-          w={220}
-          value={draft[envelope]}
+          min={0}
           onChange={(value) =>
             setDraft((current) => ({
               ...current,
               [envelope]: typeof value === 'number' ? value : 0,
             }))
           }
+          suffix=" %"
+          value={draft[envelope]}
+          w={220}
         />
       ))}
 
       <Group gap={16}>
-        <Text size="sm" c={unassigned === 0 ? 'dimmed' : 'red.4'}>
+        <Text c={unassigned === 0 ? 'dimmed' : 'red.4'} size="sm">
           {unassigned === 0
             ? fr.settings.shares.totalOk
             : unassigned < 0
@@ -91,7 +91,7 @@ function SharesFields({ initial }: { initial: Shares }) {
         </Alert>
       )}
       {save.isSuccess && !changed && (
-        <Text size="sm" c="teal.4">
+        <Text c="teal.4" size="sm">
           {fr.common.saved}
         </Text>
       )}
@@ -106,9 +106,9 @@ function SharesFields({ initial }: { initial: Shares }) {
         </Button>
         {/* Remplit seulement le formulaire : rien n'est enregistré avant « Enregistrer ». */}
         <Button
-          variant="default"
           disabled={isDefault}
           onClick={() => setDraft({ ...DEFAULT_ENVELOPE_PERCENTS })}
+          variant="default"
         >
           {fr.settings.shares.resetDefaults}
         </Button>

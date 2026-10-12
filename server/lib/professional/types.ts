@@ -11,8 +11,8 @@ export type CategoryCents = Partial<Record<TransactionCategory, number>>
 
 /** Une valeur prévue et réelle. `actual` = `null` tant que le mois n'a pas de réel (mois à venir). */
 export interface ForecastActual {
-  forecast: number
   actual: number | null
+  forecast: number
 }
 
 /** Ligne de facturation (prévue ou réelle) d'un client pour le mois. */
@@ -23,34 +23,22 @@ export type BillingInput = Pick<
 
 /** Tout ce qu'il faut pour calculer un mois : rien n'est lu en base dans le calcul. */
 export interface ProfessionalMonthInput {
-  year: number
-  /** 1-12 */
-  month: number
-  /** Le mois est commencé ou passé : il a un réel (sinon, prévisionnel seul). */
-  hasActual: boolean
-  settings: ProfessionalYearSettingsValues
-  forecastBilling: readonly BillingInput[]
   actualBilling: readonly BillingInput[]
-  /** Débits du relevé pro du mois par catégorie (TTC, positifs). */
-  professionalDebits: CategoryCents
-  /** Débits du relevé pro du même mois l'année précédente : valeurs par défaut du prévisionnel. */
-  lastYearProfessionalDebits: CategoryCents
-  /** Débits du relevé perso du mois (frais mixtes : loyer, internet…). */
-  persoDebits: CategoryCents
-  /** Débits perso du même mois l'année précédente : prévisionnel par défaut des frais mixtes. */
-  lastYearPersoDebits: CategoryCents
-  /** Montants prévus saisis (`MonthlyForecast`), HT pour les charges pro. */
-  forecasts: CategoryCents
   /**
    * Encaissements clients du mois (crédits « Encaissement client » du relevé pro, TTC).
    * `countedCents` = la part qui vient en déduction du reste à encaisser : 0 tant que la
    * facturation n'a pas commencé dans l'app (ces virements paient des factures plus anciennes).
    */
   collections: { receivedCents: number; countedCents: number }
-  /** Reste à encaisser (TTC, cumulé) au début du mois. */
-  openingReceivablesCents: number
-  /** TVA à reverser du mois précédent (payée ce mois-ci). */
-  previousVatDueCents: number
+  forecastBilling: readonly BillingInput[]
+  /** Montants prévus saisis (`MonthlyForecast`), HT pour les charges pro. */
+  forecasts: CategoryCents
+  /** Le mois est commencé ou passé : il a un réel (sinon, prévisionnel seul). */
+  hasActual: boolean
+  /** Débits perso du même mois l'année précédente : prévisionnel par défaut des frais mixtes. */
+  lastYearPersoDebits: CategoryCents
+  /** Débits du relevé pro du même mois l'année précédente : valeurs par défaut du prévisionnel. */
+  lastYearProfessionalDebits: CategoryCents
   mileage: {
     /** Somme des trajets du mois. */
     tripsKm: number
@@ -59,45 +47,50 @@ export interface ProfessionalMonthInput {
     /** Km prévus saisis (`MileageForecast`), `null` = valeur par défaut (N-1). */
     forecastKm: number | null
   }
+  /** 1-12 */
+  month: number
+  /** Reste à encaisser (TTC, cumulé) au début du mois. */
+  openingReceivablesCents: number
+  /** Débits du relevé perso du mois (frais mixtes : loyer, internet…). */
+  persoDebits: CategoryCents
+  /** TVA à reverser du mois précédent (payée ce mois-ci). */
+  previousVatDueCents: number
+  /** Débits du relevé pro du mois par catégorie (TTC, positifs). */
+  professionalDebits: CategoryCents
+  settings: ProfessionalYearSettingsValues
+  year: number
 }
 
 export interface ClientBilling {
+  actual: { days: number; amountCents: number } | null
   clientName: string
   forecast: { days: number; amountCents: number }
-  actual: { days: number; amountCents: number } | null
   /** TTC réel (prévu pour un mois à venir). */
   ttcCents: number
 }
 
 export interface ChargeRow {
+  /** HT. */
+  amount: ForecastActual
   category: ProfessionalChargeCategory
   /** Taux de TVA déductible (points de base). */
   vatBp: number
-  /** HT. */
-  amount: ForecastActual
 }
 
 export interface MixedCostRow {
   category: MixedCostCategory
+  /** Part due par Stygma. */
+  due: ForecastActual
   keyType: 'area' | 'key'
+  /** Remboursé (débits « Remboursement frais mixtes » du relevé pro, répartis ligne par ligne). */
+  paidCents: number | null
   /** Part remboursée par Stygma, en points de base (2222 = 22,22 %). */
   shareBp: number
   /** Dépense perso du mois. */
   spent: ForecastActual
-  /** Part due par Stygma. */
-  due: ForecastActual
-  /** Remboursé (débits « Remboursement frais mixtes » du relevé pro, répartis ligne par ligne). */
-  paidCents: number | null
 }
 
 export interface ProfessionalMonth {
-  year: number
-  month: number
-  hasActual: boolean
-  /** Règles de l'année utilisées (taux, clés), pour les explications de l'écran. */
-  settings: ProfessionalYearSettingsValues
-  /** Chiffre d'affaires HT (jours × TJM). */
-  revenue: ForecastActual
   billing: {
     clients: ClientBilling[]
     /** Demi-journées facturées (réel) ou prévues (mois à venir). */
@@ -121,6 +114,18 @@ export interface ProfessionalMonth {
     mixedCosts: ForecastActual
     total: ForecastActual
   }
+  hasActual: boolean
+  mileage: {
+    forecastKm: number
+    actualKm: number | null
+    rateMilli: number
+    amount: ForecastActual
+  }
+  mixedCosts: { rows: MixedCostRow[]; leftToRefundCents: number }
+  month: number
+  profit: ForecastActual
+  /** Charges sociales sur la quote-part de bénéfice (réglées en perso). */
+  profitSocialCharges: ForecastActual
   remuneration: {
     bncWithdrawal: ForecastActual
     grossSalary: ForecastActual
@@ -131,22 +136,17 @@ export interface ProfessionalMonth {
     netSalary: ForecastActual
     withholdingTax: ForecastActual
   }
+  /** Bénéfice − BNC prélevés : ce qui reste dans la société. */
+  retained: ForecastActual
+  /** Chiffre d'affaires HT (jours × TJM). */
+  revenue: ForecastActual
+  /** Règles de l'année utilisées (taux, clés), pour les explications de l'écran. */
+  settings: ProfessionalYearSettingsValues
   vat: {
     collected: ForecastActual
     deductible: ForecastActual
     due: ForecastActual
     payment: ForecastActual
   }
-  profit: ForecastActual
-  /** Bénéfice − BNC prélevés : ce qui reste dans la société. */
-  retained: ForecastActual
-  /** Charges sociales sur la quote-part de bénéfice (réglées en perso). */
-  profitSocialCharges: ForecastActual
-  mixedCosts: { rows: MixedCostRow[]; leftToRefundCents: number }
-  mileage: {
-    forecastKm: number
-    actualKm: number | null
-    rateMilli: number
-    amount: ForecastActual
-  }
+  year: number
 }

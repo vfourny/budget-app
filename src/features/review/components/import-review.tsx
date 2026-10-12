@@ -11,6 +11,11 @@ import {
   Text,
   Tooltip,
 } from '@mantine/core'
+import type {
+  AccountType,
+  TransactionCategory,
+} from '@server/generated/prisma/enums'
+import { isCategoryOf } from '@shared/account-categories'
 import {
   IconAlertTriangle,
   IconArrowLeft,
@@ -20,8 +25,8 @@ import { useState } from 'react'
 import { Link, useNavigate } from 'react-router'
 
 import { PageHeader } from '@/components/page-header'
-import { DeleteImportButton } from '@/features/imports/components/delete-import-button'
 import { useApartmentOptions } from '@/features/apartments/hooks/use-apartment-options'
+import { DeleteImportButton } from '@/features/imports/components/delete-import-button'
 import {
   useImportReview,
   useRunCategorization,
@@ -32,11 +37,6 @@ import {
 import { errorMessage } from '@/lib/errors'
 import { formatCents, formatDate } from '@/lib/format'
 import { fr } from '@/lib/i18n/fr'
-import { isCategoryOf } from '@shared/account-categories'
-import type {
-  AccountType,
-  TransactionCategory,
-} from '@server/generated/prisma/enums'
 
 import classes from './import-review.module.css'
 
@@ -91,47 +91,45 @@ export function ImportReview({ importId }: { importId: string }) {
   return (
     <>
       <Text
-        component={Link}
-        to="/imports"
-        size="sm"
         c="dimmed"
         className={classes.back}
+        component={Link}
+        size="sm"
+        to="/imports"
       >
         <IconArrowLeft size={14} /> {fr.review.back}
       </Text>
       <PageHeader
-        eyebrow={fr.review.eyebrow(
-          formatDate(batch.createdAt),
-          fr.accountTypes[batch.accountType],
-        )}
-        title={fr.review.title}
         actions={
           <Group gap={12}>
-            <Paper withBorder radius="md" px={18} py={12}>
-              <Text fz={26} fw={600} lh={1}>
+            <Paper px={18} py={12} radius="md" withBorder>
+              <Text fw={600} fz={26} lh={1}>
                 {confidentCount}
               </Text>
-              <Text size="xs" c="dimmed">
+              <Text c="dimmed" size="xs">
                 {fr.review.confidentTile}
               </Text>
             </Paper>
-            <Paper radius="md" px={18} py={12} className={classes.alertTile}>
-              <Text fz={26} fw={600} lh={1} c="amber.4">
+            <Paper className={classes.alertTile} px={18} py={12} radius="md">
+              <Text c="amber.4" fw={600} fz={26} lh={1}>
                 {toReviewCount}
               </Text>
-              <Text size="xs" c="amber.3">
+              <Text c="amber.3" size="xs">
                 {fr.review.toReviewTile}
               </Text>
             </Paper>
           </Group>
         }
+        eyebrow={fr.review.eyebrow(
+          formatDate(batch.createdAt),
+          fr.accountTypes[batch.accountType],
+        )}
+        title={fr.review.title}
       />
 
-      <Paper withBorder radius="lg" className={classes.card}>
+      <Paper className={classes.card} radius="lg" withBorder>
         <div className={classes.toolbar}>
           <SegmentedControl
-            value={filter}
-            onChange={(value) => setFilter(value as Filter)}
             data={[
               {
                 value: 'all',
@@ -142,13 +140,15 @@ export function ImportReview({ importId }: { importId: string }) {
                 label: fr.review.filterToReview(toReviewCount),
               },
             ]}
+            onChange={(value) => setFilter(value as Filter)}
+            value={filter}
           />
-          <Text size="xs" c="dimmed" ff="monospace">
+          <Text c="dimmed" ff="monospace" size="xs">
             {batch.fileName}
           </Text>
         </div>
 
-        <Table verticalSpacing="sm" horizontalSpacing="lg">
+        <Table horizontalSpacing="lg" verticalSpacing="sm">
           <Table.Thead>
             <Table.Tr>
               <Table.Th>{fr.common.date}</Table.Th>
@@ -164,29 +164,26 @@ export function ImportReview({ importId }: { importId: string }) {
           <Table.Tbody>
             {rows.map((row) => (
               <Table.Tr
-                key={row.id}
                 className={row.needsReview ? classes.lowRow : undefined}
+                key={row.id}
               >
                 <Table.Td c="dimmed">{formatDate(row.date)}</Table.Td>
                 <Table.Td>{row.label}</Table.Td>
                 <Table.Td
-                  ta="right"
-                  fw={600}
                   c={row.amountCents > 0 ? 'blue.3' : undefined}
+                  fw={600}
+                  ta="right"
                 >
                   {row.amountCents > 0 ? '+' : ''}
                   {formatCents(row.amountCents)}
                 </Table.Td>
                 <Table.Td>
                   <Select
-                    aria-label={fr.review.categoryOf(row.label)}
-                    placeholder={fr.review.categoryPlaceholder}
-                    size="sm"
-                    w={210}
-                    data={CATEGORY_OPTIONS[batch.accountType]}
-                    value={row.category}
                     allowDeselect={false}
+                    aria-label={fr.review.categoryOf(row.label)}
+                    data={CATEGORY_OPTIONS[batch.accountType]}
                     disabled={locked}
+                    error={row.category === null}
                     onChange={(value) => {
                       if (value) {
                         setCategory.mutate({
@@ -195,13 +192,16 @@ export function ImportReview({ importId }: { importId: string }) {
                         })
                       }
                     }}
-                    error={row.category === null}
+                    placeholder={fr.review.categoryPlaceholder}
+                    size="sm"
+                    value={row.category}
+                    w={210}
                   />
                   {row.loanMatch && (
                     <Text
-                      size="xs"
-                      mt={4}
                       c={row.loanMatch.recognized ? 'teal.4' : 'amber.4'}
+                      mt={4}
+                      size="xs"
                     >
                       {row.loanMatch.recognized
                         ? fr.review.loanMatch.recognized
@@ -214,13 +214,9 @@ export function ImportReview({ importId }: { importId: string }) {
                 {showApartment && (
                   <Table.Td>
                     <Select
-                      aria-label={fr.review.apartmentOf(row.label)}
-                      placeholder={fr.review.apartmentPlaceholder}
-                      size="sm"
-                      w={160}
-                      data={apartmentOptions}
-                      value={row.apartmentId}
                       allowDeselect={false}
+                      aria-label={fr.review.apartmentOf(row.label)}
+                      data={apartmentOptions}
                       disabled={locked}
                       onChange={(value) => {
                         if (value)
@@ -229,6 +225,10 @@ export function ImportReview({ importId }: { importId: string }) {
                             apartmentId: value,
                           })
                       }}
+                      placeholder={fr.review.apartmentPlaceholder}
+                      size="sm"
+                      value={row.apartmentId}
+                      w={160}
                     />
                   </Table.Td>
                 )}
@@ -243,20 +243,21 @@ export function ImportReview({ importId }: { importId: string }) {
                         il faut donc une action dédiée pour confirmer la catégorie proposée par l'IA. */}
                     {row.category !== null && row.needsReview && !locked && (
                       <Button
-                        size="compact-xs"
-                        variant="light"
                         color="teal"
                         leftSection={<IconCheck size={12} />}
                         loading={
                           setCategory.isPending &&
                           setCategory.variables?.id === row.id
                         }
-                        onClick={() =>
+                        onClick={() => {
+                          if (row.category === null) return
                           setCategory.mutate({
                             id: row.id,
-                            category: row.category!,
+                            category: row.category,
                           })
-                        }
+                        }}
+                        size="compact-xs"
+                        variant="light"
                       >
                         {fr.common.confirm}
                       </Button>
@@ -280,8 +281,8 @@ export function ImportReview({ importId }: { importId: string }) {
 
         <div className={classes.footer}>
           <Text
-            size="sm"
             c={toReviewCount > 0 && !locked ? 'amber.4' : 'dimmed'}
+            size="sm"
           >
             {locked
               ? fr.review.lockedNote
@@ -294,11 +295,11 @@ export function ImportReview({ importId }: { importId: string }) {
             <Group gap={12} wrap="nowrap">
               {uncategorizedCount > 0 && (
                 <Button
-                  variant="default"
                   loading={runCategorization.isPending}
                   onClick={() =>
                     runCategorization.mutate({ batchId: importId })
                   }
+                  variant="default"
                 >
                   {fr.review.categorizeWithAi}
                 </Button>
@@ -306,12 +307,12 @@ export function ImportReview({ importId }: { importId: string }) {
               <DeleteImportButton
                 importId={importId}
                 lineCount={batch.transactions.length}
-                variant="button"
                 onDeleted={() => void navigate('/imports')}
+                variant="button"
               />
               <Tooltip
-                label={fr.review.validateTooltip(toReviewCount)}
                 disabled={toReviewCount === 0}
+                label={fr.review.validateTooltip(toReviewCount)}
               >
                 {/* `data-disabled` plutôt que `disabled` : un bouton désactivé n'affiche pas l'infobulle. */}
                 <Button
@@ -349,8 +350,8 @@ function ConfidenceBadge({
     return (
       <Badge
         color="amber"
-        variant="light"
         leftSection={<IconAlertTriangle size={12} />}
+        variant="light"
       >
         {fr.review.toCategorize}
       </Badge>
@@ -358,7 +359,7 @@ function ConfidenceBadge({
   }
   if (confidence === null) {
     return (
-      <Badge color="teal" variant="light" leftSection={<IconCheck size={12} />}>
+      <Badge color="teal" leftSection={<IconCheck size={12} />} variant="light">
         {fr.review.confirmed}
       </Badge>
     )
@@ -367,8 +368,8 @@ function ConfidenceBadge({
   return needsReview ? (
     <Badge
       color="amber"
-      variant="light"
       leftSection={<IconAlertTriangle size={12} />}
+      variant="light"
     >
       {label}
     </Badge>

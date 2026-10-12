@@ -9,24 +9,24 @@ import { LOAN_MATCH_TOLERANCE_CENTS } from '@shared/apartment-rules'
  */
 
 export interface LoanTerms {
+  /** Date de la première échéance (UTC) ; les suivantes tombent le même jour du mois. */
+  firstDueDate: Date
   principalCents: number
   /** Taux annuel en points de base (3,00 % = 300). */
   rateBps: number
   termMonths: number
-  /** Date de la première échéance (UTC) ; les suivantes tombent le même jour du mois. */
-  firstDueDate: Date
 }
 
 export interface LoanInstallment {
+  /** Capital restant dû après cette échéance. */
+  balanceCents: number
+  capitalCents: number
   dueDate: Date
-  year: number
+  interestCents: number
   /** 1-12. */
   month: number
   paymentCents: number
-  interestCents: number
-  capitalCents: number
-  /** Capital restant dû après cette échéance. */
-  balanceCents: number
+  year: number
 }
 
 /** Date de l'échéance `index` (0 = la première), le jour est ramené à la fin du mois si besoin (31 → 28/30). */
@@ -82,12 +82,12 @@ export function loanSchedule(terms: LoanTerms): LoanInstallment[] {
 }
 
 export interface LoanPaymentSplit {
-  /** Montant prélevé reconnu comme l'échéance attendue (R7) ? */
-  recognized: boolean
   capitalCents: number
-  interestCents: number
   /** Assurance emprunteur comprise dans le prélèvement (0 si elle est prélevée à part). */
   insuranceCents: number
+  interestCents: number
+  /** Montant prélevé reconnu comme l'échéance attendue (R7) ? */
+  recognized: boolean
 }
 
 /**

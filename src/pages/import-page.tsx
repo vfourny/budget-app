@@ -1,5 +1,5 @@
-import { ImportForm } from '@/features/imports/components/import-form'
 import { PageHeader } from '@/components/page-header'
+import { ImportForm } from '@/features/imports/components/import-form'
 import { fr } from '@/lib/i18n/fr'
 
 export function ImportPage() {

@@ -1,4 +1,3 @@
-import type { RevenueLineKey } from '@shared/personal-rules'
 import type {
   AccountType,
   ApartmentKind,
@@ -7,6 +6,7 @@ import type {
   ImportStatus,
   TransactionCategory,
 } from '@server/generated/prisma/enums'
+import type { RevenueLineKey } from '@shared/personal-rules'
 
 /*
  * Libellés des enums Prisma (et des lignes de revenus). Chaque dictionnaire est

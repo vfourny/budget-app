@@ -1,5 +1,5 @@
 import { Alert, Button, PasswordInput, Stack, TextInput } from '@mantine/core'
-import { useState, type FormEvent } from 'react'
+import { type FormEvent, useState } from 'react'
 import { useNavigate } from 'react-router'
 
 import { authClient } from '@/lib/auth-client'
@@ -41,26 +41,26 @@ export function LoginForm() {
     <form onSubmit={(event) => void handleSubmit(event)}>
       <Stack gap="md">
         <TextInput
-          type="email"
-          label={fr.auth.email}
           autoComplete="username"
-          required
-          value={email}
+          label={fr.auth.email}
           onChange={(event) => setEmail(event.currentTarget.value)}
+          required
+          type="email"
+          value={email}
         />
         <PasswordInput
-          label={fr.auth.password}
           autoComplete="current-password"
+          label={fr.auth.password}
+          onChange={(event) => setPassword(event.currentTarget.value)}
           required
           value={password}
-          onChange={(event) => setPassword(event.currentTarget.value)}
         />
         {error && (
           <Alert color="red" variant="light">
             {error}
           </Alert>
         )}
-        <Button type="submit" loading={submitting}>
+        <Button loading={submitting} type="submit">
           {fr.auth.submit}
         </Button>
       </Stack>

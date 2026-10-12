@@ -19,10 +19,10 @@ export function ImportsTable() {
   const count = imports.data.length
 
   return (
-    <Paper withBorder radius="lg" className={classes.card}>
+    <Paper className={classes.card} radius="lg" withBorder>
       <div className={classes.header}>
         <Text fw={600}>{fr.imports.count(count)}</Text>
-        <Text size="xs" c="dimmed">
+        <Text c="dimmed" size="xs">
           {fr.imports.deleteHint}
         </Text>
       </div>
@@ -32,7 +32,7 @@ export function ImportsTable() {
           {fr.imports.empty}
         </Text>
       ) : (
-        <Table verticalSpacing="md" horizontalSpacing="lg" highlightOnHover>
+        <Table highlightOnHover horizontalSpacing="lg" verticalSpacing="md">
           <Table.Thead>
             <Table.Tr>
               <Table.Th>{fr.imports.columns.file}</Table.Th>
@@ -47,14 +47,14 @@ export function ImportsTable() {
             {imports.data.map((item) => (
               <Table.Tr key={item.id}>
                 <Table.Td>
-                  <Link to={`/imports/${item.id}`} className={classes.file}>
+                  <Link className={classes.file} to={`/imports/${item.id}`}>
                     <IconFileSpreadsheet size={18} />
                     <span>{item.fileName}</span>
                   </Link>
                 </Table.Td>
                 <Table.Td>{fr.accountTypes[item.accountType]}</Table.Td>
                 <Table.Td>{formatDate(item.createdAt)}</Table.Td>
-                <Table.Td ta="right" fw={600}>
+                <Table.Td fw={600} ta="right">
                   {item.lineCount}
                 </Table.Td>
                 <Table.Td>

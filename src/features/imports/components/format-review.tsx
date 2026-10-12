@@ -8,13 +8,13 @@ import {
   TextInput,
   Title,
 } from '@mantine/core'
+import type { CsvFormatConfig } from '@shared/csv-format'
 import { IconAlertTriangle } from '@tabler/icons-react'
 import { useState } from 'react'
 
 import { formatCents, formatDate } from '@/lib/format'
 import { fr } from '@/lib/i18n/fr'
 import type { RouterOutputs } from '@/lib/trpc'
-import type { CsvFormatConfig } from '@shared/csv-format'
 
 type Detection = RouterOutputs['import']['detectFormat']
 
@@ -82,7 +82,7 @@ export function FormatReview({
     <Stack gap={18}>
       <div>
         <Title order={3}>{fr.importForm.formatTitle}</Title>
-        <Text c="dimmed" size="sm" mt={4}>
+        <Text c="dimmed" mt={4} size="sm">
           {fr.importForm.formatIntro}
         </Text>
       </div>
@@ -128,26 +128,26 @@ export function FormatReview({
 
       {checks.map((code) => (
         <Alert
-          key={code}
           color={code === 'NO_TRANSACTIONS' ? 'red' : 'amber'}
           icon={<IconAlertTriangle size={18} />}
+          key={code}
         >
           {fr.importForm.formatChecks[code]}
         </Alert>
       ))}
 
       <TextInput
-        label={fr.importForm.formatName}
         description={fr.importForm.formatNameDescription}
-        value={name}
+        label={fr.importForm.formatName}
         maxLength={60}
         onChange={(event) => setName(event.currentTarget.value)}
+        value={name}
       />
 
       <Group>
         <Button
-          loading={isImporting}
           disabled={!canConfirm}
+          loading={isImporting}
           onClick={() =>
             onConfirm({
               name: name.trim() || fr.importForm.defaultFormatName,
@@ -157,7 +157,7 @@ export function FormatReview({
         >
           {fr.importForm.confirmFormat}
         </Button>
-        <Button variant="default" onClick={onRetry} disabled={isImporting}>
+        <Button disabled={isImporting} onClick={onRetry} variant="default">
           {fr.importForm.retryDetection}
         </Button>
       </Group>

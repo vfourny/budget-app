@@ -1,10 +1,9 @@
-import { initTRPC } from '@trpc/server'
-import superjson from 'superjson'
-import { ZodError, z } from 'zod'
-
-import { AppErrorCause, appError } from '@server/lib/app-error'
+import { appError, AppErrorCause } from '@server/lib/app-error'
 import { auth } from '@server/lib/auth'
 import { db } from '@server/lib/db'
+import { initTRPC } from '@trpc/server'
+import superjson from 'superjson'
+import { z, ZodError } from 'zod'
 
 /** Contexte disponible dans toutes les procédures (`ctx`), recréé à chaque requête. */
 export async function createTRPCContext(opts: { headers: Headers }) {

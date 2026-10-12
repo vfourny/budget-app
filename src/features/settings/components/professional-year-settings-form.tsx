@@ -12,22 +12,22 @@ import {
   Text,
   Title,
 } from '@mantine/core'
+import type { CompanyRegime } from '@server/generated/prisma/enums'
+import {
+  DEFAULT_PROFESSIONAL_YEAR_SETTINGS,
+  IR_OPTION_MAX_YEARS,
+  type ProfessionalYearSettingsValues,
+  SUPPORTED_REGIMES,
+} from '@shared/professional-rules'
 import { useState } from 'react'
 
 import {
-  useProfessionalYearSettings,
   useProfessionalYearsConfigured,
+  useProfessionalYearSettings,
   useSetProfessionalYearSettings,
 } from '@/features/settings/hooks/use-professional-year-settings'
 import { errorMessage } from '@/lib/errors'
 import { fr } from '@/lib/i18n/fr'
-import {
-  DEFAULT_PROFESSIONAL_YEAR_SETTINGS,
-  IR_OPTION_MAX_YEARS,
-  SUPPORTED_REGIMES,
-  type ProfessionalYearSettingsValues,
-} from '@shared/professional-rules'
-import type { CompanyRegime } from '@server/generated/prisma/enums'
 
 type NumericKey = Exclude<
   keyof ProfessionalYearSettingsValues,
@@ -40,11 +40,11 @@ type Unit = keyof typeof fr.settings.pro.units
  * le formulaire affiche des unités lisibles (€, %, m², €/km). `scale` = facteur stocké / affiché.
  */
 interface FieldConfig {
-  unit: Unit
-  scale: number
   decimals: number
-  step: number
   max: number
+  scale: number
+  step: number
+  unit: Unit
 }
 
 const PERCENT = {
@@ -133,26 +133,26 @@ export function ProfessionalYearSettingsForm() {
     <Stack gap={20}>
       <div>
         <Title order={3}>{fr.settings.pro.title}</Title>
-        <Text size="sm" c="dimmed">
+        <Text c="dimmed" size="sm">
           {fr.settings.pro.description}
         </Text>
       </div>
 
       <Stack gap={6}>
-        <Text size="sm" fw={600}>
+        <Text fw={600} size="sm">
           {fr.settings.pro.year}
         </Text>
         <SegmentedControl
-          w="fit-content"
           aria-label={fr.settings.pro.year}
-          value={String(year)}
-          onChange={(value) => setYear(Number(value))}
           data={years.map((value) => ({
             value: String(value),
             label: configured.data?.includes(value)
               ? `${value} · ${fr.settings.pro.configured}`
               : String(value),
           }))}
+          onChange={(value) => setYear(Number(value))}
+          value={String(year)}
+          w="fit-content"
         />
       </Stack>
 
@@ -163,9 +163,9 @@ export function ProfessionalYearSettingsForm() {
       {settings.isSuccess && (
         // `key` : changer d'année remonte les champs, donc le brouillon repart des valeurs de l'année.
         <ProfessionalYearFields
-          key={year}
-          year={year}
           initial={settings.data.values}
+          isOwn={settings.data.source === 'own'}
+          key={year}
           note={
             settings.data.source === 'own'
               ? fr.settings.pro.yearNote.own(year)
@@ -176,7 +176,7 @@ export function ProfessionalYearSettingsForm() {
                   )
                 : fr.settings.pro.yearNote.default(year)
           }
-          isOwn={settings.data.source === 'own'}
+          year={year}
         />
       )}
     </Stack>
@@ -184,11 +184,11 @@ export function ProfessionalYearSettingsForm() {
 }
 
 interface ProfessionalYearFieldsProps {
-  year: number
   initial: ProfessionalYearSettingsValues
-  note: string
   /** Valeurs déjà enregistrées pour cette année (sinon reprises : on peut enregistrer sans modifier). */
   isOwn: boolean
+  note: string
+  year: number
 }
 
 function ProfessionalYearFields({
@@ -226,17 +226,14 @@ function ProfessionalYearFields({
     const text = fr.settings.pro.fields[key]
     return (
       <NumberInput
-        key={key}
-        label={text.label}
-        description={text.hint}
-        inputWrapperOrder={['label', 'input', 'description']}
-        suffix={` ${fr.settings.pro.units[config.unit]}`}
-        min={0}
-        max={config.max}
-        step={config.step}
         decimalScale={config.decimals}
         decimalSeparator=","
-        value={draft[key] / config.scale}
+        description={text.hint}
+        inputWrapperOrder={['label', 'input', 'description']}
+        key={key}
+        label={text.label}
+        max={config.max}
+        min={0}
         onChange={(value) =>
           setDraft((current) => ({
             ...current,
@@ -245,43 +242,45 @@ function ProfessionalYearFields({
             ),
           }))
         }
+        step={config.step}
+        suffix={` ${fr.settings.pro.units[config.unit]}`}
+        value={draft[key] / config.scale}
       />
     )
   }
 
   return (
     <Stack gap={20}>
-      <Text size="sm" c={isOwn ? 'dimmed' : 'amber.3'} role="status">
+      <Text c={isOwn ? 'dimmed' : 'amber.3'} role="status" size="sm">
         {note}
       </Text>
 
       <Radio.Group
         label={fr.settings.pro.regime}
-        value={draft.regime}
         onChange={(value) =>
           setDraft((current) => ({
             ...current,
             regime: value as CompanyRegime,
           }))
         }
+        value={draft.regime}
       >
-        <Group mt={8} gap={12}>
+        <Group gap={12} mt={8}>
           {REGIMES.map((regime) => {
             const supported = SUPPORTED_REGIMES.some(
               (value) => value === regime,
             )
             return (
               <Radio
-                key={regime}
-                value={regime}
                 disabled={!supported}
+                key={regime}
                 label={
                   <Group gap={8} wrap="nowrap">
                     {fr.companyRegimes[regime]}
                     <Badge
+                      color={supported ? 'gold' : 'gray'}
                       size="xs"
                       variant="light"
-                      color={supported ? 'gold' : 'gray'}
                     >
                       {supported
                         ? fr.settings.pro.active
@@ -289,36 +288,37 @@ function ProfessionalYearFields({
                     </Badge>
                   </Group>
                 }
+                value={regime}
               />
             )
           })}
         </Group>
       </Radio.Group>
-      <Text size="xs" c="dimmed">
+      <Text c="dimmed" size="xs">
         {fr.settings.pro.regimeNote}
       </Text>
 
       <NumberInput
-        w={280}
-        label={fr.settings.pro.irOption.label}
-        description={irHint}
-        inputWrapperOrder={['label', 'input', 'description']}
-        min={2000}
-        max={2100}
         allowDecimal={false}
-        value={draft.irOptionFirstYear}
+        description={irHint}
         error={exercise > IR_OPTION_MAX_YEARS}
+        inputWrapperOrder={['label', 'input', 'description']}
+        label={fr.settings.pro.irOption.label}
+        max={2100}
+        min={2000}
         onChange={(value) =>
           typeof value === 'number' &&
           setDraft((current) => ({ ...current, irOptionFirstYear: value }))
         }
+        value={draft.irOptionFirstYear}
+        w={280}
       />
 
       {(Object.keys(GROUPS) as (keyof typeof GROUPS)[]).map((group) => (
-        <Stack key={group} gap={12}>
+        <Stack gap={12} key={group}>
           <div>
             <Title order={4}>{fr.settings.pro.groups[group].title}</Title>
-            <Text size="sm" c="dimmed">
+            <Text c="dimmed" size="sm">
               {fr.settings.pro.groups[group].description}
             </Text>
           </div>
@@ -338,7 +338,7 @@ function ProfessionalYearFields({
         </Alert>
       )}
       {save.isSuccess && !changed && isOwn && (
-        <Text size="sm" c="teal.4">
+        <Text c="teal.4" size="sm">
           {fr.settings.pro.savedFor(year)}
         </Text>
       )}
@@ -353,9 +353,9 @@ function ProfessionalYearFields({
         </Button>
         {/* Remplit seulement le formulaire : rien n'est enregistré avant « Enregistrer ». */}
         <Button
-          variant="default"
           disabled={isDefault}
           onClick={() => setDraft({ ...DEFAULT_PROFESSIONAL_YEAR_SETTINGS })}
+          variant="default"
         >
           {fr.settings.pro.resetDefaults}
         </Button>

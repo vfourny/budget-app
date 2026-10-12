@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# PostToolUse hook (Edit/Write) : prettier + oxlint --fix sur le fichier touché,
+# PostToolUse hook (Edit/Write) : prettier + eslint --fix sur le fichier touché,
 # puis typecheck du projet. Exit 2 => l'erreur est renvoyée à Claude, qui corrige.
 set -uo pipefail
 
@@ -21,8 +21,8 @@ esac
 
 case "$file" in
   *.ts|*.tsx|*.js|*.jsx|*.mjs)
-    if ! out=$(pnpm exec oxlint --fix --deny-warnings "$file" 2>&1); then
-      errors+=$'oxlint:\n'"$out"$'\n'
+    if ! out=$(pnpm exec eslint --fix --max-warnings 0 --no-warn-ignored "$file" 2>&1); then
+      errors+=$'eslint:\n'"$out"$'\n'
     fi
     if ! out=$(pnpm -s typecheck --pretty false 2>&1); then
       errors+=$'TypeScript:\n'"$(echo "$out" | head -40)"$'\n'

@@ -1,10 +1,9 @@
-import { z } from 'zod'
-
 import { CompanyRegime, type Envelope } from '@server/generated/prisma/enums'
 import { BUDGET_ENVELOPES } from '@server/lib/settings/envelope-shares'
 import { resolveProfessionalYearSettings } from '@server/lib/settings/professional-year-settings'
-import { DEFAULT_ENVELOPE_PERCENTS } from '@shared/personal-rules'
 import { createTRPCRouter, protectedProcedure } from '@server/trpc/init'
+import { DEFAULT_ENVELOPE_PERCENTS } from '@shared/personal-rules'
+import { z } from 'zod'
 
 const envelopeSharesSchema = z
   .object(

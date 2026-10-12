@@ -17,9 +17,9 @@ export function DeltaBadge({ actual, forecast, goal }: DeltaBadgeProps) {
   const good = goal === 'atLeast' ? delta > 0 : delta < 0
   return (
     <Badge
-      variant="light"
       color={delta === 0 ? 'gold' : good ? 'teal' : 'red'}
       tt="none"
+      variant="light"
     >
       {delta > 0 ? '+ ' : delta < 0 ? '− ' : ''}
       {formatCents(Math.abs(delta))}

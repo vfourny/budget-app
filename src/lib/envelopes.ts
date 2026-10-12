@@ -1,6 +1,7 @@
-import { ENVELOPE_CATEGORIES, isSavingsEnvelope } from '@shared/personal-rules'
-import { fr } from '@/lib/i18n/fr'
 import type { Envelope } from '@server/generated/prisma/enums'
+import { ENVELOPE_CATEGORIES, isSavingsEnvelope } from '@shared/personal-rules'
+
+import { fr } from '@/lib/i18n/fr'
 
 /** Ordre d'affichage des enveloppes = ordre des clés de `fr.envelopes`. */
 export const ENVELOPE_ORDER = Object.keys(fr.envelopes) as Envelope[]

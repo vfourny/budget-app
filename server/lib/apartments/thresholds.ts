@@ -1,17 +1,17 @@
+import type { ApartmentPeriodColumns } from '@server/lib/apartments/compute-period'
+import type { ApartmentRecord } from '@server/lib/apartments/types'
 import {
   LMP_THRESHOLD_CENTS,
   microBicCeilingCents,
 } from '@shared/apartment-rules'
-import type { ApartmentRecord } from '@server/lib/apartments/types'
-import type { ApartmentPeriodColumns } from '@server/lib/apartments/compute-period'
 
 export interface LmnpThresholds {
-  /** Recettes de janvier au dernier mois clos, tous appartements LMNP actifs confondus. */
-  receiptsCents: number
+  lmpThresholdCents: number
+  microBicCeilingCents: number
   /** Projection annuelle : Σ par appartement de (recettes ÷ mois clos × 12). */
   projectedCents: number
-  microBicCeilingCents: number
-  lmpThresholdCents: number
+  /** Recettes de janvier au dernier mois clos, tous appartements LMNP actifs confondus. */
+  receiptsCents: number
 }
 
 /**

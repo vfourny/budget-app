@@ -1,13 +1,12 @@
 import type { GoogleGenAI } from '@google/genai'
-import { z } from 'zod'
-
 import {
-  TransactionCategory,
   type AccountType,
+  TransactionCategory,
 } from '@server/generated/prisma/enums'
-import { isCategoryOf } from '@shared/account-categories'
 import { CATEGORY_HINTS } from '@server/lib/categorize/category-hints'
 import { env } from '@server/lib/env'
+import { isCategoryOf } from '@shared/account-categories'
+import { z } from 'zod'
 
 /** Nombre de lignes envoyées par appel : peu d'appels par import (quota de requêtes par minute du
  * palier gratuit Gemini), les appels d'un même import partent en parallèle. */
@@ -24,9 +23,9 @@ function categoriesOf(accountType: AccountType): TransactionCategory[] {
 }
 
 export interface CategorizeInput {
-  label: string
   /** Centimes, signé : négatif = débit. */
   amountCents: number
+  label: string
 }
 
 /** Transaction déjà validée, montrée à l'IA comme exemple (few-shot). */

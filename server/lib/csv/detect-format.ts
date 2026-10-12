@@ -1,10 +1,9 @@
 import type { GoogleGenAI } from '@google/genai'
-import { z } from 'zod'
-
 import { splitCsvLine } from '@server/lib/csv/parse-bank-statement'
 import type { ParsedBankStatement } from '@server/lib/csv/types'
 import { env } from '@server/lib/env'
-import { csvFormatConfigSchema, type CsvFormatConfig } from '@shared/csv-format'
+import { type CsvFormatConfig, csvFormatConfigSchema } from '@shared/csv-format'
+import { z } from 'zod'
 
 /** En-tête + 8 opérations : de quoi repérer les colonnes sans envoyer tout le relevé à l'IA. */
 const SAMPLE_LINES = 9
@@ -18,7 +17,7 @@ const DELIMITERS = [
 /** Les lignes non vides du fichier, sans BOM UTF-8. */
 function csvLines(csvText: string): string[] {
   return csvText
-    .replace(/^﻿/, '')
+    .replace(/^\uFEFF/, '')
     .split(/\r?\n/)
     .filter((line) => line.trim() !== '')
 }
@@ -110,9 +109,9 @@ function formatSample(
 
 export interface DetectedCsvFormat {
   bankName: string
-  config: CsvFormatConfig
   /** Cellules de la 1re ligne (titres si `config.hasHeader`), pour nommer les colonnes à l'écran. */
   columns: string[]
+  config: CsvFormatConfig
 }
 
 /**

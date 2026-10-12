@@ -37,7 +37,7 @@ Choix délibéré : **le plus simple possible**. SPA React (pas de SSR, pas de S
 | Auth        | Better Auth (email + mot de passe, mono-utilisateur, sessions en base)               |
 | IA          | API Gemini (Google AI Studio) pour catégoriser les lignes de relevé                  |
 | Hébergement | Vercel (Hobby, détection Nitro automatique) + Neon (Free)                            |
-| Qualité     | oxlint (règles React hooks incluses), Prettier, `tsc` (`@vfourny/node-toolkit`)      |
+| Qualité     | ESLint, Prettier, `tsc`, commitlint (configs `@vfourny/node-toolkit`)                |
 
 ## Commandes
 
@@ -46,7 +46,7 @@ pnpm dev            # front + API sur un seul serveur (http://localhost:5173, AP
 pnpm check          # lint + typecheck + format:check + i18n:check + knip (à lancer avant toute PR)
 pnpm build          # build de prod (fait aussi en CI) → .output/ (ou .vercel/output sur Vercel)
 pnpm preview        # sert le build de prod localement
-pnpm lint:fix       # autofix oxlint
+pnpm lint:fix       # autofix ESLint
 pnpm format         # prettier --write
 
 pnpm db:migrate     # prisma migrate dev (crée + applique une migration, régénère le client)
@@ -106,7 +106,7 @@ nitro.config.ts        # serverDir: ./server
 - **Calculs du dashboard Pro** : fonctions **pures** dans `server/lib/professional/` (aucun accès base) ;
   les requêtes restent dans `load-year.ts`. Un statut juridique = un `ProfessionalRegime` (`server/lib/professional/regimes/`).
 - **Données** : toujours via tRPC + TanStack Query. **Pas de `fetch` dans un `useEffect`.**
-  `useEffect` est réservé à la synchro avec un système externe (oxlint le signale sinon).
+  `useEffect` est réservé à la synchro avec un système externe (ESLint le signale sinon).
 - **Pattern de lecture** : `useQuery(trpc.<domaine>.<proc>.queryOptions())` avec `trpc` de
   `@/lib/trpc`, encapsulé dans un hook de feature ; gérer `isPending` / `isError` dans le
   composant. Écriture : `useMutation(trpc.x.y.mutationOptions())` + invalidation ciblée.
@@ -175,10 +175,10 @@ nitro.config.ts        # serverDir: ./server
   `/ship-pr`. Ne présenter que du vert.
 - Remplir `.github/pull_request_template.md`, section « Notes React » incluse.
 - CI GitHub Actions (`.github/workflows/ci.yml`) : lint, typecheck, format, build sur chaque PR.
-- Hook Git pre-commit (`lefthook.yml`, installé par `pnpm install`) : oxlint --fix + Prettier
+- Hook Git pre-commit (`lefthook.yml`, installé par `pnpm install`) : eslint --fix + Prettier
   sur les fichiers stagés, commit bloqué s'il reste une erreur. Ne pas contourner avec
   `--no-verify` : corriger l'erreur.
-- Hook Claude Code (`.claude/hooks/check.sh`) : prettier + oxlint --fix + tsc après chaque
+- Hook Claude Code (`.claude/hooks/check.sh`) : prettier + eslint --fix + tsc après chaque
   édition ; corrige immédiatement ce qu'il remonte.
 - Questions de clarification : **regroupées une fois par feature**. Si ce n'est pas bloquant,
   décide, documente l'hypothèse dans la PR (et ici si durable).
@@ -234,10 +234,13 @@ Hors scope : synchro bancaire auto, multi-utilisateurs, émission de factures.
 - Prisma 7 stable (la 8 est en RC).
 - **Configs partagées** : `tsconfig.json` étend `@vfourny/node-toolkit/tsconfig/react` (strict + `noUncheckedIndexedAccess`,
   `noEmit`, tout le projet inclus) ; seules les options propres au projet (cible, `types`, alias, `exclude`) restent en local.
-  Prettier = config du toolkit telle quelle (guillemets simples, sans point-virgule, 80 colonnes).
+  Prettier = config du toolkit telle quelle (guillemets simples, sans point-virgule, 80 colonnes). ESLint =
+  `@vfourny/node-toolkit/eslint/react` (tri des imports, props JSX et interfaces, `interface` plutôt que `type`, pas de `!`) ;
+  surcharges locales dans `eslint.config.ts` uniquement (routes Nitro en export par défaut, fonctions utilisables avant leur
+  déclaration).
 - pnpm, une seule app (pas de monorepo).
-- TypeScript 6.0 (comme le template Vite), oxlint plutôt qu'ESLint (template Vite, plus rapide,
-  règles `rules-of-hooks` / `exhaustive-deps` incluses).
+- TypeScript 6.0 (comme le template Vite). **ESLint plutôt qu'oxlint** (décidé le 2026-10-12) : pour partager la config
+  du toolkit entre projets ; oxlint était plus rapide mais sans tri des imports ni config partagée.
 - **Pro (2026-10-06)** : catégories pro dans l'enum `TransactionCategory` (filtrées par type de compte) plutôt qu'un
   2e enum ; prévisionnel sans saisie = réel du même mois N-1 ; salaire et cotisations calculés depuis les règles de
   l'année (les prélèvements URSSAF / PAS… ne comptent pas dans les charges) ; clients en texte libre dans la facturation

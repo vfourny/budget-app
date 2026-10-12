@@ -16,11 +16,11 @@ export function LoanGauge({
   const percent = formatBp(Math.round(ratio * 10_000))
   return (
     <div>
-      <Group justify="space-between" mb={6} gap={12}>
-        <Text size="sm" c="dimmed">
+      <Group gap={12} justify="space-between" mb={6}>
+        <Text c="dimmed" size="sm">
           {text.capitalRepaid}
         </Text>
-        <Text size="sm" fw={600}>
+        <Text fw={600} size="sm">
           {text.capitalOf(
             formatCents(repaidCents),
             formatCents(principalCents),
@@ -29,10 +29,10 @@ export function LoanGauge({
         </Text>
       </Group>
       <Progress
-        value={ratio * 100}
+        aria-label={text.capitalAria(percent)}
         color="gold"
         size="sm"
-        aria-label={text.capitalAria(percent)}
+        value={ratio * 100}
       />
     </div>
   )

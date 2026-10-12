@@ -5,8 +5,8 @@ pre-commit:
   commands:
     lint:
       priority: 1
-      glob: '*.{ts,tsx,js,jsx,mjs,cjs}'
-      run: pnpm exec oxlint --fix --deny-warnings {staged_files}
+      glob: '*.{ts,tsx,js,jsx,mjs,cjs,json}'
+      run: pnpm exec eslint --fix --max-warnings 0 --no-warn-ignored {staged_files}
       stage_fixed: true
     format:
       priority: 2

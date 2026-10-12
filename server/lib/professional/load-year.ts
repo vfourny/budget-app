@@ -2,7 +2,6 @@ import type { TransactionCategory } from '@server/generated/prisma/enums'
 import { validatedTransactions } from '@server/lib/dashboard/scope'
 import type { db as Db } from '@server/lib/db'
 import { applyBp } from '@server/lib/professional/amounts'
-import { billingAmount } from '@shared/billing-days'
 import { computeMonth } from '@server/lib/professional/compute-month'
 import { computeYear } from '@server/lib/professional/compute-year'
 import type {
@@ -12,6 +11,7 @@ import type {
   ProfessionalMonthInput,
 } from '@server/lib/professional/types'
 import { resolveProfessionalYearSettings } from '@server/lib/settings/professional-year-settings'
+import { billingAmount } from '@shared/billing-days'
 import { COLLECTED_VAT_BP, MIXED_COSTS } from '@shared/professional-rules'
 import type { ProfessionalYearSettingsValues } from '@shared/professional-rules'
 

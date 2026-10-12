@@ -7,13 +7,13 @@ import classes from './target-gauge.module.css'
 export type GaugeGoal = 'atMost' | 'atLeast'
 
 interface TargetGaugeProps {
+  /** Texte lu par les lecteurs d'écran (« Loyer : 300 € sur 320 € prévus »). */
+  ariaLabel: string
+  goal: GaugeGoal
   /** Valeur réelle (centimes ou autre unité entière) ; `null` = pas encore de réel (prévisionnel). */
   real: number | null
   /** Cible : le trait vertical (recommandé, prévu…). */
   target: number
-  goal: GaugeGoal
-  /** Texte lu par les lecteurs d'écran (« Loyer : 300 € sur 320 € prévus »). */
-  ariaLabel: string
 }
 
 /**
@@ -37,7 +37,7 @@ export function TargetGauge({
           : 'bad'
 
   return (
-    <div className={classes.track} role="img" aria-label={ariaLabel}>
+    <div aria-label={ariaLabel} className={classes.track} role="img">
       <div
         className={classes.fill}
         data-state={state}

@@ -4,6 +4,10 @@ import { createHash } from 'node:crypto'
  * espaces autour. Deux exports de la même banque ont le même en-tête, donc la même empreinte ;
  * c'est la clé de `CsvFormat` (un format connu = pas besoin de le redétecter). */
 export function csvFingerprint(csvText: string): string {
-  const firstLine = csvText.replace(/^﻿/, '').split(/\r?\n/, 1)[0]?.trim() ?? ''
+  const firstLine =
+    csvText
+      .replace(/^\uFEFF/, '')
+      .split(/\r?\n/, 1)[0]
+      ?.trim() ?? ''
   return createHash('sha256').update(firstLine).digest('hex')
 }

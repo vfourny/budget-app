@@ -3,9 +3,9 @@ import { useState } from 'react'
 export type PeriodView = 'month' | 'year'
 
 export interface Period {
-  year: number
   /** 1-12 */
   month: number
+  year: number
 }
 
 export const periodKey = (period: Period) => `${period.year}-${period.month}`

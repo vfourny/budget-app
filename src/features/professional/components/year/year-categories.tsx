@@ -1,17 +1,17 @@
 import { Paper, Text, Title } from '@mantine/core'
-
-import {
-  ForecastTable,
-  type ForecastTableGroup,
-  type ForecastRow,
-} from '@/features/professional/components/forecast-table'
-import { formatCents, monthName } from '@/lib/format'
-import { fr } from '@/lib/i18n/fr'
+import type { TransactionCategory } from '@server/generated/prisma/enums'
 import type {
   ForecastActual,
   ProfessionalMonth,
 } from '@server/lib/professional/types'
-import type { TransactionCategory } from '@server/generated/prisma/enums'
+
+import {
+  type ForecastRow,
+  ForecastTable,
+  type ForecastTableGroup,
+} from '@/features/professional/components/forecast-table'
+import { formatCents, monthName } from '@/lib/format'
+import { fr } from '@/lib/i18n/fr'
 
 const EMPTY_AMOUNT: ForecastActual = { forecast: 0, actual: null }
 
@@ -167,14 +167,14 @@ export function YearCategories({
 
   return (
     <Paper
-      withBorder
-      radius="lg"
-      p={24}
-      component="section"
       aria-label={text.title}
+      component="section"
+      p={24}
+      radius="lg"
+      withBorder
     >
       <Title order={2}>{text.title}</Title>
-      <Text size="xs" c="dimmed" mb={8}>
+      <Text c="dimmed" mb={8} size="xs">
         {last
           ? text.subtitle(monthName(1), monthName(last.month))
           : text.noActual}

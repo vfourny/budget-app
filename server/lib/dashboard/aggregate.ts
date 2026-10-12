@@ -1,36 +1,36 @@
-import {
-  REVENUE_LINES,
-  FIXED_CHARGES_CATEGORIES,
-  envelopeOf,
-  isSavingsEnvelope,
-  type RevenueLineKey,
-} from '@shared/personal-rules'
 import type { Transaction } from '@server/generated/prisma/client'
 import type {
   Envelope,
   TransactionCategory,
 } from '@server/generated/prisma/enums'
+import {
+  envelopeOf,
+  FIXED_CHARGES_CATEGORIES,
+  isSavingsEnvelope,
+  REVENUE_LINES,
+  type RevenueLineKey,
+} from '@shared/personal-rules'
 
 export type AggregatedRow = Pick<Transaction, 'category' | 'amountCents'>
 
 export interface PeriodTotals {
-  /** Somme des crédits. */
-  revenueCents: number
-  /** Détail des crédits selon `REVENUE_LINES` (+ `"other"` s'il reste un montant) : somme = `revenueCents`. */
-  revenueLines: { key: RevenueLineKey; cents: number }[]
-  /** Somme des débits hors enveloppes d'épargne (positive). */
-  expenseCents: number
-  /** Somme des débits des enveloppes d'épargne (positive). */
-  savingsCents: number
   /** Débits par enveloppe selon `ENVELOPE_CATEGORIES` (positifs). */
   byEnvelope: Record<Envelope, number>
   /** Débits par catégorie (épargne comprise), du plus gros au plus petit. */
   debitsByCategory: { category: TransactionCategory | null; cents: number }[]
+  /** Somme des débits hors enveloppes d'épargne (positive). */
+  expenseCents: number
   /** Débits des `FIXED_CHARGES_CATEGORIES` (dans cet ordre, 0 si aucun) : card « Charges fixes ». */
   fixedCharges: {
     category: (typeof FIXED_CHARGES_CATEGORIES)[number]
     cents: number
   }[]
+  /** Somme des crédits. */
+  revenueCents: number
+  /** Détail des crédits selon `REVENUE_LINES` (+ `"other"` s'il reste un montant) : somme = `revenueCents`. */
+  revenueLines: { key: RevenueLineKey; cents: number }[]
+  /** Somme des débits des enveloppes d'épargne (positive). */
+  savingsCents: number
 }
 
 /**

@@ -16,7 +16,7 @@ import { TargetGauge } from '@/components/target-gauge'
 import { TripForm } from '@/features/professional/components/month/trip-form'
 import { useDeleteTrip } from '@/features/professional/hooks/use-trips'
 import { formatCents, formatDate } from '@/lib/format'
-import { LOCALE, fr } from '@/lib/i18n/fr'
+import { fr, LOCALE } from '@/lib/i18n/fr'
 import type { RouterOutputs } from '@/lib/trpc'
 
 type MonthData = RouterOutputs['professional']['month']
@@ -42,29 +42,29 @@ export function MileageCard({ month }: { month: MonthData }) {
 
   return (
     <Paper
-      withBorder
-      radius="lg"
-      p={24}
-      component="section"
       aria-label={text.title}
+      component="section"
+      p={24}
+      radius="lg"
+      withBorder
     >
       <Group gap={4} mb={16} wrap="nowrap">
         <Title order={2}>{text.title}</Title>
         <InfoTip
-          label={text.tip(rate)}
           ariaLabel={fr.professional.howComputed(text.title)}
+          label={text.tip(rate)}
         />
       </Group>
 
       <Stack gap={6}>
         <Group justify="space-between">
-          <Text size="sm" c="dimmed">
+          <Text c="dimmed" size="sm">
             {text.done}
           </Text>
           {delta !== null && (
             <Text
-              size="xs"
               c={delta === 0 ? 'gold.6' : delta > 0 ? 'red.4' : 'teal.4'}
+              size="xs"
             >
               {delta === 0
                 ? text.onForecast
@@ -74,99 +74,99 @@ export function MileageCard({ month }: { month: MonthData }) {
             </Text>
           )}
         </Group>
-        <Group justify="space-between" align="baseline">
-          <Text fz={24} fw={600}>
+        <Group align="baseline" justify="space-between">
+          <Text fw={600} fz={24}>
             {mileage.actualKm === null ? '—' : km(mileage.actualKm)}
           </Text>
           {mileage.amount.actual !== null && (
-            <Text size="sm" c="dimmed">
+            <Text c="dimmed" size="sm">
               {text.toDeclare(formatCents(mileage.amount.actual))}
             </Text>
           )}
         </Group>
         <TargetGauge
-          real={mileage.actualKm}
-          target={mileage.forecastKm}
-          goal="atMost"
           ariaLabel={text.gaugeAria(
             kmFormat.format(mileage.actualKm ?? 0),
             kmFormat.format(mileage.forecastKm),
           )}
+          goal="atMost"
+          real={mileage.actualKm}
+          target={mileage.forecastKm}
         />
-        <Text size="xs" c="dimmed">
+        <Text c="dimmed" size="xs">
           {mileage.actualKm === null ? text.noTripsYet : text.rate(rate)}
         </Text>
       </Stack>
 
-      <SimpleGrid cols={2} spacing={16} mt={16}>
+      <SimpleGrid cols={2} mt={16} spacing={16}>
         <div>
-          <Text size="xs" c="dimmed">
+          <Text c="dimmed" size="xs">
             {text.toDate}
           </Text>
           <Text fw={600}>{km(month.mileageToDate.km)}</Text>
-          <Text size="xs" c="dimmed">
+          <Text c="dimmed" size="xs">
             {formatCents(month.mileageToDate.cents)}
           </Text>
         </div>
         <div>
-          <Text size="xs" c="dimmed">
+          <Text c="dimmed" size="xs">
             {text.forecast}
           </Text>
           <Text fw={600}>{km(mileage.forecastKm)}</Text>
-          <Text size="xs" c="dimmed">
+          <Text c="dimmed" size="xs">
             {formatCents(mileage.amount.forecast)}
           </Text>
         </div>
       </SimpleGrid>
 
-      <Group justify="space-between" mt={20} mb={8}>
-        <Text size="sm" fw={600}>
+      <Group justify="space-between" mb={8} mt={20}>
+        <Text fw={600} size="sm">
           {text.journal}
         </Text>
         {!adding && (
           <Button
-            variant="subtle"
-            size="compact-sm"
             onClick={() => setAdding(true)}
+            size="compact-sm"
+            variant="subtle"
           >
             {text.addTrip}
           </Button>
         )}
       </Group>
       {adding && (
-        <Paper withBorder radius="md" p={12} mb={12}>
+        <Paper mb={12} p={12} radius="md" withBorder>
           <TripForm defaultDate={defaultDate} onDone={() => setAdding(false)} />
         </Paper>
       )}
       {month.trips.length === 0 ? (
-        <Text size="sm" c="dimmed">
+        <Text c="dimmed" size="sm">
           {text.noTrips}
         </Text>
       ) : (
         <Stack gap={8}>
           {month.trips.map((trip) => (
-            <Group key={trip.id} justify="space-between" wrap="nowrap">
+            <Group justify="space-between" key={trip.id} wrap="nowrap">
               <div>
                 <Text size="sm">
                   {formatDate(trip.date)} · {trip.route}
                 </Text>
-                <Text size="xs" c="dimmed">
+                <Text c="dimmed" size="xs">
                   {trip.reason}
                 </Text>
               </div>
               <Group gap={4} wrap="nowrap">
-                <Text size="sm" fw={600}>
+                <Text fw={600} size="sm">
                   {km(trip.km)}
                 </Text>
                 <ActionIcon
-                  variant="subtle"
-                  color="gray"
-                  size="sm"
                   aria-label={text.trip.remove(trip.route)}
+                  color="gray"
                   loading={
                     deleteTrip.isPending && deleteTrip.variables?.id === trip.id
                   }
                   onClick={() => deleteTrip.mutate({ id: trip.id })}
+                  size="sm"
+                  variant="subtle"
                 >
                   <IconTrash size={14} />
                 </ActionIcon>
@@ -178,10 +178,10 @@ export function MileageCard({ month }: { month: MonthData }) {
             pt={8}
             style={{ borderTop: '1px solid var(--app-border)' }}
           >
-            <Text size="sm" c="dimmed">
+            <Text c="dimmed" size="sm">
               {text.total}
             </Text>
-            <Text size="sm" fw={700}>
+            <Text fw={700} size="sm">
               {km(month.trips.reduce((total, trip) => total + trip.km, 0))}
             </Text>
           </Group>

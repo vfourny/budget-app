@@ -1,4 +1,6 @@
 import { Modal, SegmentedControl, Stack, Tabs } from '@mantine/core'
+import type { BillingKind } from '@server/generated/prisma/enums'
+import type { ProfessionalYearSettingsValues } from '@shared/professional-rules'
 import { useState } from 'react'
 
 import { BillingTab } from '@/features/professional/components/forecast-editor/billing-tab'
@@ -8,24 +10,22 @@ import { MixedCostsTab } from '@/features/professional/components/forecast-edito
 import type { Period } from '@/hooks/use-period-selection'
 import { capitalizedMonthName } from '@/lib/format'
 import { fr } from '@/lib/i18n/fr'
-import type { ProfessionalYearSettingsValues } from '@shared/professional-rules'
-import type { BillingKind } from '@server/generated/prisma/enums'
 
 export type EditorTab = 'billing' | 'charges' | 'mixedCosts' | 'mileage'
 
 export interface EditorTarget {
-  tab: EditorTab
   source: BillingKind
+  tab: EditorTab
 }
 
 interface ForecastEditorModalProps {
-  period: Period
   /** Le mois a un réel : la saisie « Réel » de la facturation est possible. */
   hasActual: boolean
-  /** Règles de l'année (salaire, taux) : rappelées dans l'onglet Charges. */
-  settings: ProfessionalYearSettingsValues
   initial: EditorTarget
   onClose: () => void
+  period: Period
+  /** Règles de l'année (salaire, taux) : rappelées dans l'onglet Charges. */
+  settings: ProfessionalYearSettingsValues
 }
 
 /**
@@ -48,20 +48,20 @@ export function ForecastEditorModal({
 
   return (
     <Modal
-      opened
+      closeButtonProps={{ 'aria-label': text.close }}
       onClose={onClose}
+      opened
       size="xl"
       title={
         source === 'ACTUAL' && tab === 'billing'
           ? text.actualTitle(periodLabel)
           : text.forecastTitle(periodLabel)
       }
-      closeButtonProps={{ 'aria-label': text.close }}
     >
       <Tabs
-        value={tab}
-        onChange={(value) => value && setTab(value as EditorTab)}
         keepMounted={false}
+        onChange={(value) => value && setTab(value as EditorTab)}
+        value={tab}
       >
         <Tabs.List aria-label={text.tabsAria} mb={16}>
           <Tabs.Tab value="billing">{text.tabs.billing}</Tabs.Tab>
@@ -72,10 +72,7 @@ export function ForecastEditorModal({
         <Tabs.Panel value="billing">
           <Stack gap={16}>
             <SegmentedControl
-              w="fit-content"
               aria-label={text.sourceAria}
-              value={source}
-              onChange={(value) => setSource(value as BillingKind)}
               data={[
                 { value: 'FORECAST', label: text.source.FORECAST },
                 {
@@ -84,6 +81,9 @@ export function ForecastEditorModal({
                   disabled: !hasActual,
                 },
               ]}
+              onChange={(value) => setSource(value as BillingKind)}
+              value={source}
+              w="fit-content"
             />
             <BillingTab period={period} source={source} />
           </Stack>

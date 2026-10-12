@@ -1,9 +1,9 @@
 import { Group, Paper, Stack, Text, Title } from '@mantine/core'
+import type { ProfessionalMonth } from '@server/lib/professional/types'
 
 import { TargetGauge } from '@/components/target-gauge'
 import { formatCents } from '@/lib/format'
 import { fr } from '@/lib/i18n/fr'
-import type { ProfessionalMonth } from '@server/lib/professional/types'
 
 /** « Frais mixtes · année » : par frais, prévu de l'année, payé en perso, dû, remboursé, reste. */
 export function YearMixedCosts({
@@ -39,47 +39,47 @@ export function YearMixedCosts({
 
   return (
     <Paper
-      withBorder
-      radius="lg"
-      p={24}
-      component="section"
       aria-label={text.title}
+      component="section"
+      p={24}
+      radius="lg"
+      withBorder
     >
       <Title order={2}>{text.title}</Title>
-      <Text size="sm" c="dimmed" mb={16}>
+      <Text c="dimmed" mb={16} size="sm">
         {text.description}
       </Text>
       <Stack gap={14}>
         {lines.map((line) => (
           <div key={line.category}>
             <Group justify="space-between">
-              <Text size="sm" fw={600}>
+              <Text fw={600} size="sm">
                 {fr.categories[line.category]}
               </Text>
-              <Text size="xs" c="dimmed">
+              <Text c="dimmed" size="xs">
                 {text.yearForecast(formatCents(line.yearForecast))}
               </Text>
             </Group>
             <Group justify="space-between">
-              <Text size="xs" c="dimmed">
+              <Text c="dimmed" size="xs">
                 {text.spent(formatCents(line.spent))}
               </Text>
-              <Text size="xs" c="dimmed">
+              <Text c="dimmed" size="xs">
                 {text.due(formatCents(line.due))}
               </Text>
             </Group>
-            <Text size="sm" mb={4} c={line.left > 0 ? 'red.4' : 'teal.4'}>
+            <Text c={line.left > 0 ? 'red.4' : 'teal.4'} mb={4} size="sm">
               {text.paid(formatCents(line.paid), formatCents(line.left))}
             </Text>
             <TargetGauge
-              real={line.paid}
-              target={line.due}
-              goal="atLeast"
               ariaLabel={fr.professional.mixedCosts.gaugeAria(
                 fr.categories[line.category],
                 formatCents(line.paid),
                 formatCents(line.due),
               )}
+              goal="atLeast"
+              real={line.paid}
+              target={line.due}
             />
           </div>
         ))}
@@ -90,10 +90,10 @@ export function YearMixedCosts({
         pt={12}
         style={{ borderTop: '1px solid var(--app-border)' }}
       >
-        <Text size="sm" c="dimmed">
+        <Text c="dimmed" size="sm">
           {text.left}
         </Text>
-        <Text fw={700} c={left > 0 ? 'red.4' : 'teal.4'}>
+        <Text c={left > 0 ? 'red.4' : 'teal.4'} fw={700}>
           {formatCents(left)}
         </Text>
       </Group>
