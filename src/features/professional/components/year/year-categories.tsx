@@ -10,6 +10,8 @@ import { fr } from "@/lib/i18n/fr";
 import type { ForecastActual, ProfessionalMonth } from "@server/lib/professional/types";
 import type { TransactionCategory } from "@server/generated/prisma/enums";
 
+const EMPTY_AMOUNT: ForecastActual = { forecast: 0, actual: null };
+
 /**
  * Cumul d'un poste sur l'année : prévu et réel sur les mois avec réel (comparables), + le prévu
  * de toute l'année en sous-titre.
@@ -58,7 +60,7 @@ export function YearCategories({ months }: { months: readonly ProfessionalMonth[
             chargeRow.category,
             fr.categories[chargeRow.category],
             months,
-            (month) => month.charges.rows[index].amount,
+            (month) => month.charges.rows[index]?.amount ?? EMPTY_AMOUNT,
           ),
         ),
         row("mixed", labels.mixedCosts, months, (month) => month.charges.mixedCosts),
@@ -82,7 +84,7 @@ export function YearCategories({ months }: { months: readonly ProfessionalMonth[
             split.category,
             labels.splitOf(fr.categories[split.category as TransactionCategory]),
             months,
-            (month) => month.remuneration.employerContributionSplit[index].amount,
+            (month) => month.remuneration.employerContributionSplit[index]?.amount ?? EMPTY_AMOUNT,
             "detail",
           ),
         ),

@@ -15,7 +15,11 @@ export function YearMixedCosts({ months }: { months: readonly ProfessionalMonth[
     const sum = (
       list: readonly ProfessionalMonth[],
       pick: (row: ProfessionalMonth["mixedCosts"]["rows"][number]) => number,
-    ) => list.reduce((total, month) => total + pick(month.mixedCosts.rows[index]), 0);
+    ) =>
+      list.reduce((total, month) => {
+        const row = month.mixedCosts.rows[index];
+        return row ? total + pick(row) : total;
+      }, 0);
     const due = sum(actualMonths, (row) => row.due.actual ?? 0);
     const paid = sum(actualMonths, (row) => row.paidCents ?? 0);
     return {

@@ -70,7 +70,7 @@ function BracketsFields({ year, initial }: { year: number; initial: Row[] }) {
 
   const valid =
     draft[0]?.fromEuros === 0 &&
-    draft.every((row, i) => i === 0 || row.fromEuros > draft[i - 1].fromEuros);
+    draft.every((row, i) => i === 0 || row.fromEuros > (draft[i - 1]?.fromEuros ?? 0));
   const changed = JSON.stringify(draft) !== JSON.stringify(initial);
 
   function update(index: number, patch: Partial<Row>) {

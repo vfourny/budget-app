@@ -88,12 +88,13 @@ export const categorizeRouter = createTRPCRouter({
       >();
       let lowConfidenceCount = 0;
       results.forEach((result, index) => {
-        if (!result) return;
+        const transaction = transactions[index];
+        if (!result || !transaction) return;
         const confidence = Math.round(result.confidence * 100) / 100;
         if (confidence < LOW_CONFIDENCE_THRESHOLD) lowConfidenceCount++;
         const key = `${result.category}:${confidence}`;
         const group = groups.get(key) ?? { category: result.category, confidence, ids: [] };
-        group.ids.push(transactions[index].id);
+        group.ids.push(transaction.id);
         groups.set(key, group);
       });
 

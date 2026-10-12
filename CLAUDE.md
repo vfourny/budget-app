@@ -37,7 +37,7 @@ Choix délibéré : **le plus simple possible**. SPA React (pas de SSR, pas de S
 | Auth        | Better Auth (email + mot de passe, mono-utilisateur, sessions en base)               |
 | IA          | API Gemini (Google AI Studio) pour catégoriser les lignes de relevé                  |
 | Hébergement | Vercel (Hobby, détection Nitro automatique) + Neon (Free)                            |
-| Qualité     | oxlint (règles React hooks incluses), Prettier, `tsc`                                |
+| Qualité     | oxlint (règles React hooks incluses), Prettier, `tsc` (`@vfourny/node-toolkit`)      |
 
 ## Commandes
 
@@ -231,6 +231,8 @@ Hors scope : synchro bancaire auto, multi-utilisateurs, émission de factures.
 - **React Router** (mode library, pas de framework mode) pour le routing client : le plus
   répandu, équivalent direct de Vue Router.
 - Prisma 7 stable (la 8 est en RC).
+- **Configs partagées** : `tsconfig.json` étend `@vfourny/node-toolkit/tsconfig/react` (strict + `noUncheckedIndexedAccess`,
+  `noEmit`, tout le projet inclus) ; seules les options propres au projet (cible, `types`, alias, `exclude`) restent en local.
 - pnpm, une seule app (pas de monorepo).
 - TypeScript 6.0 (comme le template Vite), oxlint plutôt qu'ESLint (template Vite, plus rapide,
   règles `rules-of-hooks` / `exhaustive-deps` incluses).
