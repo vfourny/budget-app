@@ -1,17 +1,17 @@
-import { Alert, Button, Group, Paper, Stack, Text, Title } from "@mantine/core";
-import { useState } from "react";
+import { Alert, Button, Group, Paper, Stack, Text, Title } from '@mantine/core'
+import { useState } from 'react'
 
-import { EuroField } from "@/components/euro-field";
-import { useSetManagementInvoice } from "@/features/apartments/hooks/use-apartments-dashboard";
-import { errorMessage } from "@/lib/errors";
-import { fr } from "@/lib/i18n/fr";
+import { EuroField } from '@/components/euro-field'
+import { useSetManagementInvoice } from '@/features/apartments/hooks/use-apartments-dashboard'
+import { errorMessage } from '@/lib/errors'
+import { fr } from '@/lib/i18n/fr'
 
 interface ManagementInvoiceFormProps {
-  apartmentId: string;
-  year: number;
-  month: number;
+  apartmentId: string
+  year: number
+  month: number
   /** Facture déjà saisie pour ce mois, `null` sinon. */
-  invoice: { feesCents: number; extraFeesCents: number } | null;
+  invoice: { feesCents: number; extraFeesCents: number } | null
 }
 
 /**
@@ -25,12 +25,14 @@ export function ManagementInvoiceForm({
   month,
   invoice,
 }: ManagementInvoiceFormProps) {
-  const text = fr.apartments.invoice;
-  const [fees, setFees] = useState(invoice?.feesCents ?? 0);
-  const [extraFees, setExtraFees] = useState(invoice?.extraFeesCents ?? 0);
-  const save = useSetManagementInvoice();
+  const text = fr.apartments.invoice
+  const [fees, setFees] = useState(invoice?.feesCents ?? 0)
+  const [extraFees, setExtraFees] = useState(invoice?.extraFeesCents ?? 0)
+  const save = useSetManagementInvoice()
   const changed =
-    invoice === null || fees !== invoice.feesCents || extraFees !== invoice.extraFeesCents;
+    invoice === null ||
+    fees !== invoice.feesCents ||
+    extraFees !== invoice.extraFeesCents
 
   return (
     <Paper withBorder radius="md" p={16}>
@@ -50,12 +52,22 @@ export function ManagementInvoiceForm({
         </div>
         <Group align="flex-end" gap={16}>
           <EuroField label={text.fees} cents={fees} onChange={setFees} />
-          <EuroField label={text.extraFees} cents={extraFees} onChange={setExtraFees} />
+          <EuroField
+            label={text.extraFees}
+            cents={extraFees}
+            onChange={setExtraFees}
+          />
           <Button
             disabled={!changed}
             loading={save.isPending}
             onClick={() =>
-              save.mutate({ apartmentId, year, month, feesCents: fees, extraFeesCents: extraFees })
+              save.mutate({
+                apartmentId,
+                year,
+                month,
+                feesCents: fees,
+                extraFeesCents: extraFees,
+              })
             }
           >
             {fr.common.save}
@@ -68,5 +80,5 @@ export function ManagementInvoiceForm({
         )}
       </Stack>
     </Paper>
-  );
+  )
 }

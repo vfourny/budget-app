@@ -1,61 +1,76 @@
-import { ActionIcon, Alert, Button, Grid, Group, Loader, Stack, Tooltip } from "@mantine/core";
-import { IconCalendarEvent, IconEdit, IconListDetails, IconUpload } from "@tabler/icons-react";
-import { useState } from "react";
-import { Link } from "react-router";
+import {
+  ActionIcon,
+  Alert,
+  Button,
+  Grid,
+  Group,
+  Loader,
+  Stack,
+  Tooltip,
+} from '@mantine/core'
+import {
+  IconCalendarEvent,
+  IconEdit,
+  IconListDetails,
+  IconUpload,
+} from '@tabler/icons-react'
+import { useState } from 'react'
+import { Link } from 'react-router'
 
-import { PageHeader, PageTitleAccent } from "@/components/page-header";
-import { PeriodPicker } from "@/components/period-picker";
-import { TransactionsTable } from "@/components/transactions-table";
+import { PageHeader, PageTitleAccent } from '@/components/page-header'
+import { PeriodPicker } from '@/components/period-picker'
+import { TransactionsTable } from '@/components/transactions-table'
 import {
   ForecastEditorModal,
   type EditorTarget,
-} from "@/features/professional/components/forecast-editor/forecast-editor-modal";
-import { BillingCard } from "@/features/professional/components/month/billing-card";
-import { CategoryForecastCard } from "@/features/professional/components/month/category-forecast-card";
-import { MileageCard } from "@/features/professional/components/month/mileage-card";
-import { MixedCostsCard } from "@/features/professional/components/month/mixed-costs-card";
-import { ProfitCard } from "@/features/professional/components/month/profit-card";
-import { RevenueKpiCard } from "@/features/professional/components/month/revenue-kpi-card";
-import { VatCard } from "@/features/professional/components/month/vat-card";
-import { IncomeStatement } from "@/features/professional/components/year/income-statement";
-import { YearCategories } from "@/features/professional/components/year/year-categories";
-import { YearMileage } from "@/features/professional/components/year/year-mileage";
-import { YearMixedCosts } from "@/features/professional/components/year/year-mixed-costs";
-import { RevenueChart } from "@/features/professional/components/year/revenue-chart";
-import { YearKpis } from "@/features/professional/components/year/year-kpis";
+} from '@/features/professional/components/forecast-editor/forecast-editor-modal'
+import { BillingCard } from '@/features/professional/components/month/billing-card'
+import { CategoryForecastCard } from '@/features/professional/components/month/category-forecast-card'
+import { MileageCard } from '@/features/professional/components/month/mileage-card'
+import { MixedCostsCard } from '@/features/professional/components/month/mixed-costs-card'
+import { ProfitCard } from '@/features/professional/components/month/profit-card'
+import { RevenueKpiCard } from '@/features/professional/components/month/revenue-kpi-card'
+import { VatCard } from '@/features/professional/components/month/vat-card'
+import { IncomeStatement } from '@/features/professional/components/year/income-statement'
+import { YearCategories } from '@/features/professional/components/year/year-categories'
+import { YearMileage } from '@/features/professional/components/year/year-mileage'
+import { YearMixedCosts } from '@/features/professional/components/year/year-mixed-costs'
+import { RevenueChart } from '@/features/professional/components/year/revenue-chart'
+import { YearKpis } from '@/features/professional/components/year/year-kpis'
 import {
   useProfessionalMonth,
   useProfessionalPeriods,
   useProfessionalYear,
-} from "@/features/professional/hooks/use-professional";
-import { usePeriodSelection, type Period } from "@/hooks/use-period-selection";
-import { capitalizedMonthName } from "@/lib/format";
-import { fr } from "@/lib/i18n/fr";
+} from '@/features/professional/hooks/use-professional'
+import { usePeriodSelection, type Period } from '@/hooks/use-period-selection'
+import { capitalizedMonthName } from '@/lib/format'
+import { fr } from '@/lib/i18n/fr'
 
 /** Lien vers l'import, type de compte « Pro » déjà choisi. */
-const IMPORT_PROFESSIONAL_URL = "/imports/new?accountType=PROFESSIONAL";
+const IMPORT_PROFESSIONAL_URL = '/imports/new?accountType=PROFESSIONAL'
 
 export function ProfessionalDashboard() {
-  const periods = useProfessionalPeriods();
+  const periods = useProfessionalPeriods()
   // Par défaut : le mois en cours (le sélecteur propose aussi les mois à venir, en prévisionnel).
-  const today = new Date();
+  const today = new Date()
   const { view, setView, selected, select } = usePeriodSelection({
     year: today.getFullYear(),
     month: today.getMonth() + 1,
-  });
+  })
 
-  if (periods.isPending) return <Loader color="gold" />;
-  if (periods.isError || !selected) return <Alert color="red" title={fr.professional.loadFailed} />;
+  if (periods.isPending) return <Loader color="gold" />
+  if (periods.isError || !selected)
+    return <Alert color="red" title={fr.professional.loadFailed} />
 
   return (
     <>
       <PageHeader
         eyebrow={fr.professional.eyebrow(
-          view === "month" ? fr.period.eyebrowMonth : fr.period.eyebrowYear,
+          view === 'month' ? fr.period.eyebrowMonth : fr.period.eyebrowYear,
         )}
         title={
           <>
-            {view === "month" && `${capitalizedMonthName(selected.month)} `}
+            {view === 'month' && `${capitalizedMonthName(selected.month)} `}
             <PageTitleAccent>{selected.year}</PageTitleAccent>
           </>
         }
@@ -82,20 +97,25 @@ export function ProfessionalDashboard() {
           </Group>
         }
       />
-      {view === "month" ? <MonthContent period={selected} /> : <YearContent year={selected.year} />}
+      {view === 'month' ? (
+        <MonthContent period={selected} />
+      ) : (
+        <YearContent year={selected.year} />
+      )}
     </>
-  );
+  )
 }
 
 function MonthContent({ period }: { period: Period }) {
-  const month = useProfessionalMonth(period.year, period.month);
+  const month = useProfessionalMonth(period.year, period.month)
   // Modale du prévisionnel : `null` = fermée, sinon l'onglet et la source à ouvrir.
-  const [editor, setEditor] = useState<EditorTarget | null>(null);
+  const [editor, setEditor] = useState<EditorTarget | null>(null)
 
-  if (month.isPending) return <Loader color="gold" />;
-  if (month.isError) return <Alert color="red" title={fr.professional.loadPeriodFailed} />;
+  if (month.isPending) return <Loader color="gold" />
+  if (month.isError)
+    return <Alert color="red" title={fr.professional.loadPeriodFailed} />
 
-  const data = month.data;
+  const data = month.data
   return (
     <>
       {!data.hasActual && (
@@ -108,7 +128,7 @@ function MonthContent({ period }: { period: Period }) {
           variant="default"
           size="compact-sm"
           leftSection={<IconEdit size={14} />}
-          onClick={() => setEditor({ tab: "billing", source: "FORECAST" })}
+          onClick={() => setEditor({ tab: 'billing', source: 'FORECAST' })}
         >
           {fr.professional.editor.open}
         </Button>
@@ -140,7 +160,9 @@ function MonthContent({ period }: { period: Period }) {
                 <Button
                   variant="light"
                   size="compact-sm"
-                  onClick={() => setEditor({ tab: "billing", source: "ACTUAL" })}
+                  onClick={() =>
+                    setEditor({ tab: 'billing', source: 'ACTUAL' })
+                  }
                 >
                   {fr.professional.editor.enterActual}
                 </Button>
@@ -160,7 +182,9 @@ function MonthContent({ period }: { period: Period }) {
       </Grid>
       <TransactionsTable
         transactions={data.transactions}
-        emptyText={data.hasActual ? undefined : fr.professional.futureTransactions}
+        emptyText={
+          data.hasActual ? undefined : fr.professional.futureTransactions
+        }
       />
       {editor && (
         <ForecastEditorModal
@@ -172,14 +196,15 @@ function MonthContent({ period }: { period: Period }) {
         />
       )}
     </>
-  );
+  )
 }
 
 function YearContent({ year }: { year: number }) {
-  const months = useProfessionalYear(year);
+  const months = useProfessionalYear(year)
 
-  if (months.isPending) return <Loader color="gold" />;
-  if (months.isError) return <Alert color="red" title={fr.professional.loadPeriodFailed} />;
+  if (months.isPending) return <Loader color="gold" />
+  if (months.isError)
+    return <Alert color="red" title={fr.professional.loadPeriodFailed} />
 
   return (
     <>
@@ -198,5 +223,5 @@ function YearContent({ year }: { year: number }) {
         </Grid.Col>
       </Grid>
     </>
-  );
+  )
 }

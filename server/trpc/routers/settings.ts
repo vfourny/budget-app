@@ -1,20 +1,27 @@
-import { z } from "zod";
+import { z } from 'zod'
 
-import { CompanyRegime, type Envelope } from "@server/generated/prisma/enums";
-import { BUDGET_ENVELOPES } from "@server/lib/settings/envelope-shares";
-import { resolveProfessionalYearSettings } from "@server/lib/settings/professional-year-settings";
-import { DEFAULT_ENVELOPE_PERCENTS } from "@shared/personal-rules";
-import { createTRPCRouter, protectedProcedure } from "@server/trpc/init";
+import { CompanyRegime, type Envelope } from '@server/generated/prisma/enums'
+import { BUDGET_ENVELOPES } from '@server/lib/settings/envelope-shares'
+import { resolveProfessionalYearSettings } from '@server/lib/settings/professional-year-settings'
+import { DEFAULT_ENVELOPE_PERCENTS } from '@shared/personal-rules'
+import { createTRPCRouter, protectedProcedure } from '@server/trpc/init'
 
 const envelopeSharesSchema = z
   .object(
     Object.fromEntries(
-      BUDGET_ENVELOPES.map((envelope) => [envelope, z.number().int().min(0).max(100)]),
+      BUDGET_ENVELOPES.map((envelope) => [
+        envelope,
+        z.number().int().min(0).max(100),
+      ]),
     ) as Record<Envelope, z.ZodNumber>,
   )
-  .refine((shares) => Object.values(shares).reduce((sum, percent) => sum + percent, 0) === 100, {
-    message: "Envelope shares must sum to exactly 100.",
-  });
+  .refine(
+    (shares) =>
+      Object.values(shares).reduce((sum, percent) => sum + percent, 0) === 100,
+    {
+      message: 'Envelope shares must sum to exactly 100.',
+    },
+  )
 
 const incomeTaxBracketsSchema = z
   .array(
@@ -27,11 +34,16 @@ const incomeTaxBracketsSchema = z
   .refine(
     (brackets) =>
       brackets[0]?.fromCents === 0 &&
-      brackets.every((b, i) => i === 0 || b.fromCents > (brackets[i - 1]?.fromCents ?? 0)),
-    { message: "Brackets must start at 0 and have strictly increasing thresholds." },
-  );
+      brackets.every(
+        (b, i) => i === 0 || b.fromCents > (brackets[i - 1]?.fromCents ?? 0),
+      ),
+    {
+      message:
+        'Brackets must start at 0 and have strictly increasing thresholds.',
+    },
+  )
 
-const basisPoints = z.number().int().min(0).max(100_00);
+const basisPoints = z.number().int().min(0).max(100_00)
 
 /** Règles pro d'une année : entiers uniquement (centimes, points de base, dm², millièmes d'€). */
 const professionalYearSettingsSchema = z
@@ -51,28 +63,30 @@ const professionalYearSettingsSchema = z
     mileageRateMilli: z.number().int().min(0).max(5000),
   })
   .refine((values) => values.officeAreaDm2 <= values.homeAreaDm2, {
-    message: "The office cannot be larger than the home.",
+    message: 'The office cannot be larger than the home.',
   })
   .refine((values) => values.mixedKeyNumerator <= values.mixedKeyDenominator, {
-    message: "The mixed costs key cannot exceed 1.",
-  });
+    message: 'The mixed costs key cannot exceed 1.',
+  })
 
 export const settingsRouter = createTRPCRouter({
   /** Part du revenu recommandée par enveloppe (valeurs par défaut si jamais configurée). */
   envelopeShares: protectedProcedure.query(async ({ ctx }) => {
-    const rows = await ctx.db.envelopeShare.findMany({ where: { userId: ctx.session.user.id } });
-    const shares: Record<Envelope, number> = { ...DEFAULT_ENVELOPE_PERCENTS };
+    const rows = await ctx.db.envelopeShare.findMany({
+      where: { userId: ctx.session.user.id },
+    })
+    const shares: Record<Envelope, number> = { ...DEFAULT_ENVELOPE_PERCENTS }
     for (const row of rows) {
-      if (row.envelope in shares) shares[row.envelope] = row.percent;
+      if (row.envelope in shares) shares[row.envelope] = row.percent
     }
-    return shares;
+    return shares
   }),
 
   /** Enregistre les 5 parts d'un coup (une seule transaction SQL). */
   setEnvelopeShares: protectedProcedure
     .input(envelopeSharesSchema)
     .mutation(async ({ ctx, input }) => {
-      const userId = ctx.session.user.id;
+      const userId = ctx.session.user.id
       await ctx.db.$transaction(
         BUDGET_ENVELOPES.map((envelope) =>
           ctx.db.envelopeShare.upsert({
@@ -81,8 +95,8 @@ export const settingsRouter = createTRPCRouter({
             update: { percent: input[envelope] },
           }),
         ),
-      );
-      return input;
+      )
+      return input
     }),
 
   /** Barème de l'IR d'une année, trié par seuil ; tableau vide si jamais renseigné. */
@@ -91,22 +105,27 @@ export const settingsRouter = createTRPCRouter({
     .query(({ ctx, input }) =>
       ctx.db.incomeTaxBracket.findMany({
         where: { year: input.year },
-        orderBy: { fromCents: "asc" },
+        orderBy: { fromCents: 'asc' },
         select: { fromCents: true, ratePercent: true },
       }),
     ),
 
   /** Remplace le barème d'une année (suppression + création en une seule transaction SQL). */
   setIncomeTaxBrackets: protectedProcedure
-    .input(z.object({ year: z.number().int(), brackets: incomeTaxBracketsSchema }))
+    .input(
+      z.object({ year: z.number().int(), brackets: incomeTaxBracketsSchema }),
+    )
     .mutation(async ({ ctx, input }) => {
       await ctx.db.$transaction([
         ctx.db.incomeTaxBracket.deleteMany({ where: { year: input.year } }),
         ctx.db.incomeTaxBracket.createMany({
-          data: input.brackets.map((bracket) => ({ year: input.year, ...bracket })),
+          data: input.brackets.map((bracket) => ({
+            year: input.year,
+            ...bracket,
+          })),
         }),
-      ]);
-      return input;
+      ])
+      return input
     }),
 
   /**
@@ -123,10 +142,10 @@ export const settingsRouter = createTRPCRouter({
   professionalYearsConfigured: protectedProcedure.query(async ({ ctx }) => {
     const rows = await ctx.db.professionalYearSettings.findMany({
       where: { userId: ctx.session.user.id },
-      orderBy: { year: "asc" },
+      orderBy: { year: 'asc' },
       select: { year: true },
-    });
-    return rows.map((row) => row.year);
+    })
+    return rows.map((row) => row.year)
   }),
 
   /** Enregistre (crée ou remplace) les règles pro d'une année, sans toucher aux autres années. */
@@ -138,12 +157,12 @@ export const settingsRouter = createTRPCRouter({
       }),
     )
     .mutation(async ({ ctx, input }) => {
-      const userId = ctx.session.user.id;
+      const userId = ctx.session.user.id
       await ctx.db.professionalYearSettings.upsert({
         where: { userId_year: { userId, year: input.year } },
         create: { userId, year: input.year, ...input.values },
         update: input.values,
-      });
-      return input;
+      })
+      return input
     }),
-});
+})

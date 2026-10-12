@@ -20,7 +20,12 @@
       }
     ]
   },
-  "ignorePatterns": ["server/generated/**", ".output/**", ".vercel/**", "dist/**"],
+  "ignorePatterns": [
+    "server/generated/**",
+    ".output/**",
+    ".vercel/**",
+    "dist/**"
+  ],
   "overrides": [
     {
       "files": ["prisma/**"],

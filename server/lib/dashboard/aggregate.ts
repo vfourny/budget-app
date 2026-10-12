@@ -4,27 +4,33 @@ import {
   envelopeOf,
   isSavingsEnvelope,
   type RevenueLineKey,
-} from "@shared/personal-rules";
-import type { Transaction } from "@server/generated/prisma/client";
-import type { Envelope, TransactionCategory } from "@server/generated/prisma/enums";
+} from '@shared/personal-rules'
+import type { Transaction } from '@server/generated/prisma/client'
+import type {
+  Envelope,
+  TransactionCategory,
+} from '@server/generated/prisma/enums'
 
-export type AggregatedRow = Pick<Transaction, "category" | "amountCents">;
+export type AggregatedRow = Pick<Transaction, 'category' | 'amountCents'>
 
 export interface PeriodTotals {
   /** Somme des crédits. */
-  revenueCents: number;
+  revenueCents: number
   /** Détail des crédits selon `REVENUE_LINES` (+ `"other"` s'il reste un montant) : somme = `revenueCents`. */
-  revenueLines: { key: RevenueLineKey; cents: number }[];
+  revenueLines: { key: RevenueLineKey; cents: number }[]
   /** Somme des débits hors enveloppes d'épargne (positive). */
-  expenseCents: number;
+  expenseCents: number
   /** Somme des débits des enveloppes d'épargne (positive). */
-  savingsCents: number;
+  savingsCents: number
   /** Débits par enveloppe selon `ENVELOPE_CATEGORIES` (positifs). */
-  byEnvelope: Record<Envelope, number>;
+  byEnvelope: Record<Envelope, number>
   /** Débits par catégorie (épargne comprise), du plus gros au plus petit. */
-  debitsByCategory: { category: TransactionCategory | null; cents: number }[];
+  debitsByCategory: { category: TransactionCategory | null; cents: number }[]
   /** Débits des `FIXED_CHARGES_CATEGORIES` (dans cet ordre, 0 si aucun) : card « Charges fixes ». */
-  fixedCharges: { category: (typeof FIXED_CHARGES_CATEGORIES)[number]; cents: number }[];
+  fixedCharges: {
+    category: (typeof FIXED_CHARGES_CATEGORIES)[number]
+    cents: number
+  }[]
 }
 
 /**
@@ -33,49 +39,58 @@ export interface PeriodTotals {
  * Que des entiers en centimes.
  */
 export function aggregatePeriod(rows: readonly AggregatedRow[]): PeriodTotals {
-  let revenueCents = 0;
-  let expenseCents = 0;
-  let savingsCents = 0;
+  let revenueCents = 0
+  let expenseCents = 0
+  let savingsCents = 0
   const byEnvelope: Record<Envelope, number> = {
     CURRENT_EXPENSES: 0,
     LEISURE: 0,
     TRAINING: 0,
     SAFETY_SAVINGS: 0,
     LONG_TERM_SAVINGS: 0,
-  };
-  const debits = new Map<TransactionCategory | null, number>();
-  const credits = new Map<TransactionCategory | null, number>();
+  }
+  const debits = new Map<TransactionCategory | null, number>()
+  const credits = new Map<TransactionCategory | null, number>()
 
   for (const row of rows) {
     if (row.amountCents > 0) {
-      revenueCents += row.amountCents;
-      credits.set(row.category, (credits.get(row.category) ?? 0) + row.amountCents);
-      continue;
+      revenueCents += row.amountCents
+      credits.set(
+        row.category,
+        (credits.get(row.category) ?? 0) + row.amountCents,
+      )
+      continue
     }
-    const cents = -row.amountCents;
-    const envelope = envelopeOf(row.category);
-    if (envelope) byEnvelope[envelope] += cents;
+    const cents = -row.amountCents
+    const envelope = envelopeOf(row.category)
+    if (envelope) byEnvelope[envelope] += cents
     // Débit d'une catégorie rangée dans aucune enveloppe : compté en dépense, sans jauge.
-    if (envelope && isSavingsEnvelope(envelope)) savingsCents += cents;
-    else expenseCents += cents;
-    debits.set(row.category, (debits.get(row.category) ?? 0) + cents);
+    if (envelope && isSavingsEnvelope(envelope)) savingsCents += cents
+    else expenseCents += cents
+    debits.set(row.category, (debits.get(row.category) ?? 0) + cents)
   }
 
-  const revenueLines: PeriodTotals["revenueLines"] = REVENUE_LINES.map((line) => ({
-    key: line.key,
-    cents: line.categories.reduce((sum, category) => sum + (credits.get(category) ?? 0), 0),
-  }));
-  const otherCents = revenueCents - revenueLines.reduce((sum, line) => sum + line.cents, 0);
-  if (otherCents !== 0) revenueLines.push({ key: "other", cents: otherCents });
+  const revenueLines: PeriodTotals['revenueLines'] = REVENUE_LINES.map(
+    (line) => ({
+      key: line.key,
+      cents: line.categories.reduce(
+        (sum, category) => sum + (credits.get(category) ?? 0),
+        0,
+      ),
+    }),
+  )
+  const otherCents =
+    revenueCents - revenueLines.reduce((sum, line) => sum + line.cents, 0)
+  if (otherCents !== 0) revenueLines.push({ key: 'other', cents: otherCents })
 
   const debitsByCategory = [...debits.entries()]
     .map(([category, cents]) => ({ category, cents }))
-    .sort((a, b) => b.cents - a.cents);
+    .sort((a, b) => b.cents - a.cents)
 
   const fixedCharges = FIXED_CHARGES_CATEGORIES.map((category) => ({
     category,
     cents: debits.get(category) ?? 0,
-  }));
+  }))
 
   return {
     revenueCents,
@@ -85,5 +100,5 @@ export function aggregatePeriod(rows: readonly AggregatedRow[]): PeriodTotals {
     byEnvelope,
     debitsByCategory,
     fixedCharges,
-  };
+  }
 }

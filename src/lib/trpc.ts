@@ -1,24 +1,24 @@
-import { QueryClient } from "@tanstack/react-query";
-import { createTRPCClient, httpBatchLink } from "@trpc/client";
-import type { inferRouterOutputs } from "@trpc/server";
-import { createTRPCOptionsProxy } from "@trpc/tanstack-react-query";
-import superjson from "superjson";
+import { QueryClient } from '@tanstack/react-query'
+import { createTRPCClient, httpBatchLink } from '@trpc/client'
+import type { inferRouterOutputs } from '@trpc/server'
+import { createTRPCOptionsProxy } from '@trpc/tanstack-react-query'
+import superjson from 'superjson'
 
 // `import type` : seul le type du routeur traverse la frontière front/back, aucun code serveur
 // n'est embarqué dans le bundle navigateur.
-import type { AppRouter } from "@server/trpc/root";
+import type { AppRouter } from '@server/trpc/root'
 
 /** Cache TanStack Query de l'app (≈ un store global de requêtes, avec cache et refetch). */
 export const queryClient = new QueryClient({
   defaultOptions: {
     queries: { staleTime: 30_000 },
   },
-});
+})
 
 /** Client « brut » : pour enchaîner plusieurs appels dans une même mutation. */
 export const trpcClient = createTRPCClient<AppRouter>({
-  links: [httpBatchLink({ url: "/api/trpc", transformer: superjson })],
-});
+  links: [httpBatchLink({ url: '/api/trpc', transformer: superjson })],
+})
 
 /**
  * Point d'accès typé à l'API : `trpc.<domaine>.<proc>.queryOptions()` produit la clé de cache
@@ -27,7 +27,10 @@ export const trpcClient = createTRPCClient<AppRouter>({
  * Dans une SPA il n'y a qu'un navigateur donc qu'un client : un simple module singleton suffit,
  * pas besoin de Context React (qui sert quand la valeur dépend de l'endroit dans l'arbre).
  */
-export const trpc = createTRPCOptionsProxy<AppRouter>({ client: trpcClient, queryClient });
+export const trpc = createTRPCOptionsProxy<AppRouter>({
+  client: trpcClient,
+  queryClient,
+})
 
 /** Types des réponses de l'API (`RouterOutputs["professional"]["month"]`), déduits du routeur. */
-export type RouterOutputs = inferRouterOutputs<AppRouter>;
+export type RouterOutputs = inferRouterOutputs<AppRouter>

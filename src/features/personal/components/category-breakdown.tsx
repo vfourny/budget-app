@@ -1,14 +1,14 @@
-import { Group, Paper, Progress, Stack, Text, Title } from "@mantine/core";
+import { Group, Paper, Progress, Stack, Text, Title } from '@mantine/core'
 
-import { CATEGORY_CARD_CATEGORIES } from "@shared/personal-rules";
-import { formatCents } from "@/lib/format";
-import { fr } from "@/lib/i18n/fr";
-import type { TransactionCategory } from "@server/generated/prisma/enums";
+import { CATEGORY_CARD_CATEGORIES } from '@shared/personal-rules'
+import { formatCents } from '@/lib/format'
+import { fr } from '@/lib/i18n/fr'
+import type { TransactionCategory } from '@server/generated/prisma/enums'
 
 interface CategoryBreakdownProps {
   overview: {
-    debitsByCategory: { category: TransactionCategory | null; cents: number }[];
-  };
+    debitsByCategory: { category: TransactionCategory | null; cents: number }[]
+  }
 }
 
 /**
@@ -19,10 +19,12 @@ interface CategoryBreakdownProps {
 export function CategoryBreakdown({ overview }: CategoryBreakdownProps) {
   const rows = CATEGORY_CARD_CATEGORIES.map((category) => ({
     category,
-    cents: overview.debitsByCategory.find((debit) => debit.category === category)?.cents ?? 0,
-  })).sort((a, b) => b.cents - a.cents);
-  const max = rows[0]?.cents ?? 0;
-  const total = rows.reduce((sum, row) => sum + row.cents, 0);
+    cents:
+      overview.debitsByCategory.find((debit) => debit.category === category)
+        ?.cents ?? 0,
+  })).sort((a, b) => b.cents - a.cents)
+  const max = rows[0]?.cents ?? 0
+  const total = rows.reduce((sum, row) => sum + row.cents, 0)
 
   return (
     <Paper withBorder radius="lg" p={28}>
@@ -41,10 +43,14 @@ export function CategoryBreakdown({ overview }: CategoryBreakdownProps) {
                 </Text>
               </Text>
             </Group>
-            <Progress value={max > 0 ? (cents / max) * 100 : 0} color="gold" size="sm" />
+            <Progress
+              value={max > 0 ? (cents / max) * 100 : 0}
+              color="gold"
+              size="sm"
+            />
           </div>
         ))}
       </Stack>
     </Paper>
-  );
+  )
 }

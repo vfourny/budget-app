@@ -8,48 +8,48 @@ import {
   Stack,
   Table,
   Text,
-} from "@mantine/core";
-import { useState, type ReactNode } from "react";
+} from '@mantine/core'
+import { useState, type ReactNode } from 'react'
 
 import {
   useCopyForecastsToFollowingMonths,
   useForecasts,
   useSetForecasts,
-} from "@/features/professional/hooks/use-forecast-editor";
-import type { Period } from "@/hooks/use-period-selection";
-import { errorMessage } from "@/lib/errors";
-import { formatCents } from "@/lib/format";
-import { fr } from "@/lib/i18n/fr";
-import type { TransactionCategory } from "@server/generated/prisma/enums";
-import type { ForecastGroup } from "@shared/professional-rules";
+} from '@/features/professional/hooks/use-forecast-editor'
+import type { Period } from '@/hooks/use-period-selection'
+import { errorMessage } from '@/lib/errors'
+import { formatCents } from '@/lib/format'
+import { fr } from '@/lib/i18n/fr'
+import type { TransactionCategory } from '@server/generated/prisma/enums'
+import type { ForecastGroup } from '@shared/professional-rules'
 
 /** Saisie par catégorie : `null` = pas de saisie (valeur par défaut N-1). En centimes. */
-type Overrides = Partial<Record<TransactionCategory, number | null>>;
+type Overrides = Partial<Record<TransactionCategory, number | null>>
 
 interface AmountsView {
   /** Montant affiché d'une catégorie : saisie, sinon défaut. */
-  valueOf: (category: TransactionCategory) => number;
+  valueOf: (category: TransactionCategory) => number
 }
 
 interface ForecastAmountsFormProps {
-  period: Period;
-  group: ForecastGroup;
+  period: Period
+  group: ForecastGroup
   /** Catégories affichées dans le tableau (les autres du groupe peuvent être rendues dans `children`). */
-  rows: readonly TransactionCategory[];
+  rows: readonly TransactionCategory[]
   /** Colonne repère : réel du mois précédent ou même mois N-1. */
-  reference: "previousMonth" | "lastYear";
-  hint: string;
+  reference: 'previousMonth' | 'lastYear'
+  hint: string
   /** En-têtes des deux premières colonnes (défaut : « Charge », « Prévu (€ HT) »). */
-  headers?: { category: string; amount: string };
+  headers?: { category: string; amount: string }
   /** Colonnes en plus (clé de répartition, part Stygma…) : en-têtes et cellules. */
-  extraHeaders?: string[];
-  extraCells?: (category: TransactionCategory, view: AmountsView) => ReactNode[];
+  extraHeaders?: string[]
+  extraCells?: (category: TransactionCategory, view: AmountsView) => ReactNode[]
   /** Contenu sous le tableau (totaux, champ BNC…), avec accès au brouillon. */
   children?: (draft: {
-    view: AmountsView;
-    overrides: Overrides;
-    setAmount: (category: TransactionCategory, cents: number | null) => void;
-  }) => ReactNode;
+    view: AmountsView
+    overrides: Overrides
+    setAmount: (category: TransactionCategory, cents: number | null) => void
+  }) => ReactNode
 }
 
 /**
@@ -57,15 +57,16 @@ interface ForecastAmountsFormProps {
  * et frais mixtes. Chaque ligne montre la saisie ou, à défaut, le réel N-1 (« modifié » si saisi).
  */
 export function ForecastAmountsForm(props: ForecastAmountsFormProps) {
-  const { period, group } = props;
-  const forecasts = useForecasts(period.year, period.month, group);
+  const { period, group } = props
+  const forecasts = useForecasts(period.year, period.month, group)
 
-  if (forecasts.isPending) return <Loader color="gold" />;
-  if (forecasts.isError) return <Alert color="red" title={fr.professional.editor.loadFailed} />;
+  if (forecasts.isPending) return <Loader color="gold" />
+  if (forecasts.isError)
+    return <Alert color="red" title={fr.professional.editor.loadFailed} />
 
   const initial: Overrides = Object.fromEntries(
     forecasts.data.map((value) => [value.category, value.overrideCents]),
-  );
+  )
   return (
     <AmountsFields
       key={`${period.year}-${period.month}-${group}`}
@@ -73,16 +74,16 @@ export function ForecastAmountsForm(props: ForecastAmountsFormProps) {
       initial={initial}
       values={forecasts.data}
     />
-  );
+  )
 }
 
 interface AmountsFieldsProps extends ForecastAmountsFormProps {
-  initial: Overrides;
+  initial: Overrides
   values: readonly {
-    category: TransactionCategory;
-    lastYearCents: number;
-    previousMonthCents: number;
-  }[];
+    category: TransactionCategory
+    lastYearCents: number
+    previousMonthCents: number
+  }[]
 }
 
 function AmountsFields({
@@ -101,22 +102,26 @@ function AmountsFields({
   initial,
   values,
 }: AmountsFieldsProps) {
-  const [overrides, setOverrides] = useState<Overrides>(initial);
-  const save = useSetForecasts();
-  const copy = useCopyForecastsToFollowingMonths();
-  const text = fr.professional.editor;
+  const [overrides, setOverrides] = useState<Overrides>(initial)
+  const save = useSetForecasts()
+  const copy = useCopyForecastsToFollowingMonths()
+  const text = fr.professional.editor
 
-  const byCategory = new Map(values.map((value) => [value.category, value]));
+  const byCategory = new Map(values.map((value) => [value.category, value]))
   const view: AmountsView = {
-    valueOf: (category) => overrides[category] ?? byCategory.get(category)?.lastYearCents ?? 0,
-  };
+    valueOf: (category) =>
+      overrides[category] ?? byCategory.get(category)?.lastYearCents ?? 0,
+  }
   const changed = values.some(
-    (value) => (overrides[value.category] ?? null) !== (initial[value.category] ?? null),
-  );
-  const hasOverride = values.some((value) => (overrides[value.category] ?? null) !== null);
+    (value) =>
+      (overrides[value.category] ?? null) !== (initial[value.category] ?? null),
+  )
+  const hasOverride = values.some(
+    (value) => (overrides[value.category] ?? null) !== null,
+  )
 
   function setAmount(category: TransactionCategory, cents: number | null) {
-    setOverrides((current) => ({ ...current, [category]: cents }));
+    setOverrides((current) => ({ ...current, [category]: cents }))
   }
 
   function saveAll(onSuccess?: () => void) {
@@ -131,7 +136,7 @@ function AmountsFields({
         })),
       },
       { onSuccess },
-    );
+    )
   }
 
   return (
@@ -145,7 +150,9 @@ function AmountsFields({
             <Table.Th>{headers.category}</Table.Th>
             <Table.Th>{headers.amount}</Table.Th>
             <Table.Th ta="right">
-              {reference === "previousMonth" ? text.amounts.previousMonth : text.amounts.lastYear}
+              {reference === 'previousMonth'
+                ? text.amounts.previousMonth
+                : text.amounts.lastYear}
             </Table.Th>
             {extraHeaders.map((header) => (
               <Table.Th key={header} ta="right">
@@ -156,8 +163,8 @@ function AmountsFields({
         </Table.Thead>
         <Table.Tbody>
           {rows.map((category) => {
-            const value = byCategory.get(category);
-            const modified = (overrides[category] ?? null) !== null;
+            const value = byCategory.get(category)
+            const modified = (overrides[category] ?? null) !== null
             return (
               <Table.Tr key={category}>
                 <Table.Td>
@@ -172,20 +179,27 @@ function AmountsFields({
                 </Table.Td>
                 <Table.Td>
                   <NumberInput
-                    aria-label={text.amounts.amountAria(fr.categories[category])}
+                    aria-label={text.amounts.amountAria(
+                      fr.categories[category],
+                    )}
                     w={140}
                     min={0}
                     decimalScale={2}
                     decimalSeparator=","
                     value={view.valueOf(category) / 100}
                     onChange={(input) =>
-                      setAmount(category, Math.round((typeof input === "number" ? input : 0) * 100))
+                      setAmount(
+                        category,
+                        Math.round(
+                          (typeof input === 'number' ? input : 0) * 100,
+                        ),
+                      )
                     }
                   />
                 </Table.Td>
                 <Table.Td ta="right" c="dimmed">
                   {formatCents(
-                    reference === "previousMonth"
+                    reference === 'previousMonth'
                       ? (value?.previousMonthCents ?? 0)
                       : (value?.lastYearCents ?? 0),
                   )}
@@ -196,7 +210,7 @@ function AmountsFields({
                   </Table.Td>
                 ))}
               </Table.Tr>
-            );
+            )
           })}
         </Table.Tbody>
       </Table>
@@ -224,7 +238,9 @@ function AmountsFields({
           variant="subtle"
           disabled={!hasOverride}
           onClick={() =>
-            setOverrides(Object.fromEntries(values.map((value) => [value.category, null])))
+            setOverrides(
+              Object.fromEntries(values.map((value) => [value.category, null])),
+            )
           }
         >
           {text.amounts.resetLastYear}
@@ -234,16 +250,22 @@ function AmountsFields({
             variant="default"
             loading={copy.isPending}
             onClick={() =>
-              saveAll(() => copy.mutate({ year: period.year, month: period.month, group }))
+              saveAll(() =>
+                copy.mutate({ year: period.year, month: period.month, group }),
+              )
             }
           >
             {text.applyNext}
           </Button>
         )}
-        <Button disabled={!changed} loading={save.isPending} onClick={() => saveAll()}>
+        <Button
+          disabled={!changed}
+          loading={save.isPending}
+          onClick={() => saveAll()}
+        >
           {fr.common.save}
         </Button>
       </Group>
     </Stack>
-  );
+  )
 }

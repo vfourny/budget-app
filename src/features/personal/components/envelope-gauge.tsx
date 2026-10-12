@@ -1,20 +1,20 @@
-import { Group, Text } from "@mantine/core";
+import { Group, Text } from '@mantine/core'
 
-import { InfoTip } from "@/components/info-tip";
-import { TargetGauge } from "@/components/target-gauge";
-import { formatCents } from "@/lib/format";
-import { fr } from "@/lib/i18n/fr";
+import { InfoTip } from '@/components/info-tip'
+import { TargetGauge } from '@/components/target-gauge'
+import { formatCents } from '@/lib/format'
+import { fr } from '@/lib/i18n/fr'
 
 interface EnvelopeGaugeProps {
-  name: string;
-  realCents: number;
-  recommendedCents: number;
+  name: string
+  realCents: number
+  recommendedCents: number
   /** Part recommandée du revenu (en %), pour expliquer le trait dans le tooltip. */
-  recommendedPercent: number;
+  recommendedPercent: number
   /** D'où vient le montant réel (liste des catégories comptées). */
-  sourceText: string;
+  sourceText: string
   /** Dépense : « bien » si on reste sous le recommandé. Épargne : « bien » si on l'atteint. */
-  kind: "expense" | "savings";
+  kind: 'expense' | 'savings'
 }
 
 /** Jauge d'une enveloppe : nom + info-bulle, réel / recommandé, barre réel vs recommandé. */
@@ -41,7 +41,7 @@ export function EnvelopeGauge({
         <Text size="sm" fw={600}>
           {formatCents(realCents)}
           <Text span size="xs" c="dimmed" fw={400}>
-            {" "}
+            {' '}
             / {formatCents(recommendedCents)}
           </Text>
         </Text>
@@ -49,7 +49,7 @@ export function EnvelopeGauge({
       <TargetGauge
         real={realCents}
         target={recommendedCents}
-        goal={kind === "savings" ? "atLeast" : "atMost"}
+        goal={kind === 'savings' ? 'atLeast' : 'atMost'}
         ariaLabel={fr.personal.gauge.aria(
           name,
           formatCents(realCents),
@@ -57,5 +57,5 @@ export function EnvelopeGauge({
         )}
       />
     </div>
-  );
+  )
 }

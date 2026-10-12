@@ -1,34 +1,39 @@
-import { Paper, Stack, Tabs } from "@mantine/core";
-import { useSearchParams } from "react-router";
+import { Paper, Stack, Tabs } from '@mantine/core'
+import { useSearchParams } from 'react-router'
 
-import { PageHeader } from "@/components/page-header";
-import { EnvelopeSharesForm } from "@/features/settings/components/envelope-shares-form";
-import { ApartmentsSettingsForm } from "@/features/settings/components/apartments-settings-form";
-import { IncomeTaxBracketsForm } from "@/features/settings/components/income-tax-brackets-form";
-import { ProfessionalYearSettingsForm } from "@/features/settings/components/professional-year-settings-form";
-import { fr } from "@/lib/i18n/fr";
+import { PageHeader } from '@/components/page-header'
+import { EnvelopeSharesForm } from '@/features/settings/components/envelope-shares-form'
+import { ApartmentsSettingsForm } from '@/features/settings/components/apartments-settings-form'
+import { IncomeTaxBracketsForm } from '@/features/settings/components/income-tax-brackets-form'
+import { ProfessionalYearSettingsForm } from '@/features/settings/components/professional-year-settings-form'
+import { fr } from '@/lib/i18n/fr'
 
-const TABS = ["personal", "professional", "apt"] as const;
-type SettingsTab = (typeof TABS)[number];
+const TABS = ['personal', 'professional', 'apt'] as const
+type SettingsTab = (typeof TABS)[number]
 
 export function SettingsPage() {
   // Onglet dans l'URL (`/settings?tab=professional`) : lien direct depuis le dashboard Pro, et
   // l'onglet survit au rechargement (≈ `useRoute().query.tab` + `router.replace` en Vue).
-  const [searchParams, setSearchParams] = useSearchParams();
-  const requested = searchParams.get("tab");
-  const tab: SettingsTab = TABS.find((value) => value === requested) ?? "personal";
+  const [searchParams, setSearchParams] = useSearchParams()
+  const requested = searchParams.get('tab')
+  const tab: SettingsTab =
+    TABS.find((value) => value === requested) ?? 'personal'
 
   return (
     <>
       <PageHeader eyebrow={fr.settings.eyebrow} title={fr.settings.title} />
       <Tabs
         value={tab}
-        onChange={(value) => value && setSearchParams({ tab: value }, { replace: true })}
+        onChange={(value) =>
+          value && setSearchParams({ tab: value }, { replace: true })
+        }
         keepMounted={false}
       >
         <Tabs.List mb={16}>
           <Tabs.Tab value="personal">{fr.settings.tabs.personal}</Tabs.Tab>
-          <Tabs.Tab value="professional">{fr.settings.tabs.professional}</Tabs.Tab>
+          <Tabs.Tab value="professional">
+            {fr.settings.tabs.professional}
+          </Tabs.Tab>
           <Tabs.Tab value="apt">{fr.settings.tabs.apartments}</Tabs.Tab>
         </Tabs.List>
         <Tabs.Panel value="personal">
@@ -51,5 +56,5 @@ export function SettingsPage() {
         </Tabs.Panel>
       </Tabs>
     </>
-  );
+  )
 }

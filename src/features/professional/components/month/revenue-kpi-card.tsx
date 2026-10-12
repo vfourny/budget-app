@@ -1,18 +1,18 @@
-import { Group, Paper, SimpleGrid, Stack, Text } from "@mantine/core";
+import { Group, Paper, SimpleGrid, Stack, Text } from '@mantine/core'
 
-import { DeltaBadge } from "@/components/delta-badge";
-import { InfoTip } from "@/components/info-tip";
-import { TargetGauge } from "@/components/target-gauge";
-import { formatCents, formatDays } from "@/lib/format";
-import { fr } from "@/lib/i18n/fr";
-import { COLLECTED_VAT_BP } from "@shared/professional-rules";
-import type { ProfessionalMonth } from "@server/lib/professional/types";
+import { DeltaBadge } from '@/components/delta-badge'
+import { InfoTip } from '@/components/info-tip'
+import { TargetGauge } from '@/components/target-gauge'
+import { formatCents, formatDays } from '@/lib/format'
+import { fr } from '@/lib/i18n/fr'
+import { COLLECTED_VAT_BP } from '@shared/professional-rules'
+import type { ProfessionalMonth } from '@server/lib/professional/types'
 
 interface Stat {
-  label: string;
-  value: string;
-  sub?: string;
-  color?: string;
+  label: string
+  value: string
+  sub?: string
+  color?: string
 }
 
 /**
@@ -20,13 +20,15 @@ interface Stat {
  * facturé / encaissé / reste à encaisser / jours.
  */
 export function RevenueKpiCard({ month }: { month: ProfessionalMonth }) {
-  const { revenue, billing } = month;
-  const text = fr.professional.revenue;
+  const { revenue, billing } = month
+  const text = fr.professional.revenue
   const invoiceCount = billing.clients.filter(
     (client) => (client.actual?.amountCents ?? 0) > 0,
-  ).length;
+  ).length
   // TTC prévu = HT prévu + TVA collectée (même règle que la carte TVA).
-  const forecastTtc = revenue.forecast + Math.round((revenue.forecast * COLLECTED_VAT_BP) / 10_000);
+  const forecastTtc =
+    revenue.forecast +
+    Math.round((revenue.forecast * COLLECTED_VAT_BP) / 10_000)
 
   const stats: Stat[] = month.hasActual
     ? [
@@ -39,22 +41,36 @@ export function RevenueKpiCard({ month }: { month: ProfessionalMonth }) {
           label: text.collected,
           value: formatCents(billing.collectedTtcCents),
           sub: text.collectedSub,
-          color: "teal.4",
+          color: 'teal.4',
         },
         {
           label: text.remaining,
           value: formatCents(billing.receivablesCents ?? 0),
           sub: text.remainingSub,
-          color: (billing.receivablesCents ?? 0) > 0 ? "red.4" : undefined,
+          color: (billing.receivablesCents ?? 0) > 0 ? 'red.4' : undefined,
         },
-        { label: text.days, value: fr.professional.days(formatDays(billing.days)) },
+        {
+          label: text.days,
+          value: fr.professional.days(formatDays(billing.days)),
+        },
       ]
     : [
-        { label: text.toInvoice, value: formatCents(revenue.forecast), sub: text.ht },
-        { label: text.collected, value: "—", sub: text.nothingBeforeEnd },
-        { label: text.toInvoiceTtc, value: formatCents(forecastTtc), sub: text.forecastTtc },
-        { label: text.days, value: fr.professional.days(formatDays(billing.days)) },
-      ];
+        {
+          label: text.toInvoice,
+          value: formatCents(revenue.forecast),
+          sub: text.ht,
+        },
+        { label: text.collected, value: '—', sub: text.nothingBeforeEnd },
+        {
+          label: text.toInvoiceTtc,
+          value: formatCents(forecastTtc),
+          sub: text.forecastTtc,
+        },
+        {
+          label: text.days,
+          value: fr.professional.days(formatDays(billing.days)),
+        },
+      ]
 
   return (
     <Paper withBorder radius="lg" p={24} h="100%">
@@ -63,9 +79,17 @@ export function RevenueKpiCard({ month }: { month: ProfessionalMonth }) {
           <Text size="sm" c="dimmed">
             {text.title}
           </Text>
-          <InfoTip label={text.tip} ariaLabel={fr.professional.howComputed(text.title)} />
+          <InfoTip
+            label={text.tip}
+            ariaLabel={fr.professional.howComputed(text.title)}
+          />
         </Group>
-        <Text fz={30} fw={600} lh={1.1} c={revenue.actual === null ? "dimmed" : "gold.6"}>
+        <Text
+          fz={30}
+          fw={600}
+          lh={1.1}
+          c={revenue.actual === null ? 'dimmed' : 'gold.6'}
+        >
           {formatCents(revenue.actual ?? revenue.forecast)}
         </Text>
         <TargetGauge
@@ -84,7 +108,11 @@ export function RevenueKpiCard({ month }: { month: ProfessionalMonth }) {
               : fr.professional.forecastValue(formatCents(revenue.forecast))}
           </Text>
           {revenue.actual !== null && (
-            <DeltaBadge actual={revenue.actual} forecast={revenue.forecast} goal="atLeast" />
+            <DeltaBadge
+              actual={revenue.actual}
+              forecast={revenue.forecast}
+              goal="atLeast"
+            />
           )}
         </Group>
         <SimpleGrid cols={{ base: 2, sm: 4 }} spacing={16} mt={12}>
@@ -106,5 +134,5 @@ export function RevenueKpiCard({ month }: { month: ProfessionalMonth }) {
         </SimpleGrid>
       </Stack>
     </Paper>
-  );
+  )
 }

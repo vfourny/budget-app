@@ -1,37 +1,38 @@
-import { Table, Text } from "@mantine/core";
-import { Fragment } from "react";
+import { Table, Text } from '@mantine/core'
+import { Fragment } from 'react'
 
-import { formatCents } from "@/lib/format";
-import { fr } from "@/lib/i18n/fr";
-import type { ApartmentLines } from "@server/lib/apartments/types";
-import type { RouterOutputs } from "@/lib/trpc";
+import { formatCents } from '@/lib/format'
+import { fr } from '@/lib/i18n/fr'
+import type { ApartmentLines } from '@server/lib/apartments/types'
+import type { RouterOutputs } from '@/lib/trpc'
 
-type ApartmentView = RouterOutputs["apartmentDashboard"]["month"]["apartments"][number];
-type Column = ApartmentView["forecast"];
+type ApartmentView =
+  RouterOutputs['apartmentDashboard']['month']['apartments'][number]
+type Column = ApartmentView['forecast']
 
 /** `+1` : un montant plus élevé est favorable (loyer, solde) ; `-1` : plus bas est favorable (charge, crédit). */
-type Sign = 1 | -1;
+type Sign = 1 | -1
 
 interface Row {
-  key: string;
-  label: string;
-  sub?: string;
-  forecast: number;
+  key: string
+  label: string
+  sub?: string
+  forecast: number
   /** `null` = pas de réalisé (mois à venir). */
-  actual: number | null;
-  sign: Sign;
-  total?: boolean;
+  actual: number | null
+  sign: Sign
+  total?: boolean
 }
 
 interface Section {
-  key: keyof typeof fr.apartments.table.sections;
-  rows: Row[];
+  key: keyof typeof fr.apartments.table.sections
+  rows: Row[]
 }
 
-const text = fr.apartments.table;
+const text = fr.apartments.table
 
 /** Montant nul = « — » (R2) ; sinon en euros. */
-const money = (cents: number) => (cents === 0 ? "—" : formatCents(cents));
+const money = (cents: number) => (cents === 0 ? '—' : formatCents(cents))
 
 function line(
   key: keyof ApartmentLines,
@@ -48,40 +49,45 @@ function line(
     forecast: forecast.lines[key],
     actual: actual ? actual.lines[key] : null,
     sign,
-  };
+  }
 }
 
 /** Sections du tableau (R2) : solde, loyers, crédit (si prêt), charges fixes, annuelles (si le mois en contient), autres. */
-function sectionsOf(apartment: ApartmentView, view: "month" | "year"): Section[] {
-  const { forecast, actual } = apartment;
-  const rows = text.rows;
-  const managed = apartment.managerName !== null;
-  const hasAnnual = (["propertyTax", "cfe"] as const).some(
+function sectionsOf(
+  apartment: ApartmentView,
+  view: 'month' | 'year',
+): Section[] {
+  const { forecast, actual } = apartment
+  const rows = text.rows
+  const managed = apartment.managerName !== null
+  const hasAnnual = (['propertyTax', 'cfe'] as const).some(
     (key) => forecast.lines[key] !== 0 || (actual?.lines[key] ?? 0) !== 0,
-  );
+  )
 
   const sections: Section[] = [
     {
-      key: "balance",
+      key: 'balance',
       rows: [
         {
-          key: "openingBalance",
-          label: view === "year" ? rows.openingBalanceYear : rows.openingBalance,
+          key: 'openingBalance',
+          label:
+            view === 'year' ? rows.openingBalanceYear : rows.openingBalance,
           forecast: forecast.openingBalanceCents,
           actual: actual ? actual.openingBalanceCents : null,
           sign: 1,
         },
         {
-          key: "differential",
+          key: 'differential',
           label: rows.differential,
           forecast: forecast.differentialCents,
           actual: actual ? actual.differentialCents : null,
           sign: 1,
         },
-        line("ownerContribution", rows.ownerContribution, 1, forecast, actual),
+        line('ownerContribution', rows.ownerContribution, 1, forecast, actual),
         {
-          key: "closingBalance",
-          label: view === "year" ? rows.closingBalanceYear : rows.closingBalance,
+          key: 'closingBalance',
+          label:
+            view === 'year' ? rows.closingBalanceYear : rows.closingBalance,
           forecast: forecast.closingBalanceCents,
           actual: actual ? actual.closingBalanceCents : null,
           sign: 1,
@@ -90,28 +96,41 @@ function sectionsOf(apartment: ApartmentView, view: "month" | "year"): Section[]
       ],
     },
     {
-      key: "rent",
+      key: 'rent',
       rows: [
-        line("grossRent", rows.grossRent, 1, forecast, actual, rows.grossRentSub),
+        line(
+          'grossRent',
+          rows.grossRent,
+          1,
+          forecast,
+          actual,
+          rows.grossRentSub,
+        ),
         ...(managed
           ? [
-              line("managementFees", rows.managementFees, -1, forecast, actual),
-              line("extraManagementFees", rows.extraManagementFees, -1, forecast, actual),
+              line('managementFees', rows.managementFees, -1, forecast, actual),
+              line(
+                'extraManagementFees',
+                rows.extraManagementFees,
+                -1,
+                forecast,
+                actual,
+              ),
             ]
           : []),
       ],
     },
-  ];
+  ]
 
   if (apartment.capital !== null) {
     sections.push({
-      key: "credit",
+      key: 'credit',
       rows: [
-        line("loanCapital", rows.loanCapital, -1, forecast, actual),
-        line("loanInterest", rows.loanInterest, -1, forecast, actual),
-        line("loanInsurance", rows.loanInsurance, -1, forecast, actual),
+        line('loanCapital', rows.loanCapital, -1, forecast, actual),
+        line('loanInterest', rows.loanInterest, -1, forecast, actual),
+        line('loanInsurance', rows.loanInsurance, -1, forecast, actual),
         {
-          key: "loanTotal",
+          key: 'loanTotal',
           label: rows.loanTotal,
           forecast: forecast.loanTotalCents,
           actual: actual ? actual.loanTotalCents : null,
@@ -119,58 +138,58 @@ function sectionsOf(apartment: ApartmentView, view: "month" | "year"): Section[]
           total: true,
         },
         {
-          key: "effort",
+          key: 'effort',
           label: rows.effort,
           forecast: forecast.effortCents,
           actual: actual ? actual.effortCents : null,
           sign: -1,
         },
       ],
-    });
+    })
   }
 
   sections.push({
-    key: "fixed",
+    key: 'fixed',
     rows: [
-      line("electricity", rows.electricity, -1, forecast, actual),
-      line("homeInsurance", rows.homeInsurance, -1, forecast, actual),
-      line("internetBox", rows.internetBox, -1, forecast, actual),
-      line("condoFees", rows.condoFees, -1, forecast, actual),
+      line('electricity', rows.electricity, -1, forecast, actual),
+      line('homeInsurance', rows.homeInsurance, -1, forecast, actual),
+      line('internetBox', rows.internetBox, -1, forecast, actual),
+      line('condoFees', rows.condoFees, -1, forecast, actual),
     ],
-  });
+  })
   if (hasAnnual) {
     sections.push({
-      key: "annual",
+      key: 'annual',
       rows: [
-        line("propertyTax", rows.propertyTax, -1, forecast, actual),
-        line("cfe", rows.cfe, -1, forecast, actual),
+        line('propertyTax', rows.propertyTax, -1, forecast, actual),
+        line('cfe', rows.cfe, -1, forecast, actual),
       ],
-    });
+    })
   }
   sections.push({
-    key: "other",
+    key: 'other',
     rows: [
-      line("bankFees", rows.bankFees, -1, forecast, actual),
-      line("regularization", rows.regularization, -1, forecast, actual),
-      line("other", rows.other, -1, forecast, actual),
+      line('bankFees', rows.bankFees, -1, forecast, actual),
+      line('regularization', rows.regularization, -1, forecast, actual),
+      line('other', rows.other, -1, forecast, actual),
     ],
-  });
+  })
   // Hors résultat : le dépôt de garantie vient des Réglages, il n'a pas d'écart (vue année seulement).
-  if (view === "year") {
+  if (view === 'year') {
     sections.push({
-      key: "offResult",
+      key: 'offResult',
       rows: [
         {
-          key: "deposit",
+          key: 'deposit',
           label: rows.deposit,
           forecast: apartment.depositCents,
           actual: actual ? apartment.depositCents : null,
           sign: 1,
         },
       ],
-    });
+    })
   }
-  return sections;
+  return sections
 }
 
 /**
@@ -181,12 +200,16 @@ export function ApartmentTable({
   apartment,
   view,
 }: {
-  apartment: ApartmentView;
-  view: "month" | "year";
+  apartment: ApartmentView
+  view: 'month' | 'year'
 }) {
   return (
     <Table.ScrollContainer minWidth={560}>
-      <Table verticalSpacing="xs" horizontalSpacing="md" aria-label={text.aria(apartment.name)}>
+      <Table
+        verticalSpacing="xs"
+        horizontalSpacing="md"
+        aria-label={text.aria(apartment.name)}
+      >
         <Table.Thead>
           <Table.Tr>
             <Table.Th>{text.columns.line}</Table.Th>
@@ -199,7 +222,14 @@ export function ApartmentTable({
           {sectionsOf(apartment, view).map((section) => (
             <Fragment key={section.key}>
               <Table.Tr>
-                <Table.Th colSpan={4} scope="colgroup" c="gold.6" fz="xs" tt="uppercase" pt={16}>
+                <Table.Th
+                  colSpan={4}
+                  scope="colgroup"
+                  c="gold.6"
+                  fz="xs"
+                  tt="uppercase"
+                  pt={16}
+                >
                   {text.sections[section.key]}
                 </Table.Th>
               </Table.Tr>
@@ -211,13 +241,14 @@ export function ApartmentTable({
         </Table.Tbody>
       </Table>
     </Table.ScrollContainer>
-  );
+  )
 }
 
 function TableLine({ row }: { row: Row }) {
-  const bold = row.total ? 700 : undefined;
+  const bold = row.total ? 700 : undefined
   // Écart signé : négatif = défavorable (rouge), positif = favorable (vert).
-  const delta = row.actual === null ? null : row.sign * (row.actual - row.forecast);
+  const delta =
+    row.actual === null ? null : row.sign * (row.actual - row.forecast)
 
   return (
     <Table.Tr>
@@ -231,22 +262,33 @@ function TableLine({ row }: { row: Row }) {
           </Text>
         )}
       </Table.Th>
-      <Table.Td ta="right" c="dimmed" fw={bold} style={{ whiteSpace: "nowrap" }}>
+      <Table.Td
+        ta="right"
+        c="dimmed"
+        fw={bold}
+        style={{ whiteSpace: 'nowrap' }}
+      >
         {money(row.forecast)}
       </Table.Td>
-      <Table.Td ta="right" fw={bold ?? 600} style={{ whiteSpace: "nowrap" }}>
-        {row.actual === null ? "—" : money(row.actual)}
+      <Table.Td ta="right" fw={bold ?? 600} style={{ whiteSpace: 'nowrap' }}>
+        {row.actual === null ? '—' : money(row.actual)}
       </Table.Td>
       <Table.Td
         ta="right"
         fw={bold}
-        style={{ whiteSpace: "nowrap" }}
-        c={delta === null || delta === 0 ? "dimmed" : delta > 0 ? "teal.4" : "red.4"}
+        style={{ whiteSpace: 'nowrap' }}
+        c={
+          delta === null || delta === 0
+            ? 'dimmed'
+            : delta > 0
+              ? 'teal.4'
+              : 'red.4'
+        }
       >
         {delta === null || delta === 0
-          ? "—"
-          : `${delta > 0 ? "+ " : "− "}${formatCents(Math.abs(delta))}`}
+          ? '—'
+          : `${delta > 0 ? '+ ' : '− '}${formatCents(Math.abs(delta))}`}
       </Table.Td>
     </Table.Tr>
-  );
+  )
 }

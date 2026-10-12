@@ -1,32 +1,55 @@
-import { Group, Paper, SimpleGrid, Stack, Table, Text, Title } from "@mantine/core";
-import type { ReactNode } from "react";
+import {
+  Group,
+  Paper,
+  SimpleGrid,
+  Stack,
+  Table,
+  Text,
+  Title,
+} from '@mantine/core'
+import type { ReactNode } from 'react'
 
-import { DeltaBadge } from "@/components/delta-badge";
-import { InfoTip } from "@/components/info-tip";
-import { TargetGauge } from "@/components/target-gauge";
-import { formatCents, formatDays } from "@/lib/format";
-import { fr } from "@/lib/i18n/fr";
-import { averageDailyRate } from "@shared/billing-days";
-import type { ClientBilling, ProfessionalMonth } from "@server/lib/professional/types";
+import { DeltaBadge } from '@/components/delta-badge'
+import { InfoTip } from '@/components/info-tip'
+import { TargetGauge } from '@/components/target-gauge'
+import { formatCents, formatDays } from '@/lib/format'
+import { fr } from '@/lib/i18n/fr'
+import { averageDailyRate } from '@shared/billing-days'
+import type {
+  ClientBilling,
+  ProfessionalMonth,
+} from '@server/lib/professional/types'
 
 /** TJM moyen d'une ligne (centimes) : montant / jours. */
 const dailyRate = (line: { days: number; amountCents: number }) =>
-  averageDailyRate(line.amountCents, line.days);
+  averageDailyRate(line.amountCents, line.days)
 
 const calc = (line: { days: number; amountCents: number }) =>
-  [formatDays(line.days), formatCents(dailyRate(line))] as const;
+  [formatDays(line.days), formatCents(dailyRate(line))] as const
 
 /**
  * « Facturation & encaissements » : une ligne par client, jours × TJM réels (saisis) vs prévus,
  * HT et écart ; en bas, facturé TTC, encaissé dans le mois (catégorie « Encaissement client ») et
  * reste à encaisser cumulé (les clients paient 1 à 2 mois plus tard).
  */
-export function BillingCard({ month, action }: { month: ProfessionalMonth; action?: ReactNode }) {
-  const text = fr.professional.billing;
-  const clients = month.billing.clients;
+export function BillingCard({
+  month,
+  action,
+}: {
+  month: ProfessionalMonth
+  action?: ReactNode
+}) {
+  const text = fr.professional.billing
+  const clients = month.billing.clients
 
   return (
-    <Paper withBorder radius="lg" p={24} component="section" aria-label={text.title}>
+    <Paper
+      withBorder
+      radius="lg"
+      p={24}
+      component="section"
+      aria-label={text.title}
+    >
       <Group justify="space-between" mb={16}>
         <Title order={2}>{text.title}</Title>
         {action}
@@ -45,7 +68,9 @@ export function BillingCard({ month, action }: { month: ProfessionalMonth; actio
                     {text.columns.amount}
                     <InfoTip
                       label={text.amountTip}
-                      ariaLabel={fr.professional.howComputed(text.columns.amount)}
+                      ariaLabel={fr.professional.howComputed(
+                        text.columns.amount,
+                      )}
                     />
                   </Group>
                 </Table.Th>
@@ -61,12 +86,12 @@ export function BillingCard({ month, action }: { month: ProfessionalMonth; actio
       )}
       <Collections month={month} />
     </Paper>
-  );
+  )
 }
 
 function ClientRow({ client }: { client: ClientBilling }) {
-  const text = fr.professional.billing;
-  const shown = client.actual ?? client.forecast;
+  const text = fr.professional.billing
+  const shown = client.actual ?? client.forecast
 
   return (
     <Table.Tr>
@@ -93,11 +118,13 @@ function ClientRow({ client }: { client: ClientBilling }) {
       <Table.Td miw={220}>
         <Stack gap={6}>
           <Group gap={8} wrap="nowrap">
-            <Text fw={600} c={client.actual ? undefined : "dimmed"}>
+            <Text fw={600} c={client.actual ? undefined : 'dimmed'}>
               {formatCents(shown.amountCents)}
             </Text>
             <Text size="xs" c="dimmed">
-              {fr.professional.forecastSub(formatCents(client.forecast.amountCents))}
+              {fr.professional.forecastSub(
+                formatCents(client.forecast.amountCents),
+              )}
             </Text>
             {client.actual && (
               <DeltaBadge
@@ -120,14 +147,14 @@ function ClientRow({ client }: { client: ClientBilling }) {
         </Stack>
       </Table.Td>
     </Table.Tr>
-  );
+  )
 }
 
 /** Bas de carte : facturé TTC du mois, encaissé dans le mois, reste à encaisser cumulé. */
 function Collections({ month }: { month: ProfessionalMonth }) {
-  const text = fr.professional.billing.collections;
-  const { billing } = month;
-  const receivables = billing.receivablesCents;
+  const text = fr.professional.billing.collections
+  const { billing } = month
+  const receivables = billing.receivablesCents
 
   return (
     <SimpleGrid
@@ -135,7 +162,7 @@ function Collections({ month }: { month: ProfessionalMonth }) {
       spacing={16}
       mt={16}
       pt={16}
-      style={{ borderTop: "1px solid var(--app-border)" }}
+      style={{ borderTop: '1px solid var(--app-border)' }}
     >
       <div>
         <Text size="xs" c="dimmed">
@@ -147,8 +174,8 @@ function Collections({ month }: { month: ProfessionalMonth }) {
         <Text size="xs" c="dimmed">
           {text.collected}
         </Text>
-        <Text fw={600} c={month.hasActual ? "teal.4" : "dimmed"}>
-          {month.hasActual ? formatCents(billing.collectedTtcCents) : "—"}
+        <Text fw={600} c={month.hasActual ? 'teal.4' : 'dimmed'}>
+          {month.hasActual ? formatCents(billing.collectedTtcCents) : '—'}
         </Text>
       </div>
       <div>
@@ -161,10 +188,10 @@ function Collections({ month }: { month: ProfessionalMonth }) {
             ariaLabel={fr.professional.howComputed(text.receivables)}
           />
         </Group>
-        <Text fw={600} c={receivables ? "red.4" : "dimmed"}>
-          {receivables === null ? "—" : formatCents(receivables)}
+        <Text fw={600} c={receivables ? 'red.4' : 'dimmed'}>
+          {receivables === null ? '—' : formatCents(receivables)}
         </Text>
       </div>
     </SimpleGrid>
-  );
+  )
 }

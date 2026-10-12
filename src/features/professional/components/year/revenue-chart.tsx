@@ -1,11 +1,11 @@
-import { Group, Paper, Text, Title, Tooltip } from "@mantine/core";
+import { Group, Paper, Text, Title, Tooltip } from '@mantine/core'
 
-import { finalOf } from "@/features/professional/final-amount";
-import { formatCents, monthName, shortMonthName } from "@/lib/format";
-import { fr } from "@/lib/i18n/fr";
-import type { ProfessionalMonth } from "@server/lib/professional/types";
+import { finalOf } from '@/features/professional/final-amount'
+import { formatCents, monthName, shortMonthName } from '@/lib/format'
+import { fr } from '@/lib/i18n/fr'
+import type { ProfessionalMonth } from '@server/lib/professional/types'
 
-import classes from "./revenue-chart.module.css";
+import classes from './revenue-chart.module.css'
 
 /**
  * Histogramme du CA HT par mois : barre pleine = réel, contour pointillé = prévisionnel restant,
@@ -15,10 +15,10 @@ export function RevenueChart({
   year,
   months,
 }: {
-  year: number;
-  months: readonly ProfessionalMonth[];
+  year: number
+  months: readonly ProfessionalMonth[]
 }) {
-  const text = fr.professional.year.chart;
+  const text = fr.professional.year.chart
   const max = Math.max(
     ...months.flatMap((month) => [
       finalOf(month.revenue),
@@ -26,17 +26,30 @@ export function RevenueChart({
       finalOf(month.charges.total),
     ]),
     1,
-  );
-  const height = (cents: number) => `${(Math.max(0, cents) / max) * 100}%`;
+  )
+  const height = (cents: number) => `${(Math.max(0, cents) / max) * 100}%`
 
   return (
-    <Paper withBorder radius="lg" p={24} mb={16} component="section" aria-label={text.title}>
+    <Paper
+      withBorder
+      radius="lg"
+      p={24}
+      mb={16}
+      component="section"
+      aria-label={text.title}
+    >
       <Group justify="space-between" mb={20}>
         <Title order={2}>{text.title}</Title>
         <Group gap={16}>
           <Legend className={classes.legendActual} label={text.actual} />
-          <Legend className={classes.legendForecast} label={text.forecastLeft} />
-          <Legend className={classes.legendMarker} label={text.originalForecast} />
+          <Legend
+            className={classes.legendForecast}
+            label={text.forecastLeft}
+          />
+          <Legend
+            className={classes.legendMarker}
+            label={text.originalForecast}
+          />
           <Legend className={classes.legendCharges} label={text.charges} />
         </Group>
       </Group>
@@ -77,7 +90,7 @@ export function RevenueChart({
         ))}
       </div>
     </Paper>
-  );
+  )
 }
 
 function Legend({ className, label }: { className?: string; label: string }) {
@@ -88,5 +101,5 @@ function Legend({ className, label }: { className?: string; label: string }) {
         {label}
       </Text>
     </Group>
-  );
+  )
 }

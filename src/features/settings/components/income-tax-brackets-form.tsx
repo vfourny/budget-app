@@ -8,26 +8,26 @@ import {
   Stack,
   Text,
   Title,
-} from "@mantine/core";
-import { IconPlus, IconTrash } from "@tabler/icons-react";
-import { useState } from "react";
+} from '@mantine/core'
+import { IconPlus, IconTrash } from '@tabler/icons-react'
+import { useState } from 'react'
 
 import {
   useIncomeTaxBrackets,
   useSetIncomeTaxBrackets,
-} from "@/features/settings/hooks/use-income-tax-brackets";
-import { errorMessage } from "@/lib/errors";
-import { fr } from "@/lib/i18n/fr";
+} from '@/features/settings/hooks/use-income-tax-brackets'
+import { errorMessage } from '@/lib/errors'
+import { fr } from '@/lib/i18n/fr'
 
 /** Tranche en cours d'édition : seuil en euros entiers (les seuils du barème sont toujours ronds). */
 interface Row {
-  fromEuros: number;
-  ratePercent: number;
+  fromEuros: number
+  ratePercent: number
 }
 
 export function IncomeTaxBracketsForm() {
-  const [year, setYear] = useState(new Date().getFullYear());
-  const brackets = useIncomeTaxBrackets(year);
+  const [year, setYear] = useState(new Date().getFullYear())
+  const brackets = useIncomeTaxBrackets(year)
 
   return (
     <Stack gap={16}>
@@ -44,10 +44,12 @@ export function IncomeTaxBracketsForm() {
         max={2100}
         allowDecimal={false}
         value={year}
-        onChange={(value) => typeof value === "number" && setYear(value)}
+        onChange={(value) => typeof value === 'number' && setYear(value)}
       />
       {brackets.isPending && <Loader color="gold" />}
-      {brackets.isError && <Alert color="red" title={fr.settings.incomeTax.loadFailed} />}
+      {brackets.isError && (
+        <Alert color="red" title={fr.settings.incomeTax.loadFailed} />
+      )}
       {brackets.isSuccess && (
         // `key` : changer d'année remonte le formulaire, donc `useState` repart des données de l'année.
         <BracketsFields
@@ -60,21 +62,27 @@ export function IncomeTaxBracketsForm() {
         />
       )}
     </Stack>
-  );
+  )
 }
 
 function BracketsFields({ year, initial }: { year: number; initial: Row[] }) {
-  const isEmpty = initial.length === 0;
-  const [draft, setDraft] = useState<Row[]>(isEmpty ? [{ fromEuros: 0, ratePercent: 0 }] : initial);
-  const save = useSetIncomeTaxBrackets();
+  const isEmpty = initial.length === 0
+  const [draft, setDraft] = useState<Row[]>(
+    isEmpty ? [{ fromEuros: 0, ratePercent: 0 }] : initial,
+  )
+  const save = useSetIncomeTaxBrackets()
 
   const valid =
     draft[0]?.fromEuros === 0 &&
-    draft.every((row, i) => i === 0 || row.fromEuros > (draft[i - 1]?.fromEuros ?? 0));
-  const changed = JSON.stringify(draft) !== JSON.stringify(initial);
+    draft.every(
+      (row, i) => i === 0 || row.fromEuros > (draft[i - 1]?.fromEuros ?? 0),
+    )
+  const changed = JSON.stringify(draft) !== JSON.stringify(initial)
 
   function update(index: number, patch: Partial<Row>) {
-    setDraft((rows) => rows.map((row, i) => (i === index ? { ...row, ...patch } : row)));
+    setDraft((rows) =>
+      rows.map((row, i) => (i === index ? { ...row, ...patch } : row)),
+    )
   }
 
   return (
@@ -93,7 +101,9 @@ function BracketsFields({ year, initial }: { year: number; initial: Row[] }) {
             w={160}
             value={row.fromEuros}
             onChange={(value) =>
-              update(index, { fromEuros: typeof value === "number" ? value : 0 })
+              update(index, {
+                fromEuros: typeof value === 'number' ? value : 0,
+              })
             }
           />
           <NumberInput
@@ -106,7 +116,9 @@ function BracketsFields({ year, initial }: { year: number; initial: Row[] }) {
             w={110}
             value={row.ratePercent}
             onChange={(value) =>
-              update(index, { ratePercent: typeof value === "number" ? value : 0 })
+              update(index, {
+                ratePercent: typeof value === 'number' ? value : 0,
+              })
             }
           />
           {index > 0 && (
@@ -114,7 +126,9 @@ function BracketsFields({ year, initial }: { year: number; initial: Row[] }) {
               variant="default"
               size="lg"
               aria-label={fr.settings.incomeTax.removeBracket}
-              onClick={() => setDraft((rows) => rows.filter((_, i) => i !== index))}
+              onClick={() =>
+                setDraft((rows) => rows.filter((_, i) => i !== index))
+              }
             >
               <IconTrash size={16} />
             </ActionIcon>
@@ -143,7 +157,10 @@ function BracketsFields({ year, initial }: { year: number; initial: Row[] }) {
           onClick={() =>
             setDraft((rows) => [
               ...rows,
-              { fromEuros: (rows[rows.length - 1]?.fromEuros ?? 0) + 1, ratePercent: 0 },
+              {
+                fromEuros: (rows[rows.length - 1]?.fromEuros ?? 0) + 1,
+                ratePercent: 0,
+              },
             ])
           }
         >
@@ -166,5 +183,5 @@ function BracketsFields({ year, initial }: { year: number; initial: Row[] }) {
         </Button>
       </Group>
     </Stack>
-  );
+  )
 }

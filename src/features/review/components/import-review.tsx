@@ -10,30 +10,37 @@ import {
   Table,
   Text,
   Tooltip,
-} from "@mantine/core";
-import { IconAlertTriangle, IconArrowLeft, IconCheck } from "@tabler/icons-react";
-import { useState } from "react";
-import { Link, useNavigate } from "react-router";
+} from '@mantine/core'
+import {
+  IconAlertTriangle,
+  IconArrowLeft,
+  IconCheck,
+} from '@tabler/icons-react'
+import { useState } from 'react'
+import { Link, useNavigate } from 'react-router'
 
-import { PageHeader } from "@/components/page-header";
-import { DeleteImportButton } from "@/features/imports/components/delete-import-button";
-import { useApartmentOptions } from "@/features/apartments/hooks/use-apartment-options";
+import { PageHeader } from '@/components/page-header'
+import { DeleteImportButton } from '@/features/imports/components/delete-import-button'
+import { useApartmentOptions } from '@/features/apartments/hooks/use-apartment-options'
 import {
   useImportReview,
   useRunCategorization,
   useSetApartment,
   useSetCategory,
   useValidateImport,
-} from "@/features/review/hooks/use-import-review";
-import { errorMessage } from "@/lib/errors";
-import { formatCents, formatDate } from "@/lib/format";
-import { fr } from "@/lib/i18n/fr";
-import { isCategoryOf } from "@shared/account-categories";
-import type { AccountType, TransactionCategory } from "@server/generated/prisma/enums";
+} from '@/features/review/hooks/use-import-review'
+import { errorMessage } from '@/lib/errors'
+import { formatCents, formatDate } from '@/lib/format'
+import { fr } from '@/lib/i18n/fr'
+import { isCategoryOf } from '@shared/account-categories'
+import type {
+  AccountType,
+  TransactionCategory,
+} from '@server/generated/prisma/enums'
 
-import classes from "./import-review.module.css";
+import classes from './import-review.module.css'
 
-type Filter = "all" | "review";
+type Filter = 'all' | 'review'
 
 // Options du sélecteur par type de compte : un relevé pro ne propose que les catégories pro.
 // Ordre des options = ordre des clés de `fr.categories` (colonnes du Google Sheet).
@@ -44,44 +51,59 @@ const CATEGORY_OPTIONS = Object.fromEntries(
       .filter((category) => isCategoryOf(accountType, category))
       .map((category) => ({ value: category, label: fr.categories[category] })),
   ]),
-) as Record<AccountType, { value: TransactionCategory; label: string }[]>;
+) as Record<AccountType, { value: TransactionCategory; label: string }[]>
 
 export function ImportReview({ importId }: { importId: string }) {
-  const review = useImportReview(importId);
-  const setCategory = useSetCategory(importId);
-  const setApartment = useSetApartment(importId);
-  const apartments = useApartmentOptions();
-  const validateImport = useValidateImport(importId);
-  const runCategorization = useRunCategorization(importId);
-  const navigate = useNavigate();
-  const [filter, setFilter] = useState<Filter>("all");
+  const review = useImportReview(importId)
+  const setCategory = useSetCategory(importId)
+  const setApartment = useSetApartment(importId)
+  const apartments = useApartmentOptions()
+  const validateImport = useValidateImport(importId)
+  const runCategorization = useRunCategorization(importId)
+  const navigate = useNavigate()
+  const [filter, setFilter] = useState<Filter>('all')
 
-  if (review.isPending) return <Loader color="gold" />;
-  if (review.isError) return <Alert color="red" title={fr.review.loadFailed} />;
+  if (review.isPending) return <Loader color="gold" />
+  if (review.isError) return <Alert color="red" title={fr.review.loadFailed} />
 
-  const batch = review.data;
-  const locked = batch.status === "VALIDATED";
+  const batch = review.data
+  const locked = batch.status === 'VALIDATED'
   // Colonne « Appartement » : uniquement pour un relevé du compte appartement (R11).
-  const showApartment = batch.accountType === "APARTMENT";
+  const showApartment = batch.accountType === 'APARTMENT'
   const apartmentOptions = (apartments.data ?? []).map(({ id, name }) => ({
     value: id,
     label: name,
-  }));
+  }))
 
   // Valeurs dérivées calculées pendant le rendu (≈ `computed`).
-  const toReviewCount = batch.transactions.filter((row) => row.needsReview).length;
-  const confidentCount = batch.transactions.length - toReviewCount;
-  const uncategorizedCount = batch.transactions.filter((row) => row.category === null).length;
+  const toReviewCount = batch.transactions.filter(
+    (row) => row.needsReview,
+  ).length
+  const confidentCount = batch.transactions.length - toReviewCount
+  const uncategorizedCount = batch.transactions.filter(
+    (row) => row.category === null,
+  ).length
   const rows =
-    filter === "review" ? batch.transactions.filter((row) => row.needsReview) : batch.transactions;
+    filter === 'review'
+      ? batch.transactions.filter((row) => row.needsReview)
+      : batch.transactions
 
   return (
     <>
-      <Text component={Link} to="/imports" size="sm" c="dimmed" className={classes.back}>
+      <Text
+        component={Link}
+        to="/imports"
+        size="sm"
+        c="dimmed"
+        className={classes.back}
+      >
         <IconArrowLeft size={14} /> {fr.review.back}
       </Text>
       <PageHeader
-        eyebrow={fr.review.eyebrow(formatDate(batch.createdAt), fr.accountTypes[batch.accountType])}
+        eyebrow={fr.review.eyebrow(
+          formatDate(batch.createdAt),
+          fr.accountTypes[batch.accountType],
+        )}
         title={fr.review.title}
         actions={
           <Group gap={12}>
@@ -111,8 +133,14 @@ export function ImportReview({ importId }: { importId: string }) {
             value={filter}
             onChange={(value) => setFilter(value as Filter)}
             data={[
-              { value: "all", label: fr.review.filterAll(batch.transactions.length) },
-              { value: "review", label: fr.review.filterToReview(toReviewCount) },
+              {
+                value: 'all',
+                label: fr.review.filterAll(batch.transactions.length),
+              },
+              {
+                value: 'review',
+                label: fr.review.filterToReview(toReviewCount),
+              },
             ]}
           />
           <Text size="xs" c="dimmed" ff="monospace">
@@ -127,17 +155,26 @@ export function ImportReview({ importId }: { importId: string }) {
               <Table.Th>{fr.common.label}</Table.Th>
               <Table.Th ta="right">{fr.common.amount}</Table.Th>
               <Table.Th>{fr.common.category}</Table.Th>
-              {showApartment && <Table.Th>{fr.review.columns.apartment}</Table.Th>}
+              {showApartment && (
+                <Table.Th>{fr.review.columns.apartment}</Table.Th>
+              )}
               <Table.Th ta="right">{fr.review.columns.confidence}</Table.Th>
             </Table.Tr>
           </Table.Thead>
           <Table.Tbody>
             {rows.map((row) => (
-              <Table.Tr key={row.id} className={row.needsReview ? classes.lowRow : undefined}>
+              <Table.Tr
+                key={row.id}
+                className={row.needsReview ? classes.lowRow : undefined}
+              >
                 <Table.Td c="dimmed">{formatDate(row.date)}</Table.Td>
                 <Table.Td>{row.label}</Table.Td>
-                <Table.Td ta="right" fw={600} c={row.amountCents > 0 ? "blue.3" : undefined}>
-                  {row.amountCents > 0 ? "+" : ""}
+                <Table.Td
+                  ta="right"
+                  fw={600}
+                  c={row.amountCents > 0 ? 'blue.3' : undefined}
+                >
+                  {row.amountCents > 0 ? '+' : ''}
                   {formatCents(row.amountCents)}
                 </Table.Td>
                 <Table.Td>
@@ -152,13 +189,20 @@ export function ImportReview({ importId }: { importId: string }) {
                     disabled={locked}
                     onChange={(value) => {
                       if (value) {
-                        setCategory.mutate({ id: row.id, category: value as TransactionCategory });
+                        setCategory.mutate({
+                          id: row.id,
+                          category: value as TransactionCategory,
+                        })
                       }
                     }}
                     error={row.category === null}
                   />
                   {row.loanMatch && (
-                    <Text size="xs" mt={4} c={row.loanMatch.recognized ? "teal.4" : "amber.4"}>
+                    <Text
+                      size="xs"
+                      mt={4}
+                      c={row.loanMatch.recognized ? 'teal.4' : 'amber.4'}
+                    >
                       {row.loanMatch.recognized
                         ? fr.review.loanMatch.recognized
                         : fr.review.loanMatch.notRecognized(
@@ -179,7 +223,11 @@ export function ImportReview({ importId }: { importId: string }) {
                       allowDeselect={false}
                       disabled={locked}
                       onChange={(value) => {
-                        if (value) setApartment.mutate({ id: row.id, apartmentId: value });
+                        if (value)
+                          setApartment.mutate({
+                            id: row.id,
+                            apartmentId: value,
+                          })
                       }}
                     />
                   </Table.Td>
@@ -199,8 +247,16 @@ export function ImportReview({ importId }: { importId: string }) {
                         variant="light"
                         color="teal"
                         leftSection={<IconCheck size={12} />}
-                        loading={setCategory.isPending && setCategory.variables?.id === row.id}
-                        onClick={() => setCategory.mutate({ id: row.id, category: row.category! })}
+                        loading={
+                          setCategory.isPending &&
+                          setCategory.variables?.id === row.id
+                        }
+                        onClick={() =>
+                          setCategory.mutate({
+                            id: row.id,
+                            category: row.category!,
+                          })
+                        }
                       >
                         {fr.common.confirm}
                       </Button>
@@ -223,7 +279,10 @@ export function ImportReview({ importId }: { importId: string }) {
         )}
 
         <div className={classes.footer}>
-          <Text size="sm" c={toReviewCount > 0 && !locked ? "amber.4" : "dimmed"}>
+          <Text
+            size="sm"
+            c={toReviewCount > 0 && !locked ? 'amber.4' : 'dimmed'}
+          >
             {locked
               ? fr.review.lockedNote
               : toReviewCount > 0
@@ -237,7 +296,9 @@ export function ImportReview({ importId }: { importId: string }) {
                 <Button
                   variant="default"
                   loading={runCategorization.isPending}
-                  onClick={() => runCategorization.mutate({ batchId: importId })}
+                  onClick={() =>
+                    runCategorization.mutate({ batchId: importId })
+                  }
                 >
                   {fr.review.categorizeWithAi}
                 </Button>
@@ -246,7 +307,7 @@ export function ImportReview({ importId }: { importId: string }) {
                 importId={importId}
                 lineCount={batch.transactions.length}
                 variant="button"
-                onDeleted={() => void navigate("/imports")}
+                onDeleted={() => void navigate('/imports')}
               />
               <Tooltip
                 label={fr.review.validateTooltip(toReviewCount)}
@@ -257,11 +318,11 @@ export function ImportReview({ importId }: { importId: string }) {
                   data-disabled={toReviewCount > 0 || undefined}
                   loading={validateImport.isPending}
                   onClick={() => {
-                    if (toReviewCount > 0) return;
+                    if (toReviewCount > 0) return
                     validateImport.mutate(
                       { id: importId },
-                      { onSuccess: () => void navigate("/imports") },
-                    );
+                      { onSuccess: () => void navigate('/imports') },
+                    )
                   }}
                 >
                   {fr.review.validate(batch.transactions.length)}
@@ -272,7 +333,7 @@ export function ImportReview({ importId }: { importId: string }) {
         </div>
       </Paper>
     </>
-  );
+  )
 }
 
 function ConfidenceBadge({
@@ -280,32 +341,40 @@ function ConfidenceBadge({
   confidence,
   needsReview,
 }: {
-  category: string | null;
-  confidence: number | null;
-  needsReview: boolean;
+  category: string | null
+  confidence: number | null
+  needsReview: boolean
 }) {
   if (category === null) {
     return (
-      <Badge color="amber" variant="light" leftSection={<IconAlertTriangle size={12} />}>
+      <Badge
+        color="amber"
+        variant="light"
+        leftSection={<IconAlertTriangle size={12} />}
+      >
         {fr.review.toCategorize}
       </Badge>
-    );
+    )
   }
   if (confidence === null) {
     return (
       <Badge color="teal" variant="light" leftSection={<IconCheck size={12} />}>
         {fr.review.confirmed}
       </Badge>
-    );
+    )
   }
-  const label = `${Math.round(confidence * 100)} %`;
+  const label = `${Math.round(confidence * 100)} %`
   return needsReview ? (
-    <Badge color="amber" variant="light" leftSection={<IconAlertTriangle size={12} />}>
+    <Badge
+      color="amber"
+      variant="light"
+      leftSection={<IconAlertTriangle size={12} />}
+    >
       {label}
     </Badge>
   ) : (
     <Badge color="gray" variant="light">
       {label}
     </Badge>
-  );
+  )
 }

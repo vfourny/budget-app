@@ -1,6 +1,9 @@
-import type { ProfessionalCategory } from "@shared/account-categories";
-import type { CompanyRegime, TransactionCategory } from "@server/generated/prisma/enums";
-import type { ProfessionalYearSettings } from "@server/generated/prisma/browser";
+import type { ProfessionalCategory } from '@shared/account-categories'
+import type {
+  CompanyRegime,
+  TransactionCategory,
+} from '@server/generated/prisma/enums'
+import type { ProfessionalYearSettings } from '@server/generated/prisma/browser'
 
 /*
  * ✏️ RÈGLES DU COMPTE PRO (Stygma) : constantes partagées front + serveur (fichier pur, sans
@@ -8,14 +11,17 @@ import type { ProfessionalYearSettings } from "@server/generated/prisma/browser"
  */
 
 /** Règles d'une année (Réglages › Pro), en entiers : centimes, points de base, dm², millièmes d'€. */
-export type ProfessionalYearSettingsValues = Omit<ProfessionalYearSettings, "userId" | "year">;
+export type ProfessionalYearSettingsValues = Omit<
+  ProfessionalYearSettings,
+  'userId' | 'year'
+>
 
 /**
  * Valeurs utilisées tant qu'aucune année n'est configurée, et par « Valeurs par défaut ».
  * Exemples de la maquette : à valider avec le comptable.
  */
 export const DEFAULT_PROFESSIONAL_YEAR_SETTINGS = {
-  regime: "SAS_IR",
+  regime: 'SAS_IR',
   irOptionFirstYear: 2026,
   grossSalaryCents: 80_000,
   employerContributionBp: 4460,
@@ -28,16 +34,18 @@ export const DEFAULT_PROFESSIONAL_YEAR_SETTINGS = {
   mixedKeyNumerator: 5,
   mixedKeyDenominator: 7,
   mileageRateMilli: 636,
-} as const satisfies ProfessionalYearSettingsValues;
+} as const satisfies ProfessionalYearSettingsValues
 
 /** Statuts que l'app sait calculer (les autres sont proposés « Bientôt » dans Réglages). */
-export const SUPPORTED_REGIMES = ["SAS_IR"] as const satisfies readonly CompanyRegime[];
+export const SUPPORTED_REGIMES = [
+  'SAS_IR',
+] as const satisfies readonly CompanyRegime[]
 
 /** Nombre maximum d'exercices avec l'option pour l'IR. */
-export const IR_OPTION_MAX_YEARS = 5;
+export const IR_OPTION_MAX_YEARS = 5
 
 /** TVA collectée sur les factures (prestations de services), en points de base. */
-export const COLLECTED_VAT_BP = 2000;
+export const COLLECTED_VAT_BP = 2000
 
 /**
  * Charges pro (catégories du relevé pro) et taux de TVA déductible de chacune, en points de base :
@@ -55,13 +63,13 @@ export const PROFESSIONAL_CHARGE_VAT_BP = {
   PROFESSIONAL_TRAVEL: 1000,
   PROFESSIONAL_TAXES: 0,
   PROFESSIONAL_OTHER: 2000,
-} as const satisfies Partial<Record<ProfessionalCategory, number>>;
+} as const satisfies Partial<Record<ProfessionalCategory, number>>
 
-export type ProfessionalChargeCategory = keyof typeof PROFESSIONAL_CHARGE_VAT_BP;
+export type ProfessionalChargeCategory = keyof typeof PROFESSIONAL_CHARGE_VAT_BP
 
 export const PROFESSIONAL_CHARGE_CATEGORIES = Object.keys(
   PROFESSIONAL_CHARGE_VAT_BP,
-) as ProfessionalChargeCategory[];
+) as ProfessionalChargeCategory[]
 
 /**
  * Frais mixtes : dépenses du compte **perso** dont Stygma rembourse une quote-part. `"area"` =
@@ -69,13 +77,16 @@ export const PROFESSIONAL_CHARGE_CATEGORIES = Object.keys(
  * L'ordre sert aussi à répartir les remboursements reçus (d'abord le loyer, etc.).
  */
 export const MIXED_COSTS = [
-  { category: "RENT_PAID", key: "area" },
-  { category: "INTERNET", key: "key" },
-  { category: "TELECOM", key: "key" },
-  { category: "ENERGY", key: "key" },
-] as const satisfies readonly { category: TransactionCategory; key: "area" | "key" }[];
+  { category: 'RENT_PAID', key: 'area' },
+  { category: 'INTERNET', key: 'key' },
+  { category: 'TELECOM', key: 'key' },
+  { category: 'ENERGY', key: 'key' },
+] as const satisfies readonly {
+  category: TransactionCategory
+  key: 'area' | 'key'
+}[]
 
-export type MixedCostCategory = (typeof MIXED_COSTS)[number]["category"];
+export type MixedCostCategory = (typeof MIXED_COSTS)[number]['category']
 
 /**
  * Part remboursée par Stygma (points de base) selon la clé : surface bureau / logement, ou clé n/d
@@ -84,13 +95,21 @@ export type MixedCostCategory = (typeof MIXED_COSTS)[number]["category"];
 export function mixedShareBp(
   settings: Pick<
     ProfessionalYearSettingsValues,
-    "officeAreaDm2" | "homeAreaDm2" | "mixedKeyNumerator" | "mixedKeyDenominator"
+    | 'officeAreaDm2'
+    | 'homeAreaDm2'
+    | 'mixedKeyNumerator'
+    | 'mixedKeyDenominator'
   >,
-  key: "area" | "key",
+  key: 'area' | 'key',
 ): number {
-  return key === "area"
-    ? Math.round((settings.officeAreaDm2 * 10_000) / Math.max(1, settings.homeAreaDm2))
-    : Math.round((settings.mixedKeyNumerator * 10_000) / Math.max(1, settings.mixedKeyDenominator));
+  return key === 'area'
+    ? Math.round(
+        (settings.officeAreaDm2 * 10_000) / Math.max(1, settings.homeAreaDm2),
+      )
+    : Math.round(
+        (settings.mixedKeyNumerator * 10_000) /
+          Math.max(1, settings.mixedKeyDenominator),
+      )
 }
 
 /**
@@ -102,7 +121,7 @@ export const EMPLOYER_CONTRIBUTION_SPLIT_BP = {
   SUPPLEMENTARY_PENSION: 1355,
   HEALTH_COVER: 1310,
   DISABILITY_COVER: 336,
-} as const satisfies Partial<Record<ProfessionalCategory, number>>;
+} as const satisfies Partial<Record<ProfessionalCategory, number>>
 
 /**
  * Groupes de l'éditeur du prévisionnel : les catégories saisies ensemble, et le compte d'où viennent
@@ -110,24 +129,33 @@ export const EMPLOYER_CONTRIBUTION_SPLIT_BP = {
  */
 export const FORECAST_GROUPS = {
   charges: {
-    accountType: "PROFESSIONAL",
-    categories: [...PROFESSIONAL_CHARGE_CATEGORIES, "BNC_WITHDRAWAL"],
+    accountType: 'PROFESSIONAL',
+    categories: [...PROFESSIONAL_CHARGE_CATEGORIES, 'BNC_WITHDRAWAL'],
   },
-  mixedCosts: { accountType: "PERSONAL", categories: MIXED_COSTS.map((cost) => cost.category) },
+  mixedCosts: {
+    accountType: 'PERSONAL',
+    categories: MIXED_COSTS.map((cost) => cost.category),
+  },
 } as const satisfies Record<
   string,
-  { accountType: "PROFESSIONAL" | "PERSONAL"; categories: readonly TransactionCategory[] }
->;
+  {
+    accountType: 'PROFESSIONAL' | 'PERSONAL'
+    categories: readonly TransactionCategory[]
+  }
+>
 
-export type ForecastGroup = keyof typeof FORECAST_GROUPS;
+export type ForecastGroup = keyof typeof FORECAST_GROUPS
 
 // ---------------------------------------------------------------------------------------------
 // Vérifications au chargement (front et serveur) : erreur immédiate plutôt qu'un calcul faux.
 // ---------------------------------------------------------------------------------------------
 
-const splitTotal = Object.values(EMPLOYER_CONTRIBUTION_SPLIT_BP).reduce((sum, bp) => sum + bp, 0);
+const splitTotal = Object.values(EMPLOYER_CONTRIBUTION_SPLIT_BP).reduce(
+  (sum, bp) => sum + bp,
+  0,
+)
 if (splitTotal !== 10_000) {
   throw new Error(
     `professional-rules : EMPLOYER_CONTRIBUTION_SPLIT_BP fait ${splitTotal} au lieu de 10 000.`,
-  );
+  )
 }

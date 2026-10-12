@@ -1,4 +1,4 @@
-import { db } from "@server/lib/db";
+import { db } from '@server/lib/db'
 
 /**
  * Barème de l'IR (1 part) par année : clé = année affichée dans le dashboard Perso, valeur =
@@ -7,7 +7,10 @@ import { db } from "@server/lib/db";
  * finances), puis relancer `pnpm db:seed`. Une année absente de la base fait afficher « barème non
  * renseigné » sur la card « IR estimé » (on peut aussi le saisir dans Réglages).
  */
-const INCOME_TAX_BRACKETS_BY_YEAR: Record<number, readonly (readonly [number, number])[]> = {
+const INCOME_TAX_BRACKETS_BY_YEAR: Record<
+  number,
+  readonly (readonly [number, number])[]
+> = {
   // Loi de finances 2025 (revenus 2024).
   2025: [
     [0, 0],
@@ -24,15 +27,17 @@ const INCOME_TAX_BRACKETS_BY_YEAR: Record<number, readonly (readonly [number, nu
     [8_457_700, 41],
     [18_191_700, 45],
   ],
-};
+}
 
 /** Insère les barèmes manquants ; une année déjà en base (saisie dans Réglages) n'est jamais écrasée. */
 export async function seedIncomeTaxBrackets() {
   for (const [year, brackets] of Object.entries(INCOME_TAX_BRACKETS_BY_YEAR)) {
-    const exists = await db.incomeTaxBracket.count({ where: { year: Number(year) } });
+    const exists = await db.incomeTaxBracket.count({
+      where: { year: Number(year) },
+    })
     if (exists > 0) {
-      process.stdout.write(`Barème IR ${year} déjà présent` + "\n");
-      continue;
+      process.stdout.write(`Barème IR ${year} déjà présent` + '\n')
+      continue
     }
     await db.incomeTaxBracket.createMany({
       data: brackets.map(([fromCents, ratePercent]) => ({
@@ -40,7 +45,7 @@ export async function seedIncomeTaxBrackets() {
         fromCents,
         ratePercent,
       })),
-    });
-    process.stdout.write(`Barème IR ${year} créé` + "\n");
+    })
+    process.stdout.write(`Barème IR ${year} créé` + '\n')
   }
 }

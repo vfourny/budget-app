@@ -11,8 +11,13 @@
 }
 
 .alertTile {
-  background: color-mix(in srgb, var(--mantine-color-amber-6) 14%, var(--mantine-color-body));
-  border: 1px solid color-mix(in srgb, var(--mantine-color-amber-6) 35%, transparent);
+  background: color-mix(
+    in srgb,
+    var(--mantine-color-amber-6) 14%,
+    var(--mantine-color-body)
+  );
+  border: 1px solid
+    color-mix(in srgb, var(--mantine-color-amber-6) 35%, transparent);
 }
 
 .card {

@@ -10,63 +10,76 @@ import {
   Stack,
   Text,
   Title,
-} from "@mantine/core";
-import { Dropzone } from "@mantine/dropzone";
-import { IconAlertTriangle, IconFileSpreadsheet, IconUpload } from "@tabler/icons-react";
-import type { AccountType } from "@server/generated/prisma/enums";
-import { useState, type SubmitEvent } from "react";
-import { Link, useNavigate, useSearchParams } from "react-router";
+} from '@mantine/core'
+import { Dropzone } from '@mantine/dropzone'
+import {
+  IconAlertTriangle,
+  IconFileSpreadsheet,
+  IconUpload,
+} from '@tabler/icons-react'
+import type { AccountType } from '@server/generated/prisma/enums'
+import { useState, type SubmitEvent } from 'react'
+import { Link, useNavigate, useSearchParams } from 'react-router'
 
-import { useApartmentOptions } from "@/features/apartments/hooks/use-apartment-options";
-import { FormatReview } from "@/features/imports/components/format-review";
-import { useDetectCsvFormat } from "@/features/imports/hooks/use-detect-csv-format";
-import { useImportStatement } from "@/features/imports/hooks/use-import-statement";
-import { appErrorCode, csvErrorMessage, errorMessage } from "@/lib/errors";
-import { fr } from "@/lib/i18n/fr";
-import type { CsvFormatConfig } from "@shared/csv-format";
+import { useApartmentOptions } from '@/features/apartments/hooks/use-apartment-options'
+import { FormatReview } from '@/features/imports/components/format-review'
+import { useDetectCsvFormat } from '@/features/imports/hooks/use-detect-csv-format'
+import { useImportStatement } from '@/features/imports/hooks/use-import-statement'
+import { appErrorCode, csvErrorMessage, errorMessage } from '@/lib/errors'
+import { fr } from '@/lib/i18n/fr'
+import type { CsvFormatConfig } from '@shared/csv-format'
 
 // Libellés des types de compte (dictionnaire aligné sur l'enum Prisma), pour le `<Select>`.
-const ACCOUNT_TYPE_OPTIONS = (Object.keys(fr.accountTypes) as AccountType[]).map((value) => ({
+const ACCOUNT_TYPE_OPTIONS = (
+  Object.keys(fr.accountTypes) as AccountType[]
+).map((value) => ({
   value,
   label: fr.accountTypes[value],
-}));
+}))
 
 // Les navigateurs annoncent un CSV sous plusieurs types MIME (Windows : application/vnd.ms-excel) :
 // on filtre donc aussi sur l'extension.
-const CSV_ACCEPT = { "text/csv": [".csv"], "application/vnd.ms-excel": [".csv"] };
+const CSV_ACCEPT = {
+  'text/csv': ['.csv'],
+  'application/vnd.ms-excel': ['.csv'],
+}
 
 export function ImportForm() {
   // État des champs : `useState` explicite (≈ `ref()` + `v-model` en Vue). Un input « contrôlé »
   // reçoit `value` et notifie via `onChange`. Le fichier, lui, vient de la Dropzone : on garde
   // seulement le `File` choisi.
   // `?accountType=PROFESSIONAL` (bouton « Importer un relevé pro » de l'écran Pro) : type pré-choisi.
-  const [searchParams] = useSearchParams();
+  const [searchParams] = useSearchParams()
   const [accountType, setAccountType] = useState<AccountType | null>(
-    ACCOUNT_TYPE_OPTIONS.find((option) => option.value === searchParams.get("accountType"))
-      ?.value ?? null,
-  );
+    ACCOUNT_TYPE_OPTIONS.find(
+      (option) => option.value === searchParams.get('accountType'),
+    )?.value ?? null,
+  )
   // Appartement du relevé (compte « Appartement » seulement) : rattache toutes ses lignes (R11).
-  const [apartmentId, setApartmentId] = useState<string | null>(null);
-  const apartments = useApartmentOptions();
-  const [file, setFile] = useState<File | null>(null);
-  const [fileRejected, setFileRejected] = useState(false);
+  const [apartmentId, setApartmentId] = useState<string | null>(null)
+  const apartments = useApartmentOptions()
+  const [file, setFile] = useState<File | null>(null)
+  const [fileRejected, setFileRejected] = useState(false)
   // Texte du CSV soumis : gardé pour relancer l'import avec le format confirmé (CSV inconnu).
-  const [csvText, setCsvText] = useState<string | null>(null);
+  const [csvText, setCsvText] = useState<string | null>(null)
 
-  const navigate = useNavigate();
-  const importStatement = useImportStatement();
-  const detectFormat = useDetectCsvFormat();
+  const navigate = useNavigate()
+  const importStatement = useImportStatement()
+  const detectFormat = useDetectCsvFormat()
 
   // Valeurs dérivées calculées pendant le rendu (≈ `computed`) : pas de `useState` en double.
-  const needsApartment = accountType === "APARTMENT";
+  const needsApartment = accountType === 'APARTMENT'
   const canSubmit =
-    accountType !== null && file !== null && (!needsApartment || apartmentId !== null);
+    accountType !== null &&
+    file !== null &&
+    (!needsApartment || apartmentId !== null)
   // Aucun format enregistré pour l'en-tête de ce fichier : l'IA le détecte, l'utilisateur confirme.
   // Le panneau de détection reste affiché pendant l'import qui suit la confirmation (sinon il
   // disparaîtrait le temps de la requête), et jusqu'au succès de cet import.
   const unknownFormatError =
-    importStatement.isError && appErrorCode(importStatement.error) === "UNKNOWN_CSV_FORMAT";
-  const detecting = detectFormat.status !== "idle" && !importStatement.isSuccess;
+    importStatement.isError &&
+    appErrorCode(importStatement.error) === 'UNKNOWN_CSV_FORMAT'
+  const detecting = detectFormat.status !== 'idle' && !importStatement.isSuccess
 
   // Tout s'est bien passé → direct à la relecture. Sinon on reste ici pour montrer l'avertissement.
   const importOptions = {
@@ -76,17 +89,17 @@ export function ImportForm() {
         data.duplicateCount === 0 &&
         data.categorizationError === null
       ) {
-        void navigate(`/imports/${data.batchId}`);
+        void navigate(`/imports/${data.batchId}`)
       }
     },
-  };
+  }
 
   async function handleSubmit(event: SubmitEvent<HTMLFormElement>) {
-    event.preventDefault(); // ≈ `@submit.prevent`
-    if (!file || !accountType) return;
+    event.preventDefault() // ≈ `@submit.prevent`
+    if (!file || !accountType) return
 
-    const text = await file.text();
-    setCsvText(text);
+    const text = await file.text()
+    setCsvText(text)
     importStatement.mutate(
       {
         accountType,
@@ -97,14 +110,18 @@ export function ImportForm() {
       {
         ...importOptions,
         onError: (error) => {
-          if (appErrorCode(error) === "UNKNOWN_CSV_FORMAT") detectFormat.mutate({ csvText: text });
+          if (appErrorCode(error) === 'UNKNOWN_CSV_FORMAT')
+            detectFormat.mutate({ csvText: text })
         },
       },
-    );
+    )
   }
 
-  function handleConfirmFormat(format: { name: string; config: CsvFormatConfig }) {
-    if (!file || !accountType || csvText === null) return;
+  function handleConfirmFormat(format: {
+    name: string
+    config: CsvFormatConfig
+  }) {
+    if (!file || !accountType || csvText === null) return
     importStatement.mutate(
       {
         accountType,
@@ -114,31 +131,37 @@ export function ImportForm() {
         format,
       },
       importOptions,
-    );
+    )
   }
 
   function handleRetryDetection() {
-    if (csvText === null) return;
-    detectFormat.reset();
-    detectFormat.mutate({ csvText });
+    if (csvText === null) return
+    detectFormat.reset()
+    detectFormat.mutate({ csvText })
   }
 
-  const result = importStatement.data;
+  const result = importStatement.data
 
   return (
     <Grid gap={16}>
       <Grid.Col span={{ base: 12, md: 5 }}>
-        <Paper component="form" withBorder radius="lg" p={28} onSubmit={handleSubmit}>
+        <Paper
+          component="form"
+          withBorder
+          radius="lg"
+          p={28}
+          onSubmit={handleSubmit}
+        >
           <Stack gap={22}>
             <Title order={2}>{fr.importForm.fileTitle}</Title>
 
             <Dropzone
               onDrop={(files) => {
-                setFile(files[0] ?? null);
-                setFileRejected(false);
-                setCsvText(null);
-                importStatement.reset();
-                detectFormat.reset();
+                setFile(files[0] ?? null)
+                setFileRejected(false)
+                setCsvText(null)
+                importStatement.reset()
+                detectFormat.reset()
               }}
               onReject={() => setFileRejected(true)}
               accept={CSV_ACCEPT}
@@ -147,7 +170,11 @@ export function ImportForm() {
               aria-label={fr.importForm.dropzoneAria}
             >
               <Group gap={14} wrap="nowrap">
-                {file ? <IconFileSpreadsheet size={28} /> : <IconUpload size={28} />}
+                {file ? (
+                  <IconFileSpreadsheet size={28} />
+                ) : (
+                  <IconUpload size={28} />
+                )}
                 <div style={{ minWidth: 0 }}>
                   <Text fw={600} truncate>
                     {file ? file.name : fr.importForm.dropHere}
@@ -180,24 +207,33 @@ export function ImportForm() {
                 label={fr.importForm.apartment}
                 placeholder={fr.importForm.apartmentPlaceholder}
                 description={fr.importForm.apartmentHint}
-                inputWrapperOrder={["label", "input", "description"]}
-                data={(apartments.data ?? []).map(({ id, name }) => ({ value: id, label: name }))}
+                inputWrapperOrder={['label', 'input', 'description']}
+                data={(apartments.data ?? []).map(({ id, name }) => ({
+                  value: id,
+                  label: name,
+                }))}
                 value={apartmentId}
                 onChange={setApartmentId}
                 allowDeselect={false}
                 error={apartments.isSuccess && apartments.data.length === 0}
               />
             )}
-            {needsApartment && apartments.isSuccess && apartments.data.length === 0 && (
-              <Text size="sm" c="dimmed">
-                {fr.importForm.noApartment}{" "}
-                <Anchor component={Link} to="/settings?tab=apt" size="sm">
-                  {fr.importForm.addApartment}
-                </Anchor>
-              </Text>
-            )}
+            {needsApartment &&
+              apartments.isSuccess &&
+              apartments.data.length === 0 && (
+                <Text size="sm" c="dimmed">
+                  {fr.importForm.noApartment}{' '}
+                  <Anchor component={Link} to="/settings?tab=apt" size="sm">
+                    {fr.importForm.addApartment}
+                  </Anchor>
+                </Text>
+              )}
 
-            <Button type="submit" disabled={!canSubmit} loading={importStatement.isPending}>
+            <Button
+              type="submit"
+              disabled={!canSubmit}
+              loading={importStatement.isPending}
+            >
               {fr.importForm.submit}
             </Button>
           </Stack>
@@ -268,7 +304,10 @@ export function ImportForm() {
                 </div>
 
                 {result.duplicateCount > 0 && (
-                  <Alert color="blue" title={fr.importForm.duplicateTitle(result.duplicateCount)}>
+                  <Alert
+                    color="blue"
+                    title={fr.importForm.duplicateTitle(result.duplicateCount)}
+                  >
                     {fr.importForm.duplicateBody}
                   </Alert>
                 )}
@@ -279,7 +318,9 @@ export function ImportForm() {
                     icon={<IconAlertTriangle size={18} />}
                     title={fr.importForm.categorizationFailedTitle}
                   >
-                    {fr.importForm.categorizationFailedBody(result.categorizationError)}
+                    {fr.importForm.categorizationFailedBody(
+                      result.categorizationError,
+                    )}
                   </Alert>
                 )}
 
@@ -292,7 +333,10 @@ export function ImportForm() {
                     <Stack gap={4}>
                       {result.errors.map((error) => (
                         <Text key={error.line} size="sm">
-                          {fr.importForm.lineError(error.line, csvErrorMessage(error))}
+                          {fr.importForm.lineError(
+                            error.line,
+                            csvErrorMessage(error),
+                          )}
                         </Text>
                       ))}
                     </Stack>
@@ -310,5 +354,5 @@ export function ImportForm() {
         </Paper>
       </Grid.Col>
     </Grid>
-  );
+  )
 }

@@ -7,13 +7,13 @@
  */
 export function normalizeLabel(label: string): string {
   return label
-    .replace(/\b\d{2}\/\d{2}\/(?:\d{4}|\d{2})\b/g, "")
-    .replace(/\bCB\*\d+\b/gi, "")
-    .replace(/\s+/g, " ")
-    .trim();
+    .replace(/\b\d{2}\/\d{2}\/(?:\d{4}|\d{2})\b/g, '')
+    .replace(/\bCB\*\d+\b/gi, '')
+    .replace(/\s+/g, ' ')
+    .trim()
 }
 
 /** Clé de comparaison de deux libellés : insensible à la casse et aux dates / numéros de carte. */
 export function labelKey(label: string): string {
-  return normalizeLabel(label).toUpperCase();
+  return normalizeLabel(label).toUpperCase()
 }

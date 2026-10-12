@@ -1,4 +1,4 @@
-import { db } from "@server/lib/db";
+import { db } from '@server/lib/db'
 
 /**
  * Deux appartements fictifs (données de dev local) : Toulouse, loué meublé et géré par une agence,
@@ -7,9 +7,9 @@ import { db } from "@server/lib/db";
  */
 const APARTMENTS_SEED = [
   {
-    name: "Toulouse",
-    kind: "FURNISHED",
-    managerName: "Agence Exemple",
+    name: 'Toulouse',
+    kind: 'FURNISHED',
+    managerName: 'Agence Exemple',
     acquiredAt: new Date(Date.UTC(2025, 5, 1)),
     priceCents: 18_500_000,
     rentCents: 78_000,
@@ -25,8 +25,8 @@ const APARTMENTS_SEED = [
     openingBalanceCents: 53_743,
   },
   {
-    name: "Lyon",
-    kind: "FURNISHED",
+    name: 'Lyon',
+    kind: 'FURNISHED',
     managerName: null,
     acquiredAt: new Date(Date.UTC(2026, 0, 1)),
     priceCents: 14_200_000,
@@ -42,26 +42,26 @@ const APARTMENTS_SEED = [
     loanFirstDueDate: new Date(Date.UTC(2026, 1, 5)),
     openingBalanceCents: 0,
   },
-] as const;
+] as const
 
 /** Un appartement déjà présent (même nom) n'est jamais touché : les saisies faites dans l'app restent. */
 export async function seedApartments(userId: string) {
-  const year = new Date().getUTCFullYear();
-  let created = 0;
+  const year = new Date().getUTCFullYear()
+  let created = 0
   for (const { openingBalanceCents, ...apartment } of APARTMENTS_SEED) {
     const existing = await db.apartment.findFirst({
       where: { userId, name: apartment.name },
       select: { id: true },
-    });
-    if (existing) continue;
+    })
+    if (existing) continue
     await db.apartment.create({
       data: {
         ...apartment,
         userId,
         yearOpenings: { create: { userId, year, openingBalanceCents } },
       },
-    });
-    created++;
+    })
+    created++
   }
-  process.stdout.write(`Appartements : ${created} créé(s)` + "\n");
+  process.stdout.write(`Appartements : ${created} créé(s)` + '\n')
 }

@@ -1,6 +1,6 @@
-import { useMutation } from "@tanstack/react-query";
+import { useMutation } from '@tanstack/react-query'
 
-import { trpc } from "@/lib/trpc";
+import { trpc } from '@/lib/trpc'
 
 /**
  * Demande à l'IA de détecter les colonnes d'un CSV au format inconnu. C'est une mutation (et non une
@@ -8,5 +8,5 @@ import { trpc } from "@/lib/trpc";
  * `$fetch` déclenché à la main dans un composable Vue, pas un `useFetch` automatique).
  */
 export function useDetectCsvFormat() {
-  return useMutation(trpc.import.detectFormat.mutationOptions());
+  return useMutation(trpc.import.detectFormat.mutationOptions())
 }

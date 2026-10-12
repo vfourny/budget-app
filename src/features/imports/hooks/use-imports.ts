@@ -1,7 +1,7 @@
-import { useQuery } from "@tanstack/react-query";
+import { useQuery } from '@tanstack/react-query'
 
-import { trpc } from "@/lib/trpc";
+import { trpc } from '@/lib/trpc'
 
 export function useImports() {
-  return useQuery(trpc.import.list.queryOptions());
+  return useQuery(trpc.import.list.queryOptions())
 }

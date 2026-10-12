@@ -1,6 +1,6 @@
 ---
 description: Self-review, checks verts, commit, push et ouverture de la PR de la branche courante
-argument-hint: "[titre de PR optionnel]"
+argument-hint: '[titre de PR optionnel]'
 ---
 
 Prépare la branche courante pour review et ouvre la PR. Titre souhaité : $ARGUMENTS
