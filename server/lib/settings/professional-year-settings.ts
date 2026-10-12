@@ -1,15 +1,15 @@
-import type { db as Db } from "@server/lib/db";
+import type { db as Db } from '@server/lib/db'
 import {
   DEFAULT_PROFESSIONAL_YEAR_SETTINGS,
   type ProfessionalYearSettingsValues,
-} from "@shared/professional-rules";
+} from '@shared/professional-rules'
 
 /** Règles d'une année + leur origine : saisies pour l'année, reprises d'une année antérieure, ou défaut. */
 export interface ResolvedProfessionalYearSettings {
-  values: ProfessionalYearSettingsValues;
-  source: "own" | "inherited" | "default";
+  values: ProfessionalYearSettingsValues
+  source: 'own' | 'inherited' | 'default'
   /** Année d'où viennent les valeurs (`null` = valeurs par défaut). */
-  fromYear: number | null;
+  fromYear: number | null
 }
 
 /**
@@ -23,10 +23,14 @@ export async function resolveProfessionalYearSettings(
 ): Promise<ResolvedProfessionalYearSettings> {
   const row = await db.professionalYearSettings.findFirst({
     where: { userId, year: { lte: year } },
-    orderBy: { year: "desc" },
-  });
+    orderBy: { year: 'desc' },
+  })
   if (!row)
-    return { values: { ...DEFAULT_PROFESSIONAL_YEAR_SETTINGS }, source: "default", fromYear: null };
-  const { userId: _userId, year: fromYear, ...values } = row;
-  return { values, source: fromYear === year ? "own" : "inherited", fromYear };
+    return {
+      values: { ...DEFAULT_PROFESSIONAL_YEAR_SETTINGS },
+      source: 'default',
+      fromYear: null,
+    }
+  const { userId: _userId, year: fromYear, ...values } = row
+  return { values, source: fromYear === year ? 'own' : 'inherited', fromYear }
 }

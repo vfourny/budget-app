@@ -8,26 +8,33 @@ import {
   Stack,
   Table,
   Text,
-} from "@mantine/core";
-import { useState } from "react";
+} from '@mantine/core'
+import { useState } from 'react'
 
 import {
   useCopyMileageToFollowingMonths,
   useMileageForecast,
   useSetMileage,
-} from "@/features/professional/hooks/use-forecast-editor";
-import type { Period } from "@/hooks/use-period-selection";
-import { errorMessage } from "@/lib/errors";
-import { capitalizedMonthName, formatCents } from "@/lib/format";
-import { LOCALE, fr } from "@/lib/i18n/fr";
+} from '@/features/professional/hooks/use-forecast-editor'
+import type { Period } from '@/hooks/use-period-selection'
+import { errorMessage } from '@/lib/errors'
+import { capitalizedMonthName, formatCents } from '@/lib/format'
+import { LOCALE, fr } from '@/lib/i18n/fr'
 
-const rateFormat = new Intl.NumberFormat(LOCALE, { maximumFractionDigits: 3 });
+const rateFormat = new Intl.NumberFormat(LOCALE, { maximumFractionDigits: 3 })
 
 /** Onglet « Frais km » : km prévus du mois (défaut : km réels du même mois N-1). */
-export function MileageTab({ period, rateMilli }: { period: Period; rateMilli: number }) {
-  const mileage = useMileageForecast(period.year, period.month);
-  if (mileage.isPending) return <Loader color="gold" />;
-  if (mileage.isError) return <Alert color="red" title={fr.professional.editor.loadFailed} />;
+export function MileageTab({
+  period,
+  rateMilli,
+}: {
+  period: Period
+  rateMilli: number
+}) {
+  const mileage = useMileageForecast(period.year, period.month)
+  if (mileage.isPending) return <Loader color="gold" />
+  if (mileage.isError)
+    return <Alert color="red" title={fr.professional.editor.loadFailed} />
   return (
     <MileageFields
       key={`${period.year}-${period.month}`}
@@ -36,28 +43,35 @@ export function MileageTab({ period, rateMilli }: { period: Period; rateMilli: n
       initial={mileage.data.overrideKm}
       lastYearKm={mileage.data.lastYearKm}
     />
-  );
+  )
 }
 
 interface MileageFieldsProps {
-  period: Period;
-  rateMilli: number;
-  initial: number | null;
-  lastYearKm: number;
+  period: Period
+  rateMilli: number
+  initial: number | null
+  lastYearKm: number
 }
 
-function MileageFields({ period, rateMilli, initial, lastYearKm }: MileageFieldsProps) {
+function MileageFields({
+  period,
+  rateMilli,
+  initial,
+  lastYearKm,
+}: MileageFieldsProps) {
   // `null` = pas de saisie : la valeur affichée est alors celle de N-1.
-  const [km, setKm] = useState<number | null>(initial);
-  const save = useSetMileage();
-  const copy = useCopyMileageToFollowingMonths();
-  const text = fr.professional.editor;
-  const shownKm = km ?? lastYearKm;
-  const changed = km !== initial;
-  const rate = fr.professional.mileage.rateUnit(rateFormat.format(rateMilli / 1000));
+  const [km, setKm] = useState<number | null>(initial)
+  const save = useSetMileage()
+  const copy = useCopyMileageToFollowingMonths()
+  const text = fr.professional.editor
+  const shownKm = km ?? lastYearKm
+  const changed = km !== initial
+  const rate = fr.professional.mileage.rateUnit(
+    rateFormat.format(rateMilli / 1000),
+  )
 
   function saveKm(onSuccess?: () => void) {
-    save.mutate({ year: period.year, month: period.month, km }, { onSuccess });
+    save.mutate({ year: period.year, month: period.month, km }, { onSuccess })
   }
 
   return (
@@ -93,7 +107,9 @@ function MileageFields({ period, rateMilli, initial, lastYearKm }: MileageFields
                 min={0}
                 allowDecimal={false}
                 value={shownKm}
-                onChange={(value) => setKm(typeof value === "number" ? value : 0)}
+                onChange={(value) =>
+                  setKm(typeof value === 'number' ? value : 0)
+                }
               />
             </Table.Td>
             <Table.Td ta="right" c="dimmed">
@@ -126,7 +142,11 @@ function MileageFields({ period, rateMilli, initial, lastYearKm }: MileageFields
       )}
 
       <Group justify="flex-end">
-        <Button variant="subtle" disabled={km === null} onClick={() => setKm(null)}>
+        <Button
+          variant="subtle"
+          disabled={km === null}
+          onClick={() => setKm(null)}
+        >
           {text.mileage.resetLastYear}
         </Button>
         {period.month < 12 && (
@@ -134,16 +154,26 @@ function MileageFields({ period, rateMilli, initial, lastYearKm }: MileageFields
             variant="default"
             loading={copy.isPending}
             onClick={() =>
-              saveKm(() => copy.mutate({ year: period.year, month: period.month, km: shownKm }))
+              saveKm(() =>
+                copy.mutate({
+                  year: period.year,
+                  month: period.month,
+                  km: shownKm,
+                }),
+              )
             }
           >
             {text.applyNext}
           </Button>
         )}
-        <Button disabled={!changed} loading={save.isPending} onClick={() => saveKm()}>
+        <Button
+          disabled={!changed}
+          loading={save.isPending}
+          onClick={() => saveKm()}
+        >
           {fr.common.save}
         </Button>
       </Group>
     </Stack>
-  );
+  )
 }

@@ -15,9 +15,9 @@ prisma/seeds/csv-formats.ts   # BoursoBank et Banque Populaire (formats historiq
 ## Utilisation
 
 ```ts
-const config = await findCsvFormat(userId, csvText, db); // null si l'en-tête est inconnu
-if (!config) throw appError("BAD_REQUEST", "UNKNOWN_CSV_FORMAT");
-const { transactions, errors } = parseBankStatement(csvText, config);
+const config = await findCsvFormat(userId, csvText, db) // null si l'en-tête est inconnu
+if (!config) throw appError('BAD_REQUEST', 'UNKNOWN_CSV_FORMAT')
+const { transactions, errors } = parseBankStatement(csvText, config)
 ```
 
 Le type de compte (perso / pro) ne sert plus à choisir le parseur : il ne détermine que les catégories proposées. Passer à une autre banque ne demande aucun code : son format est détecté puis enregistré (voir « Formats inconnus »).

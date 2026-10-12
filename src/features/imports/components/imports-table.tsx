@@ -1,21 +1,22 @@
-import { Alert, Badge, Loader, Paper, Table, Text } from "@mantine/core";
-import { IconFileSpreadsheet } from "@tabler/icons-react";
-import { Link } from "react-router";
+import { Alert, Badge, Loader, Paper, Table, Text } from '@mantine/core'
+import { IconFileSpreadsheet } from '@tabler/icons-react'
+import { Link } from 'react-router'
 
-import { DeleteImportButton } from "@/features/imports/components/delete-import-button";
-import { useImports } from "@/features/imports/hooks/use-imports";
-import { formatDate } from "@/lib/format";
-import { fr } from "@/lib/i18n/fr";
+import { DeleteImportButton } from '@/features/imports/components/delete-import-button'
+import { useImports } from '@/features/imports/hooks/use-imports'
+import { formatDate } from '@/lib/format'
+import { fr } from '@/lib/i18n/fr'
 
-import classes from "./imports-table.module.css";
+import classes from './imports-table.module.css'
 
 export function ImportsTable() {
-  const imports = useImports();
+  const imports = useImports()
 
-  if (imports.isPending) return <Loader color="gold" />;
-  if (imports.isError) return <Alert color="red" title={fr.imports.loadFailed} />;
+  if (imports.isPending) return <Loader color="gold" />
+  if (imports.isError)
+    return <Alert color="red" title={fr.imports.loadFailed} />
 
-  const count = imports.data.length;
+  const count = imports.data.length
 
   return (
     <Paper withBorder radius="lg" className={classes.card}>
@@ -57,7 +58,7 @@ export function ImportsTable() {
                   {item.lineCount}
                 </Table.Td>
                 <Table.Td>
-                  {item.status === "VALIDATED" ? (
+                  {item.status === 'VALIDATED' ? (
                     <Badge color="teal" variant="light">
                       {fr.importStatus.VALIDATED}
                     </Badge>
@@ -82,5 +83,5 @@ export function ImportsTable() {
         </Table>
       )}
     </Paper>
-  );
+  )
 }

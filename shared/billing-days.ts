@@ -5,18 +5,19 @@
  */
 
 /** Pas de saisie : la demi-journée. */
-export const DAY_STEP = 0.5;
+export const DAY_STEP = 0.5
 
 /** Plafond d'une ligne : 31 jours. */
-export const MAX_BILLED_DAYS = 31;
+export const MAX_BILLED_DAYS = 31
 
 /** Arrondit une saisie à la demi-journée la plus proche : 1,3 → 1,5. */
-export const roundToDayStep = (days: number) => Math.round(days / DAY_STEP) * DAY_STEP;
+export const roundToDayStep = (days: number) =>
+  Math.round(days / DAY_STEP) * DAY_STEP
 
 /** Montant HT d'une ligne en centimes : jours × TJM. */
 export const billingAmount = (line: { days: number; dailyRateCents: number }) =>
-  Math.round(line.days * line.dailyRateCents);
+  Math.round(line.days * line.dailyRateCents)
 
 /** TJM moyen (centimes) d'un montant facturé sur `days` jours ; 0 sans jour. */
 export const averageDailyRate = (amountCents: number, days: number) =>
-  days > 0 ? Math.round(amountCents / days) : 0;
+  days > 0 ? Math.round(amountCents / days) : 0

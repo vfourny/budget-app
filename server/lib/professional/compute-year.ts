@@ -1,12 +1,15 @@
-import { computeMonth } from "@server/lib/professional/compute-month";
-import type { ProfessionalMonth, ProfessionalMonthInput } from "@server/lib/professional/types";
+import { computeMonth } from '@server/lib/professional/compute-month'
+import type {
+  ProfessionalMonth,
+  ProfessionalMonthInput,
+} from '@server/lib/professional/types'
 
 /** Ce qui se reporte d'un mois sur le suivant. */
 export interface YearOpening {
   /** TVA à reverser de décembre de l'année précédente (payée en janvier). */
-  previousVatDueCents: number;
+  previousVatDueCents: number
   /** Reste à encaisser (TTC, cumulé) au 1er janvier. */
-  receivablesCents: number;
+  receivablesCents: number
 }
 
 /**
@@ -17,18 +20,23 @@ export interface YearOpening {
 export function computeYear(
   months: readonly Omit<
     ProfessionalMonthInput,
-    "previousVatDueCents" | "openingReceivablesCents"
+    'previousVatDueCents' | 'openingReceivablesCents'
   >[],
   opening: YearOpening,
 ): ProfessionalMonth[] {
-  const results: ProfessionalMonth[] = [];
-  let previousVatDueCents = opening.previousVatDueCents;
-  let openingReceivablesCents = opening.receivablesCents;
+  const results: ProfessionalMonth[] = []
+  let previousVatDueCents = opening.previousVatDueCents
+  let openingReceivablesCents = opening.receivablesCents
   for (const month of months) {
-    const result = computeMonth({ ...month, previousVatDueCents, openingReceivablesCents });
-    results.push(result);
-    previousVatDueCents = result.vat.due.actual ?? result.vat.due.forecast;
-    openingReceivablesCents = result.billing.receivablesCents ?? openingReceivablesCents;
+    const result = computeMonth({
+      ...month,
+      previousVatDueCents,
+      openingReceivablesCents,
+    })
+    results.push(result)
+    previousVatDueCents = result.vat.due.actual ?? result.vat.due.forecast
+    openingReceivablesCents =
+      result.billing.receivablesCents ?? openingReceivablesCents
   }
-  return results;
+  return results
 }

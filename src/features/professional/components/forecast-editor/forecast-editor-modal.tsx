@@ -1,31 +1,31 @@
-import { Modal, SegmentedControl, Stack, Tabs } from "@mantine/core";
-import { useState } from "react";
+import { Modal, SegmentedControl, Stack, Tabs } from '@mantine/core'
+import { useState } from 'react'
 
-import { BillingTab } from "@/features/professional/components/forecast-editor/billing-tab";
-import { ChargesTab } from "@/features/professional/components/forecast-editor/charges-tab";
-import { MileageTab } from "@/features/professional/components/forecast-editor/mileage-tab";
-import { MixedCostsTab } from "@/features/professional/components/forecast-editor/mixed-costs-tab";
-import type { Period } from "@/hooks/use-period-selection";
-import { capitalizedMonthName } from "@/lib/format";
-import { fr } from "@/lib/i18n/fr";
-import type { ProfessionalYearSettingsValues } from "@shared/professional-rules";
-import type { BillingKind } from "@server/generated/prisma/enums";
+import { BillingTab } from '@/features/professional/components/forecast-editor/billing-tab'
+import { ChargesTab } from '@/features/professional/components/forecast-editor/charges-tab'
+import { MileageTab } from '@/features/professional/components/forecast-editor/mileage-tab'
+import { MixedCostsTab } from '@/features/professional/components/forecast-editor/mixed-costs-tab'
+import type { Period } from '@/hooks/use-period-selection'
+import { capitalizedMonthName } from '@/lib/format'
+import { fr } from '@/lib/i18n/fr'
+import type { ProfessionalYearSettingsValues } from '@shared/professional-rules'
+import type { BillingKind } from '@server/generated/prisma/enums'
 
-export type EditorTab = "billing" | "charges" | "mixedCosts" | "mileage";
+export type EditorTab = 'billing' | 'charges' | 'mixedCosts' | 'mileage'
 
 export interface EditorTarget {
-  tab: EditorTab;
-  source: BillingKind;
+  tab: EditorTab
+  source: BillingKind
 }
 
 interface ForecastEditorModalProps {
-  period: Period;
+  period: Period
   /** Le mois a un réel : la saisie « Réel » de la facturation est possible. */
-  hasActual: boolean;
+  hasActual: boolean
   /** Règles de l'année (salaire, taux) : rappelées dans l'onglet Charges. */
-  settings: ProfessionalYearSettingsValues;
-  initial: EditorTarget;
-  onClose: () => void;
+  settings: ProfessionalYearSettingsValues
+  initial: EditorTarget
+  onClose: () => void
 }
 
 /**
@@ -39,10 +39,12 @@ export function ForecastEditorModal({
   initial,
   onClose,
 }: ForecastEditorModalProps) {
-  const [tab, setTab] = useState<EditorTab>(initial.tab);
-  const [source, setSource] = useState<BillingKind>(hasActual ? initial.source : "FORECAST");
-  const text = fr.professional.editor;
-  const periodLabel = `${capitalizedMonthName(period.month)} ${period.year}`;
+  const [tab, setTab] = useState<EditorTab>(initial.tab)
+  const [source, setSource] = useState<BillingKind>(
+    hasActual ? initial.source : 'FORECAST',
+  )
+  const text = fr.professional.editor
+  const periodLabel = `${capitalizedMonthName(period.month)} ${period.year}`
 
   return (
     <Modal
@@ -50,11 +52,11 @@ export function ForecastEditorModal({
       onClose={onClose}
       size="xl"
       title={
-        source === "ACTUAL" && tab === "billing"
+        source === 'ACTUAL' && tab === 'billing'
           ? text.actualTitle(periodLabel)
           : text.forecastTitle(periodLabel)
       }
-      closeButtonProps={{ "aria-label": text.close }}
+      closeButtonProps={{ 'aria-label': text.close }}
     >
       <Tabs
         value={tab}
@@ -75,8 +77,12 @@ export function ForecastEditorModal({
               value={source}
               onChange={(value) => setSource(value as BillingKind)}
               data={[
-                { value: "FORECAST", label: text.source.FORECAST },
-                { value: "ACTUAL", label: text.source.ACTUAL, disabled: !hasActual },
+                { value: 'FORECAST', label: text.source.FORECAST },
+                {
+                  value: 'ACTUAL',
+                  label: text.source.ACTUAL,
+                  disabled: !hasActual,
+                },
               ]}
             />
             <BillingTab period={period} source={source} />
@@ -93,5 +99,5 @@ export function ForecastEditorModal({
         </Tabs.Panel>
       </Tabs>
     </Modal>
-  );
+  )
 }

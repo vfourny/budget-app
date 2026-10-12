@@ -1,35 +1,39 @@
-import { Table, Text } from "@mantine/core";
-import { Fragment } from "react";
+import { Table, Text } from '@mantine/core'
+import { Fragment } from 'react'
 
-import type { GaugeGoal } from "@/components/target-gauge";
-import { formatCents } from "@/lib/format";
-import { fr } from "@/lib/i18n/fr";
-import type { ForecastActual } from "@server/lib/professional/types";
+import type { GaugeGoal } from '@/components/target-gauge'
+import { formatCents } from '@/lib/format'
+import { fr } from '@/lib/i18n/fr'
+import type { ForecastActual } from '@server/lib/professional/types'
 
-import classes from "./forecast-table.module.css";
+import classes from './forecast-table.module.css'
 
 /** `detail` : ligne « dont … » grisée ; `memo` : pour info (hors total) ; `total` : ligne de total. */
-type ForecastRowTone = "normal" | "detail" | "memo" | "total";
+type ForecastRowTone = 'normal' | 'detail' | 'memo' | 'total'
 
 export interface ForecastRow {
-  key: string;
-  label: string;
-  sub?: string;
-  amount: ForecastActual;
+  key: string
+  label: string
+  sub?: string
+  amount: ForecastActual
   /** Sens favorable de l'écart : `atMost` pour une charge (moins = mieux). */
-  goal: GaugeGoal;
-  tone?: ForecastRowTone;
+  goal: GaugeGoal
+  tone?: ForecastRowTone
 }
 
 export interface ForecastTableGroup {
-  key: string;
-  label: string;
-  rows: ForecastRow[];
+  key: string
+  label: string
+  rows: ForecastRow[]
 }
 
 /** Tableau Catégorie / Prévu / Réel / Écart, par groupes (vue mois et vue année). */
-export function ForecastTable({ groups }: { groups: readonly ForecastTableGroup[] }) {
-  const columns = fr.professional.categories.columns;
+export function ForecastTable({
+  groups,
+}: {
+  groups: readonly ForecastTableGroup[]
+}) {
+  const columns = fr.professional.categories.columns
   return (
     <Table.ScrollContainer minWidth={560}>
       <Table verticalSpacing="xs" horizontalSpacing="md">
@@ -45,7 +49,14 @@ export function ForecastTable({ groups }: { groups: readonly ForecastTableGroup[
           {groups.map((group) => (
             <Fragment key={group.key}>
               <Table.Tr>
-                <Table.Th colSpan={4} scope="colgroup" c="gold.6" fz="xs" tt="uppercase" pt={16}>
+                <Table.Th
+                  colSpan={4}
+                  scope="colgroup"
+                  c="gold.6"
+                  fz="xs"
+                  tt="uppercase"
+                  pt={16}
+                >
                   {group.label}
                 </Table.Th>
               </Table.Tr>
@@ -57,20 +68,21 @@ export function ForecastTable({ groups }: { groups: readonly ForecastTableGroup[
         </Table.Tbody>
       </Table>
     </Table.ScrollContainer>
-  );
+  )
 }
 
 function Row({ row }: { row: ForecastRow }) {
-  const { amount, tone = "normal" } = row;
-  const delta = amount.actual === null ? null : amount.actual - amount.forecast;
-  const favorable = delta !== null && (row.goal === "atMost" ? delta < 0 : delta > 0);
-  const muted = tone === "detail" || tone === "memo";
-  const bold = tone === "total" ? 700 : undefined;
+  const { amount, tone = 'normal' } = row
+  const delta = amount.actual === null ? null : amount.actual - amount.forecast
+  const favorable =
+    delta !== null && (row.goal === 'atMost' ? delta < 0 : delta > 0)
+  const muted = tone === 'detail' || tone === 'memo'
+  const bold = tone === 'total' ? 700 : undefined
 
   return (
     <Table.Tr>
       <Table.Th scope="row" fw={bold ?? 400}>
-        <Text span size="sm" c={muted ? "dimmed" : undefined} fw={bold}>
+        <Text span size="sm" c={muted ? 'dimmed' : undefined} fw={bold}>
           {row.label}
         </Text>
         {row.sub && (
@@ -85,21 +97,27 @@ function Row({ row }: { row: ForecastRow }) {
       <Table.Td
         ta="right"
         fw={bold ?? 600}
-        c={muted ? "dimmed" : undefined}
+        c={muted ? 'dimmed' : undefined}
         className={classes.number}
       >
-        {amount.actual === null ? "—" : formatCents(amount.actual)}
+        {amount.actual === null ? '—' : formatCents(amount.actual)}
       </Table.Td>
       <Table.Td
         ta="right"
         fw={bold}
         className={classes.number}
-        c={delta === null || delta === 0 ? "dimmed" : favorable ? "teal.4" : "red.4"}
+        c={
+          delta === null || delta === 0
+            ? 'dimmed'
+            : favorable
+              ? 'teal.4'
+              : 'red.4'
+        }
       >
         {delta === null
-          ? "—"
-          : `${delta > 0 ? "+ " : delta < 0 ? "− " : ""}${formatCents(Math.abs(delta))}`}
+          ? '—'
+          : `${delta > 0 ? '+ ' : delta < 0 ? '− ' : ''}${formatCents(Math.abs(delta))}`}
       </Table.Td>
     </Table.Tr>
-  );
+  )
 }

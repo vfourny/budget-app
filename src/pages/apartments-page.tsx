@@ -1,5 +1,5 @@
-import { ApartmentsDashboard } from "@/features/apartments/components/apartments-dashboard";
+import { ApartmentsDashboard } from '@/features/apartments/components/apartments-dashboard'
 
 export function ApartmentsPage() {
-  return <ApartmentsDashboard />;
+  return <ApartmentsDashboard />
 }

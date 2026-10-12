@@ -1,7 +1,7 @@
-import { z } from "zod";
+import { z } from 'zod'
 
-import { appError } from "@server/lib/app-error";
-import { createTRPCRouter, protectedProcedure } from "@server/trpc/init";
+import { appError } from '@server/lib/app-error'
+import { createTRPCRouter, protectedProcedure } from '@server/trpc/init'
 
 export const tripRouter = createTRPCRouter({
   /** Ajoute un trajet au journal des frais kilométriques (km réels de son mois). */
@@ -18,8 +18,12 @@ export const tripRouter = createTRPCRouter({
     .mutation(({ ctx, input }) => {
       // Comme pour les transactions : jour civil en UTC, mois / année dénormalisés.
       const date = new Date(
-        Date.UTC(input.date.getUTCFullYear(), input.date.getUTCMonth(), input.date.getUTCDate()),
-      );
+        Date.UTC(
+          input.date.getUTCFullYear(),
+          input.date.getUTCMonth(),
+          input.date.getUTCDate(),
+        ),
+      )
       return ctx.db.trip.create({
         data: {
           ...input,
@@ -29,7 +33,7 @@ export const tripRouter = createTRPCRouter({
           userId: ctx.session.user.id,
         },
         select: { id: true },
-      });
+      })
     }),
 
   delete: protectedProcedure
@@ -37,8 +41,8 @@ export const tripRouter = createTRPCRouter({
     .mutation(async ({ ctx, input }) => {
       const { count } = await ctx.db.trip.deleteMany({
         where: { id: input.id, userId: ctx.session.user.id },
-      });
-      if (count === 0) throw appError("NOT_FOUND", "TRIP_NOT_FOUND");
-      return input;
+      })
+      if (count === 0) throw appError('NOT_FOUND', 'TRIP_NOT_FOUND')
+      return input
     }),
-});
+})

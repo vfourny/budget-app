@@ -1,13 +1,13 @@
-import { Stack, Text, Title } from "@mantine/core";
-import type { ReactNode } from "react";
+import { Stack, Text, Title } from '@mantine/core'
+import type { ReactNode } from 'react'
 
 interface PageHeaderProps {
   /** Sur-titre en capitales (« NOUVEL IMPORT »). */
-  eyebrow: string;
+  eyebrow: string
   /** Titre serif ; peut contenir un `<PageTitleAccent>` (mot en italique doré). */
-  title: ReactNode;
+  title: ReactNode
   /** Zone à droite du titre (boutons d'action). */
-  actions?: ReactNode;
+  actions?: ReactNode
 }
 
 /** En-tête commun des écrans : sur-titre + grand titre Instrument Serif (+ actions à droite). */
@@ -15,9 +15,9 @@ export function PageHeader({ eyebrow, title, actions }: PageHeaderProps) {
   return (
     <header
       style={{
-        display: "flex",
-        alignItems: "flex-end",
-        justifyContent: "space-between",
+        display: 'flex',
+        alignItems: 'flex-end',
+        justifyContent: 'space-between',
         gap: 24,
         marginBottom: 28,
       }}
@@ -28,7 +28,7 @@ export function PageHeader({ eyebrow, title, actions }: PageHeaderProps) {
           fw={700}
           c="var(--app-caption)"
           tt="uppercase"
-          style={{ letterSpacing: "1.4px" }}
+          style={{ letterSpacing: '1.4px' }}
         >
           {eyebrow}
         </Text>
@@ -36,7 +36,7 @@ export function PageHeader({ eyebrow, title, actions }: PageHeaderProps) {
       </Stack>
       {actions}
     </header>
-  );
+  )
 }
 
 /** Mot mis en avant dans un titre : italique doré (« Bonjour *Valentin* »). */
@@ -45,5 +45,5 @@ export function PageTitleAccent({ children }: { children: ReactNode }) {
     <Text span inherit fs="italic" c="gold.6">
       {children}
     </Text>
-  );
+  )
 }

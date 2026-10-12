@@ -1,6 +1,6 @@
-import { apartments } from "./apartments";
-import { auth } from "./auth";
-import { common } from "./common";
+import { apartments } from './apartments'
+import { auth } from './auth'
+import { common } from './common'
 import {
   accountTypes,
   apartmentKinds,
@@ -9,51 +9,51 @@ import {
   envelopes,
   importStatus,
   revenueLines,
-} from "./enums";
-import { csvErrors, errors } from "./errors";
-import { importForm, imports } from "./imports";
-import { nav } from "./nav";
-import { period } from "./period";
-import { personal } from "./personal";
-import { review } from "./review";
-import { professional } from "./professional";
-import { settings } from "./settings";
-import { transactions } from "./transactions";
+} from './enums'
+import { csvErrors, errors } from './errors'
+import { importForm, imports } from './imports'
+import { nav } from './nav'
+import { period } from './period'
+import { personal } from './personal'
+import { review } from './review'
+import { professional } from './professional'
+import { settings } from './settings'
+import { transactions } from './transactions'
 
 /** Locale des formats (`Intl`) : dates, montants. */
-export const LOCALE = "fr-FR";
+export const LOCALE = 'fr-FR'
 
 /** Noms des mois (index 0 = janvier). */
 const months = [
-  "janvier",
-  "février",
-  "mars",
-  "avril",
-  "mai",
-  "juin",
-  "juillet",
-  "août",
-  "septembre",
-  "octobre",
-  "novembre",
-  "décembre",
-] as const;
+  'janvier',
+  'février',
+  'mars',
+  'avril',
+  'mai',
+  'juin',
+  'juillet',
+  'août',
+  'septembre',
+  'octobre',
+  'novembre',
+  'décembre',
+] as const
 
 /** Noms courts des mois (colonnes, axes). */
 const monthsShort = [
-  "janv.",
-  "févr.",
-  "mars",
-  "avr.",
-  "mai",
-  "juin",
-  "juil.",
-  "août",
-  "sept.",
-  "oct.",
-  "nov.",
-  "déc.",
-] as const;
+  'janv.',
+  'févr.',
+  'mars',
+  'avr.',
+  'mai',
+  'juin',
+  'juil.',
+  'août',
+  'sept.',
+  'oct.',
+  'nov.',
+  'déc.',
+] as const
 
 /**
  * Tous les textes affichés de l'app (UI en français). Un texte vient d'ici, jamais écrit en dur
@@ -84,4 +84,4 @@ export const fr = {
   csvErrors,
   months,
   monthsShort,
-} as const;
+} as const

@@ -1,24 +1,25 @@
 /** Dashboard Perso. */
 export const personal = {
-  eyebrow: "Budget perso",
-  loadFailed: "Impossible de charger le dashboard.",
-  loadPeriodFailed: "Impossible de charger la période.",
-  empty: "Aucun import validé pour le moment : le dashboard se remplit à la validation.",
+  eyebrow: 'Budget perso',
+  loadFailed: 'Impossible de charger le dashboard.',
+  loadPeriodFailed: 'Impossible de charger la période.',
+  empty:
+    'Aucun import validé pour le moment : le dashboard se remplit à la validation.',
   // Cards KPI
   kpi: {
-    expensesMonth: "Dépenses",
-    expensesYear: "Dépensé sur la période",
-    expensesHint: "Hors épargne",
-    revenuesHint: "Tous les crédits",
-    savingsMonth: "Épargne du mois",
-    savingsYear: "Épargné",
+    expensesMonth: 'Dépenses',
+    expensesYear: 'Dépensé sur la période',
+    expensesHint: 'Hors épargne',
+    revenuesHint: 'Tous les crédits',
+    savingsMonth: 'Épargne du mois',
+    savingsYear: 'Épargné',
     savingsHint: (ratePercent: number) => `${ratePercent} % des revenus`,
-    averageExpense: "Dépense moyenne / mois",
+    averageExpense: 'Dépense moyenne / mois',
     monthsWithData: (count: number) => `${count} mois avec données`,
     incomeTax: (year: number) => `IR estimé ${year}`,
-    incomeTaxHint: "Barème 1 part, avant réductions",
+    incomeTaxHint: 'Barème 1 part, avant réductions',
     incomeTaxMissing: (year: number) => `Barème de l'IR ${year} non renseigné.`,
-    incomeTaxMissingLink: "Le renseigner dans Réglages",
+    incomeTaxMissingLink: 'Le renseigner dans Réglages',
     incomeTaxLoadFailed: "Barème de l'IR indisponible.",
   },
   // Jauges réel vs recommandé
@@ -33,15 +34,15 @@ export const personal = {
   envelopeSource: {
     empty: "Aucune catégorie rattachée pour l'instant : le réel reste à 0 €.",
     expenses: (labels: readonly string[]) =>
-      `Total des dépenses des catégories : ${labels.join(", ")}.`,
+      `Total des dépenses des catégories : ${labels.join(', ')}.`,
     savings: (labels: readonly string[]) =>
-      `Total des virements d'épargne des catégories : ${labels.join(", ")}.`,
+      `Total des virements d'épargne des catégories : ${labels.join(', ')}.`,
   },
   fixedCharges: {
-    title: "Charges fixes",
-    total: "Total",
+    title: 'Charges fixes',
+    total: 'Total',
   },
   breakdown: {
-    title: "Par catégorie",
+    title: 'Par catégorie',
   },
-} as const;
+} as const

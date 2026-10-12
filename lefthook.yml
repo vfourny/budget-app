@@ -5,12 +5,12 @@ pre-commit:
   commands:
     lint:
       priority: 1
-      glob: "*.{ts,tsx,js,jsx,mjs,cjs}"
+      glob: '*.{ts,tsx,js,jsx,mjs,cjs}'
       run: pnpm exec oxlint --fix --deny-warnings {staged_files}
       stage_fixed: true
     format:
       priority: 2
-      glob: "*.{ts,tsx,js,jsx,mjs,cjs,json,md,css,yml,yaml}"
+      glob: '*.{ts,tsx,js,jsx,mjs,cjs,json,md,css,yml,yaml}'
       run: pnpm exec prettier --write --ignore-unknown {staged_files}
       stage_fixed: true
 

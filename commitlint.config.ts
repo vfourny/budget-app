@@ -1,1 +1,1 @@
-export { default } from "@vfourny/node-toolkit/commitlint";
+export { default } from '@vfourny/node-toolkit/commitlint'

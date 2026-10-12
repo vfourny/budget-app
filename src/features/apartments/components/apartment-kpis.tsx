@@ -1,27 +1,33 @@
-import { Grid, Group, Stack, Text } from "@mantine/core";
+import { Grid, Group, Stack, Text } from '@mantine/core'
 
-import { InfoTip } from "@/components/info-tip";
-import { KpiCard } from "@/components/kpi-card";
-import { TargetGauge } from "@/components/target-gauge";
-import { formatBp, formatCents } from "@/lib/format";
-import { fr } from "@/lib/i18n/fr";
-import type { RouterOutputs } from "@/lib/trpc";
+import { InfoTip } from '@/components/info-tip'
+import { KpiCard } from '@/components/kpi-card'
+import { TargetGauge } from '@/components/target-gauge'
+import { formatBp, formatCents } from '@/lib/format'
+import { fr } from '@/lib/i18n/fr'
+import type { RouterOutputs } from '@/lib/trpc'
 
-type Kpis = RouterOutputs["apartmentDashboard"]["month"]["kpis"];
+type Kpis = RouterOutputs['apartmentDashboard']['month']['kpis']
 
 /**
  * Les deux KPI de l'écran (R8) : loyers nets perçus (jauge perçus bruts / dus) et effort d'épargne
  * nécessaire (jauge apport réel / effort).
  */
-export function ApartmentKpis({ kpis, view }: { kpis: Kpis; view: "month" | "year" }) {
-  const { rent, effort } = kpis;
-  const text = fr.apartments.kpis;
+export function ApartmentKpis({
+  kpis,
+  view,
+}: {
+  kpis: Kpis
+  view: 'month' | 'year'
+}) {
+  const { rent, effort } = kpis
+  const text = fr.apartments.kpis
   const percent =
     rent.dueCents > 0
       ? formatBp(Math.round((rent.grossReceivedCents / rent.dueCents) * 10_000))
-      : "—";
-  const missingRent = rent.dueCents - rent.grossReceivedCents;
-  const surplus = effort.contributionCents - effort.actualCents;
+      : '—'
+  const missingRent = rent.dueCents - rent.grossReceivedCents
+  const surplus = effort.contributionCents - effort.actualCents
 
   return (
     <Grid gap={16} align="stretch">
@@ -54,8 +60,10 @@ export function ApartmentKpis({ kpis, view }: { kpis: Kpis; view: "month" | "yea
                 formatCents(rent.dueCents),
               )}
             />
-            <Text size="xs" c={missingRent > 0 ? "amber.4" : "teal.4"}>
-              {missingRent > 0 ? text.rent.missing(formatCents(missingRent)) : text.rent.complete}
+            <Text size="xs" c={missingRent > 0 ? 'amber.4' : 'teal.4'}>
+              {missingRent > 0
+                ? text.rent.missing(formatCents(missingRent))
+                : text.rent.complete}
             </Text>
           </Stack>
         </KpiCard>
@@ -75,7 +83,7 @@ export function ApartmentKpis({ kpis, view }: { kpis: Kpis; view: "month" | "yea
           hint={
             effort.actualCents === 0 && effort.forecastCents === 0
               ? text.effort.none
-              : view === "year"
+              : view === 'year'
                 ? text.effort.hintYear(
                     formatCents(effort.perMonthCents),
                     formatCents(effort.forecastCents),
@@ -94,7 +102,7 @@ export function ApartmentKpis({ kpis, view }: { kpis: Kpis; view: "month" | "yea
                   formatCents(effort.actualCents),
                 )}
               />
-              <Text size="xs" c={surplus >= 0 ? "teal.4" : "amber.4"}>
+              <Text size="xs" c={surplus >= 0 ? 'teal.4' : 'amber.4'}>
                 {surplus >= 0
                   ? text.effort.covered(formatCents(surplus))
                   : text.effort.missing(formatCents(-surplus))}
@@ -104,5 +112,5 @@ export function ApartmentKpis({ kpis, view }: { kpis: Kpis; view: "month" | "yea
         </KpiCard>
       </Grid.Col>
     </Grid>
-  );
+  )
 }

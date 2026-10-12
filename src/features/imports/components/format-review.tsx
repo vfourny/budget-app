@@ -1,35 +1,50 @@
-import { Alert, Button, Group, Stack, Table, Text, TextInput, Title } from "@mantine/core";
-import { IconAlertTriangle } from "@tabler/icons-react";
-import { useState } from "react";
+import {
+  Alert,
+  Button,
+  Group,
+  Stack,
+  Table,
+  Text,
+  TextInput,
+  Title,
+} from '@mantine/core'
+import { IconAlertTriangle } from '@tabler/icons-react'
+import { useState } from 'react'
 
-import { formatCents, formatDate } from "@/lib/format";
-import { fr } from "@/lib/i18n/fr";
-import type { RouterOutputs } from "@/lib/trpc";
-import type { CsvFormatConfig } from "@shared/csv-format";
+import { formatCents, formatDate } from '@/lib/format'
+import { fr } from '@/lib/i18n/fr'
+import type { RouterOutputs } from '@/lib/trpc'
+import type { CsvFormatConfig } from '@shared/csv-format'
 
-type Detection = RouterOutputs["import"]["detectFormat"];
+type Detection = RouterOutputs['import']['detectFormat']
 
 interface FormatReviewProps {
-  detection: Detection;
-  isImporting: boolean;
-  onConfirm: (format: { name: string; config: CsvFormatConfig }) => void;
-  onRetry: () => void;
+  detection: Detection
+  isImporting: boolean
+  onConfirm: (format: { name: string; config: CsvFormatConfig }) => void
+  onRetry: () => void
 }
 
 /** Format de colonnes détecté par l'IA : mapping lisible + aperçu des premières lignes lues, à
  * confirmer avant d'importer (le format n'est enregistré qu'à la confirmation). */
-export function FormatReview({ detection, isImporting, onConfirm, onRetry }: FormatReviewProps) {
+export function FormatReview({
+  detection,
+  isImporting,
+  onConfirm,
+  onRetry,
+}: FormatReviewProps) {
   // Champ contrôlé (≈ `v-model`) : pré-rempli avec le nom de banque deviné par l'IA.
-  const [name, setName] = useState(detection.bankName);
-  const { config, columns, checks } = detection;
+  const [name, setName] = useState(detection.bankName)
+  const { config, columns, checks } = detection
 
   // Titre de la colonne si le fichier a un en-tête, sinon « Colonne N » (index affiché à partir de 1).
   const columnName = (index: number) =>
-    (config.hasHeader ? columns[index] : undefined) || fr.importForm.columnN(index + 1);
+    (config.hasHeader ? columns[index] : undefined) ||
+    fr.importForm.columnN(index + 1)
 
   const mapping = [
     {
-      key: "date",
+      key: 'date',
       label: fr.importForm.mappingFields.date,
       value: fr.importForm.mappingDate(
         columnName(config.dateColumn),
@@ -37,15 +52,17 @@ export function FormatReview({ detection, isImporting, onConfirm, onRetry }: For
       ),
     },
     {
-      key: "label",
+      key: 'label',
       label: fr.importForm.mappingFields.label,
-      value: config.labelColumns.map(columnName).join(fr.importForm.mappingJoin),
+      value: config.labelColumns
+        .map(columnName)
+        .join(fr.importForm.mappingJoin),
     },
     {
-      key: "amount",
+      key: 'amount',
       label: fr.importForm.mappingFields.amount,
       value:
-        config.amount.kind === "signed"
+        config.amount.kind === 'signed'
           ? columnName(config.amount.column)
           : fr.importForm.mappingDebitCredit(
               columnName(config.amount.debit),
@@ -53,13 +70,13 @@ export function FormatReview({ detection, isImporting, onConfirm, onRetry }: For
             ),
     },
     {
-      key: "decimal",
+      key: 'decimal',
       label: fr.importForm.mappingFields.decimal,
       value: fr.importForm.decimalSeparatorNames[config.decimalSeparator],
     },
-  ];
+  ]
 
-  const canConfirm = !checks.includes("NO_TRANSACTIONS");
+  const canConfirm = !checks.includes('NO_TRANSACTIONS')
 
   return (
     <Stack gap={18}>
@@ -90,7 +107,9 @@ export function FormatReview({ detection, isImporting, onConfirm, onRetry }: For
             <Table.Tr>
               <Table.Th>{fr.importForm.previewColumns.date}</Table.Th>
               <Table.Th>{fr.importForm.previewColumns.label}</Table.Th>
-              <Table.Th ta="right">{fr.importForm.previewColumns.amount}</Table.Th>
+              <Table.Th ta="right">
+                {fr.importForm.previewColumns.amount}
+              </Table.Th>
             </Table.Tr>
           </Table.Thead>
           <Table.Tbody>
@@ -98,7 +117,9 @@ export function FormatReview({ detection, isImporting, onConfirm, onRetry }: For
               <Table.Tr key={index}>
                 <Table.Td>{formatDate(transaction.date)}</Table.Td>
                 <Table.Td>{transaction.label}</Table.Td>
-                <Table.Td ta="right">{formatCents(transaction.amountCents)}</Table.Td>
+                <Table.Td ta="right">
+                  {formatCents(transaction.amountCents)}
+                </Table.Td>
               </Table.Tr>
             ))}
           </Table.Tbody>
@@ -108,7 +129,7 @@ export function FormatReview({ detection, isImporting, onConfirm, onRetry }: For
       {checks.map((code) => (
         <Alert
           key={code}
-          color={code === "NO_TRANSACTIONS" ? "red" : "amber"}
+          color={code === 'NO_TRANSACTIONS' ? 'red' : 'amber'}
           icon={<IconAlertTriangle size={18} />}
         >
           {fr.importForm.formatChecks[code]}
@@ -128,7 +149,10 @@ export function FormatReview({ detection, isImporting, onConfirm, onRetry }: For
           loading={isImporting}
           disabled={!canConfirm}
           onClick={() =>
-            onConfirm({ name: name.trim() || fr.importForm.defaultFormatName, config })
+            onConfirm({
+              name: name.trim() || fr.importForm.defaultFormatName,
+              config,
+            })
           }
         >
           {fr.importForm.confirmFormat}
@@ -138,5 +162,5 @@ export function FormatReview({ detection, isImporting, onConfirm, onRetry }: For
         </Button>
       </Group>
     </Stack>
-  );
+  )
 }

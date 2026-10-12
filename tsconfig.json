@@ -10,5 +10,12 @@
       "@shared/*": ["./shared/*"]
     }
   },
-  "exclude": ["node_modules", "dist", ".output", ".vercel", ".pnpm-store", "Claude outputs"]
+  "exclude": [
+    "node_modules",
+    "dist",
+    ".output",
+    ".vercel",
+    ".pnpm-store",
+    "Claude outputs"
+  ]
 }

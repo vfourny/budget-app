@@ -1,23 +1,24 @@
-import { Paper, Title } from "@mantine/core";
+import { Paper, Title } from '@mantine/core'
 
 import {
   ForecastTable,
   type ForecastTableGroup,
-} from "@/features/professional/components/forecast-table";
-import { formatBp, formatCents } from "@/lib/format";
-import { fr } from "@/lib/i18n/fr";
-import type { ProfessionalMonth } from "@server/lib/professional/types";
-import type { TransactionCategory } from "@server/generated/prisma/enums";
+} from '@/features/professional/components/forecast-table'
+import { formatBp, formatCents } from '@/lib/format'
+import { fr } from '@/lib/i18n/fr'
+import type { ProfessionalMonth } from '@server/lib/professional/types'
+import type { TransactionCategory } from '@server/generated/prisma/enums'
 
 /** Groupes du tableau « Prévisionnel vs réel · par catégorie » d'un mois. */
 function monthForecastGroups(month: ProfessionalMonth): ForecastTableGroup[] {
-  const text = fr.professional.categories;
-  const { remuneration, settings } = month;
-  const netSalary = remuneration.netSalary.actual ?? remuneration.netSalary.forecast;
+  const text = fr.professional.categories
+  const { remuneration, settings } = month
+  const netSalary =
+    remuneration.netSalary.actual ?? remuneration.netSalary.forecast
 
   return [
     {
-      key: "charges",
+      key: 'charges',
       label: text.groups.charges,
       rows: [
         ...month.charges.rows.map((row) => ({
@@ -25,96 +26,98 @@ function monthForecastGroups(month: ProfessionalMonth): ForecastTableGroup[] {
           label: fr.categories[row.category],
           sub: row.vatBp > 0 ? text.vatRate(formatBp(row.vatBp)) : undefined,
           amount: row.amount,
-          goal: "atMost" as const,
+          goal: 'atMost' as const,
         })),
         {
-          key: "mixed",
+          key: 'mixed',
           label: text.mixedCosts,
           sub: text.mixedCostsSub,
           amount: month.charges.mixedCosts,
-          goal: "atMost",
+          goal: 'atMost',
         },
         {
-          key: "total",
+          key: 'total',
           label: text.totalCharges,
           amount: month.charges.total,
-          goal: "atMost",
-          tone: "total",
+          goal: 'atMost',
+          tone: 'total',
         },
       ],
     },
     {
-      key: "remuneration",
+      key: 'remuneration',
       label: text.groups.remuneration,
       rows: [
         {
-          key: "bnc",
+          key: 'bnc',
           label: text.bnc,
           sub: text.bncSub,
           amount: remuneration.bncWithdrawal,
-          goal: "atMost",
+          goal: 'atMost',
         },
         {
-          key: "gross",
+          key: 'gross',
           label: text.grossSalary,
           sub: text.netSalarySub(formatCents(netSalary)),
           amount: remuneration.grossSalary,
-          goal: "atMost",
+          goal: 'atMost',
         },
         {
-          key: "employer",
+          key: 'employer',
           label: text.employer,
           sub: text.rateOfGross(formatBp(settings.employerContributionBp)),
           amount: remuneration.employerContributions,
-          goal: "atMost",
+          goal: 'atMost',
         },
         ...remuneration.employerContributionSplit.map((split) => ({
           key: split.category,
-          label: text.splitOf(fr.categories[split.category as TransactionCategory]),
+          label: text.splitOf(
+            fr.categories[split.category as TransactionCategory],
+          ),
           amount: split.amount,
-          goal: "atMost" as const,
-          tone: "detail" as const,
+          goal: 'atMost' as const,
+          tone: 'detail' as const,
         })),
         {
-          key: "employee",
+          key: 'employee',
           label: text.employee,
           sub: text.employeeSub(formatBp(settings.employeeContributionBp)),
           amount: remuneration.employeeContributions,
-          goal: "atMost",
-          tone: "memo",
+          goal: 'atMost',
+          tone: 'memo',
         },
         {
-          key: "withholding",
+          key: 'withholding',
           label: text.withholding,
           sub: text.withholdingSub(formatBp(settings.withholdingTaxBp)),
           amount: remuneration.withholdingTax,
-          goal: "atMost",
-          tone: "memo",
+          goal: 'atMost',
+          tone: 'memo',
         },
         {
-          key: "social",
+          key: 'social',
           label: text.socialCharges,
           sub: text.socialChargesSub(formatBp(settings.profitSocialChargesBp)),
           amount: month.profitSocialCharges,
-          goal: "atMost",
-          tone: "memo",
+          goal: 'atMost',
+          tone: 'memo',
         },
       ],
     },
     {
-      key: "taxes",
+      key: 'taxes',
       label: text.groups.taxes,
       rows: [
         {
-          key: "vat",
+          key: 'vat',
           label: text.vat,
           sub: text.vatSub,
           amount: month.vat.payment,
-          goal: "atMost",
+          goal: 'atMost',
         },
       ],
     },
-  ];
+  ]
 }
 
 /** Carte « Prévisionnel vs réel · par catégorie » de la vue mois. */
@@ -132,5 +135,5 @@ export function CategoryForecastCard({ month }: { month: ProfessionalMonth }) {
       </Title>
       <ForecastTable groups={monthForecastGroups(month)} />
     </Paper>
-  );
+  )
 }

@@ -1,20 +1,24 @@
-import { ActionIcon, useMantineColorScheme, type MantineColorScheme } from "@mantine/core";
-import { IconDeviceDesktop, IconMoon, IconSun } from "@tabler/icons-react";
+import {
+  ActionIcon,
+  useMantineColorScheme,
+  type MantineColorScheme,
+} from '@mantine/core'
+import { IconDeviceDesktop, IconMoon, IconSun } from '@tabler/icons-react'
 
-import { fr } from "@/lib/i18n/fr";
+import { fr } from '@/lib/i18n/fr'
 
 /** Ordre de la bascule : Système → Clair → Sombre → Système… */
 const NEXT = {
-  auto: "light",
-  light: "dark",
-  dark: "auto",
-} as const satisfies Record<MantineColorScheme, MantineColorScheme>;
+  auto: 'light',
+  light: 'dark',
+  dark: 'auto',
+} as const satisfies Record<MantineColorScheme, MantineColorScheme>
 
 const ICONS = {
   auto: IconDeviceDesktop,
   light: IconSun,
   dark: IconMoon,
-} as const satisfies Record<MantineColorScheme, typeof IconSun>;
+} as const satisfies Record<MantineColorScheme, typeof IconSun>
 
 /**
  * Bouton du thème à 3 états : suivre le système (défaut), clair, sombre. L'icône montre le mode
@@ -23,10 +27,10 @@ const ICONS = {
  * Mode avec `preference: "system"`.
  */
 export function ColorSchemeToggle() {
-  const { colorScheme, setColorScheme } = useMantineColorScheme();
-  const next = NEXT[colorScheme];
-  const label = fr.nav.colorScheme[next];
-  const Icon = ICONS[colorScheme];
+  const { colorScheme, setColorScheme } = useMantineColorScheme()
+  const next = NEXT[colorScheme]
+  const label = fr.nav.colorScheme[next]
+  const Icon = ICONS[colorScheme]
 
   return (
     <ActionIcon
@@ -38,5 +42,5 @@ export function ColorSchemeToggle() {
     >
       <Icon size={18} stroke={1.8} />
     </ActionIcon>
-  );
+  )
 }

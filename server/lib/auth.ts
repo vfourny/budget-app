@@ -1,8 +1,8 @@
-import { betterAuth } from "better-auth";
-import { prismaAdapter } from "better-auth/adapters/prisma";
+import { betterAuth } from 'better-auth'
+import { prismaAdapter } from 'better-auth/adapters/prisma'
 
-import { db } from "@server/lib/db";
-import { env } from "@server/lib/env";
+import { db } from '@server/lib/db'
+import { env } from '@server/lib/env'
 
 /**
  * Better Auth, monté sur `/api/auth/*` (`server/api/auth/[...all].ts`). Sessions en cookie
@@ -14,10 +14,10 @@ import { env } from "@server/lib/env";
 export const auth = betterAuth({
   secret: env.BETTER_AUTH_SECRET,
   baseURL: env.BETTER_AUTH_URL,
-  database: prismaAdapter(db, { provider: "postgresql" }),
+  database: prismaAdapter(db, { provider: 'postgresql' }),
   emailAndPassword: {
     enabled: true,
     disableSignUp: true,
     minPasswordLength: 12,
   },
-});
+})

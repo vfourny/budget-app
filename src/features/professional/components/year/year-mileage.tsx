@@ -1,35 +1,51 @@
-import { Paper, SimpleGrid, Text, Title, Tooltip } from "@mantine/core";
+import { Paper, SimpleGrid, Text, Title, Tooltip } from '@mantine/core'
 
-import { formatCents, monthName, shortMonthName } from "@/lib/format";
-import { LOCALE, fr } from "@/lib/i18n/fr";
-import type { ProfessionalMonth } from "@server/lib/professional/types";
+import { formatCents, monthName, shortMonthName } from '@/lib/format'
+import { LOCALE, fr } from '@/lib/i18n/fr'
+import type { ProfessionalMonth } from '@server/lib/professional/types'
 
-import classes from "./year-mileage.module.css";
+import classes from './year-mileage.module.css'
 
-const kmFormat = new Intl.NumberFormat(LOCALE);
-const rateFormat = new Intl.NumberFormat(LOCALE, { maximumFractionDigits: 3 });
+const kmFormat = new Intl.NumberFormat(LOCALE)
+const rateFormat = new Intl.NumberFormat(LOCALE, { maximumFractionDigits: 3 })
 
 /** « Frais kilométriques · année » : réalisé à ce jour, prévu de l'année, km par mois. */
-export function YearMileage({ months }: { months: readonly ProfessionalMonth[] }) {
-  const text = fr.professional.year.mileage;
-  const kmOf = (month: ProfessionalMonth) => month.mileage.actualKm ?? month.mileage.forecastKm;
-  const toDate = months.filter((month) => month.hasActual);
-  const toDateKm = toDate.reduce((total, month) => total + (month.mileage.actualKm ?? 0), 0);
+export function YearMileage({
+  months,
+}: {
+  months: readonly ProfessionalMonth[]
+}) {
+  const text = fr.professional.year.mileage
+  const kmOf = (month: ProfessionalMonth) =>
+    month.mileage.actualKm ?? month.mileage.forecastKm
+  const toDate = months.filter((month) => month.hasActual)
+  const toDateKm = toDate.reduce(
+    (total, month) => total + (month.mileage.actualKm ?? 0),
+    0,
+  )
   const toDateCents = toDate.reduce(
     (total, month) => total + (month.mileage.amount.actual ?? 0),
     0,
-  );
-  const yearKm = months.reduce((total, month) => total + kmOf(month), 0);
+  )
+  const yearKm = months.reduce((total, month) => total + kmOf(month), 0)
   const yearCents = months.reduce(
-    (total, month) => total + (month.mileage.amount.actual ?? month.mileage.amount.forecast),
+    (total, month) =>
+      total + (month.mileage.amount.actual ?? month.mileage.amount.forecast),
     0,
-  );
-  const max = Math.max(...months.map(kmOf), 1);
-  const rateMilli = months.at(-1)?.mileage.rateMilli ?? 0;
-  const km = (value: number) => fr.professional.mileage.km(kmFormat.format(value));
+  )
+  const max = Math.max(...months.map(kmOf), 1)
+  const rateMilli = months.at(-1)?.mileage.rateMilli ?? 0
+  const km = (value: number) =>
+    fr.professional.mileage.km(kmFormat.format(value))
 
   return (
-    <Paper withBorder radius="lg" p={24} component="section" aria-label={text.title}>
+    <Paper
+      withBorder
+      radius="lg"
+      p={24}
+      component="section"
+      aria-label={text.title}
+    >
       <Title order={2} mb={16}>
         {text.title}
       </Title>
@@ -57,7 +73,10 @@ export function YearMileage({ months }: { months: readonly ProfessionalMonth[] }
         {months.map((month) => (
           <Tooltip
             key={month.month}
-            label={text.bar(monthName(month.month), kmFormat.format(kmOf(month)))}
+            label={text.bar(
+              monthName(month.month),
+              kmFormat.format(kmOf(month)),
+            )}
           >
             <div className={classes.column}>
               <div
@@ -78,5 +97,5 @@ export function YearMileage({ months }: { months: readonly ProfessionalMonth[] }
         )}
       </Text>
     </Paper>
-  );
+  )
 }

@@ -11,11 +11,11 @@
   background: var(--mantine-color-amber-6);
 }
 
-.fill[data-state="good"] {
+.fill[data-state='good'] {
   background: var(--mantine-color-teal-5);
 }
 
-.fill[data-state="even"] {
+.fill[data-state='even'] {
   background: var(--mantine-color-gold-6);
 }
 

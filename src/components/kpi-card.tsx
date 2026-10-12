@@ -1,13 +1,13 @@
-import { Group, Paper, Stack, Text } from "@mantine/core";
-import type { ReactNode } from "react";
+import { Group, Paper, Stack, Text } from '@mantine/core'
+import type { ReactNode } from 'react'
 
 interface KpiCardProps {
-  label: ReactNode;
-  value: string;
-  hint?: ReactNode;
+  label: ReactNode
+  value: string
+  hint?: ReactNode
   /** Couleur du chiffre (token Mantine, ex. `"gold.6"`). */
-  color?: string;
-  children?: ReactNode;
+  color?: string
+  children?: ReactNode
 }
 
 /** Carte d'indicateur : libellé, grand chiffre, aide, puis un détail optionnel (lignes, jauges). */
@@ -33,7 +33,7 @@ export function KpiCard({ label, value, hint, color, children }: KpiCardProps) {
         )}
       </Stack>
     </Paper>
-  );
+  )
 }
 
 /** Ligne « libellé … valeur » du détail d'une carte. */
@@ -42,9 +42,9 @@ export function KpiLine({
   value,
   color,
 }: {
-  name: ReactNode;
-  value: string;
-  color?: string;
+  name: ReactNode
+  value: string
+  color?: string
 }) {
   return (
     <Group justify="space-between" wrap="nowrap">
@@ -55,5 +55,5 @@ export function KpiLine({
         {value}
       </Text>
     </Group>
-  );
+  )
 }

@@ -1,4 +1,4 @@
-import { TRPCError } from "@trpc/server";
+import { TRPCError } from '@trpc/server'
 
 /**
  * Erreurs « métier » renvoyées au front sous forme de **code**, jamais de texte : le serveur ne
@@ -6,29 +6,29 @@ import { TRPCError } from "@trpc/server";
  * (dictionnaire exhaustif : un code ajouté ici sans traduction casse `tsc`).
  */
 export type AppErrorCode =
-  | "NOT_AUTHENTICATED"
-  | "IMPORT_NOT_FOUND"
-  | "IMPORT_ALREADY_VALIDATED"
-  | "TRANSACTION_NOT_FOUND"
-  | "CATEGORY_NOT_ALLOWED"
-  | "TRIP_NOT_FOUND"
-  | "APARTMENT_NOT_FOUND"
-  | "APARTMENT_HAS_TRANSACTIONS"
-  | "APARTMENT_REQUIRED"
-  | "APARTMENT_NO_MANAGER"
-  | "APARTMENT_NOT_ALLOWED"
-  | "UNKNOWN_CSV_FORMAT"
-  | "NO_READABLE_TRANSACTIONS"
-  | "ALL_ROWS_ALREADY_IMPORTED"
-  | "REMAINING_TO_REVIEW"
-  | "GEMINI_QUOTA_EXCEEDED"
-  | "GEMINI_REFUSED"
-  | "CATEGORIZATION_FAILED"
-  | "CSV_FORMAT_DETECTION_FAILED";
+  | 'NOT_AUTHENTICATED'
+  | 'IMPORT_NOT_FOUND'
+  | 'IMPORT_ALREADY_VALIDATED'
+  | 'TRANSACTION_NOT_FOUND'
+  | 'CATEGORY_NOT_ALLOWED'
+  | 'TRIP_NOT_FOUND'
+  | 'APARTMENT_NOT_FOUND'
+  | 'APARTMENT_HAS_TRANSACTIONS'
+  | 'APARTMENT_REQUIRED'
+  | 'APARTMENT_NO_MANAGER'
+  | 'APARTMENT_NOT_ALLOWED'
+  | 'UNKNOWN_CSV_FORMAT'
+  | 'NO_READABLE_TRANSACTIONS'
+  | 'ALL_ROWS_ALREADY_IMPORTED'
+  | 'REMAINING_TO_REVIEW'
+  | 'GEMINI_QUOTA_EXCEEDED'
+  | 'GEMINI_REFUSED'
+  | 'CATEGORIZATION_FAILED'
+  | 'CSV_FORMAT_DETECTION_FAILED'
 
 /** Paramètres d'interpolation des codes qui en ont besoin (les autres n'en prennent pas). */
 export interface AppErrorParams {
-  REMAINING_TO_REVIEW: { remaining: number };
+  REMAINING_TO_REVIEW: { remaining: number }
 }
 
 /** Portée par `TRPCError.cause` ; l'`errorFormatter` (init.ts) l'expose au client. */
@@ -37,8 +37,8 @@ export class AppErrorCause extends Error {
     readonly code: AppErrorCode,
     readonly params?: unknown,
   ) {
-    super(code);
-    this.name = "AppErrorCause";
+    super(code)
+    this.name = 'AppErrorCause'
   }
 }
 
@@ -47,13 +47,15 @@ export class AppErrorCause extends Error {
  * dans les logs) ; le paramètre n'est demandé que pour les codes de `AppErrorParams`.
  */
 export function appError<Code extends AppErrorCode>(
-  trpcCode: TRPCError["code"],
+  trpcCode: TRPCError['code'],
   code: Code,
-  ...params: Code extends keyof AppErrorParams ? [params: AppErrorParams[Code]] : []
+  ...params: Code extends keyof AppErrorParams
+    ? [params: AppErrorParams[Code]]
+    : []
 ): TRPCError {
   return new TRPCError({
     code: trpcCode,
     message: code,
     cause: new AppErrorCause(code, params[0]),
-  });
+  })
 }

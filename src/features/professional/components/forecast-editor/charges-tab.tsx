@@ -1,23 +1,23 @@
-import { Group, NumberInput, Paper, Stack, Text } from "@mantine/core";
+import { Group, NumberInput, Paper, Stack, Text } from '@mantine/core'
 
-import { ForecastAmountsForm } from "@/features/professional/components/forecast-editor/forecast-amounts-form";
-import type { Period } from "@/hooks/use-period-selection";
-import { formatBp, formatCents } from "@/lib/format";
-import { fr } from "@/lib/i18n/fr";
+import { ForecastAmountsForm } from '@/features/professional/components/forecast-editor/forecast-amounts-form'
+import type { Period } from '@/hooks/use-period-selection'
+import { formatBp, formatCents } from '@/lib/format'
+import { fr } from '@/lib/i18n/fr'
 import {
   PROFESSIONAL_CHARGE_CATEGORIES,
   type ProfessionalYearSettingsValues,
-} from "@shared/professional-rules";
+} from '@shared/professional-rules'
 
 /** Onglet « Charges & rémunération » : prévu HT par charge pro + BNC prévu. */
 export function ChargesTab({
   period,
   settings,
 }: {
-  period: Period;
-  settings: ProfessionalYearSettingsValues;
+  period: Period
+  settings: ProfessionalYearSettingsValues
 }) {
-  const text = fr.professional.editor.charges;
+  const text = fr.professional.editor.charges
   return (
     <ForecastAmountsForm
       period={period}
@@ -35,7 +35,10 @@ export function ChargesTab({
             <Text size="sm" fw={600}>
               {text.total(
                 formatCents(
-                  PROFESSIONAL_CHARGE_CATEGORIES.reduce((total, c) => total + view.valueOf(c), 0),
+                  PROFESSIONAL_CHARGE_CATEGORIES.reduce(
+                    (total, c) => total + view.valueOf(c),
+                    0,
+                  ),
                 ),
               )}
             </Text>
@@ -54,17 +57,17 @@ export function ChargesTab({
             <NumberInput
               label={text.bnc}
               description={text.bncHint}
-              inputWrapperOrder={["label", "input", "description"]}
+              inputWrapperOrder={['label', 'input', 'description']}
               w={260}
               min={0}
               step={100}
               decimalScale={2}
               decimalSeparator=","
-              value={view.valueOf("BNC_WITHDRAWAL") / 100}
+              value={view.valueOf('BNC_WITHDRAWAL') / 100}
               onChange={(input) =>
                 setAmount(
-                  "BNC_WITHDRAWAL",
-                  Math.round((typeof input === "number" ? input : 0) * 100),
+                  'BNC_WITHDRAWAL',
+                  Math.round((typeof input === 'number' ? input : 0) * 100),
                 )
               }
             />
@@ -72,5 +75,5 @@ export function ChargesTab({
         </Stack>
       )}
     </ForecastAmountsForm>
-  );
+  )
 }

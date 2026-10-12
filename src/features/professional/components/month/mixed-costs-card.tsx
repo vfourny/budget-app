@@ -1,25 +1,28 @@
-import { Badge, Group, Paper, Stack, Text, Title } from "@mantine/core";
+import { Badge, Group, Paper, Stack, Text, Title } from '@mantine/core'
 
-import { InfoTip } from "@/components/info-tip";
-import { TargetGauge } from "@/components/target-gauge";
-import { formatBp, formatCents, formatSquareMeters } from "@/lib/format";
-import { fr } from "@/lib/i18n/fr";
-import type { MixedCostRow, ProfessionalMonth } from "@server/lib/professional/types";
+import { InfoTip } from '@/components/info-tip'
+import { TargetGauge } from '@/components/target-gauge'
+import { formatBp, formatCents, formatSquareMeters } from '@/lib/format'
+import { fr } from '@/lib/i18n/fr'
+import type {
+  MixedCostRow,
+  ProfessionalMonth,
+} from '@server/lib/professional/types'
 
-type Status = keyof typeof fr.professional.mixedCosts.status;
+type Status = keyof typeof fr.professional.mixedCosts.status
 
 const STATUS_COLOR = {
-  forecast: "gray",
-  paid: "teal",
-  partial: "red",
-  toRefund: "red",
-} as const satisfies Record<Status, string>;
+  forecast: 'gray',
+  paid: 'teal',
+  partial: 'red',
+  toRefund: 'red',
+} as const satisfies Record<Status, string>
 
 function statusOf(row: MixedCostRow): Status {
-  if (row.paidCents === null) return "forecast";
-  const due = row.due.actual ?? 0;
-  if (row.paidCents >= due) return "paid";
-  return row.paidCents > 0 ? "partial" : "toRefund";
+  if (row.paidCents === null) return 'forecast'
+  const due = row.due.actual ?? 0
+  if (row.paidCents >= due) return 'paid'
+  return row.paidCents > 0 ? 'partial' : 'toRefund'
 }
 
 /**
@@ -27,19 +30,29 @@ function statusOf(row: MixedCostRow): Status {
  * Stygma (prorata surface ou clé n/d) et remboursements reçus, ligne par ligne.
  */
 export function MixedCostsCard({ month }: { month: ProfessionalMonth }) {
-  const text = fr.professional.mixedCosts;
-  const { settings } = month;
-  const areaShare = month.mixedCosts.rows.find((row) => row.keyType === "area")?.shareBp ?? 0;
+  const text = fr.professional.mixedCosts
+  const { settings } = month
+  const areaShare =
+    month.mixedCosts.rows.find((row) => row.keyType === 'area')?.shareBp ?? 0
   const areaText = text.areaKey(
     formatSquareMeters(settings.officeAreaDm2),
     formatSquareMeters(settings.homeAreaDm2),
     formatBp(areaShare),
-  );
-  const ratioText = text.ratioKey(settings.mixedKeyNumerator, settings.mixedKeyDenominator);
-  const left = month.mixedCosts.leftToRefundCents;
+  )
+  const ratioText = text.ratioKey(
+    settings.mixedKeyNumerator,
+    settings.mixedKeyDenominator,
+  )
+  const left = month.mixedCosts.leftToRefundCents
 
   return (
-    <Paper withBorder radius="lg" p={24} component="section" aria-label={text.title}>
+    <Paper
+      withBorder
+      radius="lg"
+      p={24}
+      component="section"
+      aria-label={text.title}
+    >
       <Group gap={4} wrap="nowrap">
         <Title order={2}>{text.title}</Title>
         <InfoTip
@@ -52,10 +65,10 @@ export function MixedCostsCard({ month }: { month: ProfessionalMonth }) {
       </Text>
       <Stack gap={14}>
         {month.mixedCosts.rows.map((row) => {
-          const status = statusOf(row);
-          const label = fr.categories[row.category];
-          const due = row.due.actual ?? row.due.forecast;
-          const key = row.keyType === "area" ? areaText : ratioText;
+          const status = statusOf(row)
+          const label = fr.categories[row.category]
+          const due = row.due.actual ?? row.due.forecast
+          const key = row.keyType === 'area' ? areaText : ratioText
           return (
             <div key={row.category}>
               <Group justify="space-between" mb={4} wrap="nowrap">
@@ -71,7 +84,12 @@ export function MixedCostsCard({ month }: { month: ProfessionalMonth }) {
                   />
                   {/* Rien à rembourser (pas de dépense ce mois-ci) : pas de statut. */}
                   {due > 0 && (
-                    <Badge size="sm" variant="light" color={STATUS_COLOR[status]} tt="none">
+                    <Badge
+                      size="sm"
+                      variant="light"
+                      color={STATUS_COLOR[status]}
+                      tt="none"
+                    >
                       {text.status[status]}
                     </Badge>
                   )}
@@ -79,32 +97,39 @@ export function MixedCostsCard({ month }: { month: ProfessionalMonth }) {
                 <Text size="sm" fw={600}>
                   {row.paidCents === null
                     ? text.forecastDue(formatCents(due))
-                    : text.paidOfDue(formatCents(row.paidCents), formatCents(due))}
+                    : text.paidOfDue(
+                        formatCents(row.paidCents),
+                        formatCents(due),
+                      )}
                 </Text>
               </Group>
               <TargetGauge
                 real={row.paidCents}
                 target={due}
                 goal="atLeast"
-                ariaLabel={text.gaugeAria(label, formatCents(row.paidCents ?? 0), formatCents(due))}
+                ariaLabel={text.gaugeAria(
+                  label,
+                  formatCents(row.paidCents ?? 0),
+                  formatCents(due),
+                )}
               />
             </div>
-          );
+          )
         })}
       </Stack>
       <Group
         justify="space-between"
         mt={20}
         pt={12}
-        style={{ borderTop: "1px solid var(--app-border)" }}
+        style={{ borderTop: '1px solid var(--app-border)' }}
       >
         <Text size="sm" c="dimmed">
           {text.left}
         </Text>
-        <Text fw={700} c={month.hasActual && left > 0 ? "red.4" : "teal.4"}>
+        <Text fw={700} c={month.hasActual && left > 0 ? 'red.4' : 'teal.4'}>
           {formatCents(left)}
         </Text>
       </Group>
     </Paper>
-  );
+  )
 }

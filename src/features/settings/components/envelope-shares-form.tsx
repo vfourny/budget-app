@@ -1,39 +1,51 @@
-import { Alert, Button, Group, Loader, NumberInput, Stack, Text, Title } from "@mantine/core";
-import { useState } from "react";
+import {
+  Alert,
+  Button,
+  Group,
+  Loader,
+  NumberInput,
+  Stack,
+  Text,
+  Title,
+} from '@mantine/core'
+import { useState } from 'react'
 
 import {
   useEnvelopeShares,
   useSetEnvelopeShares,
-} from "@/features/settings/hooks/use-envelope-shares";
-import { DEFAULT_ENVELOPE_PERCENTS } from "@shared/personal-rules";
-import { errorMessage } from "@/lib/errors";
-import { fr } from "@/lib/i18n/fr";
-import type { Envelope } from "@server/generated/prisma/enums";
+} from '@/features/settings/hooks/use-envelope-shares'
+import { DEFAULT_ENVELOPE_PERCENTS } from '@shared/personal-rules'
+import { errorMessage } from '@/lib/errors'
+import { fr } from '@/lib/i18n/fr'
+import type { Envelope } from '@server/generated/prisma/enums'
 
-type Shares = Record<Envelope, number>;
+type Shares = Record<Envelope, number>
 
 export function EnvelopeSharesForm() {
-  const shares = useEnvelopeShares();
+  const shares = useEnvelopeShares()
 
-  if (shares.isPending) return <Loader color="gold" />;
-  if (shares.isError) return <Alert color="red" title={fr.settings.shares.loadFailed} />;
+  if (shares.isPending) return <Loader color="gold" />
+  if (shares.isError)
+    return <Alert color="red" title={fr.settings.shares.loadFailed} />
 
   // Le formulaire est monté une fois les données chargées : `useState` s'initialise avec elles
   // (≈ copier la valeur serveur dans un `ref` local, éditable avant d'enregistrer).
-  return <SharesFields initial={shares.data} />;
+  return <SharesFields initial={shares.data} />
 }
 
 function SharesFields({ initial }: { initial: Shares }) {
-  const [draft, setDraft] = useState<Shares>(initial);
-  const save = useSetEnvelopeShares();
+  const [draft, setDraft] = useState<Shares>(initial)
+  const save = useSetEnvelopeShares()
 
-  const envelopes = Object.keys(initial) as Envelope[];
-  const total = envelopes.reduce((sum, envelope) => sum + draft[envelope], 0);
-  const unassigned = 100 - total;
+  const envelopes = Object.keys(initial) as Envelope[]
+  const total = envelopes.reduce((sum, envelope) => sum + draft[envelope], 0)
+  const unassigned = 100 - total
   const isDefault = envelopes.every(
     (envelope) => draft[envelope] === DEFAULT_ENVELOPE_PERCENTS[envelope],
-  );
-  const changed = envelopes.some((envelope) => draft[envelope] !== initial[envelope]);
+  )
+  const changed = envelopes.some(
+    (envelope) => draft[envelope] !== initial[envelope],
+  )
 
   return (
     <Stack gap={16}>
@@ -57,14 +69,14 @@ function SharesFields({ initial }: { initial: Shares }) {
           onChange={(value) =>
             setDraft((current) => ({
               ...current,
-              [envelope]: typeof value === "number" ? value : 0,
+              [envelope]: typeof value === 'number' ? value : 0,
             }))
           }
         />
       ))}
 
       <Group gap={16}>
-        <Text size="sm" c={unassigned === 0 ? "dimmed" : "red.4"}>
+        <Text size="sm" c={unassigned === 0 ? 'dimmed' : 'red.4'}>
           {unassigned === 0
             ? fr.settings.shares.totalOk
             : unassigned < 0
@@ -102,5 +114,5 @@ function SharesFields({ initial }: { initial: Shares }) {
         </Button>
       </Group>
     </Stack>
-  );
+  )
 }

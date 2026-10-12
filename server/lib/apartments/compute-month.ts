@@ -1,10 +1,10 @@
-import { splitLoanPayment, type LoanInstallment } from "@shared/apartment-loan";
+import { splitLoanPayment, type LoanInstallment } from '@shared/apartment-loan'
 import {
   APARTMENT_CHARGE_LINES,
   CFE_MONTH,
   PROPERTY_TAX_MONTH,
   apartmentLineOf,
-} from "@shared/apartment-rules";
+} from '@shared/apartment-rules'
 import {
   ZERO_LINES,
   type ApartmentColumn,
@@ -12,7 +12,7 @@ import {
   type ApartmentRecord,
   type ApartmentTransaction,
   type ManagementInvoiceRecord,
-} from "@server/lib/apartments/types";
+} from '@server/lib/apartments/types'
 
 /**
  * Lignes de charges mensuelles dont le prévu vient de l'historique (R3, H2) : électricité,
@@ -20,10 +20,13 @@ import {
  */
 export const MONTHLY_CHARGE_LINES = [
   ...APARTMENT_CHARGE_LINES.fixed,
-  "bankFees",
-] as const satisfies readonly (keyof ApartmentLines)[];
+  'bankFees',
+] as const satisfies readonly (keyof ApartmentLines)[]
 
-export type MonthlyChargeBasis = Record<(typeof MONTHLY_CHARGE_LINES)[number], number>;
+export type MonthlyChargeBasis = Record<
+  (typeof MONTHLY_CHARGE_LINES)[number],
+  number
+>
 
 /** Échéance du tableau d'amortissement du mois, `undefined` hors tableau ou sans prêt. */
 function installmentOf(
@@ -31,7 +34,7 @@ function installmentOf(
   year: number,
   month: number,
 ): LoanInstallment | undefined {
-  return schedule.find((row) => row.year === year && row.month === month);
+  return schedule.find((row) => row.year === year && row.month === month)
 }
 
 /** Différentiel (R5) : loyer net − crédit − charges. Les frais de gérance sont déjà dans le loyer net. */
@@ -50,28 +53,33 @@ function differentialOf(lines: ApartmentLines): number {
     lines.other -
     lines.propertyTax -
     lines.cfe
-  );
+  )
 }
 
-function toColumn(lines: ApartmentLines, openingBalanceCents: number): ApartmentColumn {
-  const differentialCents = differentialOf(lines);
+function toColumn(
+  lines: ApartmentLines,
+  openingBalanceCents: number,
+): ApartmentColumn {
+  const differentialCents = differentialOf(lines)
   return {
     lines,
-    loanTotalCents: lines.loanCapital + lines.loanInterest + lines.loanInsurance,
+    loanTotalCents:
+      lines.loanCapital + lines.loanInterest + lines.loanInsurance,
     differentialCents,
     effortCents: Math.max(0, -differentialCents),
     openingBalanceCents,
-    closingBalanceCents: openingBalanceCents + differentialCents + lines.ownerContribution,
-  };
+    closingBalanceCents:
+      openingBalanceCents + differentialCents + lines.ownerContribution,
+  }
 }
 
 interface MonthContext {
-  apartment: ApartmentRecord;
-  schedule: readonly LoanInstallment[];
-  year: number;
-  month: number;
+  apartment: ApartmentRecord
+  schedule: readonly LoanInstallment[]
+  year: number
+  month: number
   /** Solde du compte au début du mois (chaîné par `computeApartmentYear`). */
-  openingBalanceCents: number;
+  openingBalanceCents: number
 }
 
 /**
@@ -82,46 +90,60 @@ interface MonthContext {
  * calculé reste égal au solde bancaire.
  */
 export function actualLines(
-  { apartment, schedule, year, month }: Omit<MonthContext, "openingBalanceCents">,
-  transactions: readonly Pick<ApartmentTransaction, "category" | "amountCents">[],
+  {
+    apartment,
+    schedule,
+    year,
+    month,
+  }: Omit<MonthContext, 'openingBalanceCents'>,
+  transactions: readonly Pick<
+    ApartmentTransaction,
+    'category' | 'amountCents'
+  >[],
   invoice: ManagementInvoiceRecord | null,
 ): ApartmentLines {
-  const lines: ApartmentLines = { ...ZERO_LINES };
-  const installment = installmentOf(schedule, year, month);
+  const lines: ApartmentLines = { ...ZERO_LINES }
+  const installment = installmentOf(schedule, year, month)
 
   for (const { category, amountCents } of transactions) {
-    const line = apartmentLineOf(category);
+    const line = apartmentLineOf(category)
     switch (line) {
-      case "rentReceived":
-        lines.netRent += amountCents;
-        break;
-      case "ownerContribution":
-        lines.ownerContribution += amountCents;
-        break;
-      case "loanInsurance":
-        lines.loanInsurance -= amountCents;
-        break;
-      case "loanRepayment": {
-        const debit = -amountCents;
+      case 'rentReceived':
+        lines.netRent += amountCents
+        break
+      case 'ownerContribution':
+        lines.ownerContribution += amountCents
+        break
+      case 'loanInsurance':
+        lines.loanInsurance -= amountCents
+        break
+      case 'loanRepayment': {
+        const debit = -amountCents
         if (installment && debit > 0) {
-          const split = splitLoanPayment(debit, installment, apartment.creditInsuranceCents);
-          lines.loanInterest += split.interestCents;
-          lines.loanInsurance += split.insuranceCents;
-          lines.loanCapital += debit - split.interestCents - split.insuranceCents;
+          const split = splitLoanPayment(
+            debit,
+            installment,
+            apartment.creditInsuranceCents,
+          )
+          lines.loanInterest += split.interestCents
+          lines.loanInsurance += split.insuranceCents
+          lines.loanCapital +=
+            debit - split.interestCents - split.insuranceCents
         } else {
-          lines.loanCapital += debit;
+          lines.loanCapital += debit
         }
-        break;
+        break
       }
       default:
-        lines[line] -= amountCents;
+        lines[line] -= amountCents
     }
   }
 
-  lines.managementFees = invoice?.feesCents ?? 0;
-  lines.extraManagementFees = invoice?.extraFeesCents ?? 0;
-  lines.grossRent = lines.netRent + lines.managementFees + lines.extraManagementFees;
-  return lines;
+  lines.managementFees = invoice?.feesCents ?? 0
+  lines.extraManagementFees = invoice?.extraFeesCents ?? 0
+  lines.grossRent =
+    lines.netRent + lines.managementFees + lines.extraManagementFees
+  return lines
 }
 
 /**
@@ -130,14 +152,19 @@ export function actualLines(
  * l'historique (`basis`). Le prévu suppose le loyer intégralement perçu (pas de vacance).
  */
 function forecastLines(
-  { apartment, schedule, year, month }: Omit<MonthContext, "openingBalanceCents">,
+  {
+    apartment,
+    schedule,
+    year,
+    month,
+  }: Omit<MonthContext, 'openingBalanceCents'>,
   basis: MonthlyChargeBasis,
 ): ApartmentLines {
   const managementFees =
     apartment.managerName === null
       ? 0
-      : Math.round((apartment.rentCents * apartment.managementFeeBps) / 10_000);
-  const installment = installmentOf(schedule, year, month);
+      : Math.round((apartment.rentCents * apartment.managementFeeBps) / 10_000)
+  const installment = installmentOf(schedule, year, month)
   return {
     ...ZERO_LINES,
     ...basis,
@@ -149,20 +176,20 @@ function forecastLines(
     loanInsurance: apartment.loan ? apartment.creditInsuranceCents : 0,
     propertyTax: month === PROPERTY_TAX_MONTH ? apartment.propertyTaxCents : 0,
     cfe: month === CFE_MONTH ? apartment.cfeCents : 0,
-  };
+  }
 }
 
 export interface MonthResult {
-  year: number;
-  month: number;
+  year: number
+  month: number
   /** Mois antérieur au mois en cours : seul un mois clos a un réalisé (R1). */
-  closed: boolean;
-  forecast: ApartmentColumn;
-  actual: ApartmentColumn | null;
+  closed: boolean
+  forecast: ApartmentColumn
+  actual: ApartmentColumn | null
   /** Facture de gérance (R12) saisie, `null` sinon ou si le bien est en direct. */
-  invoice: ManagementInvoiceRecord | null;
+  invoice: ManagementInvoiceRecord | null
   /** Mois clos d'un bien géré sans facture saisie (« Facture de gérance à saisir »). */
-  missingManagementInvoice: boolean;
+  missingManagementInvoice: boolean
 }
 
 /**
@@ -173,24 +200,30 @@ export interface MonthResult {
 export function computeMonth(
   context: MonthContext,
   input: {
-    closed: boolean;
-    basis: MonthlyChargeBasis;
-    transactions: readonly Pick<ApartmentTransaction, "category" | "amountCents">[];
-    invoice: ManagementInvoiceRecord | null;
+    closed: boolean
+    basis: MonthlyChargeBasis
+    transactions: readonly Pick<
+      ApartmentTransaction,
+      'category' | 'amountCents'
+    >[]
+    invoice: ManagementInvoiceRecord | null
   },
 ): MonthResult {
-  const forecastRaw = forecastLines(context, input.basis);
-  const forecastDifferential = differentialOf(forecastRaw);
+  const forecastRaw = forecastLines(context, input.basis)
+  const forecastDifferential = differentialOf(forecastRaw)
   const forecast = toColumn(
     { ...forecastRaw, ownerContribution: Math.max(0, -forecastDifferential) },
     context.openingBalanceCents,
-  );
+  )
 
-  const managed = context.apartment.managerName !== null;
-  const invoice = managed ? input.invoice : null;
+  const managed = context.apartment.managerName !== null
+  const invoice = managed ? input.invoice : null
   const actual = input.closed
-    ? toColumn(actualLines(context, input.transactions, invoice), context.openingBalanceCents)
-    : null;
+    ? toColumn(
+        actualLines(context, input.transactions, invoice),
+        context.openingBalanceCents,
+      )
+    : null
 
   return {
     year: context.year,
@@ -200,5 +233,5 @@ export function computeMonth(
     actual,
     invoice,
     missingManagementInvoice: input.closed && managed && invoice === null,
-  };
+  }
 }

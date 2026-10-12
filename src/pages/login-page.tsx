@@ -1,17 +1,17 @@
-import { Center, Paper } from "@mantine/core";
-import { Navigate } from "react-router";
+import { Center, Paper } from '@mantine/core'
+import { Navigate } from 'react-router'
 
-import { PageHeader } from "@/components/page-header";
-import { LoginForm } from "@/features/auth/components/login-form";
-import { authClient } from "@/lib/auth-client";
-import { fr } from "@/lib/i18n/fr";
+import { PageHeader } from '@/components/page-header'
+import { LoginForm } from '@/features/auth/components/login-form'
+import { authClient } from '@/lib/auth-client'
+import { fr } from '@/lib/i18n/fr'
 
 export function LoginPage() {
-  const { data: session, isPending } = authClient.useSession();
+  const { data: session, isPending } = authClient.useSession()
 
   // Déjà connecté : inutile de montrer le formulaire.
   if (!isPending && session) {
-    return <Navigate to="/personal" replace />;
+    return <Navigate to="/personal" replace />
   }
 
   return (
@@ -21,5 +21,5 @@ export function LoginPage() {
         <LoginForm />
       </Paper>
     </Center>
-  );
+  )
 }

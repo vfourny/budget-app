@@ -8,24 +8,26 @@
     <script>
       // Applique le thème avant le chargement de React (évite un flash) : le choix mémorisé par
       // Mantine (« light » / « dark »), sinon (« auto » ou rien) celui du système.
-      (function () {
-        let scheme = null;
+      ;(function () {
+        let scheme = null
         try {
-          scheme = localStorage.getItem("mantine-color-scheme-value");
+          scheme = localStorage.getItem('mantine-color-scheme-value')
         } catch {
           // localStorage indisponible (navigation privée stricte) : on suit le système.
         }
-        if (scheme !== "light" && scheme !== "dark") {
-          scheme = matchMedia("(prefers-color-scheme: light)").matches ? "light" : "dark";
+        if (scheme !== 'light' && scheme !== 'dark') {
+          scheme = matchMedia('(prefers-color-scheme: light)').matches
+            ? 'light'
+            : 'dark'
         }
-        document.documentElement.dataset.mantineColorScheme = scheme;
-      })();
+        document.documentElement.dataset.mantineColorScheme = scheme
+      })()
     </script>
     <style>
       body {
         background: #0d0e10;
       }
-      html[data-mantine-color-scheme="light"] body {
+      html[data-mantine-color-scheme='light'] body {
         background: #f4f3ef;
       }
     </style>

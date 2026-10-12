@@ -1,5 +1,5 @@
-import { ProfessionalDashboard } from "@/features/professional/components/professional-dashboard";
+import { ProfessionalDashboard } from '@/features/professional/components/professional-dashboard'
 
 export function ProfessionalPage() {
-  return <ProfessionalDashboard />;
+  return <ProfessionalDashboard />
 }
