@@ -3,6 +3,7 @@ import type {
   MixedCostRow,
   ProfessionalMonth,
 } from '@server/lib/professional/types'
+import { MIXED_COSTS_KEY } from '@shared/professional-rules'
 
 import { InfoTip } from '@/components/info-tip'
 import { TargetGauge } from '@/components/target-gauge'
@@ -40,8 +41,8 @@ export function MixedCostsCard({ month }: { month: ProfessionalMonth }) {
     formatBp(areaShare),
   )
   const ratioText = text.ratioKey(
-    settings.mixedKeyNumerator,
-    settings.mixedKeyDenominator,
+    MIXED_COSTS_KEY.numerator,
+    MIXED_COSTS_KEY.denominator,
   )
   const left = month.mixedCosts.leftToRefundCents
 

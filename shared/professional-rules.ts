@@ -31,8 +31,6 @@ export const DEFAULT_PROFESSIONAL_YEAR_SETTINGS = {
   profitSocialChargesBp: 970,
   officeAreaDm2: 1200,
   homeAreaDm2: 5400,
-  mixedKeyNumerator: 5,
-  mixedKeyDenominator: 7,
   mileageRateMilli: 636,
 } as const satisfies ProfessionalYearSettingsValues
 
@@ -72,8 +70,14 @@ export const PROFESSIONAL_CHARGE_CATEGORIES = Object.keys(
 ) as ProfessionalChargeCategory[]
 
 /**
+ * Clé de répartition des autres frais mixtes (internet, téléphone, énergie) : 5 jours travaillés
+ * sur 7. Donnée fixe : la changer = une PR.
+ */
+export const MIXED_COSTS_KEY = { numerator: 5, denominator: 7 } as const
+
+/**
  * Frais mixtes : dépenses du compte **perso** dont Stygma rembourse une quote-part. `"area"` =
- * prorata surface bureau / logement, `"key"` = clé n/d des Réglages (5/7 par défaut).
+ * prorata surface bureau / logement, `"key"` = clé fixe `MIXED_COSTS_KEY` (5/7).
  * L'ordre sert aussi à répartir les remboursements reçus (d'abord le loyer, etc.).
  */
 export const MIXED_COSTS = [
@@ -89,16 +93,13 @@ export const MIXED_COSTS = [
 export type MixedCostCategory = (typeof MIXED_COSTS)[number]['category']
 
 /**
- * Part remboursée par Stygma (points de base) selon la clé : surface bureau / logement, ou clé n/d
- * des Réglages. Utilisée par le calcul et par l'éditeur du prévisionnel.
+ * Part remboursée par Stygma (points de base) selon la clé : surface bureau / logement, ou clé fixe
+ * `MIXED_COSTS_KEY`. Utilisée par le calcul et par l'éditeur du prévisionnel.
  */
 export function mixedShareBp(
   settings: Pick<
     ProfessionalYearSettingsValues,
-    | 'officeAreaDm2'
-    | 'homeAreaDm2'
-    | 'mixedKeyNumerator'
-    | 'mixedKeyDenominator'
+    'officeAreaDm2' | 'homeAreaDm2'
   >,
   key: 'area' | 'key',
 ): number {
@@ -107,8 +108,7 @@ export function mixedShareBp(
         (settings.officeAreaDm2 * 10_000) / Math.max(1, settings.homeAreaDm2),
       )
     : Math.round(
-        (settings.mixedKeyNumerator * 10_000) /
-          Math.max(1, settings.mixedKeyDenominator),
+        (MIXED_COSTS_KEY.numerator * 10_000) / MIXED_COSTS_KEY.denominator,
       )
 }
 

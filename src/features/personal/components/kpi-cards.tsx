@@ -1,17 +1,15 @@
-import { Anchor, Grid } from '@mantine/core'
+import { Grid } from '@mantine/core'
 import type { Envelope } from '@server/generated/prisma/enums'
 import type { PeriodTotals } from '@server/lib/dashboard/aggregate'
+import { estimateIncomeTaxCents, incomeTaxBrackets } from '@shared/income-tax'
 import { isSavingsEnvelope, SAVINGS_ENVELOPES } from '@shared/personal-rules'
-import { Link } from 'react-router'
 
 import { KpiCard, KpiLine } from '@/components/kpi-card'
 import { EnvelopeGauge } from '@/features/personal/components/envelope-gauge'
 import { useEnvelopeShares } from '@/features/settings/hooks/use-envelope-shares'
-import { useIncomeTaxBrackets } from '@/features/settings/hooks/use-income-tax-brackets'
 import { ENVELOPE_ORDER, envelopeSourceText } from '@/lib/envelopes'
 import { formatCents } from '@/lib/format'
 import { fr } from '@/lib/i18n/fr'
-import { estimateIncomeTaxCents } from '@/lib/income-tax'
 
 type Overview = PeriodTotals & { monthsWithData: number }
 
@@ -70,7 +68,7 @@ export function KpiCards({
   const topSpan = { base: 12, md: 4 }
   const bottomSpan = { base: 12, md: 6 }
   // IR estimé sur le revenu annualisé (cumul / mois avec données × 12), valeur dérivée au rendu.
-  const brackets = useIncomeTaxBrackets(year)
+  const brackets = incomeTaxBrackets(year)
   const annualRevenueCents = Math.round((overview.revenueCents / months) * 12)
 
   return (
@@ -128,35 +126,22 @@ export function KpiCards({
             />
           </Grid.Col>
           <Grid.Col span={bottomSpan}>
-            {brackets.data && brackets.data.length > 0 ? (
-              <KpiCard
-                color="blue.3"
-                hint={fr.personal.kpi.incomeTaxHint}
-                label={fr.personal.kpi.incomeTax(year)}
-                value={formatCents(
-                  estimateIncomeTaxCents(annualRevenueCents, brackets.data),
-                )}
-              />
-            ) : (
-              <KpiCard
-                color="blue.3"
-                hint={
-                  brackets.isError
-                    ? fr.personal.kpi.incomeTaxLoadFailed
-                    : brackets.isSuccess
-                      ? fr.personal.kpi.incomeTaxMissing(year)
-                      : ''
-                }
-                label={fr.personal.kpi.incomeTax(year)}
-                value={brackets.isPending ? '…' : '—'}
-              >
-                {brackets.isSuccess && (
-                  <Anchor c="amber.4" component={Link} size="sm" to="/settings">
-                    {fr.personal.kpi.incomeTaxMissingLink}
-                  </Anchor>
-                )}
-              </KpiCard>
-            )}
+            <KpiCard
+              color="blue.3"
+              hint={
+                brackets
+                  ? fr.personal.kpi.incomeTaxHint
+                  : fr.personal.kpi.incomeTaxMissing(year)
+              }
+              label={fr.personal.kpi.incomeTax(year)}
+              value={
+                brackets
+                  ? formatCents(
+                      estimateIncomeTaxCents(annualRevenueCents, brackets),
+                    )
+                  : '—'
+              }
+            />
           </Grid.Col>
         </>
       )}

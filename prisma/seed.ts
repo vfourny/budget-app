@@ -4,7 +4,6 @@ import { db } from '@server/lib/db'
 
 import { seedApartments } from './seeds/apartments'
 import { seedCsvFormats } from './seeds/csv-formats'
-import { seedIncomeTaxBrackets } from './seeds/income-tax'
 import { seedProfessionalBilling } from './seeds/professional-billing'
 import { seedUser } from './seeds/user'
 
@@ -14,7 +13,6 @@ import { seedUser } from './seeds/user'
 // saisies faites dans l'app.
 
 try {
-  await seedIncomeTaxBrackets()
   const userId = await seedUser()
   await seedCsvFormats(userId)
   await seedProfessionalBilling(userId)

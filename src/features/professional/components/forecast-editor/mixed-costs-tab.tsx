@@ -1,6 +1,7 @@
 import { Text } from '@mantine/core'
 import {
   MIXED_COSTS,
+  MIXED_COSTS_KEY,
   mixedShareBp,
   type ProfessionalYearSettingsValues,
 } from '@shared/professional-rules'
@@ -36,8 +37,8 @@ export function MixedCostsTab({
             {cost.key === 'area'
               ? text.areaKey(formatBp(cost.shareBp))
               : text.ratioKey(
-                  settings.mixedKeyNumerator,
-                  settings.mixedKeyDenominator,
+                  MIXED_COSTS_KEY.numerator,
+                  MIXED_COSTS_KEY.denominator,
                 )}
           </Text>,
           <Text fw={600} key="share" size="sm">

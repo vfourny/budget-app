@@ -72,7 +72,7 @@ src/                   # FRONT — SPA React, tourne uniquement dans le navigate
   lib/                 # utilitaires front : trpc.ts (client + queryClient), theme.ts (thème Mantine)…
     i18n/fr/           # TOUS les textes de l'UI (dictionnaires typés) + plural.ts (accord en nombre)
   styles/global.css    # règles CSS globales (le thème, lui, est dans lib/theme.ts)
-shared/                # code pur partagé front + back (personal-rules.ts, professional-rules.ts, apartment-rules.ts, apartment-loan.ts, account-categories.ts, billing-days.ts), alias @shared/
+shared/                # code pur partagé front + back (personal-rules.ts, income-tax.ts, professional-rules.ts, apartment-rules.ts, apartment-loan.ts, account-categories.ts, billing-days.ts), alias @shared/
 server/                # BACKEND — Nitro, mêmes conventions que le server/ de Nuxt
   api/                 # routes HTTP : server/api/health.ts → GET /api/health
     trpc/[...path].ts  # point d'entrée HTTP de tRPC
@@ -118,7 +118,8 @@ nitro.config.ts        # serverDir: ./server
   (`@/lib/auth-client`), routes privées sous `RequireAuth` dans `app.tsx`. Les données métier
   (`EnvelopeShare`, `ImportBatch`, `Transaction`) portent un `userId` : **toute requête tRPC filtre sur
   `ctx.session.user.id`** (`findFirst({ where: { id, userId } })` plutôt que `findUnique({ where: { id } })`,
-  `userId` à la création). `IncomeTaxBracket` reste global (barème légal).
+  `userId` à la création). Le barème de l'IR n'est pas en base : donnée légale dans `shared/income-tax.ts`,
+  une PR par nouvelle année.
 - **Valeurs dérivées** calculées pendant le rendu (≈ `computed`), pas stockées dans un
   `useState` ; `useMemo` seulement si le calcul est coûteux.
 - **Hooks custom** (`useXxx`) dans `features/<domaine>/hooks/` dès qu'une logique à état est

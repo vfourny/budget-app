@@ -9,7 +9,7 @@ enum CompanyRegime {
 }
 
 /// Règles de Stygma pour une année (Réglages › Pro) : taux du bulletin de paie, charges sociales sur
-/// la quote-part de bénéfice, clés des frais mixtes, barème km. Une année sans ligne reprend la
+/// la quote-part de bénéfice, surfaces des frais mixtes, barème km. Une année sans ligne reprend la
 /// dernière année configurée avant elle (sinon `DEFAULT_PROFESSIONAL_YEAR_SETTINGS`, `shared/professional-rules.ts`).
 /// Pas de float : taux en points de base (4460 = 44,60 %), surfaces en dm², barème en millièmes d'€.
 model ProfessionalYearSettings {
@@ -29,9 +29,6 @@ model ProfessionalYearSettings {
   profitSocialChargesBp  Int
   officeAreaDm2          Int
   homeAreaDm2            Int
-  /// Clé de répartition des autres frais mixtes (internet, téléphone, énergie) : numérateur / dénominateur.
-  mixedKeyNumerator      Int           @db.SmallInt
-  mixedKeyDenominator    Int           @db.SmallInt
   /// Barème kilométrique en millièmes d'euro par km (636 = 0,636 €/km).
   mileageRateMilli       Int
 

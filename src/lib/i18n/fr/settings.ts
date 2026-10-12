@@ -67,7 +67,6 @@ export const settings = {
       euros: '€',
       percent: '%',
       squareMeters: 'm²',
-      days: 'j',
       eurosPerKm: '€/km',
     },
     fields: {
@@ -103,14 +102,6 @@ export const settings = {
         label: 'Surface du logement',
         hint: 'Quote-part loyer = surface bureau / surface logement.',
       },
-      mixedKeyNumerator: {
-        label: 'Clé autres frais : numérateur',
-        hint: 'Ex. 5 jours travaillés…',
-      },
-      mixedKeyDenominator: {
-        label: 'Clé autres frais : dénominateur',
-        hint: '…sur 7 : internet, téléphone, électricité.',
-      },
       mileageRateMilli: {
         label: 'Barème kilométrique',
         hint: "Taux appliqué aux km à déclarer. Il change chaque année : à mettre à jour pour l'année choisie.",
@@ -118,7 +109,6 @@ export const settings = {
     },
     invalidAreas:
       'La surface du bureau ne peut pas dépasser celle du logement.',
-    invalidKey: 'Le numérateur de la clé ne peut pas dépasser le dénominateur.',
     savedFor: (year: number) =>
       `Enregistré pour ${year}. L'écran Pro utilise ces valeurs pour cette année.`,
     saveFailed: 'Enregistrement impossible',
@@ -175,21 +165,5 @@ export const settings = {
         `1ʳᵉ échéance : ${capital} de capital, ${interest} d'intérêts`,
       totalInterest: (amount: string) => `Coût total des intérêts : ${amount}`,
     },
-  },
-  incomeTax: {
-    title: "Barème de l'impôt sur le revenu",
-    description:
-      "Barème (1 part) en vigueur pour l'année choisie : il sert à l'IR estimé de la vue année du dashboard Perso. À renseigner chaque année.",
-    year: 'Année',
-    loadFailed: 'Impossible de charger le barème.',
-    empty:
-      'Barème non renseigné pour cette année : saisis les tranches ci-dessous.',
-    from: 'À partir de',
-    rate: 'Taux',
-    addBracket: 'Ajouter une tranche',
-    removeBracket: 'Supprimer la tranche',
-    invalid:
-      'Le barème doit commencer à 0 € et avoir des seuils strictement croissants.',
-    saveFailed: 'Enregistrement impossible',
   },
 } as const
