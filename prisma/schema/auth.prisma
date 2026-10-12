@@ -22,6 +22,7 @@ model User {
   billingLines             BillingLine[]
   monthlyForecasts         MonthlyForecast[]
   mileageForecasts         MileageForecast[]
+  salaryForecasts          SalaryForecast[]
   trips                    Trip[]
   apartments               Apartment[]
   apartmentYearOpenings    ApartmentYearOpening[]

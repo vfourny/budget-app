@@ -22,6 +22,8 @@ const billingLineSchema = z.object({
   days: z.number().min(0).max(MAX_BILLED_DAYS).multipleOf(DAY_STEP),
 })
 
+const grossSalaryCents = z.number().int().min(0).max(100_000_00)
+
 const groupSchema = z.enum(
   Object.keys(FORECAST_GROUPS) as [ForecastGroup, ...ForecastGroup[]],
 )
@@ -221,6 +223,75 @@ export const professionalForecastRouter = createTRPCRouter({
               amountCents: value.overrideCents ?? value.lastYearCents,
             })),
           ),
+        }),
+      ])
+      return { months: months.length }
+    }),
+
+  /** Salaire brut prévu d'un mois : saisie (`null` = défaut) et brut du même mois N-1. */
+  salary: protectedProcedure
+    .input(periodSchema)
+    .query(async ({ ctx, input }) => {
+      const userId = ctx.session.user.id
+      const [override, lastYear] = await Promise.all([
+        ctx.db.salaryForecast.findUnique({
+          where: { userId_year_month: { userId, ...input } },
+        }),
+        ctx.db.salaryForecast.findUnique({
+          where: {
+            userId_year_month: {
+              userId,
+              year: input.year - 1,
+              month: input.month,
+            },
+          },
+        }),
+      ])
+      return {
+        overrideCents: override?.grossSalaryCents ?? null,
+        lastYearCents: lastYear?.grossSalaryCents ?? 0,
+      }
+    }),
+
+  /** Enregistre le salaire brut prévu d'un mois ; `null` = revenir au brut N-1. */
+  setSalary: protectedProcedure
+    .input(
+      periodSchema.extend({ grossSalaryCents: grossSalaryCents.nullable() }),
+    )
+    .mutation(async ({ ctx, input }) => {
+      const userId = ctx.session.user.id
+      const { grossSalaryCents, ...period } = input
+      if (grossSalaryCents === null) {
+        await ctx.db.salaryForecast.deleteMany({
+          where: { userId, ...period },
+        })
+      } else {
+        await ctx.db.salaryForecast.upsert({
+          where: { userId_year_month: { userId, ...period } },
+          create: { userId, ...period, grossSalaryCents },
+          update: { grossSalaryCents },
+        })
+      }
+      return input
+    }),
+
+  /** « Appliquer aux mois suivants » : recopie le salaire brut du mois sur la fin de l'année. */
+  copySalaryToFollowingMonths: protectedProcedure
+    .input(periodSchema.extend({ grossSalaryCents }))
+    .mutation(async ({ ctx, input }) => {
+      const userId = ctx.session.user.id
+      const months = followingMonths(input.month)
+      await ctx.db.$transaction([
+        ctx.db.salaryForecast.deleteMany({
+          where: { userId, year: input.year, month: { in: months } },
+        }),
+        ctx.db.salaryForecast.createMany({
+          data: months.map((month) => ({
+            userId,
+            year: input.year,
+            month,
+            grossSalaryCents: input.grossSalaryCents,
+          })),
         }),
       ])
       return { months: months.length }

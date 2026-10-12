@@ -63,13 +63,6 @@ const AREA = {
 } as const
 
 const FIELDS = {
-  grossSalaryCents: {
-    unit: 'euros',
-    scale: 100,
-    decimals: 2,
-    step: 10,
-    max: 100_000,
-  },
   employerContributionBp: PERCENT,
   employeeContributionBp: PERCENT,
   taxableNetBp: { ...PERCENT, max: 150 },
@@ -89,7 +82,6 @@ const FIELDS = {
 /** Champs par bloc, dans l'ordre de la maquette. */
 const GROUPS = {
   salary: [
-    'grossSalaryCents',
     'employerContributionBp',
     'employeeContributionBp',
     'taxableNetBp',

@@ -243,8 +243,9 @@ Hors scope : synchro bancaire auto, multi-utilisateurs, émission de factures.
 - TypeScript 6.0 (comme le template Vite). **ESLint plutôt qu'oxlint** (décidé le 2026-10-12) : pour partager la config
   du toolkit entre projets ; oxlint était plus rapide mais sans tri des imports ni config partagée.
 - **Pro (2026-10-06)** : catégories pro dans l'enum `TransactionCategory` (filtrées par type de compte) plutôt qu'un
-  2e enum ; prévisionnel sans saisie = réel du même mois N-1 ; salaire et cotisations calculés depuis les règles de
-  l'année (les prélèvements URSSAF / PAS… ne comptent pas dans les charges) ; clients en texte libre dans la facturation
+  2e enum ; prévisionnel sans saisie = réel du même mois N-1 ; salaire brut prévu mois par mois dans l'éditeur du
+  prévisionnel (`SalaryForecast`, sans saisie = brut du même mois N-1 ; réel = prévu, le relevé ne montre que le net),
+  cotisations calculées depuis les taux de l'année (les prélèvements URSSAF / PAS… ne comptent pas dans les charges) ; clients en texte libre dans la facturation
   (pas de table) ; jours facturés en `Float` par pas de 0,5 (exact en binaire, pas de demi-journées entières) ; encaissé = crédits `CLIENT_PAYMENT` du mois, reste à encaisser = solde cumulé facturé TTC − encaissé ; graphiques en CSS (pas de lib).
 - **Appartements (2026-10-07)** : trésorerie seulement (pas de fiscalité). Hypothèses retenues : mois clos = antérieur au mois
   en cours ; prévu des charges mensuelles = réel N-1, sinon moyenne des autres mois clos, sinon 0 ; prêt à taux fixe, assurance

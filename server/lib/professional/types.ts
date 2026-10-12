@@ -57,6 +57,13 @@ export interface ProfessionalMonthInput {
   previousVatDueCents: number
   /** Débits du relevé pro du mois par catégorie (TTC, positifs). */
   professionalDebits: CategoryCents
+  /** Salaire brut (le relevé ne montre que le net : le réel = le prévu). */
+  salary: {
+    /** Brut prévu saisi (`SalaryForecast`), `null` = valeur par défaut (N-1). */
+    forecastCents: number | null
+    /** Brut du même mois l'année précédente (saisi, sinon 0). */
+    lastYearCents: number
+  }
   settings: ProfessionalYearSettingsValues
   year: number
 }

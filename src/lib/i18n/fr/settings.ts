@@ -50,7 +50,7 @@ export const settings = {
       salary: {
         title: 'Cotisations sur salaire',
         description:
-          "Président assimilé salarié : ces taux s'appliquent au salaire brut versé.",
+          "Président assimilé salarié : ces taux s'appliquent au salaire brut, prévu mois par mois dans l'éditeur du prévisionnel (écran Pro).",
       },
       profit: {
         title: 'Quote-part de bénéfice (IR)',
@@ -64,16 +64,11 @@ export const settings = {
       },
     },
     units: {
-      euros: '€',
       percent: '%',
       squareMeters: 'm²',
       eurosPerKm: '€/km',
     },
     fields: {
-      grossSalaryCents: {
-        label: 'Salaire brut mensuel',
-        hint: "Fixe chaque mois (bulletin de paie). Le net versé et les prélèvements s'en déduisent.",
-      },
       employerContributionBp: {
         label: 'Cotisations patronales',
         hint: 'Part employeur, en plus du brut (bulletin : charges patronales ÷ brut). Elle inclut URSSAF, retraite complémentaire, santé et prévoyance.',

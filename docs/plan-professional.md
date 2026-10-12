@@ -55,7 +55,7 @@ Deux onglets **Perso** / **Pro · Stygma** :
 - **Pro · Stygma** = « Régime de Stygma », **un jeu de règles par année** (2025 → 2028, pastille « configuré ») ;
   une année non configurée reprend la dernière année configurée avant elle (« valeurs reprises de 2025 »).
   Régime : **SAS à l'IR** (actif), SAS à l'IS / EURL (désactivés « Bientôt ») ; option IR : première année
-  (+ « Exercice n sur 5 ») ; cotisations sur salaire (brut mensuel, % patronal, % salarial, % net imposable,
+  (+ « Exercice n sur 5 ») ; cotisations sur salaire (% patronal, % salarial, % net imposable,
   % PAS) ; quote-part de bénéfice (% charges sociales) ; frais mixtes et déplacements (surface bureau,
   surface logement, clé n/d, barème km €/km).
 
@@ -246,7 +246,7 @@ composants Vue partagés ; PR 15 : `useReducer` pour l'éditeur ≈ état local 
 - **Encaissé** = crédits `CLIENT_PAYMENT` rapprochés : libellé contenant le mot-clé du client, sur le mois de la facture et les 2 suivants.
 - **Charges pro HT réelles** = débits des catégories de charges pro ramenés en HT avec le taux de TVA de la catégorie ; TVA déductible = la différence.
 - **TVA à reverser** = 20 % × CA HT − TVA déductible (calculée par mois, comme la maquette ; la règle d'exigibilité à l'encaissement reste en info-bulle). Ligne « TVA » de Fiscalité = prévu : TVA due du mois précédent ; réel : débits `VAT_PAYMENT`.
-- **Salaires bruts / cotisations patronales** : depuis Réglages (brut × taux) ; les prélèvements URSSAF / Malakoff / SwissLife / PAS sont catégorisés et affichés mais **n'entrent pas dans les charges** (évite le double comptage).
+- **Salaires bruts / cotisations patronales** : brut prévu mois par mois dans l'éditeur du prévisionnel (onglet « Salaire », `SalaryForecast`), cotisations = brut × taux de Réglages ; les prélèvements URSSAF / Malakoff / SwissLife / PAS sont catégorisés et affichés mais **n'entrent pas dans les charges** (évite le double comptage).
 - **Bénéfice** = CA HT − charges pro − salaires bruts − cotisations patronales ; **reste en trésorerie** = bénéfice − BNC prélevés ; **charges sociales sur bénéfice** = taux × max(0, bénéfice).
 - **Frais mixtes** : dû = dépense perso du mois × clé (loyer : surface bureau / logement ; autres : n/d) ; payé = débits pro `MIXED_COSTS_REFUND`, répartis dans l'ordre loyer → internet → téléphone → énergie.
 - **Km** : réel = Σ trajets du mois ; prévu = valeur saisie, sinon km réels du même mois N-1 ; montant = km × barème de l'année.

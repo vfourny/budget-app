@@ -190,7 +190,8 @@ export const professional = {
     tabsAria: 'Type de prévisionnel',
     tabs: {
       billing: 'Facturation',
-      charges: 'Charges & rémunération',
+      charges: 'Charges & BNC',
+      salary: 'Salaire',
       mixedCosts: 'Frais mixtes',
       mileage: 'Frais km',
     },
@@ -214,8 +215,7 @@ export const professional = {
       hint: "Un montant prévu par charge pour ce mois, et le BNC viré vers ton perso. Sans saisie, c'est le réel du même mois l'an dernier. « Appliquer aux mois suivants » copie le tout sur la fin de l'année.",
       total: (amount: string) => `Charges prévues ce mois : ${amount} HT`,
       remuneration: 'Rémunération',
-      salaryNote: (gross: string, employer: string, withholding: string) =>
-        `Salaire brut ${gross} fixe chaque mois, cotisations patronales ${employer} %, PAS ${withholding} % : définis dans Réglages › Pro (valeurs de l'année), pas ici.`,
+      salaryNote: "Salaire brut : à régler dans l'onglet « Salaire ».",
       bnc: 'BNC prévu',
       bncHint: '€ virés vers ton perso (prélèvement sur le bénéfice)',
       mixedNote: "Frais mixtes : à régler dans l'onglet « Frais mixtes ».",
@@ -230,6 +230,15 @@ export const professional = {
       ratioKey: (numerator: number, denominator: number) =>
         `clé ${numerator}/${denominator}`,
       total: (amount: string) => `Part Stygma prévue : ${amount}`,
+    },
+    salary: {
+      hint: "Salaire brut que Stygma te verse ce mois. Sans saisie, c'est le brut du même mois l'an dernier. Les cotisations et le PAS s'en déduisent avec les taux de l'année (Réglages › Pro).",
+      month: 'Mois',
+      gross: 'Brut prévu (€)',
+      lastYear: 'Même mois N-1',
+      employer: (rate: string) => `Cotisations patronales (${rate} %)`,
+      cost: 'Coût société',
+      resetLastYear: 'Revenir au brut N-1',
     },
     mileage: {
       hint: 'Kilomètres professionnels prévus ce mois, à déclarer au barème kilométrique.',

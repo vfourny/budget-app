@@ -8,7 +8,8 @@ enum CompanyRegime {
   EURL // EURL
 }
 
-/// Règles de Stygma pour une année (Réglages › Pro) : taux du bulletin de paie, charges sociales sur
+/// Règles de Stygma pour une année (Réglages › Pro) : taux du bulletin de paie (le salaire brut, lui,
+/// est prévu mois par mois : `SalaryForecast`), charges sociales sur
 /// la quote-part de bénéfice, surfaces des frais mixtes, barème km. Une année sans ligne reprend la
 /// dernière année configurée avant elle (sinon `DEFAULT_PROFESSIONAL_YEAR_SETTINGS`, `shared/professional-rules.ts`).
 /// Pas de float : taux en points de base (4460 = 44,60 %), surfaces en dm², barème en millièmes d'€.
@@ -19,7 +20,6 @@ model ProfessionalYearSettings {
   regime                 CompanyRegime @default(SAS_IR)
   /// Premier exercice avec l'option pour l'IR (5 exercices maximum).
   irOptionFirstYear      Int           @db.SmallInt
-  grossSalaryCents       Int
   employerContributionBp Int
   employeeContributionBp Int
   /// Net imposable en % du brut (base du prélèvement à la source).
@@ -81,6 +81,18 @@ model MileageForecast {
   year   Int    @db.SmallInt
   month  Int    @db.SmallInt
   km     Int
+
+  @@id([userId, year, month])
+}
+
+/// Salaire brut prévu pour un mois (le relevé ne montre que le net : le réel = le prévu). Sans ligne :
+/// salaire du même mois l'année précédente, sinon 0.
+model SalaryForecast {
+  userId           String
+  user             User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  year             Int    @db.SmallInt
+  month            Int    @db.SmallInt
+  grossSalaryCents Int
 
   @@id([userId, year, month])
 }
