@@ -89,6 +89,18 @@ const CONDO_DEBITS_CENTS = [4_800, 33_291] as const
 /** Apport du compte perso : mise de départ à l'acquisition, puis virement mensuel. */
 const INITIAL_CONTRIBUTION_CENTS = 250_000
 const MONTHLY_CONTRIBUTION_CENTS = 75_000
+export const CONTRIBUTION_DAY = 2
+
+/**
+ * Apport du mois (centimes) versé du compte perso vers le compte appartement, `null` avant
+ * l'acquisition. Partagé avec le seed perso, qui y miroite l'« Apport appartement » (R11).
+ */
+export function ownerContributionCents(month: number): number | null {
+  if (month < ACQUISITION_MONTH) return null
+  return month === ACQUISITION_MONTH
+    ? INITIAL_CONTRIBUTION_CENTS
+    : MONTHLY_CONTRIBUTION_CENTS
+}
 
 interface SeedTransaction {
   amountCents: number
@@ -143,14 +155,14 @@ function statementOf(
   }
 
   // Apport du compte perso (crédit).
-  add(
-    2,
-    'VIR Valentin Fourny apport appartement',
-    month === ACQUISITION_MONTH
-      ? INITIAL_CONTRIBUTION_CENTS
-      : MONTHLY_CONTRIBUTION_CENTS,
-    'APT_OWNER_CONTRIBUTION',
-  )
+  const contributionCents = ownerContributionCents(month)
+  if (contributionCents !== null)
+    add(
+      CONTRIBUTION_DAY,
+      'VIR Valentin Fourny apport appartement',
+      contributionCents,
+      'APT_OWNER_CONTRIBUTION',
+    )
 
   for (const debit of MONTHLY_DEBITS) {
     if (month >= debit.firstMonth)
