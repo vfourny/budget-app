@@ -42,7 +42,7 @@ export const apartments = {
   },
   card: {
     direct: 'En direct',
-    managedBy: (manager: string) => `Géré par ${manager}`,
+    managed: 'En gérance',
     acquired: (month: string, year: number, price: string) =>
       `acquis en ${month} ${year} · ${price}`,
     capitalRepaid: 'Capital remboursé',

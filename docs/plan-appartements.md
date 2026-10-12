@@ -49,7 +49,7 @@ perso vers ce compte existent des deux côtés (voir R11).
 
 ### Réglages › onglet « Appartements » (`/settings?tab=apt`)
 
-Une carte par appartement : régime (étiquette), nom, gérant (vide = en direct), date d'acquisition (mm/aaaa),
+Une carte par appartement : régime (étiquette), nom, gérance (interrupteur, désactivé = en direct), date d'acquisition (mm/aaaa),
 prix d'achat, loyer prévu, dépôt de garantie, taxe foncière (€/an), CFE (€/an), solde de début d'année ; bloc
 **Prêt immobilier** (capital emprunté, taux annuel, durée en mois, première échéance, assurance de l'emprunt en €/mois)
 avec un encadré de synthèse calculé (mensualité, première échéance en capital / intérêts, coût total des intérêts).
@@ -218,7 +218,7 @@ affichée. Projection = Σ par appartement de (recettes ÷ mois clos × 12).
   les deux lignes de frais viennent de la facture. Le **différentiel et le solde ne changent pas** (ils partent du net réellement encaissé) :
   la saisie n'a d'effet que sur la **répartition brut / frais** et sur les rendements.
 - Facture non saisie sur un mois clos : frais = 0 (loyer brut = loyer net) et le mois est signalé (« Facture de gérance à saisir »).
-- Un appartement sans gérant (`managerName` vide) n'a ni facture ni ligne de frais.
+- Un appartement en direct (`managed` à `false`) n'a ni facture ni ligne de frais.
 - Les frais de gérance ne sont **pas** des transactions : pas de catégorie `APT_MANAGEMENT_*`.
 
 ### R11 — Compte appartement, rattachement et apport
@@ -244,7 +244,7 @@ Une migration. Tout porte `userId`, toute requête filtre sur `ctx.session.user.
 
 | Modèle / champ               | Détail                                                                                                                                                                                                                                                                                                                                           |
 | ---------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `Apartment`                  | `userId`, `name`, `kind` (enum `ApartmentKind` : `FURNISHED` (LMNP) seul pour l'instant), `managerName?` (vide = en direct), `acquiredAt` (`@db.Date`, 1ᵉʳ du mois), `priceCents`, `rentCents`, `depositCents`, `managementFeeBps`, `creditInsuranceCents`, `propertyTaxCents` (annuel), `cfeCents` (annuel)                                     |
+| `Apartment`                  | `userId`, `name`, `kind` (enum `ApartmentKind` : `FURNISHED` (LMNP) seul pour l'instant), `managed` (`false` = en direct), `acquiredAt` (`@db.Date`, 1ᵉʳ du mois), `priceCents`, `rentCents`, `depositCents`, `managementFeeBps`, `creditInsuranceCents`, `propertyTaxCents` (annuel), `cfeCents` (annuel)                                       |
 | prêt (sur `Apartment`)       | `loanPrincipalCents`, `loanRateBps`, `loanTermMonths`, `loanFirstDueDate` (`@db.Date`), tous **optionnels** (un bien sans prêt est possible : alors pas de ligne Crédit)                                                                                                                                                                         |
 | `ApartmentYearOpening`       | `apartmentId`, `year` (PK composée), `openingBalanceCents`                                                                                                                                                                                                                                                                                       |
 | `ManagementInvoice`          | `apartmentId`, `year`, `month` (PK composée), `feesCents`, `extraFeesCents` : facture de gérance saisie à la main (R12)                                                                                                                                                                                                                          |

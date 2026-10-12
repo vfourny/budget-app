@@ -19,8 +19,8 @@ const saveSchema = z.object({
   id: z.string().min(1).optional(),
   name: z.string().trim().min(1).max(60),
   kind: z.enum(ApartmentKind),
-  /** Vide = location en direct (pas de facture de gérance). */
-  managerName: z.string().trim().max(80),
+  /** `false` = location en direct (pas de facture de gérance). */
+  managed: z.boolean(),
   acquiredAt: z.date(),
   priceCents: cents,
   rentCents: cents,
@@ -57,7 +57,7 @@ export const apartmentRouter = createTRPCRouter({
         id: apartment.id,
         name: apartment.name,
         kind: apartment.kind,
-        managerName: apartment.managerName ?? '',
+        managed: apartment.managed,
         acquiredAt: apartment.acquiredAt,
         priceCents: apartment.priceCents,
         rentCents: apartment.rentCents,
@@ -101,13 +101,11 @@ export const apartmentRouter = createTRPCRouter({
         loan,
         openingYear,
         openingBalanceCents,
-        managerName,
         acquiredAt,
         ...fields
       } = input
       const data = {
         ...fields,
-        managerName: managerName === '' ? null : managerName,
         // 1er du mois d'acquisition : l'appartement est actif à partir de ce mois (R1).
         acquiredAt: new Date(
           Date.UTC(acquiredAt.getUTCFullYear(), acquiredAt.getUTCMonth(), 1),
@@ -167,10 +165,10 @@ export const apartmentRouter = createTRPCRouter({
       const { apartmentId, year, month, ...fees } = input
       const apartment = await ctx.db.apartment.findFirst({
         where: { id: apartmentId, userId },
-        select: { managerName: true },
+        select: { managed: true },
       })
       if (!apartment) throw appError('NOT_FOUND', 'APARTMENT_NOT_FOUND')
-      if (apartment.managerName === null)
+      if (!apartment.managed)
         throw appError('BAD_REQUEST', 'APARTMENT_NO_MANAGER')
       await ctx.db.managementInvoice.upsert({
         where: { apartmentId_year_month: { apartmentId, year, month } },

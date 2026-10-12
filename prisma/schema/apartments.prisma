@@ -14,8 +14,8 @@ model Apartment {
   user                 User          @relation(fields: [userId], references: [id], onDelete: Cascade)
   name                 String
   kind                 ApartmentKind
-  /// Nom du gérant ; `null` = location en direct (ni facture de gérance, ni ligne de frais).
-  managerName          String?
+  /// Bien confié à un gérant ; `false` = location en direct (ni facture de gérance, ni ligne de frais).
+  managed              Boolean       @default(false)
   /// 1er jour du mois d'acquisition : l'appartement est actif à partir de ce mois (inclus).
   acquiredAt           DateTime      @db.Date
   priceCents           Int

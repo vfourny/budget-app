@@ -230,7 +230,7 @@ de l'année.
 Suivi de **trésorerie** des biens en location (comme l'onglet « Toulouse » de l'ancien tableur), sans fiscalité ni
 rappels (déclaration = comptable). Règles détaillées et hypothèses : [plan-appartements.md](./plan-appartements.md).
 
-- **Réglages › Appartements** (`/settings?tab=apt`) : par bien, régime (étiquette), gérant (vide = en direct), mois
+- **Réglages › Appartements** (`/settings?tab=apt`) : par bien, régime (étiquette), gérance (interrupteur, désactivé = en direct), mois
   d'acquisition, prix, loyer prévu brut, dépôt, frais de gérance (%), assurance emprunteur, taxe foncière et CFE
   annuelles, solde du compte au 1er janvier, prêt à taux fixe (synthèse : mensualité, 1ʳᵉ échéance, intérêts totaux).
 - **Import** : type de compte « Appartement » + choix de l'appartement. Les catégories `APT_*` sont proposées ; le

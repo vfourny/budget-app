@@ -59,7 +59,7 @@ function sectionsOf(
 ): Section[] {
   const { forecast, actual } = apartment
   const rows = text.rows
-  const managed = apartment.managerName !== null
+  const { managed } = apartment
   const hasAnnual = (['propertyTax', 'cfe'] as const).some(
     (key) => forecast.lines[key] !== 0 || (actual?.lines[key] ?? 0) !== 0,
   )

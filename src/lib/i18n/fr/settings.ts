@@ -127,9 +127,9 @@ export const settings = {
       kindHint:
         "Simple étiquette : aucune règle de calcul n'en dépend pour l'instant.",
       name: 'Nom',
-      manager: 'Gérant',
-      managerHint:
-        'Vide = location en direct (ni facture de gérance, ni frais).',
+      managed: 'Confié à un gérant',
+      managedHint:
+        'Désactivé = location en direct (ni facture de gérance, ni frais).',
       acquiredAt: 'Acquisition (mois)',
       price: "Prix d'achat",
       rent: 'Loyer prévu (brut, par mois)',

@@ -14,7 +14,7 @@ function emptyApartment(): ApartmentValues {
   return {
     name: '',
     kind: 'FURNISHED',
-    managerName: '',
+    managed: false,
     acquiredAt: new Date(Date.UTC(now.getFullYear(), now.getMonth(), 1)),
     priceCents: 0,
     rentCents: 0,

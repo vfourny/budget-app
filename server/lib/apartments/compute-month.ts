@@ -160,10 +160,9 @@ function forecastLines(
   }: Omit<MonthContext, 'openingBalanceCents'>,
   basis: MonthlyChargeBasis,
 ): ApartmentLines {
-  const managementFees =
-    apartment.managerName === null
-      ? 0
-      : Math.round((apartment.rentCents * apartment.managementFeeBps) / 10_000)
+  const managementFees = apartment.managed
+    ? Math.round((apartment.rentCents * apartment.managementFeeBps) / 10_000)
+    : 0
   const installment = installmentOf(schedule, year, month)
   return {
     ...ZERO_LINES,
@@ -216,7 +215,7 @@ export function computeMonth(
     context.openingBalanceCents,
   )
 
-  const managed = context.apartment.managerName !== null
+  const { managed } = context.apartment
   const invoice = managed ? input.invoice : null
   const actual = input.closed
     ? toColumn(

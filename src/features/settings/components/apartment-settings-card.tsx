@@ -62,6 +62,7 @@ function PercentField(props: {
   label: string
   description?: string
   bps: number
+  disabled?: boolean
   onChange: (bps: number) => void
 }) {
   return (
@@ -69,6 +70,7 @@ function PercentField(props: {
       decimalScale={2}
       decimalSeparator=","
       description={props.description}
+      disabled={props.disabled}
       inputWrapperOrder={['label', 'input', 'description']}
       label={props.label}
       max={100}
@@ -179,14 +181,11 @@ export function ApartmentSettingsCard({
               onChange={(value) => value && set('kind', value as ApartmentKind)}
               value={draft.kind}
             />
-            <TextInput
-              description={text.fields.managerHint}
-              inputWrapperOrder={['label', 'input', 'description']}
-              label={text.fields.manager}
-              onChange={(event) =>
-                set('managerName', event.currentTarget.value)
-              }
-              value={draft.managerName}
+            <Switch
+              checked={draft.managed}
+              description={text.fields.managedHint}
+              label={text.fields.managed}
+              onChange={(event) => set('managed', event.currentTarget.checked)}
             />
             <TextInput
               label={text.fields.acquiredAt}
@@ -218,6 +217,7 @@ export function ApartmentSettingsCard({
             <PercentField
               bps={draft.managementFeeBps}
               description={text.fields.managementFeeHint}
+              disabled={!draft.managed}
               label={text.fields.managementFee}
               onChange={(value) => set('managementFeeBps', value)}
             />

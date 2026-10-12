@@ -16,7 +16,7 @@ const APARTMENTS_SEED = [
   {
     name: 'Toulouse',
     kind: 'FURNISHED',
-    managerName: 'Myroom',
+    managed: true,
     acquiredAt: new Date(Date.UTC(2025, 3, 1)),
     priceCents: 20_000_000,
     rentCents: 79_000,
@@ -35,7 +35,7 @@ const APARTMENTS_SEED = [
   {
     name: 'Lyon',
     kind: 'FURNISHED',
-    managerName: null,
+    managed: false,
     acquiredAt: new Date(Date.UTC(2026, 0, 1)),
     priceCents: 14_200_000,
     rentCents: 62_000,

@@ -21,7 +21,6 @@ interface ApartmentCardProps {
 /** Carte d'un appartement : en-tête, jauge de capital remboursé, facture de gérance (bien géré, mois clos) et tableau. */
 export function ApartmentCard({ apartment, period }: ApartmentCardProps) {
   const text = fr.apartments.card
-  const managed = apartment.managerName !== null
   return (
     <Paper
       aria-label={apartment.name}
@@ -40,9 +39,7 @@ export function ApartmentCard({ apartment, period }: ApartmentCardProps) {
               </Badge>
             </Group>
             <Text c="dimmed" size="sm">
-              {managed
-                ? text.managedBy(apartment.managerName ?? '')
-                : text.direct}
+              {apartment.managed ? text.managed : text.direct}
               {' · '}
               {text.acquired(
                 monthName(apartment.acquiredAt.getUTCMonth() + 1),
@@ -83,15 +80,17 @@ export function ApartmentCard({ apartment, period }: ApartmentCardProps) {
           </Group>
         )}
 
-        {managed && period.month !== null && apartment.closedMonths > 0 && (
-          <ManagementInvoiceForm
-            apartmentId={apartment.id}
-            invoice={apartment.invoice}
-            key={`${apartment.id}-${period.year}-${period.month}`}
-            month={period.month}
-            year={period.year}
-          />
-        )}
+        {apartment.managed &&
+          period.month !== null &&
+          apartment.closedMonths > 0 && (
+            <ManagementInvoiceForm
+              apartmentId={apartment.id}
+              invoice={apartment.invoice}
+              key={`${apartment.id}-${period.year}-${period.month}`}
+              month={period.month}
+              year={period.year}
+            />
+          )}
 
         <ApartmentTable
           apartment={apartment}

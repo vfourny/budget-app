@@ -13,9 +13,9 @@ export interface ApartmentRecord {
   id: string
   kind: ApartmentKind
   loan: LoanTerms | null
+  /** `false` = location en direct : ni facture de gérance, ni frais. */
+  managed: boolean
   managementFeeBps: number
-  /** `null` = location en direct : ni facture de gérance, ni frais. */
-  managerName: string | null
   name: string
   priceCents: number
   propertyTaxCents: number
