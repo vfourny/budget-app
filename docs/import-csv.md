@@ -52,7 +52,7 @@ Entrée : `{ accountType, fileName, csvText }` (CSV lu côté navigateur, UTF-8,
 - Montants : espaces supprimés (séparateur de milliers), séparateur décimal normalisé, arrondi en **centimes**. Exemples : `-1 500,00` → `-150000`, `+8640,00` → `864000`.
 - Deux modes d'extraction du montant : `signed` (une colonne déjà signée) ou `debitCredit` (deux colonnes déjà signées, une seule renseignée par ligne).
 - Formats de date : `yyyy-mm-dd` ou `dd/mm/yyyy`.
-- Le libellé peut être une colonne ou une fonction qui compose plusieurs champs (plus de contexte pour la catégorisation automatique).
+- Le libellé concatène les colonnes de `labelColumns` avec `—` (champs vides ignorés) : plus de contexte pour la catégorisation automatique.
 
 ## Formats historiques (seed)
 

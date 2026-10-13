@@ -13,13 +13,14 @@ src/                   # FRONT — SPA React, tourne uniquement dans le navigate
   pages/               # une page = un écran
   features/<domaine>/  # components/ + hooks/ propres à un domaine (import, review, dashboard…)
   components/          # UI partagée entre features
-  lib/                 # utilitaires front : trpc.ts, theme.ts, envelopes.ts, categories.ts…
+  lib/                 # utilitaires front : trpc.ts, theme.ts, envelopes.ts, errors.ts, i18n/fr/…
   styles/global.css    # règles CSS globales
+shared/                # code pur partagé front + back (règles perso / pro / appartements, IR, prêt, formats CSV)
 server/                # BACKEND — Nitro, mêmes conventions que le server/ de Nuxt
   api/                 # routes HTTP : server/api/health.ts → GET /api/health
     trpc/[...path].ts  # point d'entrée HTTP de tRPC (/api/trpc/*)
   trpc/                # init.ts (contexte, procédures), root.ts (appRouter), routers/<domaine>.ts
-  lib/                 # db.ts (PrismaClient), env.ts (validation Zod), csv/ (parseur de relevés)
+  lib/                 # db.ts, env.ts, auth.ts, csv/, categorize/, dashboard/, professional/, apartments/, settings/
   generated/prisma/    # client Prisma généré — gitignoré, ne pas éditer
 prisma/                # schema/ (un .prisma par domaine), migrations/, seed.ts + seeds/
 prisma.config.ts       # config CLI Prisma 7
@@ -31,7 +32,7 @@ Pourquoi pas Next.js : app mono-utilisateur derrière une auth, sans SEO. SSR et
 
 - `src/**` ne peut importer de `server/**` qu'en **`import type`** (ex. le type `AppRouter`). Jamais d'import runtime (Prisma, secrets…) côté front, sinon du code serveur part dans le bundle navigateur.
 - `import type` est **obligatoire** pour les types (`verbatimModuleSyntax`).
-- Alias : `@/…` → `src/`, `@server/…` → `server/` (déclarés dans `vite.config.ts` **et** `tsconfig.json`).
+- Alias : `@/…` → `src/`, `@server/…` → `server/`, `@shared/…` → `shared/` (déclarés dans `vite.config.ts` **et** `tsconfig.json`).
 - `src/lib/i18n/fr/enums.ts` (libellés des enums), `personal-rules.ts` (dans `shared/`) et `envelopes.ts` importent les types de l'enum Prisma depuis `@server/generated/prisma/enums`, en `import type` uniquement.
 
 ## API : tRPC + TanStack Query
@@ -51,7 +52,34 @@ Pourquoi pas Next.js : app mono-utilisateur derrière une auth, sans SEO. SSR et
 2. L'enregistrer dans `server/trpc/root.ts`.
 3. Côté front, un hook dans `src/features/<domaine>/hooks/`.
 
-Routeurs actuels : `categorize` (`run` : demande à Gemini une catégorie + confiance par transaction sans catégorie d'un import en attente ; logique et prompt dans `server/lib/categorize/`) `import` (`create` : parse le CSV via le mapping de la banque, puis crée l'`ImportBatch` et ses `Transaction` en une seule transaction SQL ; `list` : historique avec nombre de lignes et de lignes « à vérifier » ; `get` : un import et ses lignes pour la relecture ; `validate` : passe l'import en `VALIDATED`, refusé tant qu'il reste une ligne à vérifier ; `delete` : supprime l'import et ses lignes en cascade) `settings` (`envelopeShares` / `setEnvelopeShares` : part du revenu recommandée par enveloppe, défauts dans `DEFAULT_ENVELOPE_PERCENTS` de `shared/personal-rules.ts`), `personal` (`periods` : mois ayant des données validées ; `overview` : totaux d'un mois ou d'une année, agrégation dans `server/lib/dashboard/aggregate.ts`), `transaction` (`setCategory` : correction manuelle, `categoryConfidence` repasse à `null` = « Confirmée », refusé si l'import est validé ou si la catégorie n'est pas du type de compte), et pour le **Pro** : `professional` (`periods` : 12 mois des années avec données + année en cours ; `month` : un mois calculé + transactions, trajets, cumul km ; `year` : les 12 mois), `professionalForecast` (lignes de facturation prévues / réelles, montants prévus par groupe `charges` / `mixedCosts`, km prévus, « appliquer aux mois suivants », `clients` : noms déjà saisis + dernier TJM pour l'autocomplétion), `trip` (`create`, `delete`) ; `settings` porte aussi `proYear` / `proYearsConfigured` / `setProYear` (règles pro par année, héritées de l'année configurée précédente). **Appartements** : `apartment` (`list` / `options` / `save` : fiche, prêt et solde de début d'année en une transaction ; `setManagementInvoice` : facture de gérance d'un mois ; `delete` : refusé si le bien porte des transactions ou des relevés), `apartmentDashboard` (`periods` : mois clos ; `month` / `year` : colonnes prévu / réalisé par appartement, KPI, rendements, seuils LMNP ; calculs purs dans `server/lib/apartments/`), `transaction.setApartment` (rattachement d'une ligne) et `import.create` (`apartmentId` obligatoire pour un compte appartement). Le filtre « transactions validées d'un type de compte » est partagé : `server/lib/dashboard/scope.ts`. Une ligne est « à vérifier » si elle n'a pas de catégorie ou si sa confiance est sous 0,7 (`server/lib/categorize/needs-review.ts`). Tous les routeurs utilisent `protectedProcedure` (session Better Auth lue dans le contexte, `UNAUTHORIZED` / code `NOT_AUTHENTICATED` sans session). L'inscription HTTP est désactivée : le compte unique est créé par le seed Prisma (`prisma/seed.ts`, un fichier par domaine dans `prisma/seeds/`, lancé par `pnpm db:seed` et après `pnpm db:reset`) depuis `SEED_USER_EMAIL` / `SEED_USER_PASSWORD`. Le barème de l'IR n'est pas en base : il est dans `shared/income-tax.ts` (une PR par nouvelle année). Il crée aussi une facturation Pro 2026 de départ (`prisma/seeds/professional-billing.ts` : un client, tous les jours lundi → vendredi du mois, fériés non retirés, prévu à 400 €/j sur l'année, réel à 450 €/j jusqu'en septembre), sans toucher un mois qui a déjà des lignes. Enfin, un journal de trajets Pro pour l'année en cours jusqu'à aujourd'hui (`prisma/seeds/professional-trips.ts` : deux allers-retours client par mois + un rendez-vous comptable par trimestre), sans toucher un mois qui a déjà des trajets.
+Routeurs actuels (tous en `protectedProcedure`) :
+
+- `import` : `detectFormat` (format CSV inconnu → Gemini), `create` (parse + `ImportBatch` et ses `Transaction` en une
+  transaction SQL ; `apartmentId` obligatoire pour un compte appartement), `list`, `get`, `validate` (refusé tant qu'une
+  ligne est à vérifier), `delete` (cascade).
+- `categorize` : `run` (catégorie + confiance par Gemini pour les lignes sans catégorie ; `server/lib/categorize/`).
+- `transaction` : `setCategory` (correction manuelle, confiance repassée à `null` = « Confirmée » ; refusé si l'import
+  est validé ou si la catégorie n'est pas du type de compte), `setApartment` (rattachement d'une ligne).
+- `personal` : `periods`, `overview` (agrégation dans `server/lib/dashboard/aggregate.ts`).
+- `settings` : `envelopeShares` / `setEnvelopeShares` (défauts `DEFAULT_ENVELOPE_PERCENTS`), `professionalYear` /
+  `professionalYearsConfigured` / `setProfessionalYear` (règles pro par année, héritées de l'année configurée précédente).
+- `professional` : `periods`, `month`, `year` (calcul dans `server/lib/professional/`).
+- `professionalForecast` : facturation (`billingLines`…), charges (`forecasts`…), salaire (`salary`…), km (`mileage`…),
+  chacun avec sa variante `copy…ToFollowingMonths` ; `clients` (noms déjà saisis + dernier TJM).
+- `trip` : `create`, `delete`.
+- `apartment` : `list`, `options`, `save` (fiche, prêt et solde de début d'année), `setManagementInvoice`, `delete`
+  (refusé si le bien porte des transactions ou des relevés).
+- `apartmentDashboard` : `periods` (mois clos), `month`, `year` (calculs purs dans `server/lib/apartments/`).
+
+Le filtre « transactions validées d'un type de compte » est partagé : `server/lib/dashboard/scope.ts`. Une ligne est
+« à vérifier » si elle n'a pas de catégorie ou si sa confiance est sous 0,7 (`server/lib/categorize/needs-review.ts`).
+Sans session : `UNAUTHORIZED` / code `NOT_AUTHENTICATED`.
+
+**Seed** (`prisma/seed.ts`, un fichier par domaine dans `prisma/seeds/`, `pnpm db:seed`, rejoué par `pnpm db:reset`) :
+crée le compte unique depuis `SEED_USER_EMAIL` / `SEED_USER_PASSWORD` (inscription HTTP désactivée), les formats CSV
+historiques et, pour le dev, des données sur l'année `SEED_YEAR` (2025, `prisma/seeds/seed-year.ts`) : relevés perso,
+facturation et trajets Pro, appartements et leurs relevés. Idempotent : il ne crée pas de doublon et n'écrase pas les saisies faites dans l'app. Le barème
+de l'IR n'est pas en base : `shared/income-tax.ts` (une PR par nouvelle année).
 
 ### Calcul du dashboard Pro (`server/lib/professional/`)
 
@@ -67,15 +95,15 @@ Routeurs actuels : `categorize` (`run` : demande à Gemini une catégorie + conf
 
 - **Thème** : `src/lib/theme.ts` (objet `createTheme` + `cssVariablesResolver`) porte les tokens de la maquette — palettes `dark` (obsidian / platine : fond, cartes, bordures, texte), `gold` (accent, index 6 = `#C9A45C`), `amber` (à vérifier / dépassement, index 6 = `#E0894A`), polices (Instrument Serif pour les titres, Manrope pour l'UI), rayons (16 cartes, 10 contrôles, 8 petits boutons). Champs et boutons à 44 px (`src/styles/global.css`). Thème clair et sombre : suit le système par défaut (`defaultColorScheme="auto"`), bouton Système → Clair → Sombre dans la barre latérale ; le script de `index.html` applique le bon thème avant React (pas de flash).
 - **Composants** : Mantine (`@mantine/core`, `@mantine/dropzone`), icônes Tabler. CSS sur mesure en CSS Modules. Pas de couleur en dur : tokens Mantine.
-- **Routing** : `BrowserRouter` (`main.tsx`) + `<Routes>` (`app.tsx`). `AppLayout` (barre latérale, `<Outlet />`) enveloppe toutes les pages. Routes : `/` (redirige vers `/personal`, pas d'accueil), `/personal`, `/professional`, `/apartments`, `/imports`, `/imports/new`, `/settings`. Les liens directs (rechargement de `/imports/new`) marchent grâce au repli SPA de Nitro (vérifié sur `pnpm preview`).
-- **Écrans** : le dashboard perso (`/personal`), l'historique (`/imports`), l'import (`/imports/new`), la relecture (`/imports/:importId`) et les réglages (parts du revenu par enveloppe) sont réels ; après un import, le front enchaîne `import.create` puis `categorize.run` dans une seule mutation et redirige vers la relecture ; les autres écrans arrivent avec leur PR.
+- **Routing** : `BrowserRouter` (`main.tsx`) + `<Routes>` (`app.tsx`). `AppLayout` (barre latérale, `<Outlet />`) enveloppe toutes les pages. Routes : `/` (redirige vers `/personal`, pas d'accueil), `/personal`, `/professional`, `/apartments`, `/imports`, `/imports/new`, `/imports/:importId`, `/settings` ; `/login` hors layout. Les liens directs (rechargement de `/imports/new`) marchent grâce au repli SPA de Nitro (vérifié sur `pnpm preview`).
+- **Écrans** : après un import, le front enchaîne `import.create` puis `categorize.run` dans une seule mutation et redirige vers la relecture (`/imports/:importId`). `/login` est hors `AppLayout` ; les autres routes sont sous `RequireAuth`.
 
 ## Base de données : Prisma 7 + Neon
 
 - Générateur `prisma-client` (client TS sans moteur Rust) sorti dans `server/generated/prisma/` (gitignoré, régénéré par `postinstall`).
 - **Deux URLs Neon** : `DATABASE_URL` (pooled, host `-pooler`) pour le runtime via `@prisma/adapter-neon`, `DIRECT_URL` (directe) pour la CLI Prisma et les migrations (`prisma.config.ts`).
 - Côté serveur, toujours passer par `db` de `@server/lib/db` (singleton mis en cache sur `globalThis` pour survivre au hot reload).
-- **Schéma découpé par domaine** dans `prisma/schema/` (déclaré dans `prisma.config.ts`) : `base` (générateur, datasource), `auth` (Better Auth), `transactions` (imports, transactions, catégories), `budget` (enveloppes, IR), `pro` (Stygma). Prisma les lit comme un seul schéma : une relation peut traverser les fichiers.
+- **Schéma découpé par domaine** dans `prisma/schema/` (déclaré dans `prisma.config.ts`) : `base` (générateur, datasource), `auth` (Better Auth), `transactions` (imports, formats CSV, transactions, catégories), `personal` (enveloppes), `professional` (Stygma), `apartments`. Prisma les lit comme un seul schéma : une relation peut traverser les fichiers.
 - **Toute modif du schéma s'accompagne d'une migration versionnée** dans `prisma/migrations/` (`pnpm db:migrate`).
 - `prisma.config.ts` n'utilise volontairement pas `env()` : il lèverait une erreur si la variable manque, ce qui casserait `prisma generate` en CI (pas de DB nécessaire).
 
@@ -83,22 +111,27 @@ Routeurs actuels : `categorize` (`run` : demande à Gemini une catégorie + conf
 
 | Modèle                     | Rôle                                                                                                 |
 | -------------------------- | ---------------------------------------------------------------------------------------------------- |
-| `ImportBatch`              | Un fichier de relevé importé (`status` PENDING_REVIEW / VALIDATED, `fileName`)                       |
+| `ImportBatch`              | Un fichier de relevé importé (`status` PENDING_REVIEW / VALIDATED, `fileName`, `apartmentId`)        |
+| `CsvFormat`                | Format de colonnes d'un export bancaire, retrouvé par l'empreinte de l'en-tête                       |
 | `EnvelopeShare`            | Part du revenu (en %) recommandée pour une enveloppe ; sans ligne, la valeur par défaut s'applique   |
 | `Transaction`              | Une ligne validée : date, libellé, montant en centimes, catégorie, mois/année                        |
 | `ProfessionalYearSettings` | Règles pro d'une année (régime, taux en points de base, surfaces en dm², barème km en millièmes d'€) |
 | `BillingLine`              | Jours (par 0,5) × TJM pour un client (`clientName`, texte libre) et un mois, prévu ou réel           |
 | `MonthlyForecast`          | Montant prévu d'une catégorie pour un mois (charges pro, BNC, dépenses perso des frais mixtes)       |
 | `MileageForecast`          | Km prévus d'un mois                                                                                  |
+| `SalaryForecast`           | Salaire brut prévu d'un mois (le réel = le prévu)                                                    |
 | `Trip`                     | Trajet du journal des frais km (date, trajet, motif, km)                                             |
+| `Apartment`                | Un bien : fiche, gérance, prêt (voir [fonctionnel.md](./fonctionnel.md) › Appartements)              |
+| `ApartmentYearOpening`     | Solde du compte appartement au 1er janvier d'une année                                               |
+| `ManagementInvoice`        | Facture de gérance d'un mois (frais + frais supplémentaires), saisie à la main                       |
 
-Enums : `AccountType` (PERSONAL / PROFESSIONAL, sur `ImportBatch` et `Transaction`), `Envelope`, `TransactionCategory` (perso + pro, voir `shared/account-categories.ts`), `ImportStatus`, `CompanyRegime`, `BillingKind`.
+Enums : `AccountType` (PERSONAL / PROFESSIONAL / APARTMENT, sur `ImportBatch` et `Transaction`), `Envelope`, `TransactionCategory` (perso + pro + appartement, voir `shared/account-categories.ts`), `ImportStatus`, `CompanyRegime`, `BillingKind`, `ApartmentKind`.
 
-Sans ligne `MonthlyForecast` / `MileageForecast`, un montant prévu vaut le réel du même mois N-1 (calculé à la lecture, jamais stocké).
+Sans ligne `MonthlyForecast` / `MileageForecast` / `SalaryForecast`, un montant prévu vaut le réel du même mois N-1 (calculé à la lecture, jamais stocké).
 
 Choix à connaître :
 
-- Pas de modèle `BankAccount` : `accountType` (enum PERSONAL/PROFESSIONAL) est porté directement par `ImportBatch` et `Transaction`. La banque (parseur CSV) est déduite du type (`BANK_BY_ACCOUNT_TYPE`), pas stockée.
+- Pas de modèle `BankAccount` : `accountType` est porté directement par `ImportBatch` et `Transaction`. La banque n'est pas stockée : le format CSV est retrouvé par l'empreinte de l'en-tête (`CsvFormat`, voir [import-csv.md](./import-csv.md)).
 - Les catégories sont un **enum figé**, pas une table : libellés dans `src/lib/i18n/fr/enums.ts`, enveloppes dans `shared/personal-rules.ts`.
 - Supprimer un `ImportBatch` supprime ses transactions (`onDelete: Cascade`).
 - Index sur `(year, month)`, `(accountType, year, month)`, `category` et `importBatchId` pour les agrégations dashboards.
@@ -132,11 +165,11 @@ Chaque PR qui introduit un pattern React le documente dans sa section « Notes R
 ## Qualité et workflow
 
 - **Une fonctionnalité = une branche = une PR** courte (`feat/…`, `fix/…`, `chore/…`), Conventional Commits. Trop gros → PR empilées.
-- `pnpm check` (lint + typecheck + format + i18n), puis `pnpm build` doivent être verts avant `/ship-pr`.
+- `pnpm check` (lint + typecheck + format + i18n + knip), puis `pnpm build` doivent être verts avant `/ship-pr`.
 - **ESLint** (config `@vfourny/node-toolkit/eslint/react`, `--max-warnings 0`) : règles des hooks React (`rules-of-hooks`, `exhaustive-deps`, `set-state-in-effect`…), tri des imports / props / interfaces ; `no-console` en warning sauf `warn` / `error`.
-- **lefthook** (pre-commit) : ESLint `--fix` puis Prettier ; (commit-msg) : commitlint sur les fichiers stagés. Ne pas contourner avec `--no-verify`.
+- **lefthook** (pre-commit) : ESLint `--fix` puis Prettier sur les fichiers stagés ; (commit-msg) : commitlint. Ne pas contourner avec `--no-verify`.
 - **Hook Claude Code** (`.claude/hooks/check.sh`) : Prettier + ESLint `--fix` + `tsc` après chaque édition.
-- **CI GitHub Actions** : lint, typecheck, format, tests, build sur chaque PR et push sur `main`.
+- **CI GitHub Actions** : lint, typecheck, format, build sur chaque PR et push sur `main` (pas de tests automatisés pour l'instant).
 - Nitro 3 est en **beta** : version épinglée exactement dans `package.json`, ne pas la monter sans test.
 
 ## Pièges connus

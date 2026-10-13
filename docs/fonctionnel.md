@@ -27,32 +27,33 @@ Loisirs, Formation).
 Liste **figée** (enum Prisma `TransactionCategory`), reprise des colonnes de l'ancien Google Sheet. Libellé affiché :
 `src/lib/i18n/fr/enums.ts` ; enveloppe de rattachement : `shared/personal-rules.ts`.
 
-| Catégorie           | Code                  | Enveloppe          |
-| ------------------- | --------------------- | ------------------ |
-| Loyer versé         | `RENT_PAID`           | Dépenses courantes |
-| Essence             | `FUEL`                | Dépenses courantes |
-| Banque et assurance | `BANK_INSURANCE`      | Dépenses courantes |
-| Restaurant          | `RESTAURANT`          | Loisirs            |
-| Alimentaire         | `GROCERIES`           | Dépenses courantes |
-| Soirée              | `NIGHTLIFE`           | Loisirs            |
-| Loisirs             | `LEISURE`             | Loisirs            |
-| Formation           | `TRAINING`            | Formation          |
-| Vêtements & Soins   | `CLOTHING_CARE`       | Loisirs            |
-| Santé               | `HEALTH`              | Dépenses courantes |
-| Transport           | `TRANSPORT`           | Dépenses courantes |
-| Impôt et Taxes      | `TAXES`               | Dépenses courantes |
-| Abonnements divers  | `OTHER_SUBSCRIPTIONS` | Loisirs            |
-| Énergie             | `ENERGY`              | Dépenses courantes |
-| Télécom             | `TELECOM`             | Dépenses courantes |
-| Internet            | `INTERNET`            | Dépenses courantes |
-| Autres              | `OTHER`               | Dépenses courantes |
-| Épargne court terme | `SHORT_TERM_SAVINGS`  | Épargne sécurité   |
-| Épargne long terme  | `LONG_TERM_SAVINGS`   | Épargne long terme |
-| Versement salaire   | `SALARY_PAYMENT`      | — (revenu)         |
-| Versement BNC       | `BNC_PAYMENT`         | — (revenu)         |
-| Versement vacation  | `VACATION_PAYMENT`    | — (revenu)         |
-| Autre remboursement | `REFUND`              | — (crédit)         |
-| Remboursement pro   | `PROFESSIONAL_REFUND` | — (crédit)         |
+| Catégorie           | Code                     | Enveloppe          |
+| ------------------- | ------------------------ | ------------------ |
+| Loyer versé         | `RENT_PAID`              | Dépenses courantes |
+| Essence             | `FUEL`                   | Dépenses courantes |
+| Banque et assurance | `BANK_INSURANCE`         | Dépenses courantes |
+| Restaurant          | `RESTAURANT`             | Loisirs            |
+| Alimentaire         | `GROCERIES`              | Dépenses courantes |
+| Soirée              | `NIGHTLIFE`              | Loisirs            |
+| Loisirs             | `LEISURE`                | Loisirs            |
+| Formation           | `TRAINING`               | Formation          |
+| Vêtements & Soins   | `CLOTHING_CARE`          | Loisirs            |
+| Santé               | `HEALTH`                 | Dépenses courantes |
+| Transport           | `TRANSPORT`              | Dépenses courantes |
+| Impôt et Taxes      | `TAXES`                  | Dépenses courantes |
+| Abonnements divers  | `OTHER_SUBSCRIPTIONS`    | Loisirs            |
+| Énergie             | `ENERGY`                 | Dépenses courantes |
+| Télécom             | `TELECOM`                | Dépenses courantes |
+| Internet            | `INTERNET`               | Dépenses courantes |
+| Autres              | `OTHER`                  | Dépenses courantes |
+| Épargne court terme | `SHORT_TERM_SAVINGS`     | Épargne sécurité   |
+| Épargne long terme  | `LONG_TERM_SAVINGS`      | Épargne long terme |
+| Versement salaire   | `SALARY_PAYMENT`         | — (revenu)         |
+| Versement BNC       | `BNC_PAYMENT`            | — (revenu)         |
+| Versement vacation  | `VACATION_PAYMENT`       | — (revenu)         |
+| Autre remboursement | `REFUND`                 | — (crédit)         |
+| Remboursement pro   | `PROFESSIONAL_REFUND`    | — (crédit)         |
+| Apport appartement  | `APARTMENT_CONTRIBUTION` | Épargne long terme |
 
 Points d'attention :
 
@@ -69,14 +70,9 @@ Points d'attention :
 ## Type de compte
 
 Chaque import et chaque transaction porte un **type** : `PERSONAL`, `PROFESSIONAL` (Stygma) ou `APARTMENT` (compte dédié aux appartements). C'est la seule notion
-de « compte » de l'app : il n'y a pas de table de comptes bancaires. La banque n'est pas stockée ; elle sert uniquement
-à choisir le **mapping CSV** à l'import (voir [import-csv.md](./import-csv.md)) et se déduit du type :
-
-| Type           | Banque (format CSV) |
-| -------------- | ------------------- |
-| `PERSONAL`     | BoursoBank          |
-| `PROFESSIONAL` | Banque Populaire    |
-| `APARTMENT`    | compte dédié        |
+de « compte » de l'app : il n'y a pas de table de comptes bancaires. La banque n'est pas stockée non plus : le
+format des colonnes du CSV est retrouvé par l'empreinte de l'en-tête du fichier (`CsvFormat`, voir
+[import-csv.md](./import-csv.md)). Le type de compte ne détermine que les catégories proposées.
 
 Un relevé `APARTMENT` est rattaché à un appartement à l'import (`ImportBatch.apartmentId`), modifiable ligne par ligne à
 la relecture (`Transaction.apartmentId`, obligatoire pour ce type de compte). Ses transactions n'entrent jamais dans les
@@ -97,8 +93,8 @@ Upload CSV → parsing → ImportBatch (PENDING_REVIEW) → catégorisation Gemi
           → relecture / correction inline → « Valider » → ImportBatch (VALIDATED)
 ```
 
-1. **Upload** : l'utilisateur choisit le type de compte (perso / pro) et dépose le CSV de la banque.
-2. **Parsing** (route `import.create`) : le mapping de la banque (déduit du type de compte) transforme les lignes en
+1. **Upload** : l'utilisateur choisit le type de compte (perso / pro / appartement, + l'appartement) et dépose le CSV de la banque.
+2. **Parsing** (route `import.create`) : le format retrouvé par l'empreinte de l'en-tête (détecté par l'IA s'il est inconnu) transforme les lignes en
    transactions normalisées. Une ligne illisible est **écartée et signalée** (numéro de ligne + contenu brut) sans
    bloquer les autres. Les lignes **déjà importées** (relevés qui se chevauchent) sont écartées aussi,
    voir [import-csv.md](./import-csv.md).
@@ -122,9 +118,6 @@ Règles :
 - Une transaction peut ne pas avoir d'`ImportBatch` (`importBatchId` nullable, ex. saisie manuelle future).
 - Les corrections validées alimentent les exemples few-shot des imports suivants : plus l'historique grandit, plus la
   catégorisation est juste.
-
-> État actuel : import, catégorisation automatique, historique et relecture (correction) sont en place ; validation et
-> suppression aussi (voir la roadmap dans [`CLAUDE.md`](../CLAUDE.md)).
 
 ## Dashboard Perso (`/personal`)
 
@@ -178,7 +171,7 @@ prévisionnel s'affiche (bandeau « Mois à venir »). Ne comptent que les trans
 ### Règles de l'année (Réglages › Pro)
 
 Un jeu de règles **par année** (`ProfessionalYearSettings`) : régime (seule la **SAS à l'IR** est calculée ; IS et EURL
-« Bientôt »), première année de l'option IR (5 exercices max), salaire brut mensuel, taux patronal, salarial, net
+« Bientôt »), première année de l'option IR (5 exercices max), taux patronal, salarial, net
 imposable, PAS, charges sociales sur la quote-part de bénéfice, surfaces bureau / logement, barème km (la clé des autres frais
 mixtes est fixe : 5/7, `MIXED_COSTS_KEY`). Une année non configurée reprend la dernière année configurée avant elle, sinon les valeurs par
 défaut (`DEFAULT_PROFESSIONAL_YEAR_SETTINGS`).
@@ -198,7 +191,7 @@ défaut (`DEFAULT_PROFESSIONAL_YEAR_SETTINGS`).
   déductible**. Frais mixtes : remboursements versés (pas de TVA déductible).
 - **TVA à reverser** = 20 % du CA HT − TVA déductible, par mois. La TVA payée un mois (catégorie TVA) est comparée à
   la TVA due du mois précédent.
-- **Salaire et cotisations** : calculés depuis les règles de l'année (brut × taux). Les prélèvements URSSAF,
+- **Salaire et cotisations** : brut du mois (éditeur du prévisionnel), cotisations et PAS = brut × taux de l'année. Les prélèvements URSSAF,
   retraite, santé, prévoyance et PAS sont catégorisés mais **n'entrent pas dans les charges** (pas de double
   comptage) ; le détail « dont URSSAF… » utilise une répartition indicative.
 - **Bénéfice** = CA HT − charges pro − salaires bruts − cotisations patronales. **Reste en trésorerie** = bénéfice −
@@ -210,9 +203,10 @@ défaut (`DEFAULT_PROFESSIONAL_YEAR_SETTINGS`).
 
 ### Prévisionnel (« Éditer le prévisionnel »)
 
-Quatre onglets : Facturation (prévu / réel, une ligne par client), Charges & rémunération (charges HT + BNC prévu),
-Frais mixtes (dépenses perso prévues), Frais km. **Sans saisie, un montant prévu vaut le réel du même mois l'année
-précédente** (charges, BNC, frais mixtes, km). « Appliquer aux mois suivants » recopie les valeurs du mois sur la fin
+Cinq onglets : Facturation (prévu / réel, une ligne par client), Charges & BNC (charges HT + BNC prévu), Salaire
+(brut du mois, `SalaryForecast` ; le réel = le prévu, le relevé ne montrant que le net), Frais mixtes (dépenses perso
+prévues), Frais km. **Sans saisie, un montant prévu vaut le réel du même mois l'année précédente** (charges, BNC,
+frais mixtes, km ; pour le salaire, le brut du même mois N-1). « Appliquer aux mois suivants » recopie les valeurs du mois sur la fin
 de l'année.
 
 ### Écran
@@ -222,16 +216,17 @@ de l'année.
   Frais mixtes, Frais km (+ journal des trajets), Transactions du mois (même tableau que le Perso).
 - **Vue année** : CA HT final (réel + prévu restant), bénéfice final, TVA réelle cumulée, frais km ; histogramme du CA ;
   compte de résultat simplifié (12 mois + Final) ; catégories, frais mixtes et km cumulés.
-- Mockup de référence : artboard « Dashboard pro — Stygma SAS » du canvas Claude Design. Plan de réalisation :
-  [plan-professional.md](./plan-professional.md).
+- Mockup de référence : artboard « Dashboard pro — Stygma SAS » du canvas Claude Design.
 
 ## Appartements (`/apartments`)
 
 Suivi de **trésorerie** des biens en location (comme l'onglet « Toulouse » de l'ancien tableur), sans fiscalité ni
-rappels (déclaration = comptable). Règles détaillées et hypothèses : [plan-appartements.md](./plan-appartements.md).
+rappels (déclaration = comptable). Les règles ci-dessous (R1 à R12, hypothèses H1 à H6) sont citées dans le code
+(`server/lib/apartments/`, `shared/apartment-*.ts`).
 
 - **Réglages › Appartements** (`/settings?tab=apt`) : par bien, régime (étiquette), gérance (interrupteur, désactivé = en direct), mois
-  d'acquisition, prix, frais de gérance (%), assurance emprunteur, solde du compte au 1er janvier, prêt à taux fixe (synthèse : mensualité, 1ʳᵉ échéance, intérêts totaux).
+  d'acquisition, prix, frais de gérance (%), assurance emprunteur, solde du compte au 1er janvier, prêt à taux fixe (synthèse :
+  mensualité, 1ʳᵉ échéance, intérêts totaux).
 - **Import** : type de compte « Appartement » + choix de l'appartement. Les catégories `APT_*` sont proposées ; le
   virement d'apport vers ce compte se catégorise « Apport appartement » côté perso (enveloppe épargne long terme).
   À la relecture, une échéance de prêt est reconnue si elle est à ±1 € de la mensualité du tableau d'amortissement.
@@ -241,8 +236,54 @@ rappels (déclaration = comptable). Règles détaillées et hypothèses : [plan-
   transactions rattachées.
 - **Vue année** : mêmes colonnes sur les mois clos, rendements brut / net sur le prix d'achat, et
   seuils LMNP (plafond micro-BIC, seuil LMP) indicatifs.
-- **Prévisionnel** : loyer brut et charges saisis mois par mois dans l'éditeur du prévisionnel ; gérance = loyer × %,
-  échéance du prêt, assurance. Sans saisie : loyer = dernier loyer saisi ; taxe foncière (octobre) et CFE (décembre) =
-  dernier montant saisi ; charges mensuelles = réel du même mois N-1, sinon moyenne des autres mois clos, sinon 0.
+- **Prévisionnel** : loyer brut et charges saisis mois par mois dans l'éditeur. La gérance (loyer × %), l'échéance
+  du prêt et l'assurance emprunteur des Réglages ne se saisissent pas. Sans saisie : le loyer, la taxe foncière
+  (octobre) et la CFE (décembre) reprennent leur dernière valeur saisie, sinon 0 ; les charges mensuelles reprennent
+  le réel du même mois N-1, sinon la moyenne des autres mois clos, sinon 0 ; régularisation et autres valent 0.
 - **Solde** : solde fin de mois = début + différentiel + apport ; il doit coïncider avec le solde bancaire. L'effort
   d'épargne annuel est la somme des efforts mensuels.
+
+### Règles
+
+- **R1 — Période** : un appartement est actif à partir de son mois d'acquisition (inclus). Un mois est **clos** s'il est
+  antérieur au mois en cours (H1) ; la vue ne propose que les mois clos.
+- **R2 — Lignes du tableau** : le réalisé = transactions **validées** rattachées (`Transaction.apartmentId`), par
+  catégorie : loyers `APT_RENT_RECEIVED` (+ frais de la facture, R12), crédit (ventilé, R6/R7) + `APT_LOAN_INSURANCE`,
+  charges fixes `ENERGY` / `APT_HOME_INSURANCE` / `INTERNET` / `APT_CONDO_FEES`, charges annuelles `APT_PROPERTY_TAX` /
+  `APT_CFE`, autres `APT_BANK_FEES` / `APT_REGULARIZATION` / `APT_OTHER`, apport `APT_OWNER_CONTRIBUTION`. Une ligne de
+  charge = −(somme des montants signés) : une régularisation créditée vient en diminution. Charges annuelles affichées en
+  vue mois seulement si le mois en contient ; montant nul = « — ».
+- **R3 — Prévisionnel** : loyer brut saisi par mois (sans saisie : dernière saisie antérieure, sinon 0) ; gérance =
+  loyer × % ; échéance du tableau d'amortissement ; assurance des Réglages. Taxe foncière en **octobre** et CFE en
+  **décembre** (sans saisie : dernier montant saisi, sinon 0 ; le réel compte dans le mois de paiement, sans lissage).
+  Les charges mensuelles saisies reprennent le réel du même mois N-1, sinon la moyenne des autres mois clos, sinon 0
+  (H2) ; régularisation et autres valent 0 sans saisie. Pas de vacance prévue.
+- **R4 — Réalisé** : import `VALIDATED`, `apartmentId` renseigné, mois de la période. Sans catégorie = « Autres », signalé
+  « À vérifier ».
+- **R5 — Solde et effort** : différentiel = loyer net reçu − crédit (capital + intérêts + assurance) − charges ;
+  effort d'épargne = max(0, −différentiel) ; solde fin de mois = début + différentiel + apport. Solde de début d'année
+  saisi (`ApartmentYearOpening`, 0 à défaut). En vue année, prévu et réalisé portent sur les mêmes mois clos et
+  **l'effort annuel = somme des efforts mensuels**. Écart = réalisé − prévu (négatif = défavorable).
+- **R6 — Prêt** : taux fixe sans palier ni différé (H3), `loanSchedule` dans `shared/apartment-loan.ts` (mensualité
+  arrondie, intérêts = capital restant × taux mensuel, la dernière échéance solde le capital). L'assurance emprunteur
+  est à part (H4). Jauge « capital remboursé » = capitaux du tableau jusqu'à la fin de la période, plafonnée au dernier
+  mois clos.
+- **R7 — Rapprochement** : une transaction `APT_LOAN_REPAYMENT` est reconnue si elle est à ±1 € de la mensualité (ou de
+  mensualité + assurance) ; sinon elle est signalée à la relecture (« attendu X € »). Intérêts = ceux du tableau,
+  capital = montant − intérêts − assurance (le solde reste égal au solde bancaire). Rien n'est stocké : recalculé à la
+  lecture.
+- **R8 — KPI** : **loyers nets perçus** (jauge vs loyers dus = somme des loyers bruts prévus des mois clos actifs) ; **effort d'épargne
+  nécessaire** = Σ des efforts (jauge : apport réel vs effort).
+- **R9 — Rendements** (vue année) : brut = loyers perçus annualisés ÷ prix d'achat ; net = (loyers − charges hors
+  crédit) annualisés ÷ prix d'achat. Prix d'achat seul, sans frais (H5).
+- **R10 — Seuils LMNP** (vue année, indicatifs) : recettes des biens LMNP de janvier au dernier mois clos + projection
+  annuelle ; plafond micro-BIC par année dans `shared/apartment-rules.ts` (année inconnue = dernière connue) ; seuil LMP
+  23 000 € (la condition des 50 % des revenus n'est pas calculée).
+- **R11 — Compte et apport** : type de compte `APARTMENT` ; l'appartement choisi à l'import (`ImportBatch.apartmentId`)
+  est modifiable ligne par ligne (`Transaction.apartmentId`, obligatoire pour ce type). Ces transactions n'entrent jamais
+  dans le budget perso. Un apport existe des deux côtés : crédit `APT_OWNER_CONTRIBUTION` côté appartement, débit
+  « Apport appartement » (`APARTMENT_CONTRIBUTION`, enveloppe épargne long terme, H6) côté perso, sans rapprochement
+  automatique. Un appartement qui porte des transactions ou des relevés ne se supprime pas.
+- **R12 — Facture de gérance** : le loyer arrive **net** ; frais de gérance et frais supplémentaires sont saisis à la main
+  chaque mois (`ManagementInvoice`, vue mois). Loyer brut = net reçu + frais ; le différentiel et le solde ne changent
+  pas. Facture non saisie sur un mois clos = frais à 0, mois signalé. Bien en direct : ni facture ni frais.

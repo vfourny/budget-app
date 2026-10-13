@@ -5,7 +5,7 @@ import type {
 import type { ApartmentCategory } from '@shared/account-categories'
 
 /*
- * ✏️ RÈGLES DES APPARTEMENTS (voir `docs/plan-appartements.md`, R2, R3, R7, R10) : le seul fichier à
+ * ✏️ RÈGLES DES APPARTEMENTS (voir `docs/fonctionnel.md` › Appartements, R2, R3, R7, R10) : le seul fichier à
  * modifier pour changer ce qui est cumulé dans une ligne du tableau, les seuils ou les tolérances.
  *
  * Partagé front + serveur (fichier pur, sans dépendance runtime). Montants en centimes, taux en
