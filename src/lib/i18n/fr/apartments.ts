@@ -54,6 +54,8 @@ export const apartments = {
     yieldTip:
       "Rendement annualisé sur les mois clos, sur le prix d'achat seul (hors frais). Brut : loyers bruts perçus. Net : loyers bruts moins les charges hors crédit (gérance, charges, taxe foncière, CFE…), hors capital, intérêts et assurance emprunteur.",
     yieldTipAria: (name: string) => `Comment est calculé « ${name} » ?`,
+    missingInvoice: (months: string) =>
+      `Facture de gérance à saisir : ${months}`,
   },
   table: {
     aria: (name: string) => `Prévisionnel, réalisé et écart de ${name}`,
@@ -117,7 +119,7 @@ export const apartments = {
     title: (name: string) => `Prévisionnel · ${name}`,
     close: 'Fermer',
     month: 'Mois',
-    hint: "Une saisie vaut pour le mois choisi. Le loyer, la taxe foncière (octobre) et la CFE (décembre) saisis valent aussi pour la suite, jusqu'à la saisie suivante. Sans saisie, les charges reprennent le réel du même mois l'an dernier, sinon la moyenne des mois clos. Le crédit vient du tableau d'amortissement et la gérance du loyer × % des Réglages.",
+    hint: "Une saisie vaut pour le mois choisi. Le loyer, la taxe foncière (octobre) et la CFE (décembre) saisis valent aussi pour la suite, jusqu'à la saisie suivante. Sans saisie, les charges reprennent le réel du même mois l'an dernier, sinon la moyenne des mois clos. Le crédit vient du tableau d'amortissement et la gérance prévue du loyer × taux ci-dessous.",
     line: 'Ligne',
     forecast: 'Prévu',
     default: 'Par défaut',
@@ -128,15 +130,18 @@ export const apartments = {
     saveFailed: 'Enregistrement impossible',
     loadFailed: 'Impossible de charger le prévisionnel.',
     notActive: "L'appartement n'est pas encore acquis ce mois-là.",
-  },
-  invoice: {
-    title: 'Facture de gérance',
-    description:
-      'Le loyer arrive net de frais : saisis les frais de la facture de gérance du mois. Ils précisent la part brut / frais et les rendements, sans changer le solde.',
-    fees: 'Frais de gérance',
-    extraFees: 'Frais supplémentaires',
-    missing: 'Facture de gérance à saisir',
-    saveFailed: 'Enregistrement impossible',
+    management: {
+      title: 'Gérance',
+      feeRate: 'Taux de gérance prévu',
+      feeRateHint: 'En % du loyer brut, vaut pour tous les mois.',
+      invoiceTitle: 'Facture de gérance du mois (réel)',
+      invoiceHint:
+        'Le loyer arrive net de frais : saisis les frais de la facture. Ils précisent la part brut / frais et les rendements, sans changer le solde.',
+      invoiceNotClosed: 'La facture se saisit une fois le mois clos.',
+      fees: 'Frais de gérance',
+      extraFees: 'Frais supplémentaires',
+      missing: 'Facture à saisir',
+    },
   },
   transactions: {
     empty: 'Aucune transaction rattachée aux appartements pour ce mois.',

@@ -5,6 +5,7 @@ export const common = {
   save: 'Enregistrer',
   saved: 'Enregistré.',
   euro: '€',
+  percent: '%',
   loadingFailed: 'Chargement impossible.',
   seeDetails: 'Voir le détail →',
   // Intitulés de colonnes / de montants

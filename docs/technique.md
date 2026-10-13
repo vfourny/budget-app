@@ -67,9 +67,11 @@ Routeurs actuels (tous en `protectedProcedure`) :
 - `professionalForecast` : facturation (`billingLines`…), charges (`forecasts`…), salaire (`salary`…), km (`mileage`…),
   chacun avec sa variante `copy…ToFollowingMonths` ; `clients` (noms déjà saisis + dernier TJM).
 - `trip` : `create`, `delete`.
-- `apartment` : `list`, `options`, `save` (fiche, prêt et solde de début d'année), `setManagementInvoice`, `delete`
+- `apartment` : `list`, `options`, `save` (fiche, prêt et solde de début d'année), `delete`
   (refusé si le bien porte des transactions ou des relevés).
 - `apartmentDashboard` : `periods` (mois clos), `month`, `year` (calculs purs dans `server/lib/apartments/`).
+- `apartmentForecast` : `inputs` / `set` (éditeur du prévisionnel : lignes du mois, et pour un bien géré taux de
+  gérance + facture de gérance du mois).
 
 Le filtre « transactions validées d'un type de compte » est partagé : `server/lib/dashboard/scope.ts`. Une ligne est
 « à vérifier » si elle n'a pas de catégorie ou si sa confiance est sous 0,7 (`server/lib/categorize/needs-review.ts`).

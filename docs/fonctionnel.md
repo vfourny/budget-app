@@ -225,19 +225,20 @@ rappels (déclaration = comptable). Les règles ci-dessous (R1 à R12, hypothès
 (`server/lib/apartments/`, `shared/apartment-*.ts`).
 
 - **Réglages › Appartements** (`/settings?tab=apt`) : par bien, régime (étiquette), gérance (interrupteur, désactivé = en direct), mois
-  d'acquisition, prix, frais de gérance (%), assurance emprunteur, solde du compte au 1er janvier, prêt à taux fixe (synthèse :
+  d'acquisition, prix, assurance emprunteur, solde du compte au 1er janvier, prêt à taux fixe (synthèse :
   mensualité, 1ʳᵉ échéance, intérêts totaux).
 - **Import** : type de compte « Appartement » + choix de l'appartement. Les catégories `APT_*` sont proposées ; le
   virement d'apport vers ce compte se catégorise « Apport appartement » côté perso (enveloppe épargne long terme).
   À la relecture, une échéance de prêt est reconnue si elle est à ±1 € de la mensualité du tableau d'amortissement.
 - **Vue mois** (mois clos seulement) : pour chaque appartement actif (à partir du mois d'acquisition), tableau
   Prévisionnel / Réalisé / Écart (solde, loyers, crédit, charges), jauge du capital remboursé, facture de gérance
-  saisie à la main (le loyer arrive net de frais), 2 KPI (loyers nets perçus, effort d'épargne nécessaire) et les
+  manquante signalée (badge), 2 KPI (loyers nets perçus, effort d'épargne nécessaire) et les
   transactions rattachées.
 - **Vue année** : mêmes colonnes sur les mois clos, rendements brut / net sur le prix d'achat, et
   seuils LMNP (plafond micro-BIC, seuil LMP) indicatifs.
-- **Prévisionnel** : loyer brut et charges saisis mois par mois dans l'éditeur. La gérance (loyer × %), l'échéance
-  du prêt et l'assurance emprunteur des Réglages ne se saisissent pas. Sans saisie : le loyer, la taxe foncière
+- **Éditeur du prévisionnel** (bouton de la carte) : loyer brut et charges saisis mois par mois ; pour un bien géré,
+  section **Gérance** : taux de gérance prévu (% du loyer brut, vaut pour tous les mois) et facture de gérance du mois
+  (réel, mois clos seulement, R12). L'échéance du prêt et l'assurance emprunteur des Réglages ne se saisissent pas. Sans saisie : le loyer, la taxe foncière
   (octobre) et la CFE (décembre) reprennent leur dernière valeur saisie, sinon 0 ; les charges mensuelles reprennent
   le réel du même mois N-1, sinon la moyenne des autres mois clos, sinon 0 ; régularisation et autres valent 0.
 - **Solde** : solde fin de mois = début + différentiel + apport ; il doit coïncider avec le solde bancaire. L'effort
@@ -254,7 +255,7 @@ rappels (déclaration = comptable). Les règles ci-dessous (R1 à R12, hypothès
   charge = −(somme des montants signés) : une régularisation créditée vient en diminution. Charges annuelles affichées en
   vue mois seulement si le mois en contient ; montant nul = « — ».
 - **R3 — Prévisionnel** : loyer brut saisi par mois (sans saisie : dernière saisie antérieure, sinon 0) ; gérance =
-  loyer × % ; échéance du tableau d'amortissement ; assurance des Réglages. Taxe foncière en **octobre** et CFE en
+  loyer × taux saisi dans l'éditeur ; échéance du tableau d'amortissement ; assurance des Réglages. Taxe foncière en **octobre** et CFE en
   **décembre** (sans saisie : dernier montant saisi, sinon 0 ; le réel compte dans le mois de paiement, sans lissage).
   Les charges mensuelles saisies reprennent le réel du même mois N-1, sinon la moyenne des autres mois clos, sinon 0
   (H2) ; régularisation et autres valent 0 sans saisie. Pas de vacance prévue.
@@ -285,5 +286,5 @@ rappels (déclaration = comptable). Les règles ci-dessous (R1 à R12, hypothès
   « Apport appartement » (`APARTMENT_CONTRIBUTION`, enveloppe épargne long terme, H6) côté perso, sans rapprochement
   automatique. Un appartement qui porte des transactions ou des relevés ne se supprime pas.
 - **R12 — Facture de gérance** : le loyer arrive **net** ; frais de gérance et frais supplémentaires sont saisis à la main
-  chaque mois (`ManagementInvoice`, vue mois). Loyer brut = net reçu + frais ; le différentiel et le solde ne changent
+  chaque mois clos dans l'éditeur du prévisionnel (`ManagementInvoice`). Loyer brut = net reçu + frais ; le différentiel et le solde ne changent
   pas. Facture non saisie sur un mois clos = frais à 0, mois signalé. Bien en direct : ni facture ni frais.
