@@ -2,6 +2,8 @@ import type { TransactionCategory } from '@server/generated/prisma/enums'
 import type { LoanTerms } from '@shared/apartment-loan'
 import { loanSchedule } from '@shared/apartment-loan'
 
+import { SEED_YEAR } from './seed-year'
+
 /**
  * Relevés 2025 du compte appartement de Toulouse (données de dev local). Les montants, libellés et
  * jours de prélèvement viennent des relevés réels d'août et septembre 2026 (sans références de
@@ -13,7 +15,7 @@ import { loanSchedule } from '@shared/apartment-loan'
  * - apport mensuel du compte perso pour couvrir l'effort d'épargne.
  * Montants en centimes, signés (négatif = débit).
  */
-const YEAR = 2025
+const YEAR = SEED_YEAR
 const ACQUISITION_MONTH = 4
 
 /** Loyer net versé par la gérance (735,31 € : relevé d'août 2026). */
