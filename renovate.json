@@ -3,20 +3,20 @@
   "extends": ["github>vfourny/.github"],
   "packageRules": [
     {
+      "automerge": false,
       "description": "A merge on main is a production deploy (Vercel + prisma migrate deploy) and there are no tests yet: runtime dependencies are never automerged",
-      "matchDepTypes": ["dependencies"],
-      "automerge": false
+      "matchDepTypes": ["dependencies"]
     },
     {
+      "automerge": false,
       "description": "Nitro 3 is a beta pinned on purpose: every bump is reviewed",
-      "matchPackageNames": ["nitro"],
-      "automerge": false
+      "matchPackageNames": ["nitro"]
     },
     {
+      "automerge": false,
       "description": "The Prisma CLI, client and adapter must stay on the same version (reviewed: the group mixes runtime and dev dependencies)",
-      "matchPackageNames": ["prisma", "@prisma/client", "@prisma/adapter-neon"],
       "groupName": "prisma",
-      "automerge": false
+      "matchPackageNames": ["prisma", "@prisma/client", "@prisma/adapter-neon"]
     }
   ]
 }
