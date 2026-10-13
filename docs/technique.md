@@ -167,11 +167,11 @@ Chaque PR qui introduit un pattern React le documente dans sa section « Notes R
 ## Qualité et workflow
 
 - **Une fonctionnalité = une branche = une PR** courte (`feat/…`, `fix/…`, `chore/…`), Conventional Commits. Trop gros → PR empilées.
-- `pnpm check` (lint + typecheck + format + i18n + knip), puis `pnpm build` doivent être verts avant `/ship-pr`.
+- `pnpm check` (lint + ts:check + format + knip), puis `pnpm build` doivent être verts avant `/ship-pr`.
 - **ESLint** (config `@vfourny/node-toolkit/eslint/react`, `--max-warnings 0`) : règles des hooks React (`rules-of-hooks`, `exhaustive-deps`, `set-state-in-effect`…), tri des imports / props / interfaces ; `no-console` en warning sauf `warn` / `error`.
 - **lefthook** (pre-commit) : ESLint `--fix` puis Prettier sur les fichiers stagés ; (commit-msg) : commitlint. Ne pas contourner avec `--no-verify`.
 - **Hook Claude Code** (`.claude/hooks/check.sh`) : Prettier + ESLint `--fix` + `tsc` après chaque édition.
-- **CI GitHub Actions** : lint, typecheck, format, build sur chaque PR et push sur `main` (pas de tests automatisés pour l'instant).
+- **CI GitHub Actions** (workflows réutilisables de `vfourny/.github`) : format, lint, knip, ts:check, build sur chaque PR et push sur `main`, plus le titre de PR via commitlint (pas de tests automatisés pour l'instant).
 - Nitro 3 est en **beta** : version épinglée exactement dans `package.json`, ne pas la monter sans test.
 
 ## Pièges connus

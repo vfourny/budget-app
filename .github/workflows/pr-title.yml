@@ -1,0 +1,27 @@
+name: PR title
+
+# Separate from pr.yml so that editing the title or description re-runs this check only.
+on:
+  pull_request:
+    branches: [main]
+    types: [opened, edited, synchronize, reopened]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  pr-checks:
+    uses: vfourny/.github/.github/workflows/pr-checks.yml@1d4e661bf91124158ed56f89cbfa362b82ee7897 # v3.0.0
+    permissions:
+      contents: read
+      issues: read
+      pull-requests: read
+    with:
+      node_version: '22'
+      package_manager: pnpm
+      # Maintained solo: PRs are not linked to issues
+      is_linked_issue_checked: false

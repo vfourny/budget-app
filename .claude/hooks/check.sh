@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # PostToolUse hook (Edit/Write) : prettier + eslint --fix sur le fichier touché,
-# puis typecheck du projet. Exit 2 => l'erreur est renvoyée à Claude, qui corrige.
+# puis ts:check du projet. Exit 2 => l'erreur est renvoyée à Claude, qui corrige.
 set -uo pipefail
 
 cd "${CLAUDE_PROJECT_DIR:-$(dirname "$0")/../..}" || exit 0
@@ -24,7 +24,7 @@ case "$file" in
     if ! out=$(pnpm exec eslint --fix --max-warnings 0 --no-warn-ignored "$file" 2>&1); then
       errors+=$'eslint:\n'"$out"$'\n'
     fi
-    if ! out=$(pnpm -s typecheck --pretty false 2>&1); then
+    if ! out=$(pnpm -s ts:check --pretty false 2>&1); then
       errors+=$'TypeScript:\n'"$(echo "$out" | head -40)"$'\n'
     fi
     ;;

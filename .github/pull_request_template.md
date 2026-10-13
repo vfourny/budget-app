@@ -16,6 +16,6 @@
 
 ## Checklist
 
-- [ ] `pnpm check` vert en local (lint + typecheck + format)
+- [ ] `pnpm check` vert en local (lint + ts:check + format + knip)
 - [ ] `pnpm build` vert en local
 - [ ] Pas de secret, pas de `console.log` oublié

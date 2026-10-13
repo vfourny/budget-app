@@ -18,7 +18,7 @@
     "allow": [
       "Bash(pnpm lint:*)",
       "Bash(pnpm lint)",
-      "Bash(pnpm typecheck)",
+      "Bash(pnpm ts:check)",
       "Bash(pnpm format:*)",
       "Bash(pnpm format)",
       "Bash(pnpm check)",

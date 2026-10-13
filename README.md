@@ -37,7 +37,7 @@ pnpm dev                    # front + API sur http://localhost:5173 (API sous /a
 | Commande          | Rôle                                                          |
 | ----------------- | ------------------------------------------------------------- |
 | `pnpm dev`        | Front + API sur un seul serveur                               |
-| `pnpm check`      | lint + typecheck + format:check (avant toute PR)              |
+| `pnpm check`      | lint + ts:check + format:check + knip (avant toute PR)        |
 | `pnpm build`      | Build de prod (`.output/`, ou `.vercel/output` sur Vercel)    |
 | `pnpm preview`    | Sert le build de prod localement                              |
 | `pnpm lint:fix`   | Autofix ESLint                                                |

@@ -43,7 +43,7 @@ Choix délibéré : **le plus simple possible**. SPA React (pas de SSR, pas de S
 
 ```bash
 pnpm dev            # front + API sur un seul serveur (http://localhost:5173, API sous /api)
-pnpm check          # lint + typecheck + format:check + knip (à lancer avant toute PR)
+pnpm check          # lint + ts:check + format:check + knip (à lancer avant toute PR)
 pnpm build          # build de prod (fait aussi en CI) → .output/ (ou .vercel/output sur Vercel)
 pnpm preview        # sert le build de prod localement
 pnpm lint:fix       # autofix ESLint
@@ -174,7 +174,8 @@ nitro.config.ts        # serverDir: ./server
 - Avant toute PR : self-review du diff, `pnpm check` + `pnpm build` verts, puis
   `/ship-pr`. Ne présenter que du vert.
 - Remplir `.github/pull_request_template.md`, section « Notes React » incluse.
-- CI GitHub Actions (`.github/workflows/ci.yml`) : lint, typecheck, format, build sur chaque PR.
+- CI GitHub Actions : workflows réutilisables de `vfourny/.github` (figés sur un SHA de release). `pr.yml` → `build.yml`
+  (format:check, lint, knip, ts:check, build) ; `pr-title.yml` → `pr-checks.yml` (titre de PR vérifié par commitlint).
 - Hook Git pre-commit (`lefthook.yml`, installé par `pnpm install`) : eslint --fix + Prettier
   sur les fichiers stagés, commit bloqué s'il reste une erreur. Ne pas contourner avec
   `--no-verify` : corriger l'erreur.
