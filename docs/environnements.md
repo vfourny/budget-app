@@ -4,15 +4,19 @@
 
 Modèle : `.env.example` (`cp .env.example .env`). Le fichier `.env` n'est jamais commité.
 
-| Variable             | Usage                                                                                       | Obligatoire     |
-| -------------------- | ------------------------------------------------------------------------------------------- | --------------- |
-| `DATABASE_URL`       | URL Neon **pooled** (host `-pooler`), runtime via `@prisma/adapter-neon`                    | oui             |
-| `DIRECT_URL`         | URL Neon **directe**, CLI Prisma (migrations, studio)                                       | oui pour la CLI |
-| `GEMINI_API_KEY`     | Catégorisation (clé gratuite sur aistudio.google.com)                                       | oui             |
-| `BETTER_AUTH_SECRET` | Signature des sessions (≥ 32 car., `openssl rand -base64 32`), une valeur par environnement | oui             |
-| `BETTER_AUTH_URL`    | URL publique de l'app (https en prod) ; sinon déduite de la requête                         | non             |
+| Variable             | Usage                                                                                       | Obligatoire      |
+| -------------------- | ------------------------------------------------------------------------------------------- | ---------------- |
+| `DATABASE_URL`       | URL Neon **pooled** (host `-pooler`), runtime via `@prisma/adapter-neon`                    | oui              |
+| `DIRECT_URL`         | URL Neon **directe**, CLI Prisma (migrations, studio)                                       | oui pour la CLI  |
+| `GEMINI_API_KEY`     | Catégorisation (clé gratuite sur aistudio.google.com)                                       | oui              |
+| `GEMINI_MODEL`       | Modèle Gemini (défaut `gemini-3.5-flash-lite`)                                              | non              |
+| `BETTER_AUTH_SECRET` | Signature des sessions (≥ 32 car., `openssl rand -base64 32`), une valeur par environnement | oui              |
+| `BETTER_AUTH_URL`    | URL publique de l'app (https en prod) ; sinon déduite de la requête                         | non              |
+| `SEED_USER_EMAIL`    | Email du compte unique, créé par le seed (`pnpm db:seed`)                                   | oui pour le seed |
+| `SEED_USER_PASSWORD` | Mot de passe de ce compte (12 caractères minimum)                                           | oui pour le seed |
+| `SEED_USER_NAME`     | Nom affiché du compte                                                                       | non              |
 
-`DATABASE_URL` est validée au démarrage par Zod (`server/lib/env.ts`). Si `DIRECT_URL` est absente, la CLI Prisma retombe sur `DATABASE_URL`, mais les migrations exigent une connexion directe : toujours définir les deux.
+Les variables serveur sont validées au démarrage par Zod (`server/lib/env.ts`). Si `DIRECT_URL` est absente, la CLI Prisma retombe sur `DATABASE_URL`, mais les migrations exigent une connexion directe : toujours définir les deux.
 
 ## Bases de données
 
@@ -41,6 +45,7 @@ GitHub Actions (`.github/workflows/ci.yml`) sur chaque PR et push sur `main` : i
 cp .env.example .env
 pnpm install                  # génère le client Prisma
 pnpm db:deploy
+pnpm db:seed                  # compte unique, formats CSV, données de dev
 ```
 
 Faire évoluer le schéma :

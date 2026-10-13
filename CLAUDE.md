@@ -102,7 +102,7 @@ nitro.config.ts        # serverDir: ./server
 - **Calculs du dashboard Appartements** : même principe, dans `server/lib/apartments/` (purs : `compute-month`, `compute-period`,
   `thresholds`) ; requêtes dans `load-period.ts`, assemblage dans `build-view.ts`. Règles (catégorie → ligne du tableau, seuils,
   tolérance de rapprochement) dans `shared/apartment-rules.ts` ; prêt dans `shared/apartment-loan.ts`. Référence métier :
-  `docs/plan-appartements.md` (R1 à R12).
+  `docs/fonctionnel.md` › Appartements (R1 à R12).
 - **Calculs du dashboard Pro** : fonctions **pures** dans `server/lib/professional/` (aucun accès base) ;
   les requêtes restent dans `load-year.ts`. Un statut juridique = un `ProfessionalRegime` (`server/lib/professional/regimes/`).
 - **Données** : toujours via tRPC + TanStack Query. **Pas de `fetch` dans un `useEffect`.**
@@ -127,7 +127,7 @@ nitro.config.ts        # serverDir: ./server
 - **Montants** : entiers en **centimes**, signés (négatif = débit). Jamais de float pour de
   l'argent.
 - **Prisma** : côté serveur, toujours passer par `db` de `@server/lib/db`. Toute modif de
-  schéma (`prisma/schema/*.prisma`, un fichier par domaine : base, auth, transactions, budget, pro) s'accompagne d'une migration versionnée dans `prisma/migrations/`.
+  schéma (`prisma/schema/*.prisma`, un fichier par domaine : base, auth, transactions, personal, professional, apartments) s'accompagne d'une migration versionnée dans `prisma/migrations/`.
 - **Dates** : `Transaction.date` en `@db.Date` ; `month` (1-12) et `year` dénormalisés pour les
   agrégations.
 - **Typage des constantes** : pour un objet/tableau de config ou une liste figée, préférer
@@ -199,11 +199,11 @@ schéma Zod + modèle Prisma, ajout d'un widget dashboard).
 4. Route tRPC `categorize` (Gemini, few-shot sur transactions validées, JSON `category` (valeur de l'enum) + `confidence`) (fait)
 5. Écran de relecture : historique, tableau de correction, « Valider », suppression d'un import (fait)
 6. Dashboard Perso mois / année : totaux, transactions, par catégorie (fait) ; parts recommandées par enveloppe dans Réglages + jauges réel vs recommandé (fait) ; abonnements, IR (à faire)
-7. Partie pro Stygma (fait, voir `docs/plan-professional.md`) : catégories pro, règles par année dans Réglages,
+7. Partie pro Stygma (fait, voir `docs/fonctionnel.md`) : catégories pro, règles par année dans Réglages,
    dashboard mois / année (CA, TVA, bénéfice, facturation & encaissements, catégories, frais mixtes, km), éditeur du
    prévisionnel ; à venir : régimes IS / EURL, TVA à l'encaissement
 
-8. Appartements (fait, voir `docs/plan-appartements.md`) : type de compte `APARTMENT`, Réglages (bien + prêt), import / relecture
+8. Appartements (fait, voir `docs/fonctionnel.md`) : type de compte `APARTMENT`, Réglages (bien + prêt), import / relecture
    avec rattachement, dashboard `/apartments` mois / année (prévu / réalisé / écart, KPI, rendements, seuils LMNP) ; hors
    périmètre : fiscalité, rappels
 
