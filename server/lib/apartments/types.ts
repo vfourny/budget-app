@@ -9,7 +9,6 @@ export interface ApartmentRecord {
   acquiredAt: Date
   cfeCents: number
   creditInsuranceCents: number
-  depositCents: number
   id: string
   kind: ApartmentKind
   loan: LoanTerms | null

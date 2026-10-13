@@ -71,7 +71,6 @@ export const apartments = {
       fixed: 'Charges fixes',
       annual: 'Charges annuelles',
       other: 'Autres charges',
-      offResult: 'Hors résultat',
     },
     rows: {
       openingBalance: 'Solde début de mois',
@@ -80,7 +79,6 @@ export const apartments = {
       ownerContribution: 'Apport fonds perso',
       closingBalance: 'Solde fin de mois',
       closingBalanceYear: 'Solde à ce jour',
-      deposit: 'Dépôt de garantie à restituer',
       grossRent: 'Loyers bruts',
       grossRentSub: 'perçus + frais de gérance',
       managementFees: 'Frais de gérance',

@@ -50,7 +50,7 @@ perso vers ce compte existent des deux côtés (voir R11).
 ### Réglages › onglet « Appartements » (`/settings?tab=apt`)
 
 Une carte par appartement : régime (étiquette), nom, gérance (interrupteur, désactivé = en direct), date d'acquisition (mm/aaaa),
-prix d'achat, loyer prévu, dépôt de garantie, taxe foncière (€/an), CFE (€/an), solde de début d'année ; bloc
+prix d'achat, loyer prévu, taxe foncière (€/an), CFE (€/an), solde de début d'année ; bloc
 **Prêt immobilier** (capital emprunté, taux annuel, durée en mois, première échéance, assurance de l'emprunt en €/mois)
 avec un encadré de synthèse calculé (mensualité, première échéance en capital / intérêts, coût total des intérêts).
 Boutons « Ajouter un appartement » et « Enregistrer ».
@@ -106,10 +106,8 @@ positif pour les charges (signe porté par la ligne).
 | Autres charges    | Frais bancaires                          | `APT_BANK_FEES`                                                                     | R3                                                  |
 |                   | Régularisation de charges                | `APT_REGULARIZATION`                                                                | 0                                                   |
 |                   | Autres (non listé)                       | `APT_OTHER`                                                                         | 0                                                   |
-| Hors résultat     | Dépôt de garantie à restituer            | (valeur des Réglages, pas une transaction)                                          | idem                                                |
 
-Règles d'affichage : la section « Charges annuelles » n'apparaît en vue mois que si le mois en contient ; le
-« Dépôt de garantie » n'apparaît qu'en vue année ; un montant nul s'affiche « — ».
+Règles d'affichage : la section « Charges annuelles » n'apparaît en vue mois que si le mois en contient ; un montant nul s'affiche « — ».
 
 **Ligne = −(somme des montants signés)** pour une charge : un remboursement de régularisation (crédit) vient en
 diminution de la ligne.
@@ -244,7 +242,7 @@ Une migration. Tout porte `userId`, toute requête filtre sur `ctx.session.user.
 
 | Modèle / champ               | Détail                                                                                                                                                                                                                                                                                                                                           |
 | ---------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `Apartment`                  | `userId`, `name`, `kind` (enum `ApartmentKind` : `FURNISHED` (LMNP) seul pour l'instant), `managed` (`false` = en direct), `acquiredAt` (`@db.Date`, 1ᵉʳ du mois), `priceCents`, `rentCents`, `depositCents`, `managementFeeBps`, `creditInsuranceCents`, `propertyTaxCents` (annuel), `cfeCents` (annuel)                                       |
+| `Apartment`                  | `userId`, `name`, `kind` (enum `ApartmentKind` : `FURNISHED` (LMNP) seul pour l'instant), `managed` (`false` = en direct), `acquiredAt` (`@db.Date`, 1ᵉʳ du mois), `priceCents`, `rentCents`, `managementFeeBps`, `creditInsuranceCents`, `propertyTaxCents` (annuel), `cfeCents` (annuel)                                                       |
 | prêt (sur `Apartment`)       | `loanPrincipalCents`, `loanRateBps`, `loanTermMonths`, `loanFirstDueDate` (`@db.Date`), tous **optionnels** (un bien sans prêt est possible : alors pas de ligne Crédit)                                                                                                                                                                         |
 | `ApartmentYearOpening`       | `apartmentId`, `year` (PK composée), `openingBalanceCents`                                                                                                                                                                                                                                                                                       |
 | `ManagementInvoice`          | `apartmentId`, `year`, `month` (PK composée), `feesCents`, `extraFeesCents` : facture de gérance saisie à la main (R12)                                                                                                                                                                                                                          |

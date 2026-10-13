@@ -231,7 +231,7 @@ Suivi de **trésorerie** des biens en location (comme l'onglet « Toulouse » de
 rappels (déclaration = comptable). Règles détaillées et hypothèses : [plan-appartements.md](./plan-appartements.md).
 
 - **Réglages › Appartements** (`/settings?tab=apt`) : par bien, régime (étiquette), gérance (interrupteur, désactivé = en direct), mois
-  d'acquisition, prix, loyer prévu brut, dépôt, frais de gérance (%), assurance emprunteur, taxe foncière et CFE
+  d'acquisition, prix, loyer prévu brut, frais de gérance (%), assurance emprunteur, taxe foncière et CFE
   annuelles, solde du compte au 1er janvier, prêt à taux fixe (synthèse : mensualité, 1ʳᵉ échéance, intérêts totaux).
 - **Import** : type de compte « Appartement » + choix de l'appartement. Les catégories `APT_*` sont proposées ; le
   virement d'apport vers ce compte se catégorise « Apport appartement » côté perso (enveloppe épargne long terme).
@@ -240,7 +240,7 @@ rappels (déclaration = comptable). Règles détaillées et hypothèses : [plan-
   Prévisionnel / Réalisé / Écart (solde, loyers, crédit, charges), jauge du capital remboursé, facture de gérance
   saisie à la main (le loyer arrive net de frais), 2 KPI (loyers nets perçus, effort d'épargne nécessaire) et les
   transactions rattachées.
-- **Vue année** : mêmes colonnes sur les mois clos, rendements brut / net sur le prix d'achat, dépôt de garantie, et
+- **Vue année** : mêmes colonnes sur les mois clos, rendements brut / net sur le prix d'achat, et
   seuils LMNP (plafond micro-BIC, seuil LMP) indicatifs.
 - **Prévisionnel** : loyer, gérance, échéance du prêt, assurance ; taxe foncière en octobre, CFE en décembre ; charges
   mensuelles = réel du même mois N-1, sinon moyenne des autres mois clos, sinon 0.
