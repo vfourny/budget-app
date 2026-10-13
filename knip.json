@@ -1,6 +1,6 @@
 {
   "$schema": "https://unpkg.com/knip@6/schema.json",
-  "entry": ["server/api/**/*.ts"],
+  "entry": ["server/api/**/*.ts", "scripts/*.ts"],
   "ignoreDependencies": ["@neondatabase/serverless", "lefthook"],
   "project": [
     "src/**/*.{ts,tsx}",

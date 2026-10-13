@@ -8,6 +8,7 @@ export interface IncomeTaxBracket {
  * Barème de l'IR (1 part) par année : clé = année affichée dans le dashboard Perso, tranches triées
  * par seuil croissant, la première à 0. Donnée légale, identique pour tous : elle vit dans le code.
  * ⚠️ CHAQUE NOUVELLE ANNÉE : ajouter son barème ici (publié avec la loi de finances), dans une PR.
+ * Rappel automatique : `scripts/check-yearly-rules.ts` (issue GitHub ouverte chaque mois tant qu'il manque).
  * Une année absente fait afficher « barème non renseigné » sur la card « IR estimé ».
  */
 const INCOME_TAX_BRACKETS_BY_YEAR: Partial<

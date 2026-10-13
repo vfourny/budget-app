@@ -16,6 +16,7 @@
     "knip": "knip",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
+    "rules:check": "tsx scripts/check-yearly-rules.ts",
     "check": "pnpm lint && pnpm ts:check && pnpm format:check && pnpm knip",
     "postinstall": "pnpm db:generate",
     "db:migrate": "prisma migrate dev",
