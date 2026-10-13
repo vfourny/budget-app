@@ -41,6 +41,7 @@ Workflows réutilisables de [`vfourny/.github`](https://github.com/vfourny/.gith
 
 - `.github/workflows/pr.yml` (chaque PR et push sur `main`) → `build.yml` : install (`--frozen-lockfile`) → format:check → lint → knip → ts:check → build. Chaque script est lancé s'il existe dans `package.json` (`--if-present`) ; pas de script `test` pour l'instant, l'étape est sautée.
 - `.github/workflows/pr-title.yml` (PR ouverte, titre modifié…) → `pr-checks.yml` : titre de PR vérifié par commitlint.
+- `.github/workflows/pr.yml` → `prisma-check.yml` : rejoue les migrations sur un Postgres vide (service du job, jamais Neon) puis `prisma migrate diff --exit-code` contre `prisma/schema/` ; échoue si le schéma a changé sans migration (`pnpm db:migrate` oublié). Lancé sur chaque PR, sans filtre `paths`, pour pouvoir être un check obligatoire.
 
 Node vient de l'input `node_version` (aligné sur `.nvmrc`), pnpm du champ `packageManager`.
 
