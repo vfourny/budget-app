@@ -68,7 +68,6 @@ export async function loadApartmentData(
       acquiredAt: apartment.acquiredAt,
       priceCents: apartment.priceCents,
       rentCents: apartment.rentCents,
-      depositCents: apartment.depositCents,
       managementFeeBps: apartment.managementFeeBps,
       creditInsuranceCents: apartment.creditInsuranceCents,
       propertyTaxCents: apartment.propertyTaxCents,

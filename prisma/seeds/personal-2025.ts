@@ -207,9 +207,7 @@ function spreadOf(spreadCents: number, month: number, lineIndex: number) {
 }
 
 /** Transactions perso d'un mois (1-12), triées par date. Fonction pure. */
-export function buildPersonalMonth2025(
-  month: number,
-): SeedPersonalTransaction[] {
+function buildPersonalMonth2025(month: number): SeedPersonalTransaction[] {
   const lastDay = new Date(Date.UTC(YEAR, month, 0)).getUTCDate()
   const dateOf = (day: number) =>
     new Date(Date.UTC(YEAR, month - 1, Math.min(day, lastDay)))

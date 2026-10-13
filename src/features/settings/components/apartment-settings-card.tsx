@@ -209,11 +209,6 @@ export function ApartmentSettingsCard({
               label={text.fields.rent}
               onChange={(value) => set('rentCents', value)}
             />
-            <EuroField
-              cents={draft.depositCents}
-              label={text.fields.deposit}
-              onChange={(value) => set('depositCents', value)}
-            />
             <PercentField
               bps={draft.managementFeeBps}
               description={text.fields.managementFeeHint}

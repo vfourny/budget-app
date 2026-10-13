@@ -174,21 +174,6 @@ function sectionsOf(
       line('other', rows.other, -1, forecast, actual),
     ],
   })
-  // Hors résultat : le dépôt de garantie vient des Réglages, il n'a pas d'écart (vue année seulement).
-  if (view === 'year') {
-    sections.push({
-      key: 'offResult',
-      rows: [
-        {
-          key: 'deposit',
-          label: rows.deposit,
-          forecast: apartment.depositCents,
-          actual: actual ? apartment.depositCents : null,
-          sign: 1,
-        },
-      ],
-    })
-  }
   return sections
 }
 

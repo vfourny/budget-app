@@ -21,7 +21,6 @@ model Apartment {
   priceCents           Int
   /// Loyer mensuel prévu, brut de frais de gérance.
   rentCents            Int
-  depositCents         Int           @default(0)
   /// Frais de gérance en points de base du loyer (7,00 % = 700), pour le prévisionnel.
   managementFeeBps     Int           @default(0)
   /// Assurance emprunteur mensuelle, prélevée à part de l'échéance du prêt.

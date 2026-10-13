@@ -133,7 +133,6 @@ export const settings = {
       acquiredAt: 'Acquisition (mois)',
       price: "Prix d'achat",
       rent: 'Loyer prévu (brut, par mois)',
-      deposit: 'Dépôt de garantie',
       managementFee: 'Frais de gérance',
       managementFeeHint:
         'En % du loyer, pour le prévisionnel : le réel vient de la facture de gérance.',
