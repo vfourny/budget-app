@@ -28,7 +28,6 @@ const basisPoints = z.number().int().min(0).max(100_00)
 const professionalYearSettingsSchema = z
   .object({
     regime: z.enum(CompanyRegime),
-    irOptionFirstYear: z.number().int().min(2000).max(2100),
     employerContributionBp: basisPoints,
     employeeContributionBp: basisPoints,
     taxableNetBp: z.number().int().min(0).max(150_00),

@@ -18,8 +18,6 @@ model ProfessionalYearSettings {
   user                   User          @relation(fields: [userId], references: [id], onDelete: Cascade)
   year                   Int           @db.SmallInt
   regime                 CompanyRegime @default(SAS_IR)
-  /// Premier exercice avec l'option pour l'IR (5 exercices maximum).
-  irOptionFirstYear      Int           @db.SmallInt
   employerContributionBp Int
   employeeContributionBp Int
   /// Net imposable en % du brut (base du prélèvement à la source).

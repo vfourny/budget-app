@@ -171,7 +171,7 @@ prévisionnel s'affiche (bandeau « Mois à venir »). Ne comptent que les trans
 ### Règles de l'année (Réglages › Pro)
 
 Un jeu de règles **par année** (`ProfessionalYearSettings`) : régime (seule la **SAS à l'IR** est calculée ; IS et EURL
-« Bientôt »), première année de l'option IR (5 exercices max), taux patronal, salarial, net
+« Bientôt »), taux patronal, salarial, net
 imposable, PAS, charges sociales sur la quote-part de bénéfice, surfaces bureau / logement, barème km (la clé des autres frais
 mixtes est fixe : 5/7, `MIXED_COSTS_KEY`). Une année non configurée reprend la dernière année configurée avant elle, sinon les valeurs par
 défaut (`DEFAULT_PROFESSIONAL_YEAR_SETTINGS`).

@@ -22,7 +22,6 @@ export type ProfessionalYearSettingsValues = Omit<
  */
 export const DEFAULT_PROFESSIONAL_YEAR_SETTINGS = {
   regime: 'SAS_IR',
-  irOptionFirstYear: 2026,
   employerContributionBp: 4460,
   employeeContributionBp: 2160,
   taxableNetBp: 8730,
@@ -37,9 +36,6 @@ export const DEFAULT_PROFESSIONAL_YEAR_SETTINGS = {
 export const SUPPORTED_REGIMES = [
   'SAS_IR',
 ] as const satisfies readonly CompanyRegime[]
-
-/** Nombre maximum d'exercices avec l'option pour l'IR. */
-export const IR_OPTION_MAX_YEARS = 5
 
 /** TVA collectée sur les factures (prestations de services), en points de base. */
 export const COLLECTED_VAT_BP = 2000

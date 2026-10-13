@@ -38,14 +38,6 @@ export const settings = {
     active: 'Actif',
     regimeNote:
       "Les règles sont propres à chaque année : modifier un taux, le barème km ou le régime d'une année ne change pas les autres. Seule la SAS à l'IR est disponible pour l'instant.",
-    irOption: {
-      label: "Option à l'IR : première année",
-      notActive: (year: number) => `Option pas encore active en ${year}.`,
-      exercise: (exercise: number, max: number, year: number) =>
-        `Exercice ${exercise} sur ${max} maximum pour ${year}.`,
-      exceeded: (exercise: number, max: number) =>
-        `Exercice ${exercise} : au-delà des ${max} exercices maximum, l'option IR n'est plus possible.`,
-    },
     groups: {
       salary: {
         title: 'Cotisations sur salaire',

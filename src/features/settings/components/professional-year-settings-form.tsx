@@ -15,7 +15,6 @@ import {
 import type { CompanyRegime } from '@server/generated/prisma/enums'
 import {
   DEFAULT_PROFESSIONAL_YEAR_SETTINGS,
-  IR_OPTION_MAX_YEARS,
   type ProfessionalYearSettingsValues,
   SUPPORTED_REGIMES,
 } from '@shared/professional-rules'
@@ -29,10 +28,7 @@ import {
 import { errorMessage } from '@/lib/errors'
 import { fr } from '@/lib/i18n/fr'
 
-type NumericKey = Exclude<
-  keyof ProfessionalYearSettingsValues,
-  'regime' | 'irOptionFirstYear'
->
+type NumericKey = Exclude<keyof ProfessionalYearSettingsValues, 'regime'>
 type Unit = keyof typeof fr.settings.pro.units
 
 /**
@@ -195,14 +191,6 @@ function ProfessionalYearFields({
   const invalidAreas = draft.officeAreaDm2 > draft.homeAreaDm2
   const canSave = (changed || !isOwn) && !invalidAreas
 
-  const exercise = year - draft.irOptionFirstYear + 1
-  const irHint =
-    exercise < 1
-      ? fr.settings.pro.irOption.notActive(year)
-      : exercise > IR_OPTION_MAX_YEARS
-        ? fr.settings.pro.irOption.exceeded(exercise, IR_OPTION_MAX_YEARS)
-        : fr.settings.pro.irOption.exercise(exercise, IR_OPTION_MAX_YEARS, year)
-
   function field(key: NumericKey) {
     const config: FieldConfig = FIELDS[key]
     const text = fr.settings.pro.fields[key]
@@ -279,22 +267,6 @@ function ProfessionalYearFields({
       <Text c="dimmed" size="xs">
         {fr.settings.pro.regimeNote}
       </Text>
-
-      <NumberInput
-        allowDecimal={false}
-        description={irHint}
-        error={exercise > IR_OPTION_MAX_YEARS}
-        inputWrapperOrder={['label', 'input', 'description']}
-        label={fr.settings.pro.irOption.label}
-        max={2100}
-        min={2000}
-        onChange={(value) =>
-          typeof value === 'number' &&
-          setDraft((current) => ({ ...current, irOptionFirstYear: value }))
-        }
-        value={draft.irOptionFirstYear}
-        w={280}
-      />
 
       {(Object.keys(GROUPS) as (keyof typeof GROUPS)[]).map((group) => (
         <Stack gap={12} key={group}>
