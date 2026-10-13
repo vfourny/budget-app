@@ -1,0 +1,25 @@
+name: PR
+
+on:
+  pull_request:
+    branches: [main]
+    # Title/description edits only re-run the title check (pr-title.yml)
+    types: [opened, synchronize, reopened]
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    uses: vfourny/.github/.github/workflows/build.yml@1d4e661bf91124158ed56f89cbfa362b82ee7897 # v3.0.0
+    with:
+      node_version: '22'
+      package_manager: pnpm
+      # Deployed by Vercel: no `dist` artifact to upload
+      is_build_upload: false

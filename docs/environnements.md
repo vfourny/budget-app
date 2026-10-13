@@ -37,7 +37,12 @@ Chaque branche a ses propres URLs pooled et directe. Les variables sont saisies 
 
 ## CI
 
-GitHub Actions (`.github/workflows/ci.yml`) sur chaque PR et push sur `main` : install (`--frozen-lockfile`) → lint → typecheck → format → build. Node vient de `.nvmrc`, pnpm du champ `packageManager`.
+Workflows réutilisables de [`vfourny/.github`](https://github.com/vfourny/.github), figés sur le SHA d'une release (Renovate propose les montées de version) :
+
+- `.github/workflows/pr.yml` (chaque PR et push sur `main`) → `build.yml` : install (`--frozen-lockfile`) → format:check → lint → knip → ts:check → build. Chaque script est lancé s'il existe dans `package.json` (`--if-present`) ; pas de script `test` pour l'instant, l'étape est sautée.
+- `.github/workflows/pr-title.yml` (PR ouverte, titre modifié…) → `pr-checks.yml` : titre de PR vérifié par commitlint.
+
+Node vient de l'input `node_version` (aligné sur `.nvmrc`), pnpm du champ `packageManager`.
 
 ## Premier setup et migrations
 
