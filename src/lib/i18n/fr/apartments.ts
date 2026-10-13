@@ -18,7 +18,7 @@ export const apartments = {
   kpis: {
     rent: {
       label: 'Loyers nets perçus',
-      tip: 'Loyers nets de frais de gérance reçus sur le compte appartement (virements « Loyer reçu »). La jauge compare les loyers bruts perçus (net + frais de gérance saisis) aux loyers dus : loyer prévu × mois clos.',
+      tip: 'Loyers nets de frais de gérance reçus sur le compte appartement (virements « Loyer reçu »). La jauge compare les loyers bruts perçus (net + frais de gérance saisis) aux loyers dus : loyers bruts prévus des mois clos.',
       hint: (received: string, due: string, percent: string, fees: string) =>
         `${received} perçus sur ${due} dus (${percent} %) · gérance ${fees}`,
       missing: (amount: string) => `Il manque ${amount} de loyers`,
@@ -111,6 +111,23 @@ export const apartments = {
     over: 'Dépassé',
     gaugeAria: (name: string, receipts: string, limit: string) =>
       `${name} : ${receipts} sur ${limit}`,
+  },
+  editor: {
+    open: 'Éditer le prévisionnel',
+    title: (name: string) => `Prévisionnel · ${name}`,
+    close: 'Fermer',
+    month: 'Mois',
+    hint: "Une saisie vaut pour le mois choisi. Le loyer, la taxe foncière (octobre) et la CFE (décembre) saisis valent aussi pour la suite, jusqu'à la saisie suivante. Sans saisie, les charges reprennent le réel du même mois l'an dernier, sinon la moyenne des mois clos. Le crédit vient du tableau d'amortissement et la gérance du loyer × % des Réglages.",
+    line: 'Ligne',
+    forecast: 'Prévu',
+    default: 'Par défaut',
+    modified: 'modifié',
+    amountAria: (label: string) => `Montant prévu : ${label}`,
+    reset: 'Revenir aux valeurs par défaut',
+    saved: 'Enregistré.',
+    saveFailed: 'Enregistrement impossible',
+    loadFailed: 'Impossible de charger le prévisionnel.',
+    notActive: "L'appartement n'est pas encore acquis ce mois-là.",
   },
   invoice: {
     title: 'Facture de gérance',
