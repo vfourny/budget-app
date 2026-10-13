@@ -17,9 +17,20 @@ concurrency:
 
 jobs:
   build:
-    uses: vfourny/.github/.github/workflows/build.yml@1d4e661bf91124158ed56f89cbfa362b82ee7897 # v3.0.0
+    uses: vfourny/.github/.github/workflows/build.yml@26c28d76f2c07349a2004088be09dd9afbe50a63 # v3.1.0
     with:
       node_version: '22'
       package_manager: pnpm
       # Deployed by Vercel: no `dist` artifact to upload
       is_build_upload: false
+
+  # Fails if prisma/schema/ changed without its migration. Runs on every PR (no `paths`
+  # filter) so it can be a required check without blocking PRs that don't touch Prisma.
+  prisma-check:
+    uses: vfourny/.github/.github/workflows/prisma-check.yml@26c28d76f2c07349a2004088be09dd9afbe50a63 # v3.1.0
+    with:
+      node_version: '22'
+      package_manager: pnpm
+      schema_path: prisma/schema
+      # Match the major of the Neon project
+      postgres_version: '17'
