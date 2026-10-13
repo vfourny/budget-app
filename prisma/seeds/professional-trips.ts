@@ -1,7 +1,9 @@
 import { db } from '@server/lib/db'
 
+import { SEED_YEAR } from './seed-year'
+
 /**
- * Journal des trajets Pro de départ (données de dev local) pour l'année en cours, jusqu'à aujourd'hui :
+ * Journal des trajets Pro de départ (données de dev local) sur toute l'année `SEED_YEAR` :
  * deux allers-retours chez le client chaque mois, et un rendez-vous chez le comptable par trimestre.
  */
 const MONTHLY_TRIPS = [
@@ -31,8 +33,7 @@ const QUARTER_MONTHS = [1, 4, 7, 10] as const
 
 /** Un mois qui a déjà des trajets n'est jamais touché : les saisies du journal restent. */
 export async function seedProfessionalTrips(userId: string) {
-  const today = new Date()
-  const year = today.getUTCFullYear()
+  const year = SEED_YEAR
   const filled = await db.trip.findMany({
     where: { userId, year },
     distinct: ['month'],
@@ -40,14 +41,13 @@ export async function seedProfessionalTrips(userId: string) {
   })
 
   const data = []
-  for (let month = 1; month <= today.getUTCMonth() + 1; month++) {
+  for (let month = 1; month <= 12; month++) {
     if (filled.some((trip) => trip.month === month)) continue
     const trips = QUARTER_MONTHS.some((quarter) => quarter === month)
       ? [...MONTHLY_TRIPS, QUARTERLY_TRIP]
       : MONTHLY_TRIPS
     for (const { day, ...trip } of trips) {
       const date = new Date(Date.UTC(year, month - 1, day))
-      if (date > today) continue
       data.push({ ...trip, userId, date, year, month })
     }
   }

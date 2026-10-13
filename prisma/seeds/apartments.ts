@@ -1,6 +1,7 @@
 import { db } from '@server/lib/db'
 
 import { buildApartmentStatements2025 } from './apartment-statements-2025'
+import { SEED_YEAR } from './seed-year'
 
 /**
  * Deux appartements (données de dev local) : Toulouse, loué meublé et géré par Myroom, et Lyon
@@ -29,14 +30,14 @@ const APARTMENTS_SEED = [
     loanRateBps: 350,
     loanTermMonths: 233,
     loanFirstDueDate: new Date(Date.UTC(2025, 4, 30)),
-    // Pas de solde d'ouverture « de l'année en cours » : voir `seedToulouseStatements2025`.
+    // Pas de solde d'ouverture ici : voir `seedToulouseStatements2025`.
     openingBalanceCents: null,
   },
   {
     name: 'Lyon',
     kind: 'FURNISHED',
     managed: false,
-    acquiredAt: new Date(Date.UTC(2026, 0, 1)),
+    acquiredAt: new Date(Date.UTC(SEED_YEAR, 0, 1)),
     priceCents: 14_200_000,
     rentCents: 62_000,
     depositCents: 62_000,
@@ -47,7 +48,7 @@ const APARTMENTS_SEED = [
     loanPrincipalCents: 12_000_000,
     loanRateBps: 350,
     loanTermMonths: 240,
-    loanFirstDueDate: new Date(Date.UTC(2026, 1, 5)),
+    loanFirstDueDate: new Date(Date.UTC(SEED_YEAR, 1, 5)),
     openingBalanceCents: 0,
   },
 ] as const
@@ -56,7 +57,7 @@ const TOULOUSE_NAME = 'Toulouse'
 
 /** Un appartement déjà présent (même nom) n'est jamais touché : les saisies faites dans l'app restent. */
 export async function seedApartments(userId: string) {
-  const year = new Date().getUTCFullYear()
+  const year = SEED_YEAR
   let created = 0
   for (const { openingBalanceCents, ...apartment } of APARTMENTS_SEED) {
     const existing = await db.apartment.findFirst({

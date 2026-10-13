@@ -1,15 +1,16 @@
 import { db } from '@server/lib/db'
 
+import { SEED_YEAR } from './seed-year'
+
 /**
  * Facturation Pro de départ (données de dev local) : un client, tous les jours ouvrés du mois
- * (lundi → vendredi, fériés ignorés), en prévu sur toute l'année et en réel jusqu'à `actualUntilMonth`.
+ * (lundi → vendredi, fériés ignorés), en prévu et en réel sur toute l'année `SEED_YEAR`.
  */
 const PROFESSIONAL_BILLING_SEED = {
-  year: 2026,
+  year: SEED_YEAR,
   clientName: 'Davidson',
   forecastDailyRateCents: 40_000,
   actualDailyRateCents: 45_000,
-  actualUntilMonth: 9,
 } as const
 
 /** Nombre de jours lundi → vendredi du mois (`month` de 1 à 12). Les fériés ne sont pas retirés. */
@@ -35,7 +36,7 @@ export async function seedProfessionalBilling(userId: string) {
     {
       kind: 'ACTUAL',
       dailyRateCents: seed.actualDailyRateCents,
-      lastMonth: seed.actualUntilMonth,
+      lastMonth: 12,
     },
   ] as const
 

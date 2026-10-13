@@ -5,6 +5,7 @@ import {
   CONTRIBUTION_DAY,
   ownerContributionCents,
 } from './apartment-statements-2025'
+import { SEED_YEAR } from './seed-year'
 
 /**
  * Compte perso 2025, version simplifiée (données de dev local) : environ une douzaine de lignes
@@ -13,7 +14,7 @@ import {
  * L'« Apport appartement » reprend les virements du seed Toulouse (côté perso de R11).
  * Montants en centimes, signés (négatif = débit).
  */
-const YEAR = 2025
+const YEAR = SEED_YEAR
 
 interface MonthlyLine {
   /** Montant de base (centimes), absolu : le signe vient de `credit`. */
@@ -207,9 +208,7 @@ function spreadOf(spreadCents: number, month: number, lineIndex: number) {
 }
 
 /** Transactions perso d'un mois (1-12), triées par date. Fonction pure. */
-export function buildPersonalMonth2025(
-  month: number,
-): SeedPersonalTransaction[] {
+function buildPersonalMonth2025(month: number): SeedPersonalTransaction[] {
   const lastDay = new Date(Date.UTC(YEAR, month, 0)).getUTCDate()
   const dateOf = (day: number) =>
     new Date(Date.UTC(YEAR, month - 1, Math.min(day, lastDay)))
