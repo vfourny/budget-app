@@ -19,15 +19,10 @@ model Apartment {
   /// 1er jour du mois d'acquisition : l'appartement est actif à partir de ce mois (inclus).
   acquiredAt           DateTime      @db.Date
   priceCents           Int
-  /// Loyer mensuel prévu, brut de frais de gérance.
-  rentCents            Int
   /// Frais de gérance en points de base du loyer (7,00 % = 700), pour le prévisionnel.
   managementFeeBps     Int           @default(0)
   /// Assurance emprunteur mensuelle, prélevée à part de l'échéance du prêt.
   creditInsuranceCents Int           @default(0)
-  /// Montants annuels, comptés le mois de paiement (taxe foncière : octobre, CFE : décembre).
-  propertyTaxCents     Int           @default(0)
-  cfeCents             Int           @default(0)
 
   // Prêt à taux fixe : tous les champs sont renseignés ensemble, ou aucun (bien sans prêt).
   loanPrincipalCents Int?
@@ -39,6 +34,7 @@ model Apartment {
   updatedAt          DateTime               @updatedAt
   yearOpenings       ApartmentYearOpening[]
   managementInvoices ManagementInvoice[]
+  forecasts          ApartmentForecast[]
   importBatches      ImportBatch[]
   transactions       Transaction[]
 
@@ -72,5 +68,38 @@ model ManagementInvoice {
   extraFeesCents Int       @default(0)
 
   @@id([apartmentId, year, month])
+  @@index([userId])
+}
+
+/// Ligne du tableau saisissable dans l'éditeur du prévisionnel (R3). Les valeurs reprennent les clés
+/// des lignes du tableau (`shared/apartment-rules.ts`). Le crédit vient du tableau d'amortissement et
+/// les frais de gérance du loyer × taux : ils ne se saisissent pas.
+enum ApartmentForecastLine {
+  grossRent
+  electricity
+  homeInsurance
+  internetBox
+  condoFees
+  propertyTax
+  cfe
+  bankFees
+  regularization
+  other
+}
+
+/// Montant prévu d'une ligne pour un mois, saisi dans l'éditeur du prévisionnel (centimes, positif
+/// pour une charge). Loyer brut, taxe foncière et CFE valent jusqu'à la saisie suivante ; les autres
+/// lignes seulement pour leur mois (sans saisie : historique, voir R3).
+model ApartmentForecast {
+  userId      String
+  user        User                  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  apartmentId String
+  apartment   Apartment             @relation(fields: [apartmentId], references: [id], onDelete: Cascade)
+  year        Int                   @db.SmallInt
+  month       Int                   @db.SmallInt
+  line        ApartmentForecastLine
+  amountCents Int
+
+  @@id([apartmentId, year, month, line])
   @@index([userId])
 }

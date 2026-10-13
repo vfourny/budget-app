@@ -225,11 +225,23 @@ rappels (déclaration = comptable). Les règles ci-dessous (R1 à R12, hypothès
 (`server/lib/apartments/`, `shared/apartment-*.ts`).
 
 - **Réglages › Appartements** (`/settings?tab=apt`) : par bien, régime (étiquette), gérance (interrupteur, désactivé = en direct), mois
-  d'acquisition, prix, loyer prévu brut, frais de gérance (%), assurance emprunteur, taxe foncière et CFE
-  annuelles, solde du compte au 1er janvier, prêt à taux fixe (synthèse : mensualité, 1ʳᵉ échéance, intérêts totaux).
-- **Vue mois** (mois clos seulement) : pour chaque appartement actif, tableau Prévisionnel / Réalisé / Écart (solde,
-  loyers, crédit, charges), jauge du capital remboursé, facture de gérance, 2 KPI et les transactions rattachées.
-- **Vue année** : mêmes colonnes sur les mois clos, rendements brut / net, seuils LMNP indicatifs.
+  d'acquisition, prix, frais de gérance (%), assurance emprunteur, solde du compte au 1er janvier, prêt à taux fixe (synthèse :
+  mensualité, 1ʳᵉ échéance, intérêts totaux).
+- **Import** : type de compte « Appartement » + choix de l'appartement. Les catégories `APT_*` sont proposées ; le
+  virement d'apport vers ce compte se catégorise « Apport appartement » côté perso (enveloppe épargne long terme).
+  À la relecture, une échéance de prêt est reconnue si elle est à ±1 € de la mensualité du tableau d'amortissement.
+- **Vue mois** (mois clos seulement) : pour chaque appartement actif (à partir du mois d'acquisition), tableau
+  Prévisionnel / Réalisé / Écart (solde, loyers, crédit, charges), jauge du capital remboursé, facture de gérance
+  saisie à la main (le loyer arrive net de frais), 2 KPI (loyers nets perçus, effort d'épargne nécessaire) et les
+  transactions rattachées.
+- **Vue année** : mêmes colonnes sur les mois clos, rendements brut / net sur le prix d'achat, et
+  seuils LMNP (plafond micro-BIC, seuil LMP) indicatifs.
+- **Prévisionnel** : loyer brut et charges saisis mois par mois dans l'éditeur. La gérance (loyer × %), l'échéance
+  du prêt et l'assurance emprunteur des Réglages ne se saisissent pas. Sans saisie : le loyer, la taxe foncière
+  (octobre) et la CFE (décembre) reprennent leur dernière valeur saisie, sinon 0 ; les charges mensuelles reprennent
+  le réel du même mois N-1, sinon la moyenne des autres mois clos, sinon 0 ; régularisation et autres valent 0.
+- **Solde** : solde fin de mois = début + différentiel + apport ; il doit coïncider avec le solde bancaire. L'effort
+  d'épargne annuel est la somme des efforts mensuels.
 
 ### Règles
 
@@ -241,10 +253,11 @@ rappels (déclaration = comptable). Les règles ci-dessous (R1 à R12, hypothès
   `APT_CFE`, autres `APT_BANK_FEES` / `APT_REGULARIZATION` / `APT_OTHER`, apport `APT_OWNER_CONTRIBUTION`. Une ligne de
   charge = −(somme des montants signés) : une régularisation créditée vient en diminution. Charges annuelles affichées en
   vue mois seulement si le mois en contient ; montant nul = « — ».
-- **R3 — Prévisionnel** : loyer brut des Réglages ; gérance = loyer × % ; échéance du tableau d'amortissement ;
-  assurance saisie ; taxe foncière en **octobre**, CFE en **décembre** (le réel compte dans le mois de paiement, sans
-  lissage). Charges mensuelles = réel du même mois N-1, sinon moyenne des autres mois clos, sinon 0 (H2). Pas de vacance
-  prévue, pas d'éditeur de prévisionnel.
+- **R3 — Prévisionnel** : loyer brut saisi par mois (sans saisie : dernière saisie antérieure, sinon 0) ; gérance =
+  loyer × % ; échéance du tableau d'amortissement ; assurance des Réglages. Taxe foncière en **octobre** et CFE en
+  **décembre** (sans saisie : dernier montant saisi, sinon 0 ; le réel compte dans le mois de paiement, sans lissage).
+  Les charges mensuelles saisies reprennent le réel du même mois N-1, sinon la moyenne des autres mois clos, sinon 0
+  (H2) ; régularisation et autres valent 0 sans saisie. Pas de vacance prévue.
 - **R4 — Réalisé** : import `VALIDATED`, `apartmentId` renseigné, mois de la période. Sans catégorie = « Autres », signalé
   « À vérifier ».
 - **R5 — Solde et effort** : différentiel = loyer net reçu − crédit (capital + intérêts + assurance) − charges ;
@@ -259,7 +272,7 @@ rappels (déclaration = comptable). Les règles ci-dessous (R1 à R12, hypothès
   mensualité + assurance) ; sinon elle est signalée à la relecture (« attendu X € »). Intérêts = ceux du tableau,
   capital = montant − intérêts − assurance (le solde reste égal au solde bancaire). Rien n'est stocké : recalculé à la
   lecture.
-- **R8 — KPI** : **loyers nets perçus** (jauge vs loyers dus = loyer brut × mois clos actifs) ; **effort d'épargne
+- **R8 — KPI** : **loyers nets perçus** (jauge vs loyers dus = somme des loyers bruts prévus des mois clos actifs) ; **effort d'épargne
   nécessaire** = Σ des efforts (jauge : apport réel vs effort).
 - **R9 — Rendements** (vue année) : brut = loyers perçus annualisés ÷ prix d'achat ; net = (loyers − charges hors
   crédit) annualisés ÷ prix d'achat. Prix d'achat seul, sans frais (H5).

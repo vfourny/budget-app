@@ -204,27 +204,12 @@ export function ApartmentSettingsCard({
               label={text.fields.price}
               onChange={(value) => set('priceCents', value)}
             />
-            <EuroField
-              cents={draft.rentCents}
-              label={text.fields.rent}
-              onChange={(value) => set('rentCents', value)}
-            />
             <PercentField
               bps={draft.managementFeeBps}
               description={text.fields.managementFeeHint}
               disabled={!draft.managed}
               label={text.fields.managementFee}
               onChange={(value) => set('managementFeeBps', value)}
-            />
-            <EuroField
-              cents={draft.propertyTaxCents}
-              label={text.fields.propertyTax}
-              onChange={(value) => set('propertyTaxCents', value)}
-            />
-            <EuroField
-              cents={draft.cfeCents}
-              label={text.fields.cfe}
-              onChange={(value) => set('cfeCents', value)}
             />
             <EuroField
               allowNegative

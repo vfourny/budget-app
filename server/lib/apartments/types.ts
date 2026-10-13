@@ -1,4 +1,5 @@
 import type {
+  ApartmentForecastLine,
   ApartmentKind,
   TransactionCategory,
 } from '@server/generated/prisma/enums'
@@ -7,7 +8,6 @@ import type { LoanTerms } from '@shared/apartment-loan'
 /** Appartement tel que les calculs le lisent (centimes, points de base). */
 export interface ApartmentRecord {
   acquiredAt: Date
-  cfeCents: number
   creditInsuranceCents: number
   id: string
   kind: ApartmentKind
@@ -17,8 +17,14 @@ export interface ApartmentRecord {
   managementFeeBps: number
   name: string
   priceCents: number
-  propertyTaxCents: number
-  rentCents: number
+}
+
+/** Montant prévu saisi dans l'éditeur du prévisionnel (centimes, positif pour une charge). */
+export interface ApartmentForecastRecord {
+  amountCents: number
+  line: ApartmentForecastLine
+  month: number
+  year: number
 }
 
 /** Transaction validée rattachée à un appartement. */

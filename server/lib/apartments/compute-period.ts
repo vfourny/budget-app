@@ -1,6 +1,7 @@
 import {
   actualLines,
   computeMonth,
+  forecastInputs,
   MONTHLY_CHARGE_LINES,
   type MonthlyChargeBasis,
   type MonthResult,
@@ -12,6 +13,7 @@ import {
 } from '@server/lib/apartments/period'
 import {
   type ApartmentColumn,
+  type ApartmentForecastRecord,
   type ApartmentLines,
   type ApartmentRecord,
   type ApartmentTransaction,
@@ -53,6 +55,8 @@ function monthlyChargeBasis(
 
 export interface ApartmentYearInput {
   apartment: ApartmentRecord
+  /** Saisies de l'éditeur du prévisionnel jusqu'à `year` inclus (les lignes reportées remontent avant). */
+  forecasts: readonly ApartmentForecastRecord[]
   /** Factures de gérance de `year`, par mois. */
   invoices: ReadonlyMap<number, ManagementInvoiceRecord>
   now: YearMonth
@@ -108,7 +112,12 @@ export function computeApartmentYear(input: ApartmentYearInput): MonthResult[] {
       { apartment, schedule, year, month, openingBalanceCents: balance },
       {
         closed: isMonthClosed({ year, month }, now),
-        basis: monthlyChargeBasis(actualByMonth, year, month),
+        forecastInputs: forecastInputs(
+          input.forecasts,
+          monthlyChargeBasis(actualByMonth, year, month),
+          year,
+          month,
+        ),
         transactions: byMonth.get(monthKey(year, month)) ?? [],
         invoice: input.invoices.get(month) ?? null,
       },
@@ -153,7 +162,7 @@ export interface ApartmentPeriodColumns {
   forecast: ApartmentColumn
   /** Mois clos d'un bien géré sans facture de gérance saisie (R12). */
   missingInvoiceMonths: number[]
-  /** Loyers dus (R8) : loyer prévu brut × mois clos. */
+  /** Loyers dus (R8) : loyers bruts prévus des mois clos. */
   rentDueCents: number
 }
 
@@ -162,7 +171,6 @@ export interface ApartmentPeriodColumns {
  * compare des périodes identiques) ; un mois non clos affiche seulement son prévu.
  */
 export function periodColumns(
-  apartment: ApartmentRecord,
   months: readonly MonthResult[],
 ): ApartmentPeriodColumns {
   const closed = months.filter((month) => month.closed)
@@ -176,7 +184,10 @@ export function periodColumns(
           )
         : null,
     closedMonths: closed.length,
-    rentDueCents: apartment.rentCents * closed.length,
+    rentDueCents: closed.reduce(
+      (total, month) => total + month.forecast.lines.grossRent,
+      0,
+    ),
     missingInvoiceMonths: closed
       .filter((month) => month.missingManagementInvoice)
       .map((m) => m.month),

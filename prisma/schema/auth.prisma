@@ -26,6 +26,7 @@ model User {
   trips                    Trip[]
   apartments               Apartment[]
   apartmentYearOpenings    ApartmentYearOpening[]
+  apartmentForecasts       ApartmentForecast[]
   managementInvoices       ManagementInvoice[]
 }
 

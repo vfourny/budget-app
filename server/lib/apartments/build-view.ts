@@ -20,13 +20,33 @@ interface ViewParams {
   year: number
 }
 
+/** Mois actifs d'un appartement sur `year`, calculés sur les données chargées. */
+export function apartmentYear(
+  data: LoadedApartmentData,
+  apartment: ApartmentRecord,
+  year: number,
+  now: YearMonth,
+): MonthResult[] {
+  return computeApartmentYear({
+    apartment,
+    year,
+    now,
+    openingBalanceCents: data.openings.get(apartment.id) ?? 0,
+    forecasts: data.forecasts.get(apartment.id) ?? [],
+    transactions: data.transactions.filter(
+      (t) => t.apartmentId === apartment.id,
+    ),
+    invoices: data.invoices.get(apartment.id) ?? new Map(),
+  })
+}
+
 /** Un appartement actif sur la période, avec ses colonnes Prévisionnel / Réalisé. */
 function buildApartment(
   apartment: ApartmentRecord,
   months: readonly MonthResult[],
   params: ViewParams,
 ) {
-  const columns = periodColumns(apartment, months)
+  const columns = periodColumns(months)
   const through = months.at(-1)
   return {
     id: apartment.id,
@@ -35,7 +55,6 @@ function buildApartment(
     managed: apartment.managed,
     acquiredAt: apartment.acquiredAt,
     priceCents: apartment.priceCents,
-    rentCents: apartment.rentCents,
     ...columns,
     /** Facture de gérance du mois affiché (vue mois, bien géré) : pré-remplit le formulaire (R12). */
     invoice: params.month === null ? null : (months[0]?.invoice ?? null),
@@ -60,16 +79,7 @@ export function buildApartmentsView(
   const { year, month } = params
 
   const all = data.apartments.flatMap((apartment) => {
-    const results = computeApartmentYear({
-      apartment,
-      year,
-      now,
-      openingBalanceCents: data.openings.get(apartment.id) ?? 0,
-      transactions: data.transactions.filter(
-        (t) => t.apartmentId === apartment.id,
-      ),
-      invoices: data.invoices.get(apartment.id) ?? new Map(),
-    })
+    const results = apartmentYear(data, apartment, year, now)
     // Vue mois : le mois demandé s'il est actif ; vue année : les mois clos.
     const months =
       month === null
@@ -91,7 +101,7 @@ export function buildApartmentsView(
   ): { apartment: ApartmentRecord; columns: ApartmentPeriodColumns }[] =>
     items.map(({ apartment, months }) => ({
       apartment,
-      columns: periodColumns(apartment, months),
+      columns: periodColumns(months),
     }))
 
   // KPI (R8) sur les appartements affichés.

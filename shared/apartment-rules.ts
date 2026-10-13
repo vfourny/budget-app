@@ -1,4 +1,7 @@
-import type { TransactionCategory } from '@server/generated/prisma/enums'
+import type {
+  ApartmentForecastLine,
+  TransactionCategory,
+} from '@server/generated/prisma/enums'
 import type { ApartmentCategory } from '@shared/account-categories'
 
 /*
@@ -56,6 +59,28 @@ export const APARTMENT_CHARGE_LINES = {
   annual: ['propertyTax', 'cfe'],
   other: ['bankFees', 'regularization', 'other'],
 } as const satisfies Record<string, readonly ApartmentLineKey[]>
+
+/**
+ * Lignes saisissables dans l'éditeur du prévisionnel (R3), dans l'ordre d'affichage. Le crédit vient
+ * du tableau d'amortissement et les frais de gérance du loyer × taux : ils ne se saisissent pas.
+ */
+export const APARTMENT_FORECAST_LINES = [
+  'grossRent',
+  ...APARTMENT_CHARGE_LINES.fixed,
+  ...APARTMENT_CHARGE_LINES.annual,
+  ...APARTMENT_CHARGE_LINES.other,
+] as const satisfies readonly ApartmentForecastLine[]
+
+/**
+ * Lignes dont la saisie vaut jusqu'à la suivante (montants qui changent rarement) : sans saisie du
+ * mois, le prévu reprend la dernière saisie antérieure, sinon 0. Les autres lignes ne valent que pour
+ * leur mois (sans saisie : historique, R3).
+ */
+export const CARRIED_FORECAST_LINES = [
+  'grossRent',
+  'propertyTax',
+  'cfe',
+] as const satisfies readonly ApartmentForecastLine[]
 
 /** Mois (1-12) où les charges annuelles du prévisionnel sont comptées (R3) : taxe foncière en octobre, CFE en décembre. */
 export const PROPERTY_TAX_MONTH = 10

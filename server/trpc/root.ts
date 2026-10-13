@@ -1,6 +1,7 @@
 import { createTRPCRouter } from '@server/trpc/init'
 import { apartmentRouter } from '@server/trpc/routers/apartment'
 import { apartmentDashboardRouter } from '@server/trpc/routers/apartment-dashboard'
+import { apartmentForecastRouter } from '@server/trpc/routers/apartment-forecast'
 import { categorizeRouter } from '@server/trpc/routers/categorize'
 import { importRouter } from '@server/trpc/routers/import'
 import { personalRouter } from '@server/trpc/routers/personal'
@@ -14,6 +15,7 @@ import { tripRouter } from '@server/trpc/routers/trip'
 export const appRouter = createTRPCRouter({
   apartment: apartmentRouter,
   apartmentDashboard: apartmentDashboardRouter,
+  apartmentForecast: apartmentForecastRouter,
   categorize: categorizeRouter,
   import: importRouter,
   personal: personalRouter,
