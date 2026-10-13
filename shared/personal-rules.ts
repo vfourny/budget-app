@@ -42,7 +42,7 @@ export const ENVELOPE_CATEGORIES = {
   ],
   TRAINING: ['TRAINING'],
   SAFETY_SAVINGS: ['SHORT_TERM_SAVINGS'],
-  // « Apport appartement » : virement vers le compte appartement (hypothèse H6 du plan appartements).
+  // « Apport appartement » : virement vers le compte appartement (hypothèse H6, `docs/fonctionnel.md` › Appartements).
   LONG_TERM_SAVINGS: ['LONG_TERM_SAVINGS', 'APARTMENT_CONTRIBUTION'],
 } as const satisfies Record<Envelope, readonly TransactionCategory[]>
 

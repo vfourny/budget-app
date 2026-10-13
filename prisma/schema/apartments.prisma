@@ -1,5 +1,5 @@
 // ─── Appartements (suivi de trésorerie des biens en location) ───────────────────────────────────
-// Règles métier : `docs/plan-appartements.md` (R1 à R12). Montants en centimes (entiers), taux en
+// Règles métier : `docs/fonctionnel.md` › Appartements (R1 à R12). Montants en centimes (entiers), taux en
 // points de base (3,00 % = 300). Les relevés du compte appartement sont des `ImportBatch` /
 // `Transaction` de type `AccountType.APARTMENT`, rattachés à un `Apartment`.
 
