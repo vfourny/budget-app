@@ -1,5 +1,7 @@
+import type { ApartmentForecastLine } from '@server/generated/prisma/enums'
 import {
   type ApartmentColumn,
+  type ApartmentForecastRecord,
   type ApartmentLines,
   type ApartmentRecord,
   type ApartmentTransaction,
@@ -9,7 +11,9 @@ import {
 import { type LoanInstallment, splitLoanPayment } from '@shared/apartment-loan'
 import {
   APARTMENT_CHARGE_LINES,
+  APARTMENT_FORECAST_LINES,
   apartmentLineOf,
+  CARRIED_FORECAST_LINES,
   CFE_MONTH,
   PROPERTY_TAX_MONTH,
 } from '@shared/apartment-rules'
@@ -27,6 +31,53 @@ export type MonthlyChargeBasis = Record<
   (typeof MONTHLY_CHARGE_LINES)[number],
   number
 >
+
+/** Ligne saisissable d'un mois : saisie du mois (`null` sans saisie) et valeur par défaut. */
+export interface ForecastInput {
+  defaultCents: number
+  line: ApartmentForecastLine
+  overrideCents: number | null
+}
+
+const periodIndex = (year: number, month: number) => year * 12 + month
+
+/**
+ * Lignes saisissables du prévu d'un mois (R3) : taxe foncière et CFE n'existent que le mois de leur
+ * paiement. Par défaut, loyer brut, taxe foncière et CFE reprennent la dernière saisie antérieure
+ * (sinon 0) ; les charges mensuelles, l'historique (`basis`) ; régularisation et autres, 0.
+ */
+export function forecastInputs(
+  entries: readonly ApartmentForecastRecord[],
+  basis: MonthlyChargeBasis,
+  year: number,
+  month: number,
+): ForecastInput[] {
+  const current = periodIndex(year, month)
+  const ofMonth = APARTMENT_FORECAST_LINES.filter(
+    (line) =>
+      (line !== 'propertyTax' || month === PROPERTY_TAX_MONTH) &&
+      (line !== 'cfe' || month === CFE_MONTH),
+  )
+  return ofMonth.map((line) => {
+    const ofLine = entries.filter((entry) => entry.line === line)
+    const exact = ofLine.find(
+      (entry) => periodIndex(entry.year, entry.month) === current,
+    )
+    const charge = MONTHLY_CHARGE_LINES.find((key) => key === line)
+    const defaultCents = CARRIED_FORECAST_LINES.some((key) => key === line)
+      ? (ofLine
+          .filter((entry) => periodIndex(entry.year, entry.month) < current)
+          .sort(
+            (a, b) =>
+              periodIndex(a.year, a.month) - periodIndex(b.year, b.month),
+          )
+          .at(-1)?.amountCents ?? 0)
+      : charge === undefined
+        ? 0
+        : basis[charge]
+    return { line, overrideCents: exact?.amountCents ?? null, defaultCents }
+  })
+}
 
 /** Échéance du tableau d'amortissement du mois, `undefined` hors tableau ou sans prêt. */
 function installmentOf(
@@ -147,9 +198,9 @@ export function actualLines(
 }
 
 /**
- * Prévu d'un mois (R3) : loyer et gérance des Réglages, échéance du tableau d'amortissement,
- * assurance emprunteur, taxe foncière (octobre) et CFE (décembre), charges mensuelles d'après
- * l'historique (`basis`). Le prévu suppose le loyer intégralement perçu (pas de vacance).
+ * Prévu d'un mois (R3) : lignes saisissables (saisie, sinon défaut, voir `forecastInputs`), frais de
+ * gérance = loyer brut × taux des Réglages, échéance du tableau d'amortissement et assurance
+ * emprunteur. Le prévu suppose le loyer intégralement perçu (pas de vacance).
  */
 function forecastLines(
   {
@@ -158,23 +209,22 @@ function forecastLines(
     year,
     month,
   }: Omit<MonthContext, 'openingBalanceCents'>,
-  basis: MonthlyChargeBasis,
+  inputs: readonly ForecastInput[],
 ): ApartmentLines {
+  const lines: ApartmentLines = { ...ZERO_LINES }
+  for (const input of inputs)
+    lines[input.line] = input.overrideCents ?? input.defaultCents
   const managementFees = apartment.managed
-    ? Math.round((apartment.rentCents * apartment.managementFeeBps) / 10_000)
+    ? Math.round((lines.grossRent * apartment.managementFeeBps) / 10_000)
     : 0
   const installment = installmentOf(schedule, year, month)
   return {
-    ...ZERO_LINES,
-    ...basis,
-    grossRent: apartment.rentCents,
+    ...lines,
     managementFees,
-    netRent: apartment.rentCents - managementFees,
+    netRent: lines.grossRent - managementFees,
     loanCapital: installment?.capitalCents ?? 0,
     loanInterest: installment?.interestCents ?? 0,
     loanInsurance: apartment.loan ? apartment.creditInsuranceCents : 0,
-    propertyTax: month === PROPERTY_TAX_MONTH ? apartment.propertyTaxCents : 0,
-    cfe: month === CFE_MONTH ? apartment.cfeCents : 0,
   }
 }
 
@@ -183,6 +233,8 @@ export interface MonthResult {
   /** Mois antérieur au mois en cours : seul un mois clos a un réalisé (R1). */
   closed: boolean
   forecast: ApartmentColumn
+  /** Lignes saisissables du prévu (éditeur du prévisionnel). */
+  forecastInputs: ForecastInput[]
   /** Facture de gérance (R12) saisie, `null` sinon ou si le bien est en direct. */
   invoice: ManagementInvoiceRecord | null
   /** Mois clos d'un bien géré sans facture saisie (« Facture de gérance à saisir »). */
@@ -200,7 +252,7 @@ export function computeMonth(
   context: MonthContext,
   input: {
     closed: boolean
-    basis: MonthlyChargeBasis
+    forecastInputs: ForecastInput[]
     transactions: readonly Pick<
       ApartmentTransaction,
       'category' | 'amountCents'
@@ -208,7 +260,7 @@ export function computeMonth(
     invoice: ManagementInvoiceRecord | null
   },
 ): MonthResult {
-  const forecastRaw = forecastLines(context, input.basis)
+  const forecastRaw = forecastLines(context, input.forecastInputs)
   const forecastDifferential = differentialOf(forecastRaw)
   const forecast = toColumn(
     { ...forecastRaw, ownerContribution: Math.max(0, -forecastDifferential) },
@@ -229,6 +281,7 @@ export function computeMonth(
     month: context.month,
     closed: input.closed,
     forecast,
+    forecastInputs: input.forecastInputs,
     actual,
     invoice,
     missingManagementInvoice: input.closed && managed && invoice === null,

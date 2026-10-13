@@ -1,4 +1,5 @@
 import type {
+  ApartmentForecastRecord,
   ApartmentRecord,
   ApartmentTransaction,
   ManagementInvoiceRecord,
@@ -8,6 +9,8 @@ import type { db as Db } from '@server/lib/db'
 
 export interface LoadedApartmentData {
   apartments: ApartmentRecord[]
+  /** Saisies du prévisionnel jusqu'à `year` inclus, par appartement. */
+  forecasts: Map<string, ApartmentForecastRecord[]>
   /** Factures de gérance de `year` : appartement → mois → facture. */
   invoices: Map<string, Map<number, ManagementInvoiceRecord>>
   /** Solde du compte au 1er janvier de `year`, par appartement. */
@@ -22,32 +25,43 @@ export async function loadApartmentData(
   userId: string,
   year: number,
 ): Promise<LoadedApartmentData> {
-  const [apartments, transactions, openings, invoices] = await Promise.all([
-    db.apartment.findMany({
-      where: { userId },
-      orderBy: [{ acquiredAt: 'asc' }, { name: 'asc' }],
-    }),
-    db.transaction.findMany({
-      where: {
-        ...validatedTransactions(userId, 'APARTMENT'),
-        apartmentId: { not: null },
-        year: { in: [year - 1, year] },
-      },
-      orderBy: [{ date: 'desc' }, { createdAt: 'desc' }],
-      select: {
-        id: true,
-        date: true,
-        label: true,
-        amountCents: true,
-        category: true,
-        apartmentId: true,
-        year: true,
-        month: true,
-      },
-    }),
-    db.apartmentYearOpening.findMany({ where: { userId, year } }),
-    db.managementInvoice.findMany({ where: { userId, year } }),
-  ])
+  const [apartments, transactions, openings, invoices, forecasts] =
+    await Promise.all([
+      db.apartment.findMany({
+        where: { userId },
+        orderBy: [{ acquiredAt: 'asc' }, { name: 'asc' }],
+      }),
+      db.transaction.findMany({
+        where: {
+          ...validatedTransactions(userId, 'APARTMENT'),
+          apartmentId: { not: null },
+          year: { in: [year - 1, year] },
+        },
+        orderBy: [{ date: 'desc' }, { createdAt: 'desc' }],
+        select: {
+          id: true,
+          date: true,
+          label: true,
+          amountCents: true,
+          category: true,
+          apartmentId: true,
+          year: true,
+          month: true,
+        },
+      }),
+      db.apartmentYearOpening.findMany({ where: { userId, year } }),
+      db.managementInvoice.findMany({ where: { userId, year } }),
+      db.apartmentForecast.findMany({
+        where: { userId, year: { lte: year } },
+        select: {
+          apartmentId: true,
+          year: true,
+          month: true,
+          line: true,
+          amountCents: true,
+        },
+      }),
+    ])
 
   const invoicesByApartment = new Map<
     string,
@@ -59,6 +73,14 @@ export async function loadApartmentData(
     invoicesByApartment.set(invoice.apartmentId, months)
   }
 
+  const forecastsByApartment = new Map<string, ApartmentForecastRecord[]>()
+  for (const { apartmentId, ...forecast } of forecasts) {
+    forecastsByApartment.set(apartmentId, [
+      ...(forecastsByApartment.get(apartmentId) ?? []),
+      forecast,
+    ])
+  }
+
   return {
     apartments: apartments.map((apartment) => ({
       id: apartment.id,
@@ -67,11 +89,8 @@ export async function loadApartmentData(
       managed: apartment.managed,
       acquiredAt: apartment.acquiredAt,
       priceCents: apartment.priceCents,
-      rentCents: apartment.rentCents,
       managementFeeBps: apartment.managementFeeBps,
       creditInsuranceCents: apartment.creditInsuranceCents,
-      propertyTaxCents: apartment.propertyTaxCents,
-      cfeCents: apartment.cfeCents,
       loan:
         apartment.loanPrincipalCents !== null &&
         apartment.loanRateBps !== null &&
@@ -93,5 +112,6 @@ export async function loadApartmentData(
       openings.map((row) => [row.apartmentId, row.openingBalanceCents]),
     ),
     invoices: invoicesByApartment,
+    forecasts: forecastsByApartment,
   }
 }

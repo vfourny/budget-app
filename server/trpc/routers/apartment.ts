@@ -23,11 +23,8 @@ const saveSchema = z.object({
   managed: z.boolean(),
   acquiredAt: z.date(),
   priceCents: cents,
-  rentCents: cents,
   managementFeeBps: z.number().int().min(0).max(10_000),
   creditInsuranceCents: cents,
-  propertyTaxCents: cents,
-  cfeCents: cents,
   loan: loanSchema.nullable(),
   /** Solde réel du compte appartement au 1er janvier de `openingYear` (R5). */
   openingYear: z.number().int().min(2000).max(2100),
@@ -59,11 +56,8 @@ export const apartmentRouter = createTRPCRouter({
         managed: apartment.managed,
         acquiredAt: apartment.acquiredAt,
         priceCents: apartment.priceCents,
-        rentCents: apartment.rentCents,
         managementFeeBps: apartment.managementFeeBps,
         creditInsuranceCents: apartment.creditInsuranceCents,
-        propertyTaxCents: apartment.propertyTaxCents,
-        cfeCents: apartment.cfeCents,
         loan:
           apartment.loanPrincipalCents !== null &&
           apartment.loanRateBps !== null &&

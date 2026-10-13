@@ -132,12 +132,9 @@ export const settings = {
         'Désactivé = location en direct (ni facture de gérance, ni frais).',
       acquiredAt: 'Acquisition (mois)',
       price: "Prix d'achat",
-      rent: 'Loyer prévu (brut, par mois)',
       managementFee: 'Frais de gérance',
       managementFeeHint:
         'En % du loyer, pour le prévisionnel : le réel vient de la facture de gérance.',
-      propertyTax: 'Taxe foncière (par an)',
-      cfe: 'CFE (par an)',
       openingBalance: (year: number) =>
         `Solde du compte au 1er janvier ${year}`,
       openingBalanceHint:

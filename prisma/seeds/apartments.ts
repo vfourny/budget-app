@@ -1,4 +1,5 @@
 import { db } from '@server/lib/db'
+import { CFE_MONTH, PROPERTY_TAX_MONTH } from '@shared/apartment-rules'
 
 import { buildApartmentStatements2025 } from './apartment-statements-2025'
 import { SEED_YEAR } from './seed-year'
@@ -20,17 +21,15 @@ const APARTMENTS_SEED = [
     managed: true,
     acquiredAt: new Date(Date.UTC(2025, 3, 1)),
     priceCents: 20_000_000,
-    rentCents: 79_000,
     managementFeeBps: 700,
     creditInsuranceCents: 1_421,
-    propertyTaxCents: 95_000,
-    cfeCents: 21_000,
     loanPrincipalCents: 19_218_000,
     loanRateBps: 350,
     loanTermMonths: 233,
     loanFirstDueDate: new Date(Date.UTC(2025, 4, 30)),
     // Pas de solde d'ouverture ici : voir `seedToulouseStatements2025`.
     openingBalanceCents: null,
+    forecast: { rentCents: 79_000, propertyTaxCents: 95_000, cfeCents: 21_000 },
   },
   {
     name: 'Lyon',
@@ -38,26 +37,30 @@ const APARTMENTS_SEED = [
     managed: false,
     acquiredAt: new Date(Date.UTC(SEED_YEAR, 0, 1)),
     priceCents: 14_200_000,
-    rentCents: 62_000,
     managementFeeBps: 0,
     creditInsuranceCents: 1_800,
-    propertyTaxCents: 70_000,
-    cfeCents: 18_000,
     loanPrincipalCents: 12_000_000,
     loanRateBps: 350,
     loanTermMonths: 240,
     loanFirstDueDate: new Date(Date.UTC(SEED_YEAR, 1, 5)),
     openingBalanceCents: 0,
+    forecast: { rentCents: 62_000, propertyTaxCents: 70_000, cfeCents: 18_000 },
   },
 ] as const
 
 const TOULOUSE_NAME = 'Toulouse'
+const TOULOUSE_FORECAST = APARTMENTS_SEED[0].forecast
 
 /** Un appartement déjà présent (même nom) n'est jamais touché : les saisies faites dans l'app restent. */
 export async function seedApartments(userId: string) {
   const year = SEED_YEAR
   let created = 0
-  for (const { openingBalanceCents, ...apartment } of APARTMENTS_SEED) {
+  for (const {
+    openingBalanceCents,
+    forecast,
+    ...apartment
+  } of APARTMENTS_SEED) {
+    const acquiredYear = apartment.acquiredAt.getUTCFullYear()
     const existing = await db.apartment.findFirst({
       where: { userId, name: apartment.name },
       select: { id: true },
@@ -71,6 +74,33 @@ export async function seedApartments(userId: string) {
           openingBalanceCents === null
             ? undefined
             : { create: { userId, year, openingBalanceCents } },
+        // Prévisionnel valable jusqu'à la saisie suivante : loyer dès l'acquisition, taxe foncière
+        // et CFE le mois de leur paiement de l'année d'acquisition.
+        forecasts: {
+          create: [
+            {
+              userId,
+              year: acquiredYear,
+              month: apartment.acquiredAt.getUTCMonth() + 1,
+              line: 'grossRent',
+              amountCents: forecast.rentCents,
+            },
+            {
+              userId,
+              year: acquiredYear,
+              month: PROPERTY_TAX_MONTH,
+              line: 'propertyTax',
+              amountCents: forecast.propertyTaxCents,
+            },
+            {
+              userId,
+              year: acquiredYear,
+              month: CFE_MONTH,
+              line: 'cfe',
+              amountCents: forecast.cfeCents,
+            },
+          ],
+        },
       },
     })
     created++
@@ -104,8 +134,8 @@ export async function seedToulouseStatements2025(userId: string) {
         termMonths: apartment.loanTermMonths,
         firstDueDate: apartment.loanFirstDueDate,
       },
-      propertyTaxCents: apartment.propertyTaxCents,
-      rentCents: apartment.rentCents,
+      propertyTaxCents: TOULOUSE_FORECAST.propertyTaxCents,
+      rentCents: TOULOUSE_FORECAST.rentCents,
     })
 
   await db.apartmentYearOpening.createMany({

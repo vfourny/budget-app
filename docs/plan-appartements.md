@@ -50,13 +50,14 @@ perso vers ce compte existent des deux côtés (voir R11).
 ### Réglages › onglet « Appartements » (`/settings?tab=apt`)
 
 Une carte par appartement : régime (étiquette), nom, gérance (interrupteur, désactivé = en direct), date d'acquisition (mm/aaaa),
-prix d'achat, loyer prévu, taxe foncière (€/an), CFE (€/an), solde de début d'année ; bloc
+prix d'achat, solde de début d'année ; bloc
 **Prêt immobilier** (capital emprunté, taux annuel, durée en mois, première échéance, assurance de l'emprunt en €/mois)
 avec un encadré de synthèse calculé (mensualité, première échéance en capital / intérêts, coût total des intérêts).
 Boutons « Ajouter un appartement » et « Enregistrer ».
 
 **Frais de gérance (%)** est saisi dans la carte de l'appartement (il sert au prévisionnel uniquement : le réel vient de la facture
-de gérance du mois, saisie dans le dashboard, R12). Les charges mensuelles prévues ne se saisissent pas en V1 (voir R3).
+de gérance du mois, saisie dans le dashboard, R12). Loyer, taxe foncière, CFE et charges prévues se saisissent dans
+l'éditeur du prévisionnel (R3), pas dans les Réglages.
 
 ### Import et relecture
 
@@ -90,7 +91,7 @@ positif pour les charges (signe porté par la ligne).
 |                   | Différentiel généré                      | calcul (R5)                                                                         | calcul sur le prévu                                 |
 |                   | Apport fonds perso                       | `APT_OWNER_CONTRIBUTION` (crédits sur l'appartement)                                | = effort d'épargne prévu                            |
 |                   | Solde fin de mois / à ce jour            | calcul (R5)                                                                         | calcul sur le prévu                                 |
-| Loyers            | Loyers bruts (perçus + frais de gérance) | `APT_RENT_RECEIVED` (loyer **net** reçu) **+** frais de la facture de gérance (R12) | loyer prévu (Réglages)                              |
+| Loyers            | Loyers bruts (perçus + frais de gérance) | `APT_RENT_RECEIVED` (loyer **net** reçu) **+** frais de la facture de gérance (R12) | loyer prévu (R3)                                    |
 |                   | Frais de gérance                         | facture de gérance saisie (R12)                                                     | loyer prévu × % de gérance                          |
 |                   | Frais de gérance supplémentaires         | facture de gérance saisie (R12)                                                     | 0                                                   |
 | Crédit            | Capital remboursé                        | ventilation de l'échéance par le tableau d'amortissement (R6/R7)                    | idem (échéance attendue)                            |
@@ -114,13 +115,18 @@ diminution de la ligne.
 
 ### R3 — Prévisionnel
 
-- **Loyer** : `rentCents` de l'appartement (brut). **Gérance** : `rentCents × managementFeeBps / 10 000`. Loyer net attendu = loyer − gérance.
-  **Assurance emprunteur** : `creditInsuranceCents`. **Crédit** : échéance du tableau d'amortissement (R6).
-- **Taxe foncière** : `propertyTaxCents` compté en **octobre** ; **CFE** : `cfeCents` compté en **décembre**
-  (même règle pour le réel : la transaction est comptée dans son mois de paiement, pas lissée).
+- **Éditeur du prévisionnel** : une saisie par ligne et par mois (`ApartmentForecast`) pour le loyer brut et toutes
+  les charges ; le crédit (tableau d'amortissement) et la gérance (calculée) ne se saisissent pas. Une saisie du mois
+  l'emporte sur la valeur par défaut ci-dessous ; l'effacer y revient.
+- **Loyer brut** : sans saisie du mois, **dernière saisie antérieure**, sinon 0. **Gérance** : loyer brut ×
+  `managementFeeBps / 10 000`. Loyer net attendu = loyer − gérance. **Assurance emprunteur** : `creditInsuranceCents`.
+  **Crédit** : échéance du tableau d'amortissement (R6).
+- **Taxe foncière** comptée en **octobre**, **CFE** en **décembre** (seuls mois où elles se saisissent) : sans saisie,
+  **dernier montant saisi** les années précédentes, sinon 0 (même règle pour le réel : la transaction est comptée dans
+  son mois de paiement, pas lissée).
 - **Charges mensuelles** (électricité, assurance habitation, box, copropriété, frais bancaires) : sans saisie,
   prévu = **réel du même mois N-1** ; à défaut, **moyenne des mois clos** de l'appartement ; à défaut, 0 (hypothèse H2,
-  même principe que le prévisionnel Pro). Pas d'éditeur de prévisionnel en V1.
+  même principe que le prévisionnel Pro). **Régularisation** et **autres** : 0 sans saisie.
 - Le prévu de la **vacance / impayé** n'existe pas : le prévu suppose le loyer intégralement perçu.
 
 ### R4 — Réalisé et mois clos
@@ -180,7 +186,7 @@ l'échéance attendue du mois (R6) :
 ### R8 — KPI
 
 - **Loyers nets perçus** = somme des virements de loyer **reçus** (`APT_RENT_RECEIVED`, déjà nets de gérance ; période, mois clos). Sous-titre :
-  « X perçus sur Y dus (Z %) · gérance W » : X = loyers **bruts** (net + frais, R12), W = frais saisis. **Loyers dus** = loyer prévu brut × nombre de mois clos actifs.
+  « X perçus sur Y dus (Z %) · gérance W » : X = loyers **bruts** (net + frais, R12), W = frais saisis. **Loyers dus** = somme des loyers bruts prévus des mois clos actifs.
   **Jauge** : barre = perçus, repère = dus ; orange si perçus < dus (« Il manque X de loyers »), verte sinon.
 - **Effort d'épargne nécessaire** = Σ des efforts (R5), tous appartements affichés. Sous-titre : vue mois « À apporter ce
   mois-ci… · prévu X » ; vue année « Soit X par mois en moyenne · prévu Y » ; si l'effort est nul : « Aucun apport
@@ -242,7 +248,8 @@ Une migration. Tout porte `userId`, toute requête filtre sur `ctx.session.user.
 
 | Modèle / champ               | Détail                                                                                                                                                                                                                                                                                                                                           |
 | ---------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `Apartment`                  | `userId`, `name`, `kind` (enum `ApartmentKind` : `FURNISHED` (LMNP) seul pour l'instant), `managed` (`false` = en direct), `acquiredAt` (`@db.Date`, 1ᵉʳ du mois), `priceCents`, `rentCents`, `managementFeeBps`, `creditInsuranceCents`, `propertyTaxCents` (annuel), `cfeCents` (annuel)                                                       |
+| `Apartment`                  | `userId`, `name`, `kind` (enum `ApartmentKind` : `FURNISHED` (LMNP) seul pour l'instant), `managed` (`false` = en direct), `acquiredAt` (`@db.Date`, 1ᵉʳ du mois), `priceCents`, `managementFeeBps`, `creditInsuranceCents`                                                                                                                      |
+| `ApartmentForecast`          | `apartmentId`, `year`, `month`, `line` (enum `ApartmentForecastLine` = clés des lignes du tableau) (PK composée), `amountCents` : saisie de l'éditeur du prévisionnel (R3)                                                                                                                                                                       |
 | prêt (sur `Apartment`)       | `loanPrincipalCents`, `loanRateBps`, `loanTermMonths`, `loanFirstDueDate` (`@db.Date`), tous **optionnels** (un bien sans prêt est possible : alors pas de ligne Crédit)                                                                                                                                                                         |
 | `ApartmentYearOpening`       | `apartmentId`, `year` (PK composée), `openingBalanceCents`                                                                                                                                                                                                                                                                                       |
 | `ManagementInvoice`          | `apartmentId`, `year`, `month` (PK composée), `feesCents`, `extraFeesCents` : facture de gérance saisie à la main (R12)                                                                                                                                                                                                                          |

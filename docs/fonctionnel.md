@@ -231,8 +231,7 @@ Suivi de **trésorerie** des biens en location (comme l'onglet « Toulouse » de
 rappels (déclaration = comptable). Règles détaillées et hypothèses : [plan-appartements.md](./plan-appartements.md).
 
 - **Réglages › Appartements** (`/settings?tab=apt`) : par bien, régime (étiquette), gérance (interrupteur, désactivé = en direct), mois
-  d'acquisition, prix, loyer prévu brut, frais de gérance (%), assurance emprunteur, taxe foncière et CFE
-  annuelles, solde du compte au 1er janvier, prêt à taux fixe (synthèse : mensualité, 1ʳᵉ échéance, intérêts totaux).
+  d'acquisition, prix, frais de gérance (%), assurance emprunteur, solde du compte au 1er janvier, prêt à taux fixe (synthèse : mensualité, 1ʳᵉ échéance, intérêts totaux).
 - **Import** : type de compte « Appartement » + choix de l'appartement. Les catégories `APT_*` sont proposées ; le
   virement d'apport vers ce compte se catégorise « Apport appartement » côté perso (enveloppe épargne long terme).
   À la relecture, une échéance de prêt est reconnue si elle est à ±1 € de la mensualité du tableau d'amortissement.
@@ -242,7 +241,8 @@ rappels (déclaration = comptable). Règles détaillées et hypothèses : [plan-
   transactions rattachées.
 - **Vue année** : mêmes colonnes sur les mois clos, rendements brut / net sur le prix d'achat, et
   seuils LMNP (plafond micro-BIC, seuil LMP) indicatifs.
-- **Prévisionnel** : loyer, gérance, échéance du prêt, assurance ; taxe foncière en octobre, CFE en décembre ; charges
-  mensuelles = réel du même mois N-1, sinon moyenne des autres mois clos, sinon 0.
+- **Prévisionnel** : loyer brut et charges saisis mois par mois dans l'éditeur du prévisionnel ; gérance = loyer × %,
+  échéance du prêt, assurance. Sans saisie : loyer = dernier loyer saisi ; taxe foncière (octobre) et CFE (décembre) =
+  dernier montant saisi ; charges mensuelles = réel du même mois N-1, sinon moyenne des autres mois clos, sinon 0.
 - **Solde** : solde fin de mois = début + différentiel + apport ; il doit coïncider avec le solde bancaire. L'effort
   d'épargne annuel est la somme des efforts mensuels.
