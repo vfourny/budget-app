@@ -1,5 +1,6 @@
 # Rappel des données légales annuelles codées en dur (voir scripts/check-yearly-rules.ts).
-# Chaque mois : s'il manque l'année en cours, ouvre (ou met à jour) une issue « yearly-rules ».
+# Chaque mois : s'il manque l'année en cours, ouvre (ou met à jour) une issue « yearly-rules »,
+# puis Gemini tente de préparer la PR (job `update`). Rien n'est mergé sans relecture.
 # Tourne chaque mois (et pas seulement en janvier) : la loi de finances peut être votée tard, et
 # un workflow cassé se voit tout de suite plutôt qu'au moment où on en a besoin.
 name: Yearly rules
@@ -15,12 +16,18 @@ on:
 
 permissions:
   contents: read
-  issues: write
 
 jobs:
   check:
     runs-on: ubuntu-latest
     timeout-minutes: 10
+    permissions:
+      contents: read
+      issues: write
+    outputs:
+      missing: ${{ steps.check.outputs.missing }}
+      year: ${{ steps.check.outputs.year }}
+      issue: ${{ steps.issue.outputs.number }}
     steps:
       - uses: actions/checkout@v5
 
@@ -49,6 +56,7 @@ jobs:
           fi
 
       - name: Open or update the reminder issue
+        id: issue
         if: steps.check.outputs.missing == 'true'
         env:
           GH_TOKEN: ${{ github.token }}
@@ -61,5 +69,147 @@ jobs:
           if [ -n "$number" ]; then
             gh issue edit "$number" --body-file report.md
           else
-            gh issue create --title "$TITLE" --label yearly-rules --body-file report.md
+            url=$(gh issue create --title "$TITLE" --label yearly-rules --body-file report.md)
+            number="${url##*/}"
           fi
+          echo "number=$number" >> "$GITHUB_OUTPUT"
+
+  # Gemini cherche les valeurs officielles et édite les fichiers ; le commit, les checks et la PR
+  # sont faits par le workflow (l'IA n'a ni git ni gh). Les mois où la valeur n'est pas encore
+  # publiée, rien ne change et le job réessaie le mois suivant.
+  update:
+    needs: check
+    if: needs.check.outputs.missing == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    permissions:
+      contents: write
+      pull-requests: write
+      issues: read
+    env:
+      YEAR: ${{ needs.check.outputs.year }}
+      BRANCH: chore/yearly-rules-${{ needs.check.outputs.year }}
+      GH_TOKEN: ${{ github.token }}
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Skip if a PR is already open
+        id: existing
+        run: |
+          count=$(gh pr list --head "$BRANCH" --state open --json number --jq 'length')
+          echo "open=$([ "$count" -gt 0 ] && echo true || echo false)" >> "$GITHUB_OUTPUT"
+
+      - uses: pnpm/action-setup@v4
+        if: steps.existing.outputs.open == 'false'
+
+      - uses: actions/setup-node@v5
+        if: steps.existing.outputs.open == 'false'
+        with:
+          node-version-file: .nvmrc
+          cache: pnpm
+
+      # Install complet (client Prisma + hooks Git) : nécessaire pour `pnpm check` et le commit.
+      - if: steps.existing.outputs.open == 'false'
+        run: pnpm install --frozen-lockfile
+
+      - name: List missing rules
+        if: steps.existing.outputs.open == 'false'
+        id: report
+        run: |
+          pnpm -s rules:check "$YEAR" > report.md || true
+          {
+            echo 'body<<EOF'
+            cat report.md
+            echo 'EOF'
+          } >> "$GITHUB_OUTPUT"
+
+      - name: Fill the missing year with Gemini
+        if: steps.existing.outputs.open == 'false'
+        id: gemini
+        uses: google-github-actions/run-gemini-cli@v0.1.9
+        with:
+          gemini_api_key: ${{ secrets.GEMINI_API_KEY }}
+          # Outils limités : lire, éditer un fichier existant, chercher sur le web. Pas de shell.
+          settings: |-
+            {
+              "tools": {
+                "core": ["list_directory", "read_file", "replace", "google_web_search", "web_fetch"]
+              }
+            }
+          prompt: |-
+            Tu mets à jour des données légales françaises codées en dur dans une app de budget.
+            Année à renseigner : ${{ needs.check.outputs.year }}.
+
+            ${{ steps.report.outputs.body }}
+
+            Pour chaque ligne de la checklist :
+            1. Lis le fichier indiqué et le commentaire au-dessus de la table : il dit à quoi
+               correspond la clé d'année (ex. barème de l'IR : clé N = loi de finances N).
+            2. Cherche la valeur officielle de cette année sur une source officielle
+               (legifrance.gouv.fr, impots.gouv.fr, bofip.impots.gouv.fr, service-public.gouv.fr).
+               N'utilise jamais un blog ou un simulateur comme seule source.
+            3. Si la valeur est publiée ET votée, ajoute l'entrée de l'année dans la table, au même
+               format que les années précédentes (montants entiers en centimes, séparateurs `_`),
+               avec un commentaire court qui cite le texte légal. N'ajoute que l'année demandée,
+               ne modifie rien d'autre.
+            4. Si la valeur n'est pas encore publiée ou votée (projet de loi), ne modifie PAS le
+               fichier.
+
+            Réponds en français, en Markdown : pour chaque ligne, « ajouté » ou « non publié »,
+            les valeurs ajoutées et l'URL exacte de la source utilisée.
+
+      - name: Check the result
+        if: steps.existing.outputs.open == 'false'
+        id: result
+        run: |
+          if git diff --quiet; then
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          echo "changed=true" >> "$GITHUB_OUTPUT"
+          pnpm format
+          if pnpm check > check.log 2>&1; then
+            echo "check=vert" >> "$GITHUB_OUTPUT"
+          else
+            echo "check=rouge (voir les logs du workflow)" >> "$GITHUB_OUTPUT"
+            cat check.log
+          fi
+          pnpm -s rules:check "$YEAR" > remaining.md || true
+
+      - name: Open the PR
+        if: steps.result.outputs.changed == 'true'
+        env:
+          SUMMARY: ${{ steps.gemini.outputs.summary }}
+          CHECK: ${{ steps.result.outputs.check }}
+          ISSUE: ${{ needs.check.outputs.issue }}
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898299+github-actions[bot]@users.noreply.github.com'
+          git switch -c "$BRANCH"
+          git commit -am "chore(rules): add $YEAR yearly legal data"
+          git push -u origin "$BRANCH"
+          {
+            echo '## Quoi'
+            echo
+            echo "Données légales **$YEAR** préparées par Gemini (workflow \`yearly-rules\`)."
+            echo
+            echo '> ⚠️ **Vérifier chaque montant contre la source officielle avant de merger.**'
+            echo
+            echo "Closes #$ISSUE"
+            echo
+            echo '## Résumé de Gemini'
+            echo
+            echo "$SUMMARY"
+            echo
+            echo '## Encore manquant'
+            echo
+            if [ -s remaining.md ]; then cat remaining.md; else echo 'Rien.'; fi
+            echo
+            echo '## Checklist'
+            echo
+            echo "- \`pnpm check\` dans le workflow : $CHECK"
+            echo '- [ ] Montants vérifiés contre la source'
+            echo '- [ ] CI relancée (une PR ouverte par le bot ne déclenche pas la CI : push vide ou re-run)'
+          } > pr.md
+          gh pr create --base main --head "$BRANCH" \
+            --title "chore(rules): add $YEAR yearly legal data" --body-file pr.md

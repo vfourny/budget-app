@@ -122,7 +122,7 @@ nitro.config.ts        # serverDir: ./server
   une PR par nouvelle année.
 - **Données légales annuelles codées en dur** (barème IR, plafond micro-BIC…) : toute nouvelle table « par année »
   dans le code se déclare dans `YEARLY_RULES` (`scripts/check-yearly-rules.ts`). `pnpm rules:check [année]` liste
-  ce qui manque ; le workflow `yearly-rules.yml` le lance chaque mois et ouvre une issue `yearly-rules`. Volontairement
+  ce qui manque ; le workflow `yearly-rules.yml` le lance chaque mois, ouvre une issue `yearly-rules`, puis Gemini (secret `GEMINI_API_KEY`, outils lecture / édition / recherche web, ni shell ni git) prépare la PR ; montants à vérifier contre la source avant merge. Volontairement
   hors de `pnpm check` / CI des PR : la loi de finances est parfois votée en février, ça ne doit pas bloquer les PR.
 - **Valeurs dérivées** calculées pendant le rendu (≈ `computed`), pas stockées dans un
   `useState` ; `useMemo` seulement si le calcul est coûteux.
