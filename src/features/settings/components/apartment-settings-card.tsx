@@ -21,6 +21,7 @@ import { IconChevronDown } from '@tabler/icons-react'
 import { useState } from 'react'
 
 import { EuroField } from '@/components/euro-field'
+import { PercentField } from '@/components/percent-field'
 import {
   useDeleteApartment,
   useSaveApartment,
@@ -55,36 +56,6 @@ function defaultLoan(acquiredAt: Date): Loan {
       Date.UTC(acquiredAt.getUTCFullYear(), acquiredAt.getUTCMonth() + 1, 5),
     ),
   }
-}
-
-/** Champ en points de base : affiché en pourcentage (300 → 3 %). */
-function PercentField(props: {
-  label: string
-  description?: string
-  bps: number
-  disabled?: boolean
-  onChange: (bps: number) => void
-}) {
-  return (
-    <NumberInput
-      decimalScale={2}
-      decimalSeparator=","
-      description={props.description}
-      disabled={props.disabled}
-      inputWrapperOrder={['label', 'input', 'description']}
-      label={props.label}
-      max={100}
-      min={0}
-      onChange={(value) =>
-        props.onChange(
-          Math.round((typeof value === 'number' ? value : 0) * 100),
-        )
-      }
-      step={0.05}
-      suffix={` ${text.units.percent}`}
-      value={props.bps / 100}
-    />
-  )
 }
 
 /** `<input type="month">` / `type="date"` : valeur « aaaa-mm » ou « aaaa-mm-jj » (jour civil en UTC). */
@@ -203,13 +174,6 @@ export function ApartmentSettingsCard({
               cents={draft.priceCents}
               label={text.fields.price}
               onChange={(value) => set('priceCents', value)}
-            />
-            <PercentField
-              bps={draft.managementFeeBps}
-              description={text.fields.managementFeeHint}
-              disabled={!draft.managed}
-              label={text.fields.managementFee}
-              onChange={(value) => set('managementFeeBps', value)}
             />
             <EuroField
               allowNegative

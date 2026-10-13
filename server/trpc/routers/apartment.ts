@@ -15,7 +15,7 @@ const loanSchema = z.object({
 })
 
 const saveSchema = z.object({
-  /** Absent = création. */
+  /** Absent = création. Le taux de gérance se saisit dans l'éditeur du prévisionnel. */
   id: z.string().min(1).optional(),
   name: z.string().trim().min(1).max(60),
   kind: z.enum(ApartmentKind),
@@ -23,7 +23,6 @@ const saveSchema = z.object({
   managed: z.boolean(),
   acquiredAt: z.date(),
   priceCents: cents,
-  managementFeeBps: z.number().int().min(0).max(10_000),
   creditInsuranceCents: cents,
   loan: loanSchema.nullable(),
   /** Solde réel du compte appartement au 1er janvier de `openingYear` (R5). */
@@ -56,7 +55,6 @@ export const apartmentRouter = createTRPCRouter({
         managed: apartment.managed,
         acquiredAt: apartment.acquiredAt,
         priceCents: apartment.priceCents,
-        managementFeeBps: apartment.managementFeeBps,
         creditInsuranceCents: apartment.creditInsuranceCents,
         loan:
           apartment.loanPrincipalCents !== null &&
@@ -136,38 +134,6 @@ export const apartmentRouter = createTRPCRouter({
         })
         return { id: apartmentId }
       })
-    }),
-
-  /**
-   * Facture de gérance d'un mois (R12), saisie à la main : frais de gérance + frais supplémentaires.
-   * Refusée pour un appartement en direct (sans gérant).
-   */
-  setManagementInvoice: protectedProcedure
-    .input(
-      z.object({
-        apartmentId: z.string().min(1),
-        year: z.number().int().min(2000).max(2100),
-        month: z.number().int().min(1).max(12),
-        feesCents: cents,
-        extraFeesCents: cents,
-      }),
-    )
-    .mutation(async ({ ctx, input }) => {
-      const userId = ctx.session.user.id
-      const { apartmentId, year, month, ...fees } = input
-      const apartment = await ctx.db.apartment.findFirst({
-        where: { id: apartmentId, userId },
-        select: { managed: true },
-      })
-      if (!apartment) throw appError('NOT_FOUND', 'APARTMENT_NOT_FOUND')
-      if (!apartment.managed)
-        throw appError('BAD_REQUEST', 'APARTMENT_NO_MANAGER')
-      await ctx.db.managementInvoice.upsert({
-        where: { apartmentId_year_month: { apartmentId, year, month } },
-        create: { userId, apartmentId, year, month, ...fees },
-        update: fees,
-      })
-      return { apartmentId, year, month }
     }),
 
   /** Refusé tant que l'appartement porte des transactions ou des relevés (R11) : les détacher d'abord. */

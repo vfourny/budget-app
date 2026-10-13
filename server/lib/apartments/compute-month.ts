@@ -199,7 +199,7 @@ export function actualLines(
 
 /**
  * Prévu d'un mois (R3) : lignes saisissables (saisie, sinon défaut, voir `forecastInputs`), frais de
- * gérance = loyer brut × taux des Réglages, échéance du tableau d'amortissement et assurance
+ * gérance = loyer brut × taux de l'éditeur, échéance du tableau d'amortissement et assurance
  * emprunteur. Le prévu suppose le loyer intégralement perçu (pas de vacance).
  */
 function forecastLines(

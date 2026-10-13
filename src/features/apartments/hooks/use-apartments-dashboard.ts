@@ -25,7 +25,7 @@ export function useApartmentsYear(year: number, apartmentId: string | null) {
   )
 }
 
-/** Lignes saisissables du prévisionnel d'un appartement pour un mois : saisie et valeur par défaut. */
+/** Prévisionnel d'un appartement pour un mois : lignes (saisie et valeur par défaut) et gérance. */
 export function useApartmentForecastInputs(
   apartmentId: string,
   year: number,
@@ -36,7 +36,10 @@ export function useApartmentForecastInputs(
   )
 }
 
-/** Enregistre les saisies d'un mois ; le prévu change le dashboard et les mois suivants (loyer reporté). */
+/**
+ * Enregistre les saisies d'un mois (et la gérance d'un bien géré) ; le prévu change le dashboard et
+ * les mois suivants (loyer reporté, taux de gérance).
+ */
 export function useSetApartmentForecast() {
   return useMutation({
     ...trpc.apartmentForecast.set.mutationOptions(),
@@ -45,14 +48,5 @@ export function useSetApartmentForecast() {
         queryClient.invalidateQueries(trpc.apartmentForecast.pathFilter()),
         queryClient.invalidateQueries(trpc.apartmentDashboard.pathFilter()),
       ]),
-  })
-}
-
-/** Saisit la facture de gérance d'un mois (R12) puis rafraîchit le dashboard. */
-export function useSetManagementInvoice() {
-  return useMutation({
-    ...trpc.apartment.setManagementInvoice.mutationOptions(),
-    onSuccess: () =>
-      queryClient.invalidateQueries(trpc.apartmentDashboard.pathFilter()),
   })
 }

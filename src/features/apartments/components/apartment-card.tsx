@@ -6,7 +6,6 @@ import { InfoTip } from '@/components/info-tip'
 import { ApartmentTable } from '@/features/apartments/components/apartment-table'
 import { ForecastEditorModal } from '@/features/apartments/components/forecast-editor-modal'
 import { LoanGauge } from '@/features/apartments/components/loan-gauge'
-import { ManagementInvoiceForm } from '@/features/apartments/components/management-invoice-form'
 import { formatBp, formatCents, monthName } from '@/lib/format'
 import { fr } from '@/lib/i18n/fr'
 import type { RouterOutputs } from '@/lib/trpc'
@@ -16,7 +15,7 @@ type ApartmentView =
 
 interface ApartmentCardProps {
   apartment: ApartmentView
-  /** Période affichée : `month: null` en vue année. La facture de gérance se saisit en vue mois. */
+  /** Période affichée : `month: null` en vue année. */
   period: { year: number; month: number | null }
 }
 
@@ -41,7 +40,10 @@ function editorMonth(
     : { year: period.year, month }
 }
 
-/** Carte d'un appartement : en-tête, jauge de capital remboursé, facture de gérance (bien géré, mois clos) et tableau. */
+/**
+ * Carte d'un appartement : en-tête (facture de gérance manquante signalée, saisie dans l'éditeur du
+ * prévisionnel), jauge de capital remboursé et tableau.
+ */
 export function ApartmentCard({ apartment, period }: ApartmentCardProps) {
   const text = fr.apartments.card
   const [editing, setEditing] = useState(false)
@@ -71,6 +73,13 @@ export function ApartmentCard({ apartment, period }: ApartmentCardProps) {
                 formatCents(apartment.priceCents),
               )}
             </Text>
+            {apartment.missingInvoiceMonths.length > 0 && (
+              <Badge color="amber" mt={6} tt="none" variant="light">
+                {text.missingInvoice(
+                  apartment.missingInvoiceMonths.map(monthName).join(', '),
+                )}
+              </Badge>
+            )}
           </div>
           <Group gap={8} wrap="nowrap">
             <Button
@@ -120,18 +129,6 @@ export function ApartmentCard({ apartment, period }: ApartmentCardProps) {
             />
           </Group>
         )}
-
-        {apartment.managed &&
-          period.month !== null &&
-          apartment.closedMonths > 0 && (
-            <ManagementInvoiceForm
-              apartmentId={apartment.id}
-              invoice={apartment.invoice}
-              key={`${apartment.id}-${period.year}-${period.month}`}
-              month={period.month}
-              year={period.year}
-            />
-          )}
 
         <ApartmentTable
           apartment={apartment}

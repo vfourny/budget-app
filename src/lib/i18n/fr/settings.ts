@@ -121,7 +121,7 @@ export const settings = {
     deleteFailed: 'Suppression impossible',
     delete: 'Supprimer',
     confirmDelete: 'Confirmer la suppression',
-    units: { percent: '%', months: 'mois' },
+    units: { months: 'mois' },
     fields: {
       kind: 'Régime de location',
       kindHint:
@@ -129,12 +129,9 @@ export const settings = {
       name: 'Nom',
       managed: 'Confié à un gérant',
       managedHint:
-        'Désactivé = location en direct (ni facture de gérance, ni frais).',
+        "Désactivé = location en direct (ni facture de gérance, ni frais). Le taux et les factures se saisissent dans l'éditeur du prévisionnel.",
       acquiredAt: 'Acquisition (mois)',
       price: "Prix d'achat",
-      managementFee: 'Frais de gérance',
-      managementFeeHint:
-        'En % du loyer, pour le prévisionnel : le réel vient de la facture de gérance.',
       openingBalance: (year: number) =>
         `Solde du compte au 1er janvier ${year}`,
       openingBalanceHint:

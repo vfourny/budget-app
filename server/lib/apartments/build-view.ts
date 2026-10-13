@@ -56,8 +56,6 @@ function buildApartment(
     acquiredAt: apartment.acquiredAt,
     priceCents: apartment.priceCents,
     ...columns,
-    /** Facture de gérance du mois affiché (vue mois, bien géré) : pré-remplit le formulaire (R12). */
-    invoice: params.month === null ? null : (months[0]?.invoice ?? null),
     /** Capital remboursé jusqu'à la fin de la période affichée, plafonnée au dernier mois clos (R6). */
     capital: through ? capitalRepaid(apartment.loan, through) : null,
     yields:

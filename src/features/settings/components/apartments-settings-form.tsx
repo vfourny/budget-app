@@ -17,7 +17,6 @@ function emptyApartment(): ApartmentValues {
     managed: false,
     acquiredAt: new Date(Date.UTC(now.getFullYear(), now.getMonth(), 1)),
     priceCents: 0,
-    managementFeeBps: 0,
     creditInsuranceCents: 0,
     loan: null,
     openingBalanceCents: 0,

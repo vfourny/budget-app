@@ -10,10 +10,13 @@ import {
   Table,
   Text,
   TextInput,
+  Title,
 } from '@mantine/core'
 import type { ApartmentForecastLine } from '@server/generated/prisma/enums'
 import { useState } from 'react'
 
+import { EuroField } from '@/components/euro-field'
+import { PercentField } from '@/components/percent-field'
 import {
   useApartmentForecastInputs,
   useSetApartmentForecast,
@@ -23,7 +26,10 @@ import { formatCents } from '@/lib/format'
 import { fr } from '@/lib/i18n/fr'
 import type { RouterOutputs } from '@/lib/trpc'
 
-type ForecastInput = RouterOutputs['apartmentForecast']['inputs'][number]
+type ForecastInputs = RouterOutputs['apartmentForecast']['inputs']
+type ForecastInput = ForecastInputs['lines'][number]
+type Management = NonNullable<ForecastInputs['management']>
+type Invoice = NonNullable<Management['invoice']>
 
 /** Saisie par ligne : `null` = pas de saisie (valeur par défaut). En centimes. */
 type Overrides = Partial<Record<ApartmentForecastLine, number | null>>
@@ -47,7 +53,8 @@ const toMonthValue = ({ year, month }: YearMonth) =>
 
 /**
  * Modale « Éditer le prévisionnel » d'un appartement : un mois à la fois (sélecteur, mois à venir
- * compris), une saisie par ligne. Montée seulement quand elle est ouverte (le parent la rend sous
+ * compris), une saisie par ligne ; pour un bien géré, le taux de gérance prévu et la facture du mois
+ * (réel, mois clos). Montée seulement quand elle est ouverte (le parent la rend sous
  * condition), donc l'état initial vient des props.
  */
 export function ForecastEditorModal({
@@ -112,11 +119,12 @@ function ForecastLines({
 
   if (inputs.isPending) return <Loader color="gold" />
   if (inputs.isError) return <Alert color="red" title={text.loadFailed} />
-  if (inputs.data.length === 0) return <Alert title={text.notActive} />
+  if (inputs.data.lines.length === 0) return <Alert title={text.notActive} />
   return (
     <ForecastLinesForm
       apartmentId={apartmentId}
-      inputs={inputs.data}
+      inputs={inputs.data.lines}
+      management={inputs.data.management}
       period={period}
     />
   )
@@ -126,21 +134,39 @@ function ForecastLinesForm({
   apartmentId,
   period,
   inputs,
+  management,
 }: {
   apartmentId: string
   inputs: readonly ForecastInput[]
+  /** `null` = bien en direct : pas de section Gérance. */
+  management: Management | null
   period: YearMonth
 }) {
   const initial: Overrides = Object.fromEntries(
     inputs.map((input) => [input.line, input.overrideCents]),
   )
   const [overrides, setOverrides] = useState<Overrides>(initial)
+  const [feeBps, setFeeBps] = useState(management?.feeBps ?? 0)
+  // `null` = facture non saisie : rien n'est enregistré tant qu'on ne touche pas aux champs.
+  const [invoice, setInvoice] = useState<Invoice | null>(
+    management?.invoice ?? null,
+  )
   const save = useSetApartmentForecast()
 
   // Valeurs dérivées du brouillon (≈ `computed`), recalculées à chaque rendu.
-  const changed = inputs.some(
-    ({ line }) => (overrides[line] ?? null) !== (initial[line] ?? null),
-  )
+  const feeChanged = management !== null && feeBps !== management.feeBps
+  const savedInvoice = management?.invoice ?? null
+  const invoiceChanged =
+    invoice !== null &&
+    (savedInvoice === null ||
+      invoice.feesCents !== savedInvoice.feesCents ||
+      invoice.extraFeesCents !== savedInvoice.extraFeesCents)
+  const changed =
+    feeChanged ||
+    invoiceChanged ||
+    inputs.some(
+      ({ line }) => (overrides[line] ?? null) !== (initial[line] ?? null),
+    )
   const hasOverride = inputs.some(
     ({ line }) => (overrides[line] ?? null) !== null,
   )
@@ -204,6 +230,61 @@ function ForecastLinesForm({
         </Table.Tbody>
       </Table>
 
+      {management && (
+        <Stack gap={12}>
+          <Title order={4}>{text.management.title}</Title>
+          <PercentField
+            bps={feeBps}
+            description={text.management.feeRateHint}
+            label={text.management.feeRate}
+            onChange={setFeeBps}
+          />
+          <Group gap={8}>
+            <Text fw={500} size="sm">
+              {text.management.invoiceTitle}
+            </Text>
+            {management.closed && management.invoice === null && (
+              <Badge color="amber" size="xs" tt="none" variant="light">
+                {text.management.missing}
+              </Badge>
+            )}
+          </Group>
+          {management.closed ? (
+            <>
+              <Text c="dimmed" size="sm">
+                {text.management.invoiceHint}
+              </Text>
+              <Group align="flex-end" gap={16} grow>
+                <EuroField
+                  cents={invoice?.feesCents ?? 0}
+                  label={text.management.fees}
+                  onChange={(feesCents) =>
+                    setInvoice((current) => ({
+                      extraFeesCents: current?.extraFeesCents ?? 0,
+                      feesCents,
+                    }))
+                  }
+                />
+                <EuroField
+                  cents={invoice?.extraFeesCents ?? 0}
+                  label={text.management.extraFees}
+                  onChange={(extraFeesCents) =>
+                    setInvoice((current) => ({
+                      feesCents: current?.feesCents ?? 0,
+                      extraFeesCents,
+                    }))
+                  }
+                />
+              </Group>
+            </>
+          ) : (
+            <Text c="dimmed" size="sm">
+              {text.management.invoiceNotClosed}
+            </Text>
+          )}
+        </Stack>
+      )}
+
       {save.isError && (
         <Alert color="red" title={text.saveFailed}>
           {errorMessage(save.error)}
@@ -239,6 +320,8 @@ function ForecastLinesForm({
                 line,
                 amountCents: overrides[line] ?? null,
               })),
+              managementFeeBps: feeChanged ? feeBps : undefined,
+              invoice: invoiceChanged ? invoice : undefined,
             })
           }
         >
