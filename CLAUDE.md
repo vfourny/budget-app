@@ -43,7 +43,7 @@ Choix délibéré : **le plus simple possible**. SPA React (pas de SSR, pas de S
 
 ```bash
 pnpm dev            # front + API sur un seul serveur (http://localhost:5173, API sous /api)
-pnpm check          # lint + typecheck + format:check + i18n:check + knip (à lancer avant toute PR)
+pnpm check          # lint + typecheck + format:check + knip (à lancer avant toute PR)
 pnpm build          # build de prod (fait aussi en CI) → .output/ (ou .vercel/output sur Vercel)
 pnpm preview        # sert le build de prod localement
 pnpm lint:fix       # autofix ESLint
@@ -157,7 +157,6 @@ nitro.config.ts        # serverDir: ./server
   variable = fonction (`fr.imports.confirmDelete(n)`) ; pluriels via `plural` / `pluralize`
   (`@/lib/i18n/plural`), jamais de `n > 1 ? "s" : ""` à la main. Libellés d'un enum Prisma :
   `as const satisfies Record<Enum, string>` dans `fr/enums.ts` (`tsc` échoue si une valeur manque).
-  `pnpm i18n:check` (inclus dans `pnpm check`) échoue s'il reste du texte en dur dans le JSX.
 - **Erreurs serveur** : le serveur n'envoie jamais de texte d'UI, seulement un **code**
   (`throw appError("NOT_FOUND", "IMPORT_NOT_FOUND")`, `server/lib/app-error.ts` ; pour les lignes
   CSV écartées, un `CsvLineErrorCode`). Le front le traduit via `fr.errors` / `fr.csvErrors`, avec
