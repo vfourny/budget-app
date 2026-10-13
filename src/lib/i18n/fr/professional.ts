@@ -22,15 +22,20 @@ export const professional = {
   vat: {
     title: 'TVA à reverser',
     tip: "TVA à reverser = TVA collectée − TVA déductible, calculée sur le CA et les charges du mois. En réel, pour des prestations de services, la TVA est exigible à l'encaissement (sauf option pour les débits) : une facture de décembre payée en janvier se déclare en janvier.",
-    collected: 'TVA collectée (20 % du CA)',
-    collectedTip:
-      "Collectée = 20 % × CA HT. C'est la TVA facturée à tes clients : elle ne t'appartient pas, elle est reversée à l'État.",
-    deductible: '− TVA déductible (charges)',
-    deductibleTip:
-      'Déductible = TVA payée sur tes charges, au taux de chaque catégorie (20 %, 10 % ou 0 % selon la dépense). Elle vient en déduction de la TVA collectée.',
-    due: '= À reverser',
-    dueTip:
-      "Collectée − déductible. Le paiement à l'État apparaît ensuite dans le relevé en catégorie « TVA », le mois suivant.",
+    declareIn: (month: string) => `à déclarer en ${month}`,
+    columns: { actual: 'Réel', forecast: 'Prévu' },
+    signs: { collected: '+', deductible: '−', due: '=' },
+    collected: 'TVA collectée',
+    collectedSub: '20 % du CA',
+    deductible: 'TVA déductible',
+    deductibleSub: 'sur charges',
+    due: 'À reverser',
+    gap: {
+      forecastOnly: 'Prévisionnel : pas encore de réel ce mois-ci',
+      even: 'Pile le prévu',
+      below: (amount: string) => `${amount} de moins que prévu`,
+      above: (amount: string) => `${amount} de plus que prévu`,
+    },
   },
   profit: {
     title: 'Bénéfice',

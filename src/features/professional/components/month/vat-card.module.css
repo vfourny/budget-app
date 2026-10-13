@@ -1,0 +1,18 @@
+/* Tableau « + collectée / − déductible / = à reverser » de la carte TVA. */
+.table {
+  --table-border-color: var(--app-border);
+}
+
+.sign {
+  width: 18px;
+  color: var(--app-caption);
+}
+
+.number {
+  white-space: nowrap;
+}
+
+/* Ligne de résultat : trait plus épais au-dessus, comme sous une addition posée. */
+.total {
+  border-top: 2px solid var(--mantine-color-default-border);
+}
