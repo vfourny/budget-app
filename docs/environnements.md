@@ -45,6 +45,10 @@ Workflows réutilisables de [`vfourny/.github`](https://github.com/vfourny/.gith
 
 Node vient de l'input `node_version` (aligné sur `.nvmrc`), pnpm du champ `packageManager`.
 
+## Renovate
+
+`renovate.json` étend le preset partagé `github>vfourny/.github` (actions figées sur un SHA, 3 jours d'attente avant de proposer une version, majeures relues à la main). Surcharges locales : une fusion sur `main` part en prod sans tests, donc les `dependencies` (runtime) et Nitro (beta épinglée) ne sont **jamais** fusionnées automatiquement ; seules les patch/minor des `devDependencies` le sont (lundi 0 h–4 h). `prisma`, `@prisma/client` et `@prisma/adapter-neon` montent ensemble. L'app GitHub Renovate doit être installée sur le repo.
+
 ## Premier setup et migrations
 
 ```bash
