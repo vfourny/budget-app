@@ -89,7 +89,10 @@ export const CFE_MONTH = 12
 /** Tolérance (en centimes, 1 €) du rapprochement d'une échéance de prêt avec le tableau d'amortissement (R7). */
 export const LOAN_MATCH_TOLERANCE_CENTS = 100
 
-/** Plafond de recettes du micro-BIC par année, en centimes (R10). À titre indicatif : à valider avec le comptable. */
+/**
+ * Plafond de recettes du micro-BIC par année, en centimes (R10). À titre indicatif : à valider avec le comptable.
+ * ⚠️ Une entrée par année, même inchangée (revalorisé tous les 3 ans) : c'est la trace qu'elle a été vérifiée.
+ */
 const MICRO_BIC_CEILINGS_CENTS = {
   2025: 7_770_000,
   2026: 8_360_000,
@@ -97,6 +100,11 @@ const MICRO_BIC_CEILINGS_CENTS = {
 
 /** Seuil de recettes du statut LMP, en centimes (R10). La condition sur 50 % des revenus n'est pas calculée. */
 export const LMP_THRESHOLD_CENTS = 2_300_000
+
+/** `true` si le plafond micro-BIC de l'année est renseigné (rappel annuel : `scripts/check-yearly-rules.ts`). */
+export function hasMicroBicCeiling(year: number): boolean {
+  return year in MICRO_BIC_CEILINGS_CENTS
+}
 
 /** Plafond micro-BIC d'une année ; une année inconnue prend la dernière connue (ou la première si elle est antérieure). */
 export function microBicCeilingCents(year: number): number {
