@@ -1,7 +1,8 @@
-# Release et déploiement en prod (voir docs/environnements.md › Release).
-# Chaque push sur main met à jour la PR de release (version + docs/CHANGELOG.md).
-# Merger cette PR crée le tag vX.Y.Z + la GitHub Release, puis avance la branche `production`,
-# qui est la Production Branch de Vercel : c'est ce push qui déploie la prod.
+# Release puis déploiement en prod (voir docs/environnements.md › Release).
+# `release` (workflow partagé) : chaque push sur main met à jour la PR de release ; la merger crée
+# le tag vX.Y.Z + la GitHub Release.
+# `deploy` (workflow partagé deploy-branch) : avance la branche `production`, Production Branch
+# de Vercel, sur le commit publié ; c'est ce push qui déploie la prod.
 name: Release
 
 on:
@@ -11,11 +12,23 @@ on:
 permissions:
   contents: read
 
+concurrency:
+  group: release
+  cancel-in-progress: false
+
 jobs:
   release:
-    uses: vfourny/.github/.github/workflows/release-please.yml@v3.2.0
-    with:
-      deploy_branch: production
+    uses: vfourny/.github/.github/workflows/on-demand-release.yml@v4.0.0
     secrets:
-      SEMANTIC_BOT_CLIENT_ID: ${{ secrets.SEMANTIC_BOT_CLIENT_ID }}
-      SEMANTIC_BOT_PRIVATE_KEY: ${{ secrets.SEMANTIC_BOT_PRIVATE_KEY }}
+      BOT_CLIENT_ID: ${{ secrets.BOT_CLIENT_ID }}
+      BOT_PRIVATE_KEY: ${{ secrets.BOT_PRIVATE_KEY }}
+
+  deploy:
+    needs: release
+    if: ${{ needs.release.outputs.release_created == 'true' }}
+    uses: vfourny/.github/.github/workflows/deploy-branch.yml@v4.0.0
+    permissions:
+      contents: write
+    with:
+      sha: ${{ needs.release.outputs.sha }}
+      branch: production
