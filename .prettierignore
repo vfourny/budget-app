@@ -5,3 +5,5 @@ dist/
 server/generated/
 prisma/migrations/
 Claude outputs/
+docs/CHANGELOG.md
+.release-please-manifest.json
