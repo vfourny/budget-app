@@ -1,8 +1,8 @@
 # Release puis déploiement en prod (voir docs/environnements.md › Release).
 # `release` (workflow partagé) : chaque push sur main met à jour la PR de release ; la merger crée
 # le tag vX.Y.Z + la GitHub Release.
-# `deploy` (workflow partagé deploy-branch) : avance la branche `production`, Production Branch
-# de Vercel, sur le commit publié ; c'est ce push qui déploie la prod.
+# `deploy` (propre à ce projet) : avance la branche `production`, Production Branch de Vercel,
+# sur le commit publié ; c'est ce push qui déploie la prod.
 name: Release
 
 on:
@@ -25,9 +25,24 @@ jobs:
   deploy:
     needs: release
     if: ${{ needs.release.outputs.release_created == 'true' }}
-    uses: vfourny/.github/.github/workflows/deploy-branch.yml@v4.0.0
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
     permissions:
       contents: write
-    with:
-      sha: ${{ needs.release.outputs.sha }}
-      branch: production
+    steps:
+      # Via l'API, sans checkout. `force=false` : fast-forward uniquement, échoue si `production`
+      # a été poussée à la main. Créée à la première release. GITHUB_TOKEN suffit : Vercel reçoit
+      # le push par sa propre app GitHub (seuls les workflows Actions l'ignorent).
+      - name: Fast-forward production
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPO: ${{ github.repository }}
+          SHA: ${{ needs.release.outputs.sha }}
+          TAG: ${{ needs.release.outputs.tag_name }}
+        run: |
+          if gh api "repos/$REPO/git/ref/heads/production" > /dev/null 2>&1; then
+            gh api -X PATCH "repos/$REPO/git/refs/heads/production" -f sha="$SHA" -F force=false > /dev/null
+          else
+            gh api -X POST "repos/$REPO/git/refs" -f ref="refs/heads/production" -f sha="$SHA" > /dev/null
+          fi
+          echo "Déployé en prod : $TAG ($SHA)" >> "$GITHUB_STEP_SUMMARY"
