@@ -9,36 +9,13 @@ on:
     branches: [main]
 
 permissions:
-  contents: write
-  pull-requests: write
-
-concurrency:
-  group: release
-  cancel-in-progress: false
+  contents: read
 
 jobs:
   release:
-    runs-on: ubuntu-latest
-    timeout-minutes: 10
-    steps:
-      - uses: googleapis/release-please-action@v4
-        id: release
-        with:
-          # PAT fine-grained (contents + pull requests) : une PR ouverte avec GITHUB_TOKEN
-          # ne déclenche pas pr.yml / pr-title.yml, la PR de release n'aurait donc pas de CI.
-          token: ${{ secrets.RELEASE_PLEASE_TOKEN }}
-
-      - uses: actions/checkout@v5
-        if: ${{ steps.release.outputs.release_created }}
-        with:
-          fetch-depth: 0
-
-      # Fast-forward uniquement : échoue si `production` a divergé de main (push manuel).
-      - name: Deploy to production
-        if: ${{ steps.release.outputs.release_created }}
-        env:
-          SHA: ${{ steps.release.outputs.sha }}
-          TAG: ${{ steps.release.outputs.tag_name }}
-        run: |
-          git push origin "$SHA:refs/heads/production"
-          echo "Déployé en prod : $TAG ($SHA)" >> "$GITHUB_STEP_SUMMARY"
+    uses: vfourny/.github/.github/workflows/release-please.yml@v3.2.0
+    with:
+      deploy_branch: production
+    secrets:
+      SEMANTIC_BOT_CLIENT_ID: ${{ secrets.SEMANTIC_BOT_CLIENT_ID }}
+      SEMANTIC_BOT_PRIVATE_KEY: ${{ secrets.SEMANTIC_BOT_PRIVATE_KEY }}

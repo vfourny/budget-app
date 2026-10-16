@@ -187,7 +187,7 @@ nitro.config.ts        # serverDir: ./server
   `--no-verify` : corriger l'erreur.
 - Hook Claude Code (`.claude/hooks/check.sh`) : prettier + eslint --fix + tsc après chaque
   édition ; corrige immédiatement ce qu'il remonte.
-- **Release** : release-please (`.github/workflows/release.yml`) tient à jour une PR « chore(main): release X.Y.Z »
+- **Release** : release-please (`.github/workflows/release.yml` → `release-please.yml` de `vfourny/.github`) tient à jour une PR « chore(main): release X.Y.Z »
   (version + `docs/CHANGELOG.md`) ; la merger crée le tag `vX.Y.Z` et avance la branche `production` (= Production
   Branch Vercel) → déploiement prod. Ne jamais pousser à la main sur `production`.
 - Questions de clarification : **regroupées une fois par feature**. Si ce n'est pas bloquant,
