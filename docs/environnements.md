@@ -44,14 +44,14 @@ Chaque branche a ses propres URLs pooled et directe. Les variables sont saisies 
 
 ## Release
 
-[release-please](https://github.com/googleapis/release-please) via le workflow réutilisable `on-demand-release.yml` de `vfourny/.github` et `deploy-branch.yml` (jobs `release` et `deploy` de `.github/workflows/release.yml`), config `release-please-config.json` + `.release-please-manifest.json` :
+[release-please](https://github.com/googleapis/release-please) via le workflow réutilisable `release.yml` de `vfourny/.github` (mode à la demande : `is_auto_merged` à `false` par défaut) et `deploy-branch.yml` (jobs `release` et `deploy` de `.github/workflows/release.yml`), config `release-please-config.json` + `.release-please-manifest.json` :
 
 1. Chaque push sur `main` crée ou met à jour une PR « chore(main): release X.Y.Z » : version de `package.json` et `docs/CHANGELOG.md`, calculées depuis les Conventional Commits (`feat` → minor, `fix` → patch, `!` → major ; `chore`, `ci`, `docs`… ne déclenchent pas de release).
 2. Merger cette PR = déployer : le workflow crée le tag `vX.Y.Z` + la GitHub Release, puis pousse le commit sur la branche `production` (fast-forward) → Vercel déploie la prod, `vercel-build` applique les migrations sur la branche Neon `production`.
 
 Pré-requis :
 
-- Secrets `BOT_CLIENT_ID` / `BOT_PRIVATE_KEY` : la GitHub App de `vfourny/.github`, installée sur ce repo (Contents, Issues, Pull requests en écriture). Avec `GITHUB_TOKEN`, la PR de release ne déclencherait pas la CI.
+- Secret `RELEASE_TOKEN` : PAT fine-grained (Contents, Pull requests, Issues en lecture/écriture), le même pour tous les repos qui utilisent `release.yml`. Avec `GITHUB_TOKEN`, la PR de release ne déclencherait pas la CI (checks obligatoires jamais verts). Il expire (un an max) : le renouveler et mettre à jour le secret.
 - Branche `production` : ruleset GitHub « Block force pushes » + « Restrict deletions » (`deploy-branch.yml` ne fait que des fast-forward avec `GITHUB_TOKEN`) ; ne jamais y pousser à la main.
 - `docs/CHANGELOG.md` et le manifest sont écrits par release-please : exclus de Prettier (`.prettierignore`).
 

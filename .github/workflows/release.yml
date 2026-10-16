@@ -18,10 +18,9 @@ concurrency:
 
 jobs:
   release:
-    uses: vfourny/.github/.github/workflows/on-demand-release.yml@v4.0.0
+    uses: vfourny/.github/.github/workflows/release.yml@v4.0.0
     secrets:
-      BOT_CLIENT_ID: ${{ secrets.BOT_CLIENT_ID }}
-      BOT_PRIVATE_KEY: ${{ secrets.BOT_PRIVATE_KEY }}
+      RELEASE_TOKEN: ${{ secrets.RELEASE_TOKEN }}
 
   deploy:
     needs: release
