@@ -18,7 +18,7 @@ concurrency:
 
 jobs:
   release:
-    uses: vfourny/.github/.github/workflows/release.yml@v4.0.0
+    uses: vfourny/.github/.github/workflows/release.yml@v4.0.1
     secrets:
       RELEASE_TOKEN: ${{ secrets.RELEASE_TOKEN }}
 
