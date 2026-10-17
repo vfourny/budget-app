@@ -59,6 +59,8 @@ Premier setup : `cp .env.example .env` (URLs Neon), `pnpm install` (génère le 
 
 Déploiement Vercel : le script `vercel-build` applique les migrations (`prisma migrate deploy`)
 avant `vite build` → `DATABASE_URL` **et** `DIRECT_URL` doivent être définies sur Vercel.
+La prod ne se déploie **pas** au merge sur `main` : elle part quand on merge la PR de release
+(release-please), voir `docs/environnements.md` › Release.
 
 ## Architecture
 
@@ -185,6 +187,10 @@ nitro.config.ts        # serverDir: ./server
   `--no-verify` : corriger l'erreur.
 - Hook Claude Code (`.claude/hooks/check.sh`) : prettier + eslint --fix + tsc après chaque
   édition ; corrige immédiatement ce qu'il remonte.
+- **Release** : release-please (`.github/workflows/release.yml` → `release.yml` de `vfourny/.github`) tient à jour une PR « chore(main): release X.Y.Z »
+  (version + `docs/CHANGELOG.md`) ; la merger crée le tag `vX.Y.Z`, et Vercel ne builde en prod que ce commit de release
+  (`vercel.json` › `ignoreCommand` → `scripts/vercel-ignore-build.sh`, filtre sur `chore(main): release`). Ne pas
+  renommer la PR de release.
 - Questions de clarification : **regroupées une fois par feature**. Si ce n'est pas bloquant,
   décide, documente l'hypothèse dans la PR (et ici si durable).
 
@@ -244,6 +250,9 @@ Hors scope : synchro bancaire auto, multi-utilisateurs, émission de factures.
   surcharges locales dans `eslint.config.ts` uniquement (routes Nitro en export par défaut, fonctions utilisables avant leur
   déclaration).
 - pnpm, une seule app (pas de monorepo).
+- **Release (2026-10-16)** : release-please plutôt que semantic-release (config du toolkit) : semantic-release publie
+  à chaque push sur `main`, alors qu'on veut choisir le moment du déploiement prod (merge de la PR de release).
+  Local + Preview sur la branche Neon `develop`, prod sur `production` ; pas de Docker.
 - TypeScript 6.0 (comme le template Vite). **ESLint plutôt qu'oxlint** (décidé le 2026-10-12) : pour partager la config
   du toolkit entre projets ; oxlint était plus rapide mais sans tri des imports ni config partagée.
 - **Pro (2026-10-06)** : catégories pro dans l'enum `TransactionCategory` (filtrées par type de compte) plutôt qu'un

@@ -1,0 +1,22 @@
+# Release (voir docs/environnements.md › Release) : chaque push sur main met à jour la PR de release ;
+# la merger crée le tag vX.Y.Z + la GitHub Release. Le déploiement en prod ne passe pas par ici :
+# Vercel builde le commit de release et ignore les autres pushes sur main
+# (scripts/vercel-ignore-build.sh).
+name: Release
+
+on:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: release
+  cancel-in-progress: false
+
+jobs:
+  release:
+    uses: vfourny/.github/.github/workflows/release.yml@v4.0.1
+    secrets:
+      RELEASE_TOKEN: ${{ secrets.RELEASE_TOKEN }}
