@@ -188,8 +188,9 @@ nitro.config.ts        # serverDir: ./server
 - Hook Claude Code (`.claude/hooks/check.sh`) : prettier + eslint --fix + tsc après chaque
   édition ; corrige immédiatement ce qu'il remonte.
 - **Release** : release-please (`.github/workflows/release.yml` → `release.yml` de `vfourny/.github`) tient à jour une PR « chore(main): release X.Y.Z »
-  (version + `docs/CHANGELOG.md`) ; la merger crée le tag `vX.Y.Z` et avance la branche `production` (= Production
-  Branch Vercel) → déploiement prod. Ne jamais pousser à la main sur `production`.
+  (version + `docs/CHANGELOG.md`) ; la merger crée le tag `vX.Y.Z`, et Vercel ne builde en prod que ce commit de release
+  (`vercel.json` › `ignoreCommand` → `scripts/vercel-ignore-build.sh`, filtre sur `chore(main): release`). Ne pas
+  renommer la PR de release.
 - Questions de clarification : **regroupées une fois par feature**. Si ce n'est pas bloquant,
   décide, documente l'hypothèse dans la PR (et ici si durable).
 
