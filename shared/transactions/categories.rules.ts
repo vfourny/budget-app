@@ -95,11 +95,14 @@ export type EveryCategoryIsAssigned = AssertNever<
   Exclude<TransactionCategory, AccountCategory<AccountType>>
 >
 
-/** La catégorie peut-elle être choisie pour une transaction de ce type de compte ? */
-export function isCategoryOf(
-  accountType: AccountType,
+/**
+ * La catégorie peut-elle être choisie pour une transaction de ce type de compte ? Type guard : après
+ * `isCategoryOf('APARTMENT', c)`, `c` est une `ApartmentCategory`.
+ */
+export function isCategoryOf<T extends AccountType>(
+  accountType: T,
   category: TransactionCategory,
-): boolean {
+): category is AccountCategory<T> {
   return ACCOUNT_CATEGORIES[accountType].some(
     (accountCategory) => accountCategory === category,
   )
