@@ -8,11 +8,11 @@ import {
 } from '@server/lib/apartments/compute-period.service'
 import type { LoadedApartmentData } from '@server/lib/apartments/load-period.service'
 import { capitalRepaid } from '@server/lib/apartments/loan.service'
+import { computeThresholds } from '@server/lib/apartments/thresholds.service'
 import {
   currentYearMonth,
   type YearMonth,
-} from '@server/lib/apartments/period.util'
-import { computeThresholds } from '@server/lib/apartments/thresholds.service'
+} from '@shared/common/year-month.util'
 
 interface ViewParams {
   /** Pastille : un seul appartement (`null` = tous). Les seuils LMNP ignorent ce filtre. */

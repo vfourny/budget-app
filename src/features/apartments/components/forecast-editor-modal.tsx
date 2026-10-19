@@ -13,6 +13,7 @@ import {
   Title,
 } from '@mantine/core'
 import type { ApartmentForecastLine } from '@server/generated/prisma/enums'
+import { type YearMonth, yearMonthOf } from '@shared/common/year-month.util'
 import { useState } from 'react'
 
 import { EuroField } from '@/components/euro-field'
@@ -33,11 +34,6 @@ type Invoice = NonNullable<Management['invoice']>
 
 /** Saisie par ligne : `null` = pas de saisie (valeur par défaut). En centimes. */
 type Overrides = Partial<Record<ApartmentForecastLine, number | null>>
-
-interface YearMonth {
-  month: number
-  year: number
-}
 
 interface ForecastEditorModalProps {
   apartment: { acquiredAt: Date; id: string; name: string }
@@ -63,10 +59,7 @@ export function ForecastEditorModal({
   onClose,
 }: ForecastEditorModalProps) {
   const [period, setPeriod] = useState(initial)
-  const acquired = {
-    year: apartment.acquiredAt.getUTCFullYear(),
-    month: apartment.acquiredAt.getUTCMonth() + 1,
-  }
+  const acquired = yearMonthOf(apartment.acquiredAt)
 
   return (
     <Modal

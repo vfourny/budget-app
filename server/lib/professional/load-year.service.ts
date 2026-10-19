@@ -11,6 +11,11 @@ import type {
   ProfessionalMonthInput,
 } from '@server/lib/professional/professional.type'
 import { resolveProfessionalYearSettings } from '@server/lib/settings/professional-year-settings.service'
+import {
+  isBefore,
+  monthIndex,
+  yearMonthOf,
+} from '@shared/common/year-month.util'
 import { billingAmount } from '@shared/professional/billing-days.util'
 import {
   COLLECTED_VAT_BP,
@@ -20,14 +25,9 @@ import type { ProfessionalYearSettingsValues } from '@shared/professional/profes
 
 const MIXED_CATEGORIES = MIXED_COSTS.map((cost) => cost.category)
 
-const monthIndex = (year: number, month: number) => year * 12 + (month - 1)
-
 /** Un mois a un réel s'il est commencé ou passé. */
 function hasActual(year: number, month: number, today: Date): boolean {
-  return (
-    monthIndex(year, month) <=
-    monthIndex(today.getUTCFullYear(), today.getUTCMonth() + 1)
-  )
+  return !isBefore(yearMonthOf(today), { year, month })
 }
 
 /** Somme par (année, mois) puis par catégorie. */
@@ -41,7 +41,7 @@ function addTo(
   cents: number,
 ) {
   if (!category) return
-  const key = monthIndex(year, month)
+  const key = monthIndex({ year, month })
   const byCategory = map.get(key) ?? {}
   byCategory[category] = (byCategory[category] ?? 0) + cents
   map.set(key, byCategory)
@@ -160,14 +160,11 @@ export async function loadProfessionalYear(
   for (const row of forecasts)
     addTo(monthlyForecasts, row.year, row.month, row.category, row.amountCents)
   const tripsKm = new Map(
-    trips.map((row) => [monthIndex(row.year, row.month), row._sum.km ?? 0]),
+    trips.map((row) => [monthIndex(row), row._sum.km ?? 0]),
   )
   const forecastKm = new Map(mileageForecasts.map((row) => [row.month, row.km]))
   const grossSalary = new Map(
-    salaryForecasts.map((row) => [
-      monthIndex(row.year, row.month),
-      row.grossSalaryCents,
-    ]),
+    salaryForecasts.map((row) => [monthIndex(row), row.grossSalaryCents]),
   )
 
   const billing = (
@@ -196,17 +193,14 @@ export async function loadProfessionalYear(
   ]
   for (const line of actualLines) {
     const ht = billingAmount(line)
-    const key = monthIndex(line.year, line.month)
+    const key = monthIndex(line)
     invoicedTtc.set(
       key,
       (invoicedTtc.get(key) ?? 0) + ht + applyBp(ht, COLLECTED_VAT_BP),
     )
   }
   const received = new Map(
-    collectionRows.map((row) => [
-      monthIndex(row.year, row.month),
-      row._sum.amountCents ?? 0,
-    ]),
+    collectionRows.map((row) => [monthIndex(row), row._sum.amountCents ?? 0]),
   )
   // Les virements reçus jusqu'au premier mois facturé dans l'app paient des factures plus
   // anciennes (absentes de l'app) : ils ne viennent pas en déduction du reste à encaisser.
@@ -219,7 +213,7 @@ export async function loadProfessionalYear(
     firstInvoiced !== null && key > firstInvoiced ? (received.get(key) ?? 0) : 0
   let openingReceivables = 0
   if (firstInvoiced !== null) {
-    for (let key = firstInvoiced; key < monthIndex(year, 1); key++) {
+    for (let key = firstInvoiced; key < monthIndex({ year, month: 1 }); key++) {
       openingReceivables = Math.max(
         0,
         openingReceivables + (invoicedTtc.get(key) ?? 0) - counted(key),
@@ -241,23 +235,25 @@ export async function loadProfessionalYear(
     settings: values,
     forecastBilling: billing('FORECAST', y, month),
     actualBilling: billing('ACTUAL', y, month),
-    professionalDebits: professionalDebits.get(monthIndex(y, month)) ?? {},
+    professionalDebits:
+      professionalDebits.get(monthIndex({ year: y, month })) ?? {},
     lastYearProfessionalDebits:
-      professionalDebits.get(monthIndex(y - 1, month)) ?? {},
-    persoDebits: persoDebits.get(monthIndex(y, month)) ?? {},
-    lastYearPersoDebits: persoDebits.get(monthIndex(y - 1, month)) ?? {},
-    forecasts: monthlyForecasts.get(monthIndex(y, month)) ?? {},
+      professionalDebits.get(monthIndex({ year: y - 1, month })) ?? {},
+    persoDebits: persoDebits.get(monthIndex({ year: y, month })) ?? {},
+    lastYearPersoDebits:
+      persoDebits.get(monthIndex({ year: y - 1, month })) ?? {},
+    forecasts: monthlyForecasts.get(monthIndex({ year: y, month })) ?? {},
     collections: {
-      receivedCents: received.get(monthIndex(y, month)) ?? 0,
-      countedCents: counted(monthIndex(y, month)),
+      receivedCents: received.get(monthIndex({ year: y, month })) ?? 0,
+      countedCents: counted(monthIndex({ year: y, month })),
     },
     salary: {
-      forecastCents: grossSalary.get(monthIndex(y, month)) ?? null,
-      lastYearCents: grossSalary.get(monthIndex(y - 1, month)) ?? 0,
+      forecastCents: grossSalary.get(monthIndex({ year: y, month })) ?? null,
+      lastYearCents: grossSalary.get(monthIndex({ year: y - 1, month })) ?? 0,
     },
     mileage: {
-      tripsKm: tripsKm.get(monthIndex(y, month)) ?? 0,
-      lastYearTripsKm: tripsKm.get(monthIndex(y - 1, month)) ?? 0,
+      tripsKm: tripsKm.get(monthIndex({ year: y, month })) ?? 0,
+      lastYearTripsKm: tripsKm.get(monthIndex({ year: y - 1, month })) ?? 0,
       forecastKm: y === year ? (forecastKm.get(month) ?? null) : null,
     },
   })

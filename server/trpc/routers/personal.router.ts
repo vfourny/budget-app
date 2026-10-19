@@ -1,18 +1,22 @@
 import { aggregatePeriod } from '@server/lib/dashboard/aggregate.service'
-import {
-  balanceAtEndOf,
-  previousMonth,
-} from '@server/lib/dashboard/balance.service'
+import { balanceAtEndOf } from '@server/lib/dashboard/balance.service'
 import {
   periodsWithData,
   validatedTransactions,
 } from '@server/lib/dashboard/scope.service'
 import { createTRPCRouter, protectedProcedure } from '@server/trpc/trpc.config'
+import {
+  monthSchema,
+  yearMonthSchema,
+  yearSchema,
+} from '@shared/common/period.schema'
+import { previousMonth } from '@shared/common/year-month.util'
 import { z } from 'zod'
 
+/** Un mois, ou l'année entière si `month` est absent. */
 const periodSchema = z.object({
-  year: z.number().int(),
-  month: z.number().int().min(1).max(12).optional(),
+  year: yearSchema,
+  month: monthSchema.optional(),
 })
 
 export const personalRouter = createTRPCRouter({
@@ -92,9 +96,7 @@ export const personalRouter = createTRPCRouter({
   /** Saisit (ou efface avec `null`) le solde réel du compte perso en fin de mois. */
   setBalance: protectedProcedure
     .input(
-      z.object({
-        year: z.number().int().min(2000).max(2100),
-        month: z.number().int().min(1).max(12),
+      yearMonthSchema.extend({
         balanceCents: z.number().int().nullable(),
       }),
     )

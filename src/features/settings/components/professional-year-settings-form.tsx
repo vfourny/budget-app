@@ -13,6 +13,7 @@ import {
   Title,
 } from '@mantine/core'
 import type { CompanyRegime } from '@server/generated/prisma/enums'
+import { currentYearMonth } from '@shared/common/year-month.util'
 import {
   DEFAULT_PROFESSIONAL_YEAR_SETTINGS,
   type ProfessionalYearSettingsValues,
@@ -93,7 +94,7 @@ const GROUPS = {
 const REGIMES = Object.keys(fr.companyRegimes) as CompanyRegime[]
 
 export function ProfessionalYearSettingsForm() {
-  const currentYear = new Date().getFullYear()
+  const currentYear = currentYearMonth().year
   const [year, setYear] = useState(currentYear)
   const configured = useProfessionalYearsConfigured()
   const settings = useProfessionalYearSettings(year)

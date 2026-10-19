@@ -1,9 +1,9 @@
 import { validatedTransactions } from '@server/lib/dashboard/scope.service'
 import { loadProfessionalYear } from '@server/lib/professional/load-year.service'
 import { createTRPCRouter, protectedProcedure } from '@server/trpc/trpc.config'
+import { yearMonthSchema, yearSchema } from '@shared/common/period.schema'
+import { currentYearMonth } from '@shared/common/year-month.util'
 import { z } from 'zod'
-
-const yearSchema = z.number().int().min(2000).max(2100)
 
 export const professionalRouter = createTRPCRouter({
   /**
@@ -21,7 +21,7 @@ export const professionalRouter = createTRPCRouter({
       ctx.db.billingLine.groupBy({ by: ['year'], where: { userId } }),
     ])
     const years = new Set([
-      new Date().getFullYear(),
+      currentYearMonth().year,
       ...transactionYears.map((row) => row.year),
       ...billingYears.map((row) => row.year),
     ])
@@ -34,9 +34,7 @@ export const professionalRouter = createTRPCRouter({
 
   /** Un mois : prévu et réel de chaque bloc (voir `computeMonth`) + ses transactions pro validées. */
   month: protectedProcedure
-    .input(
-      z.object({ year: yearSchema, month: z.number().int().min(1).max(12) }),
-    )
+    .input(yearMonthSchema)
     .query(async ({ ctx, input }) => {
       const userId = ctx.session.user.id
       const [months, transactions, trips] = await Promise.all([

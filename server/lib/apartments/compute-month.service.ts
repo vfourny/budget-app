@@ -20,6 +20,11 @@ import {
   type LoanInstallment,
   splitLoanPayment,
 } from '@shared/apartments/loan.util'
+import {
+  compareMonths,
+  isBefore,
+  isSameMonth,
+} from '@shared/common/year-month.util'
 
 /**
  * Lignes de charges mensuelles dont le prévu vient de l'historique (R3, H2) : électricité,
@@ -42,8 +47,6 @@ export interface ForecastInput {
   overrideCents: number | null
 }
 
-const periodIndex = (year: number, month: number) => year * 12 + month
-
 /**
  * Lignes saisissables du prévu d'un mois (R3) : taxe foncière et CFE n'existent que le mois de leur
  * paiement. Par défaut, loyer brut, taxe foncière et CFE reprennent la dernière saisie antérieure
@@ -55,7 +58,7 @@ export function forecastInputs(
   year: number,
   month: number,
 ): ForecastInput[] {
-  const current = periodIndex(year, month)
+  const current = { year, month }
   const ofMonth = APARTMENT_FORECAST_LINES.filter(
     (line) =>
       (line !== 'propertyTax' || month === PROPERTY_TAX_MONTH) &&
@@ -63,17 +66,12 @@ export function forecastInputs(
   )
   return ofMonth.map((line) => {
     const ofLine = entries.filter((entry) => entry.line === line)
-    const exact = ofLine.find(
-      (entry) => periodIndex(entry.year, entry.month) === current,
-    )
+    const exact = ofLine.find((entry) => isSameMonth(entry, current))
     const charge = MONTHLY_CHARGE_LINES.find((key) => key === line)
     const defaultCents = CARRIED_FORECAST_LINES.some((key) => key === line)
       ? (ofLine
-          .filter((entry) => periodIndex(entry.year, entry.month) < current)
-          .sort(
-            (a, b) =>
-              periodIndex(a.year, a.month) - periodIndex(b.year, b.month),
-          )
+          .filter((entry) => isBefore(entry, current))
+          .sort(compareMonths)
           .at(-1)?.amountCents ?? 0)
       : charge === undefined
         ? 0

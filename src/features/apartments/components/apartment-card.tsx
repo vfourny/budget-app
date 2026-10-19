@@ -1,4 +1,10 @@
 import { Badge, Button, Group, Paper, Stack, Text, Title } from '@mantine/core'
+import {
+  currentYearMonth,
+  isBefore,
+  type YearMonth,
+  yearMonthOf,
+} from '@shared/common/year-month.util'
 import { useState } from 'react'
 import { Link } from 'react-router'
 
@@ -26,18 +32,12 @@ interface ApartmentCardProps {
 function editorMonth(
   period: ApartmentCardProps['period'],
   acquiredAt: Date,
-): { year: number; month: number } {
-  const now = new Date()
-  const month =
-    period.month ??
-    (period.year === now.getUTCFullYear() ? now.getUTCMonth() + 1 : 1)
-  const acquired = {
-    year: acquiredAt.getUTCFullYear(),
-    month: acquiredAt.getUTCMonth() + 1,
-  }
-  return period.year * 12 + month < acquired.year * 12 + acquired.month
-    ? acquired
-    : { year: period.year, month }
+): YearMonth {
+  const now = currentYearMonth()
+  const month = period.month ?? (period.year === now.year ? now.month : 1)
+  const acquired = yearMonthOf(acquiredAt)
+  const shown = { year: period.year, month }
+  return isBefore(shown, acquired) ? acquired : shown
 }
 
 /**

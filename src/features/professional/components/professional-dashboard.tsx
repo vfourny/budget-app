@@ -8,6 +8,7 @@ import {
   Stack,
   Tooltip,
 } from '@mantine/core'
+import { currentYearMonth } from '@shared/common/year-month.util'
 import {
   IconCalendarEvent,
   IconEdit,
@@ -52,11 +53,8 @@ const IMPORT_PROFESSIONAL_URL = '/imports/new?accountType=PROFESSIONAL'
 export function ProfessionalDashboard() {
   const periods = useProfessionalPeriods()
   // Par défaut : le mois en cours (le sélecteur propose aussi les mois à venir, en prévisionnel).
-  const today = new Date()
-  const { view, setView, selected, select } = usePeriodSelection({
-    year: today.getFullYear(),
-    month: today.getMonth() + 1,
-  })
+  const { view, setView, selected, select } =
+    usePeriodSelection(currentYearMonth())
 
   if (periods.isPending) return <Loader color="gold" />
   if (periods.isError || !selected)

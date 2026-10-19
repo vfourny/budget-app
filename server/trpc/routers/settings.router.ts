@@ -2,6 +2,7 @@ import { CompanyRegime, type Envelope } from '@server/generated/prisma/enums'
 import { BUDGET_ENVELOPES } from '@server/lib/settings/envelope-shares.service'
 import { resolveProfessionalYearSettings } from '@server/lib/settings/professional-year-settings.service'
 import { createTRPCRouter, protectedProcedure } from '@server/trpc/trpc.config'
+import { yearSchema } from '@shared/common/period.schema'
 import { DEFAULT_ENVELOPE_PERCENTS } from '@shared/personal/personal.rules'
 import { z } from 'zod'
 
@@ -76,7 +77,7 @@ export const settingsRouter = createTRPCRouter({
    * reprises de la dernière année configurée avant, sinon les valeurs par défaut.
    */
   professionalYear: protectedProcedure
-    .input(z.object({ year: z.number().int() }))
+    .input(z.object({ year: yearSchema }))
     .query(({ ctx, input }) =>
       resolveProfessionalYearSettings(ctx.db, ctx.session.user.id, input.year),
     ),
@@ -95,7 +96,7 @@ export const settingsRouter = createTRPCRouter({
   setProfessionalYear: protectedProcedure
     .input(
       z.object({
-        year: z.number().int().min(2000).max(2100),
+        year: yearSchema,
         values: professionalYearSettingsSchema,
       }),
     )

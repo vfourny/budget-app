@@ -1,13 +1,15 @@
 import { buildApartmentsView } from '@server/lib/apartments/build-view.service'
 import { loadApartmentData } from '@server/lib/apartments/load-period.service'
+import { createTRPCRouter, protectedProcedure } from '@server/trpc/trpc.config'
+import { yearMonthSchema, yearSchema } from '@shared/common/period.schema'
 import {
   currentYearMonth,
-  isMonthClosed,
-} from '@server/lib/apartments/period.util'
-import { createTRPCRouter, protectedProcedure } from '@server/trpc/trpc.config'
+  monthsBetween,
+  previousMonth,
+  yearMonthOf,
+} from '@shared/common/year-month.util'
 import { z } from 'zod'
 
-const yearSchema = z.number().int().min(2000).max(2100)
 const apartmentFilter = z.string().min(1).nullish()
 
 export const apartmentDashboardRouter = createTRPCRouter({
@@ -19,25 +21,18 @@ export const apartmentDashboardRouter = createTRPCRouter({
       select: { acquiredAt: true },
     })
     if (!first) return []
-    const now = currentYearMonth()
-    const periods: { year: number; month: number }[] = []
-    for (
-      let year = first.acquiredAt.getUTCFullYear(),
-        month = first.acquiredAt.getUTCMonth() + 1;
-      isMonthClosed({ year, month }, now);
-      month === 12 ? ((month = 1), year++) : month++
-    ) {
-      periods.push({ year, month })
-    }
-    return periods.reverse()
+    // Mois clos = jusqu'au mois précédent le mois en cours (R1).
+    return monthsBetween(
+      yearMonthOf(first.acquiredAt),
+      previousMonth(currentYearMonth()),
+    ).reverse()
   }),
 
   /** Un mois : prévu / réalisé / écart de chaque appartement actif, KPI et transactions rattachées. */
   month: protectedProcedure
     .input(
       z.object({
-        year: yearSchema,
-        month: z.number().int().min(1).max(12),
+        ...yearMonthSchema.shape,
         apartmentId: apartmentFilter,
       }),
     )

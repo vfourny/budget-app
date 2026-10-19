@@ -15,15 +15,12 @@ import {
   type MonthlyChargeBasis,
   type MonthResult,
 } from '@server/lib/apartments/compute-month.service'
-import {
-  isActiveIn,
-  isMonthClosed,
-  type YearMonth,
-} from '@server/lib/apartments/period.util'
+import { isActiveIn, isMonthClosed } from '@server/lib/apartments/period.util'
 import {
   type LoanInstallment,
   loanSchedule,
 } from '@shared/apartments/loan.util'
+import type { YearMonth } from '@shared/common/year-month.util'
 
 const monthKey = (year: number, month: number) => `${year}-${month}`
 

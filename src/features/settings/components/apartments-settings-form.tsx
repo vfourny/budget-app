@@ -1,4 +1,5 @@
 import { Alert, Button, Loader, Stack, Text, Title } from '@mantine/core'
+import { currentYearMonth } from '@shared/common/year-month.util'
 import { useState } from 'react'
 
 import {
@@ -10,12 +11,12 @@ import { fr } from '@/lib/i18n/fr'
 
 /** Brouillon d'un nouveau bien : acquisition ce mois-ci, tout à zéro, sans prêt. */
 function emptyApartment(): ApartmentValues {
-  const now = new Date()
+  const now = currentYearMonth()
   return {
     name: '',
     kind: 'FURNISHED',
     managed: false,
-    acquiredAt: new Date(Date.UTC(now.getFullYear(), now.getMonth(), 1)),
+    acquiredAt: new Date(Date.UTC(now.year, now.month - 1, 1)),
     priceCents: 0,
     creditInsuranceCents: 0,
     loan: null,
@@ -26,7 +27,7 @@ function emptyApartment(): ApartmentValues {
 /** Réglages › onglet « Appartements » : une carte par bien + un brouillon de nouveau bien. */
 export function ApartmentsSettingsForm() {
   // Le solde de début d'année saisi ici est celui de l'année en cours.
-  const openingYear = new Date().getFullYear()
+  const openingYear = currentYearMonth().year
   const apartments = useApartments(openingYear)
   const [adding, setAdding] = useState(false)
 
