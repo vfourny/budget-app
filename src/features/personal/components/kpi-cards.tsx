@@ -1,10 +1,10 @@
 import { Grid } from '@mantine/core'
 import type { Envelope } from '@server/generated/prisma/enums'
-import type { PeriodTotals } from '@server/lib/dashboard/aggregate.service'
 import {
   estimateIncomeTaxCents,
   incomeTaxBrackets,
 } from '@shared/fiscal/income-tax.rules'
+import type { PeriodTotals } from '@shared/personal/aggregate.calc'
 import {
   isSavingsEnvelope,
   SAVINGS_ENVELOPES,

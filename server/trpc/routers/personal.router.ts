@@ -1,5 +1,3 @@
-import { aggregatePeriod } from '@server/lib/dashboard/aggregate.service'
-import { balanceAtEndOf } from '@server/lib/dashboard/balance.service'
 import {
   periodsWithData,
   validatedTransactions,
@@ -11,6 +9,8 @@ import {
   yearSchema,
 } from '@shared/common/period.schema'
 import { previousMonth } from '@shared/common/year-month.util'
+import { aggregatePeriod } from '@shared/personal/aggregate.calc'
+import { balanceAtEndOf } from '@shared/personal/balance.calc'
 import { z } from 'zod'
 
 /** Un mois, ou l'année entière si `month` est absent. */

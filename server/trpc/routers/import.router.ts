@@ -1,5 +1,4 @@
 import { AccountType } from '@server/generated/prisma/enums'
-import { matchLoanTransaction } from '@server/lib/apartments/loan.service'
 import { appError } from '@server/lib/app-error.util'
 import {
   NEEDS_REVIEW_WHERE,
@@ -16,6 +15,7 @@ import { parseBankStatement } from '@server/lib/csv/parse-bank-statement.service
 import { geminiTRPCError } from '@server/lib/gemini-error.util'
 import { gemini } from '@server/lib/gemini.client'
 import { createTRPCRouter, protectedProcedure } from '@server/trpc/trpc.config'
+import { matchLoanTransaction } from '@shared/apartments/loan.util'
 import { csvFormatConfigSchema } from '@shared/transactions/csv-format.schema'
 import { z } from 'zod'
 

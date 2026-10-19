@@ -6,7 +6,7 @@ import {
   type ApartmentTransaction,
   type ManagementInvoiceRecord,
   ZERO_LINES,
-} from '@server/lib/apartments/apartment.type'
+} from '@shared/apartments/apartment.type'
 import {
   actualLines,
   computeMonth,
@@ -14,12 +14,12 @@ import {
   MONTHLY_CHARGE_LINES,
   type MonthlyChargeBasis,
   type MonthResult,
-} from '@server/lib/apartments/compute-month.service'
-import { isActiveIn, isMonthClosed } from '@server/lib/apartments/period.util'
+} from '@shared/apartments/compute-month.calc'
 import {
   type LoanInstallment,
   loanSchedule,
 } from '@shared/apartments/loan.util'
+import { isActiveIn, isMonthClosed } from '@shared/apartments/period.util'
 import type { YearMonth } from '@shared/common/year-month.util'
 
 const monthKey = (year: number, month: number) => `${year}-${month}`
@@ -180,7 +180,9 @@ export function periodColumns(
     actual:
       closed.length > 0
         ? sumColumns(
-            closed.flatMap((month) => (month.actual ? [month.actual] : [])),
+            closed
+              .map((month) => month.actual)
+              .filter((column) => column !== null),
           )
         : null,
     closedMonths: closed.length,

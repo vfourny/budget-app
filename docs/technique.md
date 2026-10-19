@@ -61,7 +61,7 @@ Routeurs actuels (tous en `protectedProcedure`) :
 - `categorize` : `run` (catégorie + confiance par Gemini pour les lignes sans catégorie ; `server/lib/categorize/`).
 - `transaction` : `setCategory` (correction manuelle, confiance repassée à `null` = « Confirmée » ; refusé si l'import
   est validé ou si la catégorie n'est pas du type de compte), `setApartment` (rattachement d'une ligne).
-- `personal` : `periods`, `overview` (agrégation dans `server/lib/dashboard/aggregate.service.ts`).
+- `personal` : `periods`, `overview` (agrégation dans `shared/personal/aggregate.calc.ts`).
 - `settings` : `envelopeShares` / `setEnvelopeShares` (défauts `DEFAULT_ENVELOPE_PERCENTS`), `professionalYear` /
   `professionalYearsConfigured` / `setProfessionalYear` (règles pro par année, héritées de l'année configurée précédente).
 - `professional` : `periods`, `month`, `year` (calcul dans `server/lib/professional/`).
