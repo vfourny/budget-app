@@ -19,7 +19,7 @@ import type { PersonalCategory } from '@shared/transactions/categories.rules'
  * Pour déplacer une catégorie : la retirer d'un tableau et l'ajouter dans un autre.
  * Seules les catégories du compte perso sont acceptées (`tsc`). Une catégorie perso ajoutée à l'enum
  * doit être rangée ici à la main (sinon ses débits comptent en « Dépenses » sans jauge).
- * Une catégorie ne peut être que dans une seule enveloppe (vérifié au chargement, voir plus bas).
+ * Une catégorie ne peut être que dans une seule enveloppe (vérifié par `tests/shared/personal/personal.rules.test.ts`).
  */
 export const ENVELOPE_CATEGORIES = {
   CURRENT_EXPENSES: [
@@ -120,13 +120,6 @@ export type RevenueLineKey = (typeof REVENUE_LINES)[number]['key'] | 'other'
 const ENVELOPE_BY_CATEGORY = new Map<TransactionCategory, Envelope>()
 for (const [envelope, categories] of Object.entries(ENVELOPE_CATEGORIES)) {
   for (const category of categories) {
-    const existing = ENVELOPE_BY_CATEGORY.get(category)
-    if (existing) {
-      // Erreur au démarrage (front et serveur) plutôt qu'un double comptage silencieux.
-      throw new Error(
-        `personal/rules : la catégorie ${category} est dans deux enveloppes (${existing} et ${envelope}).`,
-      )
-    }
     ENVELOPE_BY_CATEGORY.set(category, envelope as Envelope)
   }
 }

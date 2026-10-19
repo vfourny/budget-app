@@ -43,7 +43,9 @@ Choix délibéré : **le plus simple possible**. SPA React (pas de SSR, pas de S
 
 ```bash
 pnpm dev            # front + API sur un seul serveur (http://localhost:5173, API sous /api)
-pnpm check          # lint + ts:check + format:check + knip (à lancer avant toute PR)
+pnpm check          # lint + ts:check + format:check + knip + test (à lancer avant toute PR)
+pnpm test           # tests unitaires Vitest + couverture (rapport HTML dans coverage/)
+pnpm test:watch     # Vitest en watch avec l'interface web (Vitest UI, onglet Coverage)
 pnpm build          # build de prod (fait aussi en CI) → .output/ (ou .vercel/output sur Vercel)
 pnpm preview        # sert le build de prod localement
 pnpm lint:fix       # autofix ESLint
@@ -184,6 +186,10 @@ nitro.config.ts        # serverDir: ./server
   dit déjà le rôle : `src/` (`components/`, `hooks/use-xxx.ts`, `pages/xxx-page.tsx`) et `server/api/` (le nom = l'URL Nitro).
 - Imports : `@/…` pour `src/`, `@server/…` pour `server/`, `@shared/…` pour `shared/`. `import type` obligatoire pour les
   types (`verbatimModuleSyntax`).
+- **Tests unitaires** (Vitest, `vitest.config.ts`, base `@vfourny/node-toolkit/vitest`) : hors du code, dans `tests/` avec la même
+  arborescence (`shared/professional/x.util.ts` → `tests/shared/professional/x.util.test.ts`), un projet Vitest par couche.
+  Seul `shared` est actif ; `server` et front (`tests/src/`, jsdom + Testing Library) sont décrits dans `vitest.config.ts`.
+  API importée explicitement (`import { describe, expect, it } from 'vitest'`, pas de globals). Couverture toujours active.
 
 ## Workflow Git / PR
 
@@ -195,7 +201,7 @@ nitro.config.ts        # serverDir: ./server
   `/ship-pr`. Ne présenter que du vert.
 - Remplir `.github/pull_request_template.md`, section « Notes React » incluse.
 - CI GitHub Actions : workflows réutilisables de `vfourny/.github` (figés sur un SHA de release). `pr.yml` → `build.yml`
-  (format:check, lint, knip, ts:check, build) ; `pr-title.yml` → `pr-checks.yml` (titre de PR vérifié par commitlint).
+  (format:check, lint, knip, ts:check, build, test) ; `pr-title.yml` → `pr-checks.yml` (titre de PR vérifié par commitlint).
 - Hook Git pre-commit (`lefthook.yml`, installé par `pnpm install`) : eslint --fix + Prettier
   sur les fichiers stagés, commit bloqué s'il reste une erreur. Ne pas contourner avec
   `--no-verify` : corriger l'erreur.

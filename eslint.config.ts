@@ -153,6 +153,7 @@ export default [
       '.vercel/**',
       '.pnpm-store/**',
       'Claude outputs/**',
+      'coverage/**',
     ],
   },
 ]
