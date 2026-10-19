@@ -1,4 +1,4 @@
-import { Alert, Badge, Loader, Paper, Table, Text } from '@mantine/core'
+import { Alert, Badge, Card, Group, Loader, Table, Text } from '@mantine/core'
 import { IconFileSpreadsheet } from '@tabler/icons-react'
 import { Link } from 'react-router'
 
@@ -19,13 +19,15 @@ export function ImportsTable() {
   const count = imports.data.length
 
   return (
-    <Paper className={classes.card} radius="lg" withBorder>
-      <div className={classes.header}>
-        <Text fw={600}>{fr.imports.count(count)}</Text>
-        <Text c="dimmed" size="xs">
-          {fr.imports.deleteHint}
-        </Text>
-      </div>
+    <Card>
+      <Card.Section px={24} py={20} withBorder>
+        <Group align="baseline" gap={16} justify="space-between">
+          <Text fw={600}>{fr.imports.count(count)}</Text>
+          <Text c="dimmed" size="xs">
+            {fr.imports.deleteHint}
+          </Text>
+        </Group>
+      </Card.Section>
 
       {count === 0 ? (
         <Text c="dimmed" p={28}>
@@ -82,6 +84,6 @@ export function ImportsTable() {
           </Table.Tbody>
         </Table>
       )}
-    </Paper>
+    </Card>
   )
 }
