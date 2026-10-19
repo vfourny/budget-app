@@ -118,7 +118,7 @@ export function VatCard({ month }: { month: ProfessionalMonth }) {
                   </Table.Th>
                   <Table.Td
                     c={isTotal ? 'gold.6' : undefined}
-                    className={classes.number}
+                    className="nowrap"
                     fw={isTotal ? 700 : 600}
                     ta="right"
                   >
@@ -126,12 +126,7 @@ export function VatCard({ month }: { month: ProfessionalMonth }) {
                       ? '—'
                       : formatCents(line.amount.actual)}
                   </Table.Td>
-                  <Table.Td
-                    c="dimmed"
-                    className={classes.number}
-                    fz="xs"
-                    ta="right"
-                  >
+                  <Table.Td c="dimmed" className="nowrap" fz="xs" ta="right">
                     {formatCents(line.amount.forecast)}
                   </Table.Td>
                 </Table.Tr>

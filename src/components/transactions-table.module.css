@@ -1,16 +1,6 @@
+/* Cible de l'ancre `#transactions` : un peu d'air au-dessus après le défilement. */
 .card {
-  overflow: hidden;
   scroll-margin-top: 24px;
-}
-
-.header {
-  padding: 20px 24px;
-  border-bottom: 1px solid var(--app-border);
-}
-
-/* Dates, montants et badges ne passent jamais à la ligne : c'est le libellé qui s'adapte. */
-.nowrap {
-  white-space: nowrap;
 }
 
 .badge {

@@ -2,6 +2,7 @@ import {
   Alert,
   Badge,
   Button,
+  Card,
   Group,
   Loader,
   Paper,
@@ -127,26 +128,28 @@ export function ImportReview({ importId }: { importId: string }) {
         title={fr.review.title}
       />
 
-      <Paper className={classes.card} radius="lg" withBorder>
-        <div className={classes.toolbar}>
-          <SegmentedControl
-            data={[
-              {
-                value: 'all',
-                label: fr.review.filterAll(batch.transactions.length),
-              },
-              {
-                value: 'review',
-                label: fr.review.filterToReview(toReviewCount),
-              },
-            ]}
-            onChange={(value) => setFilter(value as Filter)}
-            value={filter}
-          />
-          <Text c="dimmed" ff="monospace" size="xs">
-            {batch.fileName}
-          </Text>
-        </div>
+      <Card>
+        <Card.Section px={24} py={16} withBorder>
+          <Group gap={16} justify="space-between" wrap="nowrap">
+            <SegmentedControl
+              data={[
+                {
+                  value: 'all',
+                  label: fr.review.filterAll(batch.transactions.length),
+                },
+                {
+                  value: 'review',
+                  label: fr.review.filterToReview(toReviewCount),
+                },
+              ]}
+              onChange={(value) => setFilter(value as Filter)}
+              value={filter}
+            />
+            <Text c="dimmed" ff="monospace" size="xs">
+              {batch.fileName}
+            </Text>
+          </Group>
+        </Card.Section>
 
         <Table horizontalSpacing="lg" verticalSpacing="sm">
           <Table.Thead>
@@ -279,60 +282,62 @@ export function ImportReview({ importId }: { importId: string }) {
           </Alert>
         )}
 
-        <div className={classes.footer}>
-          <Text
-            c={toReviewCount > 0 && !locked ? 'amber.4' : 'dimmed'}
-            size="sm"
-          >
-            {locked
-              ? fr.review.lockedNote
-              : toReviewCount > 0
-                ? fr.review.toReviewNote(toReviewCount)
-                : fr.review.doneNote}
-          </Text>
+        <Card.Section px={24} py={16} withBorder>
+          <Group gap={16} justify="space-between" wrap="nowrap">
+            <Text
+              c={toReviewCount > 0 && !locked ? 'amber.4' : 'dimmed'}
+              size="sm"
+            >
+              {locked
+                ? fr.review.lockedNote
+                : toReviewCount > 0
+                  ? fr.review.toReviewNote(toReviewCount)
+                  : fr.review.doneNote}
+            </Text>
 
-          {!locked && (
-            <Group gap={12} wrap="nowrap">
-              {uncategorizedCount > 0 && (
-                <Button
-                  loading={runCategorization.isPending}
-                  onClick={() =>
-                    runCategorization.mutate({ batchId: importId })
-                  }
-                  variant="default"
+            {!locked && (
+              <Group gap={12} wrap="nowrap">
+                {uncategorizedCount > 0 && (
+                  <Button
+                    loading={runCategorization.isPending}
+                    onClick={() =>
+                      runCategorization.mutate({ batchId: importId })
+                    }
+                    variant="default"
+                  >
+                    {fr.review.categorizeWithAi}
+                  </Button>
+                )}
+                <DeleteImportButton
+                  importId={importId}
+                  lineCount={batch.transactions.length}
+                  onDeleted={() => void navigate('/imports')}
+                  variant="button"
+                />
+                <Tooltip
+                  disabled={toReviewCount === 0}
+                  label={fr.review.validateTooltip(toReviewCount)}
                 >
-                  {fr.review.categorizeWithAi}
-                </Button>
-              )}
-              <DeleteImportButton
-                importId={importId}
-                lineCount={batch.transactions.length}
-                onDeleted={() => void navigate('/imports')}
-                variant="button"
-              />
-              <Tooltip
-                disabled={toReviewCount === 0}
-                label={fr.review.validateTooltip(toReviewCount)}
-              >
-                {/* `data-disabled` plutôt que `disabled` : un bouton désactivé n'affiche pas l'infobulle. */}
-                <Button
-                  data-disabled={toReviewCount > 0 || undefined}
-                  loading={validateImport.isPending}
-                  onClick={() => {
-                    if (toReviewCount > 0) return
-                    validateImport.mutate(
-                      { id: importId },
-                      { onSuccess: () => void navigate('/imports') },
-                    )
-                  }}
-                >
-                  {fr.review.validate(batch.transactions.length)}
-                </Button>
-              </Tooltip>
-            </Group>
-          )}
-        </div>
-      </Paper>
+                  {/* `data-disabled` plutôt que `disabled` : un bouton désactivé n'affiche pas l'infobulle. */}
+                  <Button
+                    data-disabled={toReviewCount > 0 || undefined}
+                    loading={validateImport.isPending}
+                    onClick={() => {
+                      if (toReviewCount > 0) return
+                      validateImport.mutate(
+                        { id: importId },
+                        { onSuccess: () => void navigate('/imports') },
+                      )
+                    }}
+                  >
+                    {fr.review.validate(batch.transactions.length)}
+                  </Button>
+                </Tooltip>
+              </Group>
+            )}
+          </Group>
+        </Card.Section>
+      </Card>
     </>
   )
 }
