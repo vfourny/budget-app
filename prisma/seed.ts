@@ -1,13 +1,16 @@
 import 'dotenv/config'
 
-import { db } from '@server/lib/db'
+import { db } from '@server/lib/db.client'
 
-import { seedApartments, seedToulouseStatements2025 } from './seeds/apartments'
-import { seedCsvFormats } from './seeds/csv-formats'
-import { seedPersonal2025 } from './seeds/personal-2025'
-import { seedProfessionalBilling } from './seeds/professional-billing'
-import { seedProfessionalTrips } from './seeds/professional-trips'
-import { seedUser } from './seeds/user'
+import {
+  seedApartments,
+  seedToulouseStatements2025,
+} from './seeds/apartments.seed'
+import { seedCsvFormats } from './seeds/csv-formats.seed'
+import { seedPersonal2025 } from './seeds/personal-2025.seed'
+import { seedProfessionalBilling } from './seeds/professional-billing.seed'
+import { seedProfessionalTrips } from './seeds/professional-trips.seed'
+import { seedUser } from './seeds/user.seed'
 
 // Seed : lancé automatiquement par `pnpm db:reset` (prisma migrate reset) ou à la main avec
 // `pnpm db:seed` (à relancer sur chaque base, develop et production). Chaque domaine a son fichier

@@ -1,5 +1,5 @@
 import { Grid } from '@mantine/core'
-import type { ProfessionalMonth } from '@server/lib/professional/types'
+import type { ProfessionalMonth } from '@server/lib/professional/professional.type'
 
 import { KpiCard } from '@/components/kpi-card'
 import { finalOf, sumFinal } from '@/features/professional/final-amount'

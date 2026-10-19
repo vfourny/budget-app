@@ -1,4 +1,4 @@
-import { auth } from '@server/lib/auth'
+import { auth } from '@server/lib/auth.config'
 import { defineHandler } from 'nitro/h3'
 
 // Catch-all : /api/auth/sign-in/email, /api/auth/get-session, /api/auth/sign-out…

@@ -4,7 +4,7 @@ import {
   MIXED_COSTS_RATIO,
   mixedShareBp,
   type ProfessionalYearSettingsValues,
-} from '@shared/professional/rules'
+} from '@shared/professional/professional.rules'
 
 import { ForecastAmountsForm } from '@/features/professional/components/forecast-editor/forecast-amounts-form'
 import type { Period } from '@/hooks/use-period-selection'

@@ -9,7 +9,7 @@ import {
   Title,
 } from '@mantine/core'
 import type { Envelope } from '@server/generated/prisma/enums'
-import { DEFAULT_ENVELOPE_PERCENTS } from '@shared/personal/rules'
+import { DEFAULT_ENVELOPE_PERCENTS } from '@shared/personal/personal.rules'
 import { useState } from 'react'
 
 import {

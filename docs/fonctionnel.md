@@ -25,7 +25,7 @@ Loisirs, Formation).
 ### Catégories de transaction
 
 Liste **figée** (enum Prisma `TransactionCategory`), reprise des colonnes de l'ancien Google Sheet. Libellé affiché :
-`src/lib/i18n/fr/enums.ts` ; enveloppe de rattachement : `shared/personal/rules.ts`.
+`src/lib/i18n/fr/enums.ts` ; enveloppe de rattachement : `shared/personal/personal.rules.ts`.
 
 | Catégorie           | Code                     | Enveloppe          |
 | ------------------- | ------------------------ | ------------------ |
@@ -57,15 +57,15 @@ Liste **figée** (enum Prisma `TransactionCategory`), reprise des colonnes de l'
 
 Points d'attention :
 
-- **Toutes les règles modifiables** sont dans `shared/personal/rules.ts` : catégories cumulées dans chaque enveloppe (
+- **Toutes les règles modifiables** sont dans `shared/personal/personal.rules.ts` : catégories cumulées dans chaque enveloppe (
   `ENVELOPE_CATEGORIES`), enveloppes d'épargne, catégories affichées dans la card « Par catégorie » (
   `CATEGORY_CARD_CATEGORIES`), lignes de la card Revenus (`REVENUE_LINES`). Une règle modifiée s'applique à tout l'
   historique (rien n'est stocké en base). La colonne « Enveloppe » du tableau ci-dessus est indicative : la source de
   vérité est ce fichier.
 - La catégorie d'une transaction est **optionnelle** (`null` tant qu'elle n'est pas catégorisée / relue).
 - Ajouter ou renommer une catégorie = modifier l'enum Prisma **+ une migration
-  versionnée + `src/lib/i18n/fr/enums.ts` + `server/lib/categorize/category-hints.ts`**, puis la ranger dans
-  `shared/personal/rules.ts` (le typage `Record<TransactionCategory, …>` fait échouer `tsc` si l'un des deux est oublié).
+  versionnée + `src/lib/i18n/fr/enums.ts` + `server/lib/categorize/category-hints.rules.ts`**, puis la ranger dans
+  `shared/personal/personal.rules.ts` (le typage `Record<TransactionCategory, …>` fait échouer `tsc` si l'un des deux est oublié).
 
 ## Type de compte
 
@@ -137,12 +137,12 @@ reste des débits sont des **dépenses**.
   (`AccountBalance`) ; pour démarrer en mars, on saisit le solde de fin février depuis le « Début de mois » de mars. Si un
   solde saisi ne correspond pas au calcul depuis la saisie précédente, l'**écart** s'affiche (import manquant ou en double).
 - **Ordre des cartes** (mois et année) : Revenus, Dépenses, Épargne.
-- **Vue année** : mêmes totaux sur l'année choisie, sur deux lignes (3 + 2) : plus la dépense moyenne par mois (mois ayant des données) et l'**IR estimé** (barème progressif 1 part de l'année affichée, appliqué au revenu annualisé = cumul / mois avec données × 12, sans abattement ni réductions). Le barème est une donnée du code (`shared/fiscal/income-tax.ts`, `INCOME_TAX_BRACKETS_BY_YEAR`, 2025 et 2026 pour l'instant), pas une saisie : **chaque nouvelle année s'ajoute par une PR**. Si l'année affichée n'a pas de barème, la card affiche « Barème de l'IR <année> non renseigné ».
+- **Vue année** : mêmes totaux sur l'année choisie, sur deux lignes (3 + 2) : plus la dépense moyenne par mois (mois ayant des données) et l'**IR estimé** (barème progressif 1 part de l'année affichée, appliqué au revenu annualisé = cumul / mois avec données × 12, sans abattement ni réductions). Le barème est une donnée du code (`shared/fiscal/income-tax.rules.ts`, `INCOME_TAX_BRACKETS_BY_YEAR`, 2025 et 2026 pour l'instant), pas une saisie : **chaque nouvelle année s'ajoute par une PR**. Si l'année affichée n'a pas de barème, la card affiche « Barème de l'IR <année> non renseigné ».
 
 - Les parts recommandées (méthode des 5 comptes) se règlent dans **Réglages** (le total doit faire exactement 100 %).
   Les 5 enveloppes sont toujours affichées avec leur jauge, même à 0 €.
 - **Card Charges fixes** (bandeau entre les cartes KPI et le tableau) : débits de la période pour Loyer, Énergie, Télécom
-  et Internet (`FIXED_CHARGES_CATEGORIES` dans `shared/personal/rules.ts`), toujours affichés même à 0 €, + leur total ; mensuel en vue mois,
+  et Internet (`FIXED_CHARGES_CATEGORIES` dans `shared/personal/personal.rules.ts`), toujours affichés même à 0 €, + leur total ; mensuel en vue mois,
   cumulé en vue année.
 - **À venir** : donut par catégorie en vue année.
 
@@ -156,7 +156,7 @@ Composant partagé : résumé (nombre, crédits, débits), filtres Toutes / Cré
 ## Catégories du compte pro
 
 Un relevé **pro** ne propose (relecture) et ne demande à Gemini que les catégories pro ; un relevé perso, toutes les
-autres (`ACCOUNT_CATEGORIES.PROFESSIONAL` dans `shared/transactions/categories.ts`, refus `CATEGORY_NOT_ALLOWED` sinon).
+autres (`ACCOUNT_CATEGORIES.PROFESSIONAL` dans `shared/transactions/categories.rules.ts`, refus `CATEGORY_NOT_ALLOWED` sinon).
 
 | Groupe        | Catégories                                                                                                                                                                                  |
 | ------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -166,8 +166,8 @@ autres (`ACCOUNT_CATEGORIES.PROFESSIONAL` dans `shared/transactions/categories.t
 | Cotisations   | URSSAF, Retraite complémentaire, Complémentaire santé, Prévoyance, Prélèvement à la source                                                                                                  |
 | Fiscalité     | TVA `VAT_PAYMENT`                                                                                                                                                                           |
 
-Taux de TVA déductible par charge, frais mixtes et répartition des cotisations : `shared/professional/rules.ts` (l'équivalent
-pro de `shared/personal/rules.ts`).
+Taux de TVA déductible par charge, frais mixtes et répartition des cotisations : `shared/professional/professional.rules.ts` (l'équivalent
+pro de `shared/personal/personal.rules.ts`).
 
 ## Dashboard Pro Stygma (`/professional`)
 
@@ -228,7 +228,7 @@ de l'année.
 
 Suivi de **trésorerie** des biens en location (comme l'onglet « Toulouse » de l'ancien tableur), sans fiscalité ni
 rappels (déclaration = comptable). Les règles ci-dessous (R1 à R12, hypothèses H1 à H6) sont citées dans le code
-(`server/lib/apartments/`, `shared/apartments/`, seuils LMNP dans `shared/fiscal/lmnp.ts`).
+(`server/lib/apartments/`, `shared/apartments/`, seuils LMNP dans `shared/fiscal/lmnp.rules.ts`).
 
 - **Réglages › Appartements** (`/settings?tab=apt`) : par bien, régime (étiquette), gérance (interrupteur, désactivé = en direct), mois
   d'acquisition, prix, assurance emprunteur, solde du compte au 1er janvier, prêt à taux fixe (synthèse :
@@ -271,7 +271,7 @@ rappels (déclaration = comptable). Les règles ci-dessous (R1 à R12, hypothès
   effort d'épargne = max(0, −différentiel) ; solde fin de mois = début + différentiel + apport. Solde de début d'année
   saisi (`ApartmentYearOpening`, 0 à défaut). En vue année, prévu et réalisé portent sur les mêmes mois clos et
   **l'effort annuel = somme des efforts mensuels**. Écart = réalisé − prévu (négatif = défavorable).
-- **R6 — Prêt** : taux fixe sans palier ni différé (H3), `loanSchedule` dans `shared/apartments/loan.ts` (mensualité
+- **R6 — Prêt** : taux fixe sans palier ni différé (H3), `loanSchedule` dans `shared/apartments/loan.util.ts` (mensualité
   arrondie, intérêts = capital restant × taux mensuel, la dernière échéance solde le capital). L'assurance emprunteur
   est à part (H4). Jauge « capital remboursé » = capitaux du tableau jusqu'à la fin de la période, plafonnée au dernier
   mois clos.
@@ -284,7 +284,7 @@ rappels (déclaration = comptable). Les règles ci-dessous (R1 à R12, hypothès
 - **R9 — Rendements** (vue année) : brut = loyers perçus annualisés ÷ prix d'achat ; net = (loyers − charges hors
   crédit) annualisés ÷ prix d'achat. Prix d'achat seul, sans frais (H5).
 - **R10 — Seuils LMNP** (vue année, indicatifs) : recettes des biens LMNP de janvier au dernier mois clos + projection
-  annuelle ; plafond micro-BIC par année dans `shared/fiscal/lmnp.ts` (année inconnue = dernière connue) ; seuil LMP
+  annuelle ; plafond micro-BIC par année dans `shared/fiscal/lmnp.rules.ts` (année inconnue = dernière connue) ; seuil LMP
   23 000 € (la condition des 50 % des revenus n'est pas calculée).
 - **R11 — Compte et apport** : type de compte `APARTMENT` ; l'appartement choisi à l'import (`ImportBatch.apartmentId`)
   est modifiable ligne par ligne (`Transaction.apartmentId`, obligatoire pour ce type). Ces transactions n'entrent jamais

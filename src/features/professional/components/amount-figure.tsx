@@ -1,5 +1,5 @@
 import { Group, Stack, Text } from '@mantine/core'
-import type { ForecastActual } from '@server/lib/professional/types'
+import type { ForecastActual } from '@server/lib/professional/professional.type'
 
 import { DeltaBadge } from '@/components/delta-badge'
 import { InfoTip } from '@/components/info-tip'

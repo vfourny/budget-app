@@ -1,4 +1,7 @@
+import path from 'node:path'
+
 import reactConfig from '@vfourny/node-toolkit/eslint/react'
+import type { Rule } from 'eslint'
 
 /** `server/` (Prisma, secrets…) ne part jamais dans le bundle du front : types uniquement. */
 const SERVER_TYPES_ONLY = {
@@ -14,6 +17,55 @@ const NO_FRONT = {
   message:
     "`src/` est le front : ne pas l'importer ici. Code commun : `shared/` (@shared/…).",
 }
+
+/**
+ * Suffixe de rôle obligatoire (`xxx.service.ts`, `xxx.router.ts`…) pour savoir ce que contient
+ * un fichier sans l'ouvrir (voir CLAUDE.md › Conventions). Option : la liste des suffixes admis.
+ */
+const fileSuffixRule: Rule.RuleModule = {
+  create(context) {
+    const suffixes = (context.options[0] as { suffixes: string[] }).suffixes
+    const name = path.basename(context.filename)
+    const pattern = new RegExp(`^[a-z0-9-]+\\.(${suffixes.join('|')})\\.ts$`)
+    return {
+      Program(node) {
+        if (name === 'index.ts' || pattern.test(name)) return
+        context.report({
+          data: { name, suffixes: suffixes.map((s) => `.${s}.ts`).join(', ') },
+          messageId: 'suffix',
+          node,
+        })
+      },
+    }
+  },
+  meta: {
+    messages: {
+      suffix: '« {{name}} » doit finir par un suffixe de rôle : {{suffixes}}.',
+    },
+    schema: [
+      {
+        additionalProperties: false,
+        properties: { suffixes: { items: { type: 'string' }, type: 'array' } },
+        type: 'object',
+      },
+    ],
+    type: 'suggestion',
+  },
+}
+
+const SERVER_LIB_SUFFIXES = [
+  'service',
+  'util',
+  'type',
+  'rules',
+  'schema',
+  'client',
+  'config',
+  'regime',
+]
+
+/** `shared/` est pur (ni base ni réseau) : pas de `.service`, seulement des règles, helpers et schémas. */
+const SHARED_SUFFIXES = ['rules', 'util', 'schema', 'type']
 
 export default [
   ...reactConfig,
@@ -65,6 +117,34 @@ export default [
     // Scripts du seed : logs de progression
     files: ['prisma/**'],
     rules: { 'no-console': 'off' },
+  },
+  // Suffixes de rôle (voir CLAUDE.md › Conventions)
+  {
+    plugins: { local: { rules: { 'file-suffix': fileSuffixRule } } },
+  },
+  {
+    files: ['server/lib/**/*.ts'],
+    rules: {
+      'local/file-suffix': ['error', { suffixes: SERVER_LIB_SUFFIXES }],
+    },
+  },
+  {
+    files: ['shared/**/*.ts'],
+    rules: { 'local/file-suffix': ['error', { suffixes: SHARED_SUFFIXES }] },
+  },
+  {
+    files: ['server/trpc/*.ts'],
+    rules: {
+      'local/file-suffix': ['error', { suffixes: ['config', 'router'] }],
+    },
+  },
+  {
+    files: ['server/trpc/routers/**/*.ts'],
+    rules: { 'local/file-suffix': ['error', { suffixes: ['router'] }] },
+  },
+  {
+    files: ['prisma/seeds/**/*.ts'],
+    rules: { 'local/file-suffix': ['error', { suffixes: ['seed', 'config'] }] },
   },
   {
     ignores: [

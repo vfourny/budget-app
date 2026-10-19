@@ -8,7 +8,7 @@ import {
   TextInput,
   Title,
 } from '@mantine/core'
-import type { CsvFormatConfig } from '@shared/transactions/csv-format'
+import type { CsvFormatConfig } from '@shared/transactions/csv-format.schema'
 import { IconAlertTriangle } from '@tabler/icons-react'
 import { useState } from 'react'
 

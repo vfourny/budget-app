@@ -1,11 +1,14 @@
 import { Grid } from '@mantine/core'
 import type { Envelope } from '@server/generated/prisma/enums'
-import type { PeriodTotals } from '@server/lib/dashboard/aggregate'
+import type { PeriodTotals } from '@server/lib/dashboard/aggregate.service'
 import {
   estimateIncomeTaxCents,
   incomeTaxBrackets,
-} from '@shared/fiscal/income-tax'
-import { isSavingsEnvelope, SAVINGS_ENVELOPES } from '@shared/personal/rules'
+} from '@shared/fiscal/income-tax.rules'
+import {
+  isSavingsEnvelope,
+  SAVINGS_ENVELOPES,
+} from '@shared/personal/personal.rules'
 
 import { KpiCard, KpiLine } from '@/components/kpi-card'
 import { EnvelopeGauge } from '@/features/personal/components/envelope-gauge'

@@ -1,6 +1,6 @@
 import { Modal, SegmentedControl, Stack, Tabs } from '@mantine/core'
 import type { BillingKind } from '@server/generated/prisma/enums'
-import type { ProfessionalYearSettingsValues } from '@shared/professional/rules'
+import type { ProfessionalYearSettingsValues } from '@shared/professional/professional.rules'
 import { useState } from 'react'
 
 import { BillingTab } from '@/features/professional/components/forecast-editor/billing-tab'

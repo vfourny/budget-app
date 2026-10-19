@@ -1,6 +1,6 @@
 import { Group, Paper, Progress, Stack, Text, Title } from '@mantine/core'
 import type { TransactionCategory } from '@server/generated/prisma/enums'
-import { CATEGORY_CARD_CATEGORIES } from '@shared/personal/rules'
+import { CATEGORY_CARD_CATEGORIES } from '@shared/personal/personal.rules'
 
 import { formatCents } from '@/lib/format'
 import { fr } from '@/lib/i18n/fr'
