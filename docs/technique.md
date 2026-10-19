@@ -84,13 +84,13 @@ historiques et, pour le dev, des données sur l'année `SEED_YEAR` (2025, `prism
 facturation et trajets Pro, appartements et leurs relevés. Idempotent : il ne crée pas de doublon et n'écrase pas les saisies faites dans l'app. Le barème
 de l'IR n'est pas en base : `shared/fiscal/income-tax.rules.ts` (une PR par nouvelle année).
 
-### Calcul du dashboard Pro (`server/lib/professional/`)
+### Calcul du dashboard Pro (`shared/professional/` + `server/lib/professional/`)
 
-- `load-year.service.ts` : quelques requêtes groupées pour une année (relevés pro et perso validés, facturation, prévisions, trajets, encaissements clients), puis appelle le calcul. Aucune règle métier ici.
-- `compute-month.service.ts` : **fonction pure** (aucun accès base) → `ProfessionalMonth` (chaque valeur est un `ForecastActual` `{ forecast, actual | null }`). `compute-year.service.ts` enchaîne les 12 mois (TVA payée = TVA due du mois précédent). La vue année = 12 × le calcul du mois.
-- `regimes/` : interface `ProfessionalRegime` (rémunération, charges sociales sur bénéfice) ; `sas-ir.ts` est la seule implémentation. Ajouter l'IS ou l'EURL = un fichier + une entrée dans `regimes/index.ts`.
-- Reste à encaisser : `load-year.service.ts` calcule le solde d'ouverture de l'année (facturé TTC réel − encaissements depuis le premier mois facturé), `compute-year.service.ts` le reporte de mois en mois (`openingReceivablesCents`), `compute-month.service.ts` l'applique (plancher à 0).
-- `allocate-refunds.ts` (remboursements de frais mixtes ligne par ligne), `forecast-values.ts` (valeurs de l'éditeur : saisie, défaut N-1, mois précédent).
+- `server/lib/professional/load-year.service.ts` : quelques requêtes groupées pour une année (relevés pro et perso validés, facturation, prévisions, trajets, encaissements clients), puis appelle le calcul. Aucune règle métier ici.
+- `shared/professional/compute-month.calc.ts` : **fonction pure** (aucun accès base, testée) → `ProfessionalMonth` (chaque valeur est un `ForecastActual` `{ forecast, actual | null }`). `compute-year.calc.ts` enchaîne les 12 mois (TVA payée = TVA due du mois précédent). La vue année = 12 × le calcul du mois.
+- `shared/professional/regimes/` : interface `ProfessionalRegime` (rémunération, charges sociales sur bénéfice) ; `sas-ir.regime.ts` est la seule implémentation. Ajouter l'IS ou l'EURL = un fichier + une entrée dans `regimes/index.ts`.
+- Reste à encaisser : `load-year.service.ts` calcule le solde d'ouverture de l'année (facturé TTC réel − encaissements depuis le premier mois facturé), `compute-year.calc.ts` le reporte de mois en mois (`openingReceivablesCents`), `compute-month.calc.ts` l'applique (plancher à 0).
+- `shared/professional/allocate-refunds.util.ts` (remboursements de frais mixtes ligne par ligne), `amounts.util.ts` (opérations sur `ForecastActual`, valeur finale), `server/lib/professional/forecast-values.service.ts` (valeurs de l'éditeur : saisie, défaut N-1, mois précédent).
 - Jours facturés : `BillingLine.days` en `Float`, limité aux multiples de 0,5 (exacts en binaire, validés par tRPC avec `multipleOf`) ; pas, plafond, montant jours × TJM et TJM moyen dans `shared/professional/billing-days.util.ts`.
 - Règles modifiables (TVA par charge, frais mixtes, groupes de l'éditeur, répartition des cotisations) : `shared/professional/professional.rules.ts` ; catégories pro : `shared/transactions/categories.rules.ts`.
 

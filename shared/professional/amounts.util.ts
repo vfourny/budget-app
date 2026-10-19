@@ -1,4 +1,4 @@
-import type { ForecastActual } from '@server/lib/professional/professional.type'
+import type { ForecastActual } from '@shared/professional/professional.type'
 
 /** `cents × bp / 10 000`, arrondi au centime. */
 export function applyBp(cents: number, bp: number): number {
@@ -51,3 +51,11 @@ export function subtractAmounts(
     actual: a.actual === null || b.actual === null ? null : a.actual - b.actual,
   }
 }
+
+/** Valeur « finale » d'un mois : le réel s'il existe, sinon le prévu (mois à venir). */
+export const finalOf = (amount: ForecastActual): number =>
+  amount.actual ?? amount.forecast
+
+/** Somme des valeurs finales (réel + prévu restant). */
+export const sumFinal = (amounts: readonly ForecastActual[]): number =>
+  amounts.reduce((total, amount) => total + finalOf(amount), 0)

@@ -1,8 +1,8 @@
-import { computeMonth } from '@server/lib/professional/compute-month.service'
+import { computeMonth } from '@shared/professional/compute-month.calc'
 import type {
   ProfessionalMonth,
   ProfessionalMonthInput,
-} from '@server/lib/professional/professional.type'
+} from '@shared/professional/professional.type'
 
 /** Ce qui se reporte d'un mois sur le suivant. */
 export interface YearOpening {

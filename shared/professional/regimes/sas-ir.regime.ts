@@ -1,5 +1,5 @@
-import { applyBp } from '@server/lib/professional/amounts.util'
-import type { ProfessionalRegime } from '@server/lib/professional/regimes/regime.type'
+import { applyBp } from '@shared/professional/amounts.util'
+import type { ProfessionalRegime } from '@shared/professional/regimes/regime.type'
 
 /**
  * SAS à l'IR : le président est assimilé salarié (salaire brut prévu mois par mois, cotisations patronales et

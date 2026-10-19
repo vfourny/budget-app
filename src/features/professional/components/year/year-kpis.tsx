@@ -1,8 +1,8 @@
 import { Grid } from '@mantine/core'
-import type { ProfessionalMonth } from '@server/lib/professional/professional.type'
+import { finalOf, sumFinal } from '@shared/professional/amounts.util'
+import type { ProfessionalMonth } from '@shared/professional/professional.type'
 
 import { KpiCard } from '@/components/kpi-card'
-import { finalOf, sumFinal } from '@/features/professional/final-amount'
 import { formatCents, monthName } from '@/lib/format'
 import { fr, LOCALE } from '@/lib/i18n/fr'
 

@@ -1,22 +1,13 @@
-import { allocateRefunds } from '@server/lib/professional/allocate-refunds.service'
+import { allocateRefunds } from '@shared/professional/allocate-refunds.util'
 import {
   amount,
   applyBp,
+  finalOf,
   htFromTtc,
   mapAmount,
   subtractAmounts,
   sumAmounts,
-} from '@server/lib/professional/amounts.util'
-import type {
-  BillingInput,
-  ChargeRow,
-  ClientBilling,
-  ForecastActual,
-  MixedCostRow,
-  ProfessionalMonth,
-  ProfessionalMonthInput,
-} from '@server/lib/professional/professional.type'
-import { regimeOf } from '@server/lib/professional/regimes'
+} from '@shared/professional/amounts.util'
 import { billingAmount } from '@shared/professional/billing-days.util'
 import {
   COLLECTED_VAT_BP,
@@ -26,10 +17,20 @@ import {
   PROFESSIONAL_CHARGE_CATEGORIES,
   PROFESSIONAL_CHARGE_VAT_BP,
 } from '@shared/professional/professional.rules'
+import type {
+  BillingInput,
+  ChargeRow,
+  ClientBilling,
+  ForecastActual,
+  MixedCostRow,
+  ProfessionalMonth,
+  ProfessionalMonthInput,
+} from '@shared/professional/professional.type'
+import { regimeOf } from '@shared/professional/regimes'
 
 /**
  * Calcul d'un mois du dashboard Pro : prévisionnel et réel côte à côte. Fonction **pure** (aucun
- * accès base) : toutes les données arrivent dans `input` (voir `load-year.ts`), ce qui la rend
+ * accès base) : toutes les données arrivent dans `input` (voir `server/lib/professional/load-year.service.ts`), ce qui la rend
  * testable et réutilisable (vue année = 12 appels).
  */
 export function computeMonth(input: ProfessionalMonthInput): ProfessionalMonth {
@@ -145,10 +146,9 @@ export function computeMonth(input: ProfessionalMonthInput): ProfessionalMonth {
     revenue,
     billing: {
       clients,
+      // Réel s'il existe (mois commencé), sinon prévu.
       days: sum(
-        clients.map((client) =>
-          hasActual ? (client.actual?.days ?? 0) : client.forecast.days,
-        ),
+        clients.map((client) => (client.actual ?? client.forecast).days),
       ),
       invoicedCents: revenue.actual ?? 0,
       invoicedTtcCents: sum(clients.map((client) => client.ttcCents)),
@@ -173,13 +173,10 @@ export function computeMonth(input: ProfessionalMonthInput): ProfessionalMonth {
     ),
     mixedCosts: {
       rows: mixedCosts,
-      leftToRefundCents: hasActual
-        ? sum(
-            mixedCosts.map(
-              (row) => (row.due.actual ?? 0) - (row.paidCents ?? 0),
-            ),
-          )
-        : sum(mixedCosts.map((row) => row.due.forecast)),
+      // Mois commencé : dû réel − remboursé ; mois à venir : dû prévu.
+      leftToRefundCents: sum(
+        mixedCosts.map((row) => finalOf(row.due) - (row.paidCents ?? 0)),
+      ),
     },
     mileage: {
       forecastKm,
@@ -250,7 +247,7 @@ function mixedCostRows(input: ProfessionalMonthInput): MixedCostRow[] {
   const paid = hasActual
     ? allocateRefunds(
         input.professionalDebits.MIXED_COSTS_REFUND ?? 0,
-        rows.map((row) => row.due.actual ?? 0),
+        rows.map((row) => finalOf(row.due)),
       )
     : null
   return rows.map((row, index) => ({

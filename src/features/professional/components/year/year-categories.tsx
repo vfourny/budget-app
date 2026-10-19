@@ -3,7 +3,7 @@ import type { TransactionCategory } from '@server/generated/prisma/enums'
 import type {
   ForecastActual,
   ProfessionalMonth,
-} from '@server/lib/professional/professional.type'
+} from '@shared/professional/professional.type'
 
 import {
   type ForecastRow,

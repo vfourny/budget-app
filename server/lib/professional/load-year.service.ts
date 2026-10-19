@@ -1,27 +1,27 @@
 import type { TransactionCategory } from '@server/generated/prisma/enums'
 import { validatedTransactions } from '@server/lib/dashboard/scope.service'
 import type { db as Db } from '@server/lib/db.client'
-import { applyBp } from '@server/lib/professional/amounts.util'
-import { computeMonth } from '@server/lib/professional/compute-month.service'
-import { computeYear } from '@server/lib/professional/compute-year.service'
-import type {
-  BillingInput,
-  CategoryCents,
-  ProfessionalMonth,
-  ProfessionalMonthInput,
-} from '@server/lib/professional/professional.type'
 import { resolveProfessionalYearSettings } from '@server/lib/settings/professional-year-settings.service'
 import {
   isBefore,
   monthIndex,
   yearMonthOf,
 } from '@shared/common/year-month.util'
+import { applyBp } from '@shared/professional/amounts.util'
 import { billingAmount } from '@shared/professional/billing-days.util'
+import { computeMonth } from '@shared/professional/compute-month.calc'
+import { computeYear } from '@shared/professional/compute-year.calc'
 import {
   COLLECTED_VAT_BP,
   MIXED_COSTS,
 } from '@shared/professional/professional.rules'
 import type { ProfessionalYearSettingsValues } from '@shared/professional/professional.rules'
+import type {
+  BillingInput,
+  CategoryCents,
+  ProfessionalMonth,
+  ProfessionalMonthInput,
+} from '@shared/professional/professional.type'
 
 const MIXED_CATEGORIES = MIXED_COSTS.map((cost) => cost.category)
 

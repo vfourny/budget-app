@@ -7,11 +7,11 @@ import {
   Text,
   Title,
 } from '@mantine/core'
+import { averageDailyRate } from '@shared/professional/billing-days.util'
 import type {
   ClientBilling,
   ProfessionalMonth,
-} from '@server/lib/professional/professional.type'
-import { averageDailyRate } from '@shared/professional/billing-days.util'
+} from '@shared/professional/professional.type'
 import type { ReactNode } from 'react'
 
 import { DeltaBadge } from '@/components/delta-badge'
