@@ -117,7 +117,8 @@ export function mixedShareBp(
 
 /**
  * Répartition indicative des cotisations patronales entre les organismes (points de base, total
- * 10 000) : détail « dont … » du tableau prévu / réel. Tirée d'un bulletin de paie.
+ * 10 000, vérifié par `tests/shared/professional/professional.rules.test.ts`) : détail « dont … » du
+ * tableau prévu / réel. Tirée d'un bulletin de paie.
  */
 export const EMPLOYER_CONTRIBUTION_SPLIT_BP = {
   URSSAF: 6999,
@@ -148,17 +149,3 @@ export const FORECAST_GROUPS = {
 >
 
 export type ForecastGroup = keyof typeof FORECAST_GROUPS
-
-// ---------------------------------------------------------------------------------------------
-// Vérifications au chargement (front et serveur) : erreur immédiate plutôt qu'un calcul faux.
-// ---------------------------------------------------------------------------------------------
-
-const splitTotal = Object.values(EMPLOYER_CONTRIBUTION_SPLIT_BP).reduce(
-  (sum, bp) => sum + bp,
-  0,
-)
-if (splitTotal !== 10_000) {
-  throw new Error(
-    `professional-rules : EMPLOYER_CONTRIBUTION_SPLIT_BP fait ${splitTotal} au lieu de 10 000.`,
-  )
-}
