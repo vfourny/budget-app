@@ -3,7 +3,7 @@ import type {
   MixedCostRow,
   ProfessionalMonth,
 } from '@server/lib/professional/types'
-import { MIXED_COSTS_KEY } from '@shared/professional-rules'
+import { MIXED_COSTS_RATIO } from '@shared/professional/rules'
 
 import { InfoTip } from '@/components/info-tip'
 import { TargetGauge } from '@/components/target-gauge'
@@ -34,15 +34,15 @@ export function MixedCostsCard({ month }: { month: ProfessionalMonth }) {
   const text = fr.professional.mixedCosts
   const { settings } = month
   const areaShare =
-    month.mixedCosts.rows.find((row) => row.keyType === 'area')?.shareBp ?? 0
+    month.mixedCosts.rows.find((row) => row.allocation === 'area')?.shareBp ?? 0
   const areaText = text.areaKey(
     formatSquareMeters(settings.officeAreaDm2),
     formatSquareMeters(settings.homeAreaDm2),
     formatBp(areaShare),
   )
   const ratioText = text.ratioKey(
-    MIXED_COSTS_KEY.numerator,
-    MIXED_COSTS_KEY.denominator,
+    MIXED_COSTS_RATIO.numerator,
+    MIXED_COSTS_RATIO.denominator,
   )
   const left = month.mixedCosts.leftToRefundCents
 
@@ -69,7 +69,7 @@ export function MixedCostsCard({ month }: { month: ProfessionalMonth }) {
           const status = statusOf(row)
           const label = fr.categories[row.category]
           const due = row.due.actual ?? row.due.forecast
-          const key = row.keyType === 'area' ? areaText : ratioText
+          const key = row.allocation === 'area' ? areaText : ratioText
           return (
             <div key={row.category}>
               <Group justify="space-between" mb={4} wrap="nowrap">

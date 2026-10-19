@@ -1,9 +1,6 @@
 import type { ApartmentPeriodColumns } from '@server/lib/apartments/compute-period'
 import type { ApartmentRecord } from '@server/lib/apartments/types'
-import {
-  LMP_THRESHOLD_CENTS,
-  microBicCeilingCents,
-} from '@shared/apartment-rules'
+import { LMP_THRESHOLD_CENTS, microBicCeilingCents } from '@shared/fiscal/lmnp'
 
 export interface LmnpThresholds {
   lmpThresholdCents: number

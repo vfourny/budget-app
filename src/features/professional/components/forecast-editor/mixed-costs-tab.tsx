@@ -1,10 +1,10 @@
 import { Text } from '@mantine/core'
 import {
   MIXED_COSTS,
-  MIXED_COSTS_KEY,
+  MIXED_COSTS_RATIO,
   mixedShareBp,
   type ProfessionalYearSettingsValues,
-} from '@shared/professional-rules'
+} from '@shared/professional/rules'
 
 import { ForecastAmountsForm } from '@/features/professional/components/forecast-editor/forecast-amounts-form'
 import type { Period } from '@/hooks/use-period-selection'
@@ -22,7 +22,7 @@ export function MixedCostsTab({
   const text = fr.professional.editor.mixedCosts
   const costs = MIXED_COSTS.map((cost) => ({
     ...cost,
-    shareBp: mixedShareBp(settings, cost.key),
+    shareBp: mixedShareBp(settings, cost.allocation),
   }))
   const shareOf = (category: string) =>
     costs.find((cost) => cost.category === category)
@@ -34,11 +34,11 @@ export function MixedCostsTab({
         if (!cost) return ['', '']
         return [
           <Text c="dimmed" key="key" size="sm">
-            {cost.key === 'area'
+            {cost.allocation === 'area'
               ? text.areaKey(formatBp(cost.shareBp))
               : text.ratioKey(
-                  MIXED_COSTS_KEY.numerator,
-                  MIXED_COSTS_KEY.denominator,
+                  MIXED_COSTS_RATIO.numerator,
+                  MIXED_COSTS_RATIO.denominator,
                 )}
           </Text>,
           <Text fw={600} key="share" size="sm">

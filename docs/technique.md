@@ -15,7 +15,7 @@ src/                   # FRONT — SPA React, tourne uniquement dans le navigate
   components/          # UI partagée entre features
   lib/                 # utilitaires front : trpc.ts, theme.ts, envelopes.ts, errors.ts, i18n/fr/…
   styles/global.css    # règles CSS globales
-shared/                # code pur partagé front + back (règles perso / pro / appartements, IR, prêt, formats CSV)
+shared/                # code pur partagé front + back, rangé par domaine (personal/, professional/, apartments/, transactions/, fiscal/)
 server/                # BACKEND — Nitro, mêmes conventions que le server/ de Nuxt
   api/                 # routes HTTP : server/api/health.ts → GET /api/health
     trpc/[...path].ts  # point d'entrée HTTP de tRPC (/api/trpc/*)
@@ -33,7 +33,8 @@ Pourquoi pas Next.js : app mono-utilisateur derrière une auth, sans SEO. SSR et
 - `src/**` ne peut importer de `server/**` qu'en **`import type`** (ex. le type `AppRouter`). Jamais d'import runtime (Prisma, secrets…) côté front, sinon du code serveur part dans le bundle navigateur.
 - `import type` est **obligatoire** pour les types (`verbatimModuleSyntax`).
 - Alias : `@/…` → `src/`, `@server/…` → `server/`, `@shared/…` → `shared/` (déclarés dans `vite.config.ts` **et** `tsconfig.json`).
-- `src/lib/i18n/fr/enums.ts` (libellés des enums), `personal-rules.ts` (dans `shared/`) et `envelopes.ts` importent les types de l'enum Prisma depuis `@server/generated/prisma/enums`, en `import type` uniquement.
+- Vérifié par ESLint (`@typescript-eslint/no-restricted-imports`, `eslint.config.ts`) : `src/` et `shared/` n'importent `@server/…` qu'en `import type` ; `shared/`, `server/`, `prisma/` et `scripts/` n'importent jamais `@/…` (le front).
+- `src/lib/i18n/fr/enums.ts` (libellés des enums), `shared/personal/rules.ts` et `envelopes.ts` importent les types de l'enum Prisma depuis `@server/generated/prisma/enums`, en `import type` uniquement.
 
 ## API : tRPC + TanStack Query
 
@@ -81,7 +82,7 @@ Sans session : `UNAUTHORIZED` / code `NOT_AUTHENTICATED`.
 crée le compte unique depuis `SEED_USER_EMAIL` / `SEED_USER_PASSWORD` (inscription HTTP désactivée), les formats CSV
 historiques et, pour le dev, des données sur l'année `SEED_YEAR` (2025, `prisma/seeds/seed-year.ts`) : relevés perso,
 facturation et trajets Pro, appartements et leurs relevés. Idempotent : il ne crée pas de doublon et n'écrase pas les saisies faites dans l'app. Le barème
-de l'IR n'est pas en base : `shared/income-tax.ts` (une PR par nouvelle année).
+de l'IR n'est pas en base : `shared/fiscal/income-tax.ts` (une PR par nouvelle année).
 
 ### Calcul du dashboard Pro (`server/lib/professional/`)
 
@@ -90,8 +91,8 @@ de l'IR n'est pas en base : `shared/income-tax.ts` (une PR par nouvelle année).
 - `regimes/` : interface `ProfessionalRegime` (rémunération, charges sociales sur bénéfice) ; `sas-ir.ts` est la seule implémentation. Ajouter l'IS ou l'EURL = un fichier + une entrée dans `regimes/index.ts`.
 - Reste à encaisser : `load-year.ts` calcule le solde d'ouverture de l'année (facturé TTC réel − encaissements depuis le premier mois facturé), `compute-year.ts` le reporte de mois en mois (`openingReceivablesCents`), `compute-month.ts` l'applique (plancher à 0).
 - `allocate-refunds.ts` (remboursements de frais mixtes ligne par ligne), `forecast-values.ts` (valeurs de l'éditeur : saisie, défaut N-1, mois précédent).
-- Jours facturés : `BillingLine.days` en `Float`, limité aux multiples de 0,5 (exacts en binaire, validés par tRPC avec `multipleOf`) ; pas, plafond, montant jours × TJM et TJM moyen dans `shared/billing-days.ts`.
-- Règles modifiables (TVA par charge, frais mixtes, groupes de l'éditeur, répartition des cotisations) : `shared/professional-rules.ts` ; catégories pro : `shared/account-categories.ts`.
+- Jours facturés : `BillingLine.days` en `Float`, limité aux multiples de 0,5 (exacts en binaire, validés par tRPC avec `multipleOf`) ; pas, plafond, montant jours × TJM et TJM moyen dans `shared/professional/billing-days.ts`.
+- Règles modifiables (TVA par charge, frais mixtes, groupes de l'éditeur, répartition des cotisations) : `shared/professional/rules.ts` ; catégories pro : `shared/transactions/categories.ts`.
 
 ## Interface : Mantine + React Router
 
@@ -127,14 +128,14 @@ de l'IR n'est pas en base : `shared/income-tax.ts` (une PR par nouvelle année).
 | `ApartmentYearOpening`     | Solde du compte appartement au 1er janvier d'une année                                               |
 | `ManagementInvoice`        | Facture de gérance d'un mois (frais + frais supplémentaires), saisie à la main                       |
 
-Enums : `AccountType` (PERSONAL / PROFESSIONAL / APARTMENT, sur `ImportBatch` et `Transaction`), `Envelope`, `TransactionCategory` (perso + pro + appartement, voir `shared/account-categories.ts`), `ImportStatus`, `CompanyRegime`, `BillingKind`, `ApartmentKind`.
+Enums : `AccountType` (PERSONAL / PROFESSIONAL / APARTMENT, sur `ImportBatch` et `Transaction`), `Envelope`, `TransactionCategory` (perso + pro + appartement, voir `shared/transactions/categories.ts`), `ImportStatus`, `CompanyRegime`, `BillingKind`, `ApartmentKind`.
 
 Sans ligne `MonthlyForecast` / `MileageForecast` / `SalaryForecast`, un montant prévu vaut le réel du même mois N-1 (calculé à la lecture, jamais stocké).
 
 Choix à connaître :
 
 - Pas de modèle `BankAccount` : `accountType` est porté directement par `ImportBatch` et `Transaction`. La banque n'est pas stockée : le format CSV est retrouvé par l'empreinte de l'en-tête (`CsvFormat`, voir [import-csv.md](./import-csv.md)).
-- Les catégories sont un **enum figé**, pas une table : libellés dans `src/lib/i18n/fr/enums.ts`, enveloppes dans `shared/personal-rules.ts`.
+- Les catégories sont un **enum figé**, pas une table : libellés dans `src/lib/i18n/fr/enums.ts`, enveloppes dans `shared/personal/rules.ts`.
 - Supprimer un `ImportBatch` supprime ses transactions (`onDelete: Cascade`).
 - Index sur `(year, month)`, `(accountType, year, month)`, `category` et `importBatchId` pour les agrégations dashboards.
 

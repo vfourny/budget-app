@@ -1,8 +1,11 @@
 import { Grid } from '@mantine/core'
 import type { Envelope } from '@server/generated/prisma/enums'
 import type { PeriodTotals } from '@server/lib/dashboard/aggregate'
-import { estimateIncomeTaxCents, incomeTaxBrackets } from '@shared/income-tax'
-import { isSavingsEnvelope, SAVINGS_ENVELOPES } from '@shared/personal-rules'
+import {
+  estimateIncomeTaxCents,
+  incomeTaxBrackets,
+} from '@shared/fiscal/income-tax'
+import { isSavingsEnvelope, SAVINGS_ENVELOPES } from '@shared/personal/rules'
 
 import { KpiCard, KpiLine } from '@/components/kpi-card'
 import { EnvelopeGauge } from '@/features/personal/components/envelope-gauge'
@@ -13,7 +16,7 @@ import { fr } from '@/lib/i18n/fr'
 
 type Overview = PeriodTotals & { monthsWithData: number }
 
-/** Enveloppes de dépense = toutes sauf l'épargne (voir `SAVINGS_ENVELOPES` dans personal-rules). */
+/** Enveloppes de dépense = toutes sauf l'épargne (voir `SAVINGS_ENVELOPES` dans `shared/personal/rules.ts`). */
 const EXPENSE_ENVELOPES = ENVELOPE_ORDER.filter(
   (envelope) => !isSavingsEnvelope(envelope),
 )

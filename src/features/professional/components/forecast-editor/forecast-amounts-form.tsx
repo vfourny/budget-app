@@ -10,7 +10,7 @@ import {
   Text,
 } from '@mantine/core'
 import type { TransactionCategory } from '@server/generated/prisma/enums'
-import type { ForecastGroup } from '@shared/professional-rules'
+import type { ForecastGroup } from '@shared/professional/rules'
 import { type ReactNode, useState } from 'react'
 
 import {

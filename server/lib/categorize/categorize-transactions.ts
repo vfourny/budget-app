@@ -5,7 +5,7 @@ import {
 } from '@server/generated/prisma/enums'
 import { CATEGORY_HINTS } from '@server/lib/categorize/category-hints'
 import { env } from '@server/lib/env'
-import { isCategoryOf } from '@shared/account-categories'
+import { isCategoryOf } from '@shared/transactions/categories'
 import { z } from 'zod'
 
 /** Nombre de lignes envoyées par appel : peu d'appels par import (quota de requêtes par minute du

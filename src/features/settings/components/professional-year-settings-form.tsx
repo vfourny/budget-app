@@ -17,7 +17,7 @@ import {
   DEFAULT_PROFESSIONAL_YEAR_SETTINGS,
   type ProfessionalYearSettingsValues,
   SUPPORTED_REGIMES,
-} from '@shared/professional-rules'
+} from '@shared/professional/rules'
 import { useState } from 'react'
 
 import {

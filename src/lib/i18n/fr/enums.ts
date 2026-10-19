@@ -6,7 +6,7 @@ import type {
   ImportStatus,
   TransactionCategory,
 } from '@server/generated/prisma/enums'
-import type { RevenueLineKey } from '@shared/personal-rules'
+import type { RevenueLineKey } from '@shared/personal/rules'
 
 /*
  * Libellés des enums Prisma (et des lignes de revenus). Chaque dictionnaire est
@@ -53,7 +53,7 @@ export const envelopes = {
 
 /**
  * Libellé de chaque catégorie ; l'ordre des clés = ordre d'affichage (colonnes du Google Sheet,
- * listes de choix). Rattachement aux enveloppes : `@shared/personal-rules`.
+ * listes de choix). Rattachement aux enveloppes : `@shared/personal/rules`.
  */
 export const categories = {
   RENT_PAID: 'Loyer versé',
@@ -117,7 +117,7 @@ export const categories = {
   APARTMENT_CONTRIBUTION: 'Apport appartement',
 } as const satisfies Record<TransactionCategory, string>
 
-/** Lignes du détail de la card Revenus (clés de `REVENUE_LINES` dans personal-rules + « other »). */
+/** Lignes du détail de la card Revenus (clés de `REVENUE_LINES` dans `shared/personal/rules.ts` + « other »). */
 export const revenueLines = {
   salary: 'Salaire',
   vacations: 'Vacations',

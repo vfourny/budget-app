@@ -81,6 +81,7 @@ const ACCOUNT_CATEGORIES = {
 
 type AccountCategory<T extends AccountType> =
   (typeof ACCOUNT_CATEGORIES)[T][number]
+export type PersonalCategory = AccountCategory<'PERSONAL'>
 export type ProfessionalCategory = AccountCategory<'PROFESSIONAL'>
 export type ApartmentCategory = AccountCategory<'APARTMENT'>
 
@@ -101,5 +102,23 @@ export function isCategoryOf(
 ): boolean {
   return ACCOUNT_CATEGORIES[accountType].some(
     (accountCategory) => accountCategory === category,
+  )
+}
+
+/**
+ * Catégories signalées « À vérifier » dans les tableaux de transactions des dashboards (badge +
+ * filtre), en plus des lignes sans catégorie : le fourre-tout de chaque compte, à reclasser si possible.
+ */
+const TO_CHECK_CATEGORIES = [
+  'OTHER',
+  'PROFESSIONAL_OTHER',
+  'APT_OTHER',
+] as const satisfies readonly TransactionCategory[]
+
+/** Ligne à signaler dans un tableau de dashboard : sans catégorie ou dans `TO_CHECK_CATEGORIES`. */
+export function isToCheck(category: TransactionCategory | null): boolean {
+  return (
+    category === null ||
+    TO_CHECK_CATEGORIES.some((toCheck) => toCheck === category)
   )
 }

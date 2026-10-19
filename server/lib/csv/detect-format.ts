@@ -2,7 +2,10 @@ import type { GoogleGenAI } from '@google/genai'
 import { splitCsvLine } from '@server/lib/csv/parse-bank-statement'
 import type { ParsedBankStatement } from '@server/lib/csv/types'
 import { env } from '@server/lib/env'
-import { type CsvFormatConfig, csvFormatConfigSchema } from '@shared/csv-format'
+import {
+  type CsvFormatConfig,
+  csvFormatConfigSchema,
+} from '@shared/transactions/csv-format'
 import { z } from 'zod'
 
 /** En-tête + 8 opérations : de quoi repérer les colonnes sans envoyer tout le relevé à l'IA. */

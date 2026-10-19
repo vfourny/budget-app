@@ -9,7 +9,7 @@ import {
   Table,
   Text,
 } from '@mantine/core'
-import type { ProfessionalYearSettingsValues } from '@shared/professional-rules'
+import type { ProfessionalYearSettingsValues } from '@shared/professional/rules'
 import { useState } from 'react'
 
 import {

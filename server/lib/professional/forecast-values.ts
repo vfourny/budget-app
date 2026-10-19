@@ -6,7 +6,7 @@ import {
   FORECAST_GROUPS,
   type ForecastGroup,
   PROFESSIONAL_CHARGE_VAT_BP,
-} from '@shared/professional-rules'
+} from '@shared/professional/rules'
 
 export interface ForecastValue {
   category: TransactionCategory

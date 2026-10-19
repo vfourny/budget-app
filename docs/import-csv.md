@@ -3,7 +3,7 @@
 Le parseur transforme un relevé bancaire CSV en transactions normalisées. Il vit dans `server/lib/csv/` et est **générique** : il ne connaît aucune banque. Le format des colonnes d'un export est une donnée (`CsvFormat`, en base), retrouvée par l'**empreinte de l'en-tête** du fichier.
 
 ```
-shared/csv-format.ts          # schéma Zod + type CsvFormatConfig (délimiteur, date, colonnes…)
+shared/transactions/csv-format.ts          # schéma Zod + type CsvFormatConfig (délimiteur, date, colonnes…)
 server/lib/csv/
   types.ts                    # ParsedTransaction, erreurs de ligne
   fingerprint.ts              # csvFingerprint(csvText) : SHA-256 de la 1re ligne

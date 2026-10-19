@@ -1,10 +1,11 @@
 import type { BillingLine } from '@server/generated/prisma/client'
 import type { TransactionCategory } from '@server/generated/prisma/enums'
 import type {
+  MixedCostAllocation,
   MixedCostCategory,
   ProfessionalChargeCategory,
   ProfessionalYearSettingsValues,
-} from '@shared/professional-rules'
+} from '@shared/professional/rules'
 
 /** Montants par catégorie, en centimes positifs (débits ou crédits selon le contexte). */
 export type CategoryCents = Partial<Record<TransactionCategory, number>>
@@ -85,10 +86,10 @@ export interface ChargeRow {
 }
 
 export interface MixedCostRow {
+  allocation: MixedCostAllocation
   category: MixedCostCategory
   /** Part due par Stygma. */
   due: ForecastActual
-  keyType: 'area' | 'key'
   /** Remboursé (débits « Remboursement frais mixtes » du relevé pro, répartis ligne par ligne). */
   paidCents: number | null
   /** Part remboursée par Stygma, en points de base (2222 = 22,22 %). */

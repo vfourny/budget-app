@@ -2,11 +2,12 @@ import type {
   ApartmentForecastLine,
   TransactionCategory,
 } from '@server/generated/prisma/enums'
-import type { ApartmentCategory } from '@shared/account-categories'
+import type { ApartmentCategory } from '@shared/transactions/categories'
 
 /*
- * ✏️ RÈGLES DES APPARTEMENTS (voir `docs/fonctionnel.md` › Appartements, R2, R3, R7, R10) : le seul fichier à
- * modifier pour changer ce qui est cumulé dans une ligne du tableau, les seuils ou les tolérances.
+ * ✏️ RÈGLES DES APPARTEMENTS (voir `docs/fonctionnel.md` › Appartements, R2, R3, R7) : le seul fichier à
+ * modifier pour changer ce qui est cumulé dans une ligne du tableau ou les tolérances. Les seuils
+ * légaux du LMNP (R10), données annuelles, sont dans `@shared/fiscal/lmnp`.
  *
  * Partagé front + serveur (fichier pur, sans dépendance runtime). Montants en centimes, taux en
  * points de base. Aucun texte affiché ici : les libellés vivent dans `@/lib/i18n/fr`.
@@ -44,10 +45,15 @@ export type ApartmentLineKey =
 export function apartmentLineOf(
   category: TransactionCategory | null,
 ): ApartmentLineKey {
-  const entry = Object.entries(APARTMENT_CATEGORY_LINES).find(
-    ([key]) => key === category,
-  )
-  return entry?.[1] ?? 'other'
+  return category !== null && isApartmentLineCategory(category)
+    ? APARTMENT_CATEGORY_LINES[category]
+    : 'other'
+}
+
+function isApartmentLineCategory(
+  category: TransactionCategory,
+): category is ApartmentCategory {
+  return category in APARTMENT_CATEGORY_LINES
 }
 
 /**
@@ -88,32 +94,3 @@ export const CFE_MONTH = 12
 
 /** Tolérance (en centimes, 1 €) du rapprochement d'une échéance de prêt avec le tableau d'amortissement (R7). */
 export const LOAN_MATCH_TOLERANCE_CENTS = 100
-
-/**
- * Plafond de recettes du micro-BIC par année, en centimes (R10). À titre indicatif : à valider avec le comptable.
- * ⚠️ Une entrée par année, même inchangée (revalorisé tous les 3 ans) : c'est la trace qu'elle a été vérifiée.
- */
-const MICRO_BIC_CEILINGS_CENTS = {
-  2025: 7_770_000,
-  2026: 8_360_000,
-} as const satisfies Record<number, number>
-
-/** Seuil de recettes du statut LMP, en centimes (R10). La condition sur 50 % des revenus n'est pas calculée. */
-export const LMP_THRESHOLD_CENTS = 2_300_000
-
-/** `true` si le plafond micro-BIC de l'année est renseigné (rappel annuel : `scripts/check-yearly-rules.ts`). */
-export function hasMicroBicCeiling(year: number): boolean {
-  return year in MICRO_BIC_CEILINGS_CENTS
-}
-
-/** Plafond micro-BIC d'une année ; une année inconnue prend la dernière connue (ou la première si elle est antérieure). */
-export function microBicCeilingCents(year: number): number {
-  const years = Object.keys(MICRO_BIC_CEILINGS_CENTS)
-    .map(Number)
-    .sort((a, b) => a - b)
-  const known =
-    years.filter((knownYear) => knownYear <= year).at(-1) ?? years[0]
-  return MICRO_BIC_CEILINGS_CENTS[
-    known as keyof typeof MICRO_BIC_CEILINGS_CENTS
-  ]
-}

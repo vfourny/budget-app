@@ -1,6 +1,9 @@
 import { csvFingerprint } from '@server/lib/csv/fingerprint'
 import type { db } from '@server/lib/db'
-import { type CsvFormatConfig, csvFormatConfigSchema } from '@shared/csv-format'
+import {
+  type CsvFormatConfig,
+  csvFormatConfigSchema,
+} from '@shared/transactions/csv-format'
 
 /** Format de colonnes connu pour ce fichier (même empreinte d'en-tête que pour un import
  * précédent), ou `null` si c'est un format inédit. Un format dont le JSON ne passe plus le schéma

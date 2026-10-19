@@ -8,7 +8,7 @@ import {
   type ManagementInvoiceRecord,
   ZERO_LINES,
 } from '@server/lib/apartments/types'
-import { type LoanInstallment, splitLoanPayment } from '@shared/apartment-loan'
+import { type LoanInstallment, splitLoanPayment } from '@shared/apartments/loan'
 import {
   APARTMENT_CHARGE_LINES,
   APARTMENT_FORECAST_LINES,
@@ -16,7 +16,7 @@ import {
   CARRIED_FORECAST_LINES,
   CFE_MONTH,
   PROPERTY_TAX_MONTH,
-} from '@shared/apartment-rules'
+} from '@shared/apartments/rules'
 
 /**
  * Lignes de charges mensuelles dont le prévu vient de l'historique (R3, H2) : électricité,

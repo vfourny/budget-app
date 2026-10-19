@@ -3,7 +3,7 @@ import type {
   ApartmentKind,
   TransactionCategory,
 } from '@server/generated/prisma/enums'
-import type { LoanTerms } from '@shared/apartment-loan'
+import type { LoanTerms } from '@shared/apartments/loan'
 
 /** Appartement tel que les calculs le lisent (centimes, points de base). */
 export interface ApartmentRecord {

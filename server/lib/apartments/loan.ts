@@ -3,7 +3,7 @@ import {
   loanSchedule,
   type LoanTerms,
   splitLoanPayment,
-} from '@shared/apartment-loan'
+} from '@shared/apartments/loan'
 
 /** Champs d'un appartement utiles au prêt (un sous-ensemble du modèle Prisma). */
 type LoanApartment = Pick<
