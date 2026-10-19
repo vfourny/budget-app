@@ -74,7 +74,12 @@ src/                   # FRONT — SPA React, tourne uniquement dans le navigate
   lib/                 # utilitaires front : trpc.ts (client + queryClient), theme.ts (thème Mantine)…
     i18n/fr/           # TOUS les textes de l'UI (dictionnaires typés) + plural.ts (accord en nombre)
   styles/global.css    # règles CSS globales (le thème, lui, est dans lib/theme.ts)
-shared/                # code pur partagé front + back (personal-rules.ts, income-tax.ts, professional-rules.ts, apartment-rules.ts, apartment-loan.ts, account-categories.ts, billing-days.ts), alias @shared/
+shared/                # code pur partagé front + back, alias @shared/ — rangé par domaine comme server/lib et src/features
+  transactions/        # categories.ts (catégories par type de compte, « À vérifier »), csv-format.ts (schéma Zod CsvFormat)
+  personal/            # rules.ts (enveloppes, cards, lignes de revenus)
+  professional/        # rules.ts (TVA, frais mixtes, prévisionnel), billing-days.ts
+  apartments/          # rules.ts (lignes du tableau, tolérances), loan.ts (amortissement)
+  fiscal/              # données légales annuelles : income-tax.ts (barème IR), lmnp.ts (micro-BIC, LMP)
 server/                # BACKEND — Nitro, mêmes conventions que le server/ de Nuxt
   api/                 # routes HTTP : server/api/health.ts → GET /api/health
     trpc/[...path].ts  # point d'entrée HTTP de tRPC
@@ -94,16 +99,18 @@ nitro.config.ts        # serverDir: ./server
 
 - **Frontière front / back / shared** : `src/**` ne peut importer de `server/**` qu'en `import type`
   (ex. le type du routeur tRPC). Jamais d'import runtime (Prisma, secrets…) côté front.
-  Le code utilisé par les deux côtés vit dans `shared/` (alias `@shared/…`) : fichiers purs, sans
-  dépendance runtime (ex. `shared/personal-rules.ts`), importables par `src/` et par `server/`.
-  `shared/` n'importe jamais de `src/` ni de `server/` (sauf `import type`).
+  Le code utilisé par les deux côtés vit dans `shared/<domaine>/` (alias `@shared/…`) : fonctions pures et
+  constantes, sans effet de bord ni accès base / réseau (seule dépendance runtime admise : `zod`), importables
+  par `src/` et par `server/`. `shared/` n'importe jamais de `src/` ni de `server/` (sauf `import type`).
+  **Vérifié par ESLint** (`@typescript-eslint/no-restricted-imports` dans `eslint.config.ts`) : `src/` et `shared/`
+  n'importent `@server/…` qu'en `import type` ; `shared/`, `server/`, `prisma/` et `scripts/` n'importent jamais `@/…`.
 - **Règles du budget** (catégories → enveloppes, épargne, catégories de la card « Par catégorie »,
-  lignes de revenus, par `key`) : uniquement dans `shared/personal-rules.ts`, jamais en dur ailleurs. Aucun libellé dedans :
-  les textes sont dans `@/lib/i18n/fr`. Équivalent pro : `shared/professional-rules.ts` (TVA par charge, frais mixtes, groupes
-  du prévisionnel) et `shared/account-categories.ts` (catégories proposées par type de compte).
+  lignes de revenus, par `key`) : uniquement dans `shared/personal/rules.ts`, jamais en dur ailleurs. Aucun libellé dedans :
+  les textes sont dans `@/lib/i18n/fr`. Équivalent pro : `shared/professional/rules.ts` (TVA par charge, frais mixtes, groupes
+  du prévisionnel) et `shared/transactions/categories.ts` (catégories proposées par type de compte).
 - **Calculs du dashboard Appartements** : même principe, dans `server/lib/apartments/` (purs : `compute-month`, `compute-period`,
-  `thresholds`) ; requêtes dans `load-period.ts`, assemblage dans `build-view.ts`. Règles (catégorie → ligne du tableau, seuils,
-  tolérance de rapprochement) dans `shared/apartment-rules.ts` ; prêt dans `shared/apartment-loan.ts`. Référence métier :
+  `thresholds`) ; requêtes dans `load-period.ts`, assemblage dans `build-view.ts`. Règles (catégorie → ligne du tableau,
+  tolérance de rapprochement) dans `shared/apartments/rules.ts`, seuils LMNP dans `shared/fiscal/lmnp.ts` ; prêt dans `shared/apartments/loan.ts`. Référence métier :
   `docs/fonctionnel.md` › Appartements (R1 à R12).
 - **Calculs du dashboard Pro** : fonctions **pures** dans `server/lib/professional/` (aucun accès base) ;
   les requêtes restent dans `load-year.ts`. Un statut juridique = un `ProfessionalRegime` (`server/lib/professional/regimes/`).
@@ -120,9 +127,9 @@ nitro.config.ts        # serverDir: ./server
   (`@/lib/auth-client`), routes privées sous `RequireAuth` dans `app.tsx`. Les données métier
   (`EnvelopeShare`, `ImportBatch`, `Transaction`) portent un `userId` : **toute requête tRPC filtre sur
   `ctx.session.user.id`** (`findFirst({ where: { id, userId } })` plutôt que `findUnique({ where: { id } })`,
-  `userId` à la création). Le barème de l'IR n'est pas en base : donnée légale dans `shared/income-tax.ts`,
+  `userId` à la création). Le barème de l'IR n'est pas en base : donnée légale dans `shared/fiscal/income-tax.ts`,
   une PR par nouvelle année.
-- **Données légales annuelles codées en dur** (barème IR, plafond micro-BIC…) : toute nouvelle table « par année »
+- **Données légales annuelles codées en dur** (barème IR, plafond micro-BIC…) : rangées dans `shared/fiscal/` ; toute nouvelle table « par année »
   dans le code se déclare dans `YEARLY_RULES` (`scripts/check-yearly-rules.ts`). `pnpm rules:check [année]` liste
   ce qui manque ; le workflow `yearly-rules.yml` le lance chaque mois, ouvre une issue `yearly-rules`, puis Gemini (secret `GEMINI_API_KEY`, outils lecture / édition / recherche web, ni shell ni git) prépare la PR ; montants à vérifier contre la source avant merge. Volontairement
   hors de `pnpm check` / CI des PR : la loi de finances est parfois votée en février, ça ne doit pas bloquer les PR.
@@ -156,7 +163,7 @@ nitro.config.ts        # serverDir: ./server
   menu, l'ajouter à `MAIN_NAV` (`features/layout/components/app-layout.tsx`).
 - Validation des entrées : schémas Zod, partagés entre tRPC et formulaires.
 - UI en **français**, code/identifiants/commits en **anglais**.
-- **Textes de l'UI** : jamais en dur dans un composant ni dans `personal-rules.ts` : ils viennent du
+- **Textes de l'UI** : jamais en dur dans un composant ni dans `shared/personal/rules.ts` : ils viennent du
   dictionnaire `fr` de `@/lib/i18n/fr` (`fr.nav.personal`, `fr.categories[category]`…), un fichier par
   domaine (`common`, `nav`, `imports`, `review`, `personal`, `settings`, `enums`, `errors`).
   Pas de lib i18n pour l'instant (une seule langue) : de simples objets `as const`. Texte avec
@@ -230,7 +237,7 @@ Hors scope : synchro bancaire auto, multi-utilisateurs, émission de factures.
   `DIRECT_URL` = URL directe (CLI Prisma / migrations, lue dans `prisma.config.ts`).
 - **Pas de modèle `BankAccount`** : seul compte le type **PERSONAL / PROFESSIONAL** (enum `AccountType`, porté par
   `ImportBatch` et `Transaction`). La banque n'est jamais stockée ni codée : le format des colonnes d'un CSV est une
-  donnée (`CsvFormat`, `shared/csv-format.ts`), retrouvée par l'empreinte de l'en-tête du fichier (`server/lib/csv/`),
+  donnée (`CsvFormat`, `shared/transactions/csv-format.ts`), retrouvée par l'empreinte de l'en-tête du fichier (`server/lib/csv/`),
   donc changer de banque ne demande aucun développement. Les appartements ont leur propre type de compte `APARTMENT` ;
   le rattachement à un bien passe par `apartmentId` (sur `ImportBatch`, défaut de l'import, et sur `Transaction`,
   modifiable ligne par ligne à la relecture), pas par un compte bancaire. Supprimer un `ImportBatch` supprime ses

@@ -15,7 +15,7 @@ import type {
   AccountType,
   TransactionCategory,
 } from '@server/generated/prisma/enums'
-import { isCategoryOf } from '@shared/account-categories'
+import { isCategoryOf } from '@shared/transactions/categories'
 import {
   IconAlertTriangle,
   IconArrowLeft,

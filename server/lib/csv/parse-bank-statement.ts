@@ -4,7 +4,10 @@ import type {
   ParsedBankStatement,
   ParsedTransaction,
 } from '@server/lib/csv/types'
-import type { AmountColumns, CsvFormatConfig } from '@shared/csv-format'
+import type {
+  AmountColumns,
+  CsvFormatConfig,
+} from '@shared/transactions/csv-format'
 
 /** Sépare les colonnes d'un libellé composé ("libellé simplifié — informations complémentaires"). */
 const LABEL_SEPARATOR = ' — '

@@ -3,7 +3,10 @@ import type {
   CompanyRegime,
   TransactionCategory,
 } from '@server/generated/prisma/enums'
-import type { ProfessionalCategory } from '@shared/account-categories'
+import type {
+  PersonalCategory,
+  ProfessionalCategory,
+} from '@shared/transactions/categories'
 
 /*
  * ✏️ RÈGLES DU COMPTE PRO (Stygma) : constantes partagées front + serveur (fichier pur, sans
@@ -65,45 +68,50 @@ export const PROFESSIONAL_CHARGE_CATEGORIES = Object.keys(
 ) as ProfessionalChargeCategory[]
 
 /**
- * Clé de répartition des autres frais mixtes (internet, téléphone, énergie) : 5 jours travaillés
- * sur 7. Donnée fixe : la changer = une PR.
+ * Ratio fixe de répartition des autres frais mixtes (internet, téléphone, énergie) : 5 jours
+ * travaillés sur 7. Donnée fixe : la changer = une PR.
  */
-export const MIXED_COSTS_KEY = { numerator: 5, denominator: 7 } as const
+export const MIXED_COSTS_RATIO = { numerator: 5, denominator: 7 } as const
 
 /**
- * Frais mixtes : dépenses du compte **perso** dont Stygma rembourse une quote-part. `"area"` =
- * prorata surface bureau / logement, `"key"` = clé fixe `MIXED_COSTS_KEY` (5/7).
+ * Mode de calcul de la quote-part d'un frais mixte : `"area"` = prorata surface bureau / logement,
+ * `"ratio"` = ratio fixe `MIXED_COSTS_RATIO` (5/7).
+ */
+export type MixedCostAllocation = 'area' | 'ratio'
+
+/**
+ * Frais mixtes : dépenses du compte **perso** dont Stygma rembourse une quote-part.
  * L'ordre sert aussi à répartir les remboursements reçus (d'abord le loyer, etc.).
  */
 export const MIXED_COSTS = [
-  { category: 'RENT_PAID', key: 'area' },
-  { category: 'INTERNET', key: 'key' },
-  { category: 'TELECOM', key: 'key' },
-  { category: 'ENERGY', key: 'key' },
+  { category: 'RENT_PAID', allocation: 'area' },
+  { category: 'INTERNET', allocation: 'ratio' },
+  { category: 'TELECOM', allocation: 'ratio' },
+  { category: 'ENERGY', allocation: 'ratio' },
 ] as const satisfies readonly {
-  category: TransactionCategory
-  key: 'area' | 'key'
+  allocation: MixedCostAllocation
+  category: PersonalCategory
 }[]
 
 export type MixedCostCategory = (typeof MIXED_COSTS)[number]['category']
 
 /**
- * Part remboursée par Stygma (points de base) selon la clé : surface bureau / logement, ou clé fixe
- * `MIXED_COSTS_KEY`. Utilisée par le calcul et par l'éditeur du prévisionnel.
+ * Part remboursée par Stygma (points de base) selon le mode : surface bureau / logement, ou ratio
+ * fixe `MIXED_COSTS_RATIO`. Utilisée par le calcul et par l'éditeur du prévisionnel.
  */
 export function mixedShareBp(
   settings: Pick<
     ProfessionalYearSettingsValues,
     'officeAreaDm2' | 'homeAreaDm2'
   >,
-  key: 'area' | 'key',
+  allocation: MixedCostAllocation,
 ): number {
-  return key === 'area'
+  return allocation === 'area'
     ? Math.round(
         (settings.officeAreaDm2 * 10_000) / Math.max(1, settings.homeAreaDm2),
       )
     : Math.round(
-        (MIXED_COSTS_KEY.numerator * 10_000) / MIXED_COSTS_KEY.denominator,
+        (MIXED_COSTS_RATIO.numerator * 10_000) / MIXED_COSTS_RATIO.denominator,
       )
 }
 

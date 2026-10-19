@@ -5,8 +5,8 @@ import {
 import { appError } from '@server/lib/app-error'
 import { forecastValues } from '@server/lib/professional/forecast-values'
 import { createTRPCRouter, protectedProcedure } from '@server/trpc/init'
-import { DAY_STEP, MAX_BILLED_DAYS } from '@shared/billing-days'
-import { FORECAST_GROUPS, type ForecastGroup } from '@shared/professional-rules'
+import { DAY_STEP, MAX_BILLED_DAYS } from '@shared/professional/billing-days'
+import { FORECAST_GROUPS, type ForecastGroup } from '@shared/professional/rules'
 import { z } from 'zod'
 
 const periodSchema = z.object({
@@ -18,7 +18,7 @@ const billingLineSchema = z.object({
   /** Nom du client, en texte libre. */
   clientName: z.string().trim().min(1).max(80),
   dailyRateCents: z.number().int().min(0).max(10_000_00),
-  /** Jours facturés, par demi-journée (1, 0,5…), voir `shared/billing-days.ts`. */
+  /** Jours facturés, par demi-journée (1, 0,5…), voir `shared/professional/billing-days.ts`. */
   days: z.number().min(0).max(MAX_BILLED_DAYS).multipleOf(DAY_STEP),
 })
 

@@ -17,7 +17,7 @@ import type {
   ProfessionalMonth,
   ProfessionalMonthInput,
 } from '@server/lib/professional/types'
-import { billingAmount } from '@shared/billing-days'
+import { billingAmount } from '@shared/professional/billing-days'
 import {
   COLLECTED_VAT_BP,
   EMPLOYER_CONTRIBUTION_SPLIT_BP,
@@ -25,7 +25,7 @@ import {
   mixedShareBp,
   PROFESSIONAL_CHARGE_CATEGORIES,
   PROFESSIONAL_CHARGE_VAT_BP,
-} from '@shared/professional-rules'
+} from '@shared/professional/rules'
 
 /**
  * Calcul d'un mois du dashboard Pro : prévisionnel et réel côte à côte. Fonction **pure** (aucun
@@ -232,15 +232,15 @@ function billingByClient(input: ProfessionalMonthInput): ClientBilling[] {
 /** Frais mixtes ligne par ligne : dépense perso × quote-part, remboursements répartis dans l'ordre. */
 function mixedCostRows(input: ProfessionalMonthInput): MixedCostRow[] {
   const { settings, hasActual } = input
-  const rows = MIXED_COSTS.map(({ category, key }) => {
-    const shareBp = mixedShareBp(settings, key)
+  const rows = MIXED_COSTS.map(({ category, allocation }) => {
+    const shareBp = mixedShareBp(settings, allocation)
     const spent: ForecastActual = amount(
       input.forecasts[category] ?? input.lastYearPersoDebits[category] ?? 0,
       hasActual ? (input.persoDebits[category] ?? 0) : null,
     )
     return {
       category,
-      keyType: key,
+      allocation,
       shareBp,
       spent,
       due: mapAmount(spent, (c) => applyBp(c, shareBp)),

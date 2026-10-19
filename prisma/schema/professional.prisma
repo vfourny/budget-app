@@ -11,7 +11,7 @@ enum CompanyRegime {
 /// Règles de Stygma pour une année (Réglages › Pro) : taux du bulletin de paie (le salaire brut, lui,
 /// est prévu mois par mois : `SalaryForecast`), charges sociales sur
 /// la quote-part de bénéfice, surfaces des frais mixtes, barème km. Une année sans ligne reprend la
-/// dernière année configurée avant elle (sinon `DEFAULT_PROFESSIONAL_YEAR_SETTINGS`, `shared/professional-rules.ts`).
+/// dernière année configurée avant elle (sinon `DEFAULT_PROFESSIONAL_YEAR_SETTINGS`, `shared/professional/rules.ts`).
 /// Pas de float : taux en points de base (4460 = 44,60 %), surfaces en dm², barème en millièmes d'€.
 model ProfessionalYearSettings {
   userId                 String
@@ -53,7 +53,7 @@ model BillingLine {
   kind           BillingKind
   dailyRateCents Int
   /// Jours facturés (1, 0,5, 15,5…) : uniquement des multiples de 0,5, exacts en float (validés
-  /// par tRPC, voir `shared/billing-days.ts`).
+  /// par tRPC, voir `shared/professional/billing-days.ts`).
   days           Float
 
   @@index([userId, year, month])

@@ -2,7 +2,7 @@ import type { db as Db } from '@server/lib/db'
 import {
   DEFAULT_PROFESSIONAL_YEAR_SETTINGS,
   type ProfessionalYearSettingsValues,
-} from '@shared/professional-rules'
+} from '@shared/professional/rules'
 
 /** Règles d'une année + leur origine : saisies pour l'année, reprises d'une année antérieure, ou défaut. */
 export interface ResolvedProfessionalYearSettings {

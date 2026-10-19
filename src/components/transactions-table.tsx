@@ -8,7 +8,7 @@ import {
   UnstyledButton,
 } from '@mantine/core'
 import type { TransactionCategory } from '@server/generated/prisma/enums'
-import { isToCheck } from '@shared/personal-rules'
+import { isToCheck } from '@shared/transactions/categories'
 import { useState } from 'react'
 
 import { formatCents, formatDate } from '@/lib/format'
@@ -73,7 +73,7 @@ interface TransactionsTableProps {
 
 /**
  * Tableau « Transactions du mois », identique en Perso et en Pro : résumé (nombre, crédits,
- * débits), filtres avec compteurs, tri par colonne, badge « À vérifier » (`isToCheck`, personal-rules).
+ * débits), filtres avec compteurs, tri par colonne, badge « À vérifier » (`isToCheck`, `shared/transactions/categories.ts`).
  * `id="transactions"` : cible de l'ancre « Transactions (N) » de l'en-tête Pro.
  */
 export function TransactionsTable({

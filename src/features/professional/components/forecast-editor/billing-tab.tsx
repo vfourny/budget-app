@@ -16,7 +16,7 @@ import {
   DAY_STEP,
   MAX_BILLED_DAYS,
   roundToDayStep,
-} from '@shared/billing-days'
+} from '@shared/professional/billing-days'
 import { IconTrash } from '@tabler/icons-react'
 import { useReducer } from 'react'
 

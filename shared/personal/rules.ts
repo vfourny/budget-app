@@ -2,6 +2,7 @@ import type {
   Envelope,
   TransactionCategory,
 } from '@server/generated/prisma/enums'
+import type { PersonalCategory } from '@shared/transactions/categories'
 
 /*
  * ✏️ RÈGLES DU BUDGET : le seul fichier à modifier pour changer ce qui est cumulé ou affiché.
@@ -16,7 +17,8 @@ import type {
 /**
  * Catégories cumulées dans chaque enveloppe (jauges de la page Perso).
  * Pour déplacer une catégorie : la retirer d'un tableau et l'ajouter dans un autre.
- * Une catégorie ajoutée à l'enum Prisma doit être rangée ici à la main (aucun garde-fou).
+ * Seules les catégories du compte perso sont acceptées (`tsc`). Une catégorie perso ajoutée à l'enum
+ * doit être rangée ici à la main (sinon ses débits comptent en « Dépenses » sans jauge).
  * Une catégorie ne peut être que dans une seule enveloppe (vérifié au chargement, voir plus bas).
  */
 export const ENVELOPE_CATEGORIES = {
@@ -44,7 +46,7 @@ export const ENVELOPE_CATEGORIES = {
   SAFETY_SAVINGS: ['SHORT_TERM_SAVINGS'],
   // « Apport appartement » : virement vers le compte appartement (hypothèse H6, `docs/fonctionnel.md` › Appartements).
   LONG_TERM_SAVINGS: ['LONG_TERM_SAVINGS', 'APARTMENT_CONTRIBUTION'],
-} as const satisfies Record<Envelope, readonly TransactionCategory[]>
+} as const satisfies Record<Envelope, readonly PersonalCategory[]>
 
 /**
  * Parts du revenu mensuel recommandées par enveloppe, en % (100 % du revenu affecté). Valeurs
@@ -81,7 +83,7 @@ export const CATEGORY_CARD_CATEGORIES = [
   'TAXES',
   'OTHER_SUBSCRIPTIONS',
   'OTHER',
-] as const satisfies readonly TransactionCategory[]
+] as const satisfies readonly PersonalCategory[]
 
 /**
  * Catégories détaillées dans la card « Charges fixes » de la page Perso (dans cet ordre, toujours
@@ -92,7 +94,7 @@ export const FIXED_CHARGES_CATEGORIES = [
   'ENERGY',
   'TELECOM',
   'INTERNET',
-] as const satisfies readonly TransactionCategory[]
+] as const satisfies readonly PersonalCategory[]
 
 /**
  * Lignes du détail de la card Revenus (dans cet ordre, toujours affichées même à 0 €).
@@ -104,19 +106,9 @@ export const REVENUE_LINES = [
   { key: 'professionalRefund', categories: ['PROFESSIONAL_REFUND'] },
   { key: 'otherRefund', categories: ['REFUND'] },
 ] as const satisfies readonly {
+  categories: readonly PersonalCategory[]
   key: string
-  categories: readonly TransactionCategory[]
 }[]
-
-/**
- * Catégories signalées « À vérifier » dans les tableaux de transactions des dashboards (badge +
- * filtre), en plus des lignes sans catégorie : fourre-tout à reclasser si possible.
- */
-const TO_CHECK_CATEGORIES = [
-  'OTHER',
-  'PROFESSIONAL_OTHER',
-  'APT_OTHER',
-] as const satisfies readonly TransactionCategory[]
 
 /** Clé d'une ligne de revenus (`"other"` = le reste). Libellés : `@/lib/i18n/fr`. */
 export type RevenueLineKey = (typeof REVENUE_LINES)[number]['key'] | 'other'
@@ -132,7 +124,7 @@ for (const [envelope, categories] of Object.entries(ENVELOPE_CATEGORIES)) {
     if (existing) {
       // Erreur au démarrage (front et serveur) plutôt qu'un double comptage silencieux.
       throw new Error(
-        `personal-rules : la catégorie ${category} est dans deux enveloppes (${existing} et ${envelope}).`,
+        `personal/rules : la catégorie ${category} est dans deux enveloppes (${existing} et ${envelope}).`,
       )
     }
     ENVELOPE_BY_CATEGORY.set(category, envelope as Envelope)
@@ -152,13 +144,5 @@ export function envelopeOf(
 export function isSavingsEnvelope(envelope: Envelope): boolean {
   return SAVINGS_ENVELOPES.some(
     (savingsEnvelope) => savingsEnvelope === envelope,
-  )
-}
-
-/** Ligne à signaler dans un tableau de dashboard : sans catégorie ou dans `TO_CHECK_CATEGORIES`. */
-export function isToCheck(category: TransactionCategory | null): boolean {
-  return (
-    category === null ||
-    TO_CHECK_CATEGORIES.some((toCheck) => toCheck === category)
   )
 }

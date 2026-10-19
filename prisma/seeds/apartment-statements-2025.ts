@@ -1,6 +1,6 @@
 import type { TransactionCategory } from '@server/generated/prisma/enums'
-import type { LoanTerms } from '@shared/apartment-loan'
-import { loanSchedule } from '@shared/apartment-loan'
+import type { LoanTerms } from '@shared/apartments/loan'
+import { loanSchedule } from '@shared/apartments/loan'
 
 import { SEED_YEAR } from './seed-year'
 

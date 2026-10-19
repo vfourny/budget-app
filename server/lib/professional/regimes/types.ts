@@ -1,4 +1,4 @@
-import type { ProfessionalYearSettingsValues } from '@shared/professional-rules'
+import type { ProfessionalYearSettingsValues } from '@shared/professional/rules'
 
 /** Rémunération mensuelle du dirigeant selon le régime, en centimes. */
 interface Remuneration {

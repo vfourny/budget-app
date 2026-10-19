@@ -72,7 +72,7 @@ model ManagementInvoice {
 }
 
 /// Ligne du tableau saisissable dans l'éditeur du prévisionnel (R3). Les valeurs reprennent les clés
-/// des lignes du tableau (`shared/apartment-rules.ts`). Le crédit vient du tableau d'amortissement et
+/// des lignes du tableau (`shared/apartments/rules.ts`). Le crédit vient du tableau d'amortissement et
 /// les frais de gérance du loyer × taux : ils ne se saisissent pas.
 enum ApartmentForecastLine {
   grossRent

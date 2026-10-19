@@ -11,9 +11,9 @@ import type {
   ProfessionalMonthInput,
 } from '@server/lib/professional/types'
 import { resolveProfessionalYearSettings } from '@server/lib/settings/professional-year-settings'
-import { billingAmount } from '@shared/billing-days'
-import { COLLECTED_VAT_BP, MIXED_COSTS } from '@shared/professional-rules'
-import type { ProfessionalYearSettingsValues } from '@shared/professional-rules'
+import { billingAmount } from '@shared/professional/billing-days'
+import { COLLECTED_VAT_BP, MIXED_COSTS } from '@shared/professional/rules'
+import type { ProfessionalYearSettingsValues } from '@shared/professional/rules'
 
 const MIXED_CATEGORIES = MIXED_COSTS.map((cost) => cost.category)
 

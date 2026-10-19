@@ -20,7 +20,7 @@ import {
   type ManagementInvoiceRecord,
   ZERO_LINES,
 } from '@server/lib/apartments/types'
-import { type LoanInstallment, loanSchedule } from '@shared/apartment-loan'
+import { type LoanInstallment, loanSchedule } from '@shared/apartments/loan'
 
 const monthKey = (year: number, month: number) => `${year}-${month}`
 

@@ -1,5 +1,5 @@
 import { db } from '@server/lib/db'
-import { CFE_MONTH, PROPERTY_TAX_MONTH } from '@shared/apartment-rules'
+import { CFE_MONTH, PROPERTY_TAX_MONTH } from '@shared/apartments/rules'
 
 import { buildApartmentStatements2025 } from './apartment-statements-2025'
 import { SEED_YEAR } from './seed-year'

@@ -1,5 +1,20 @@
 import reactConfig from '@vfourny/node-toolkit/eslint/react'
 
+/** `server/` (Prisma, secrets…) ne part jamais dans le bundle du front : types uniquement. */
+const SERVER_TYPES_ONLY = {
+  allowTypeImports: true,
+  group: ['@server/*', '**/server/*'],
+  message:
+    "Côté front et shared, `server/` ne s'importe qu'en `import type`. Code commun : `shared/` (@shared/…).",
+}
+
+/** Le front (React, i18n…) ne s'importe ni côté serveur ni dans `shared/`. */
+const NO_FRONT = {
+  group: ['@/*', '**/src/*'],
+  message:
+    "`src/` est le front : ne pas l'importer ici. Code commun : `shared/` (@shared/…).",
+}
+
 export default [
   ...reactConfig,
   {
@@ -10,6 +25,34 @@ export default [
       '@typescript-eslint/no-use-before-define': [
         'error',
         { functions: false },
+      ],
+    },
+  },
+  // Frontière front / back / shared (voir CLAUDE.md › Conventions) : seuls les `import type` passent.
+  {
+    files: ['src/**/*.{ts,tsx}'],
+    rules: {
+      '@typescript-eslint/no-restricted-imports': [
+        'error',
+        { patterns: [SERVER_TYPES_ONLY] },
+      ],
+    },
+  },
+  {
+    files: ['shared/**/*.ts'],
+    rules: {
+      '@typescript-eslint/no-restricted-imports': [
+        'error',
+        { patterns: [SERVER_TYPES_ONLY, NO_FRONT] },
+      ],
+    },
+  },
+  {
+    files: ['server/**/*.ts', 'prisma/**/*.ts', 'scripts/**/*.ts'],
+    rules: {
+      '@typescript-eslint/no-restricted-imports': [
+        'error',
+        { patterns: [NO_FRONT] },
       ],
     },
   },

@@ -16,7 +16,7 @@ import { parseBankStatement } from '@server/lib/csv/parse-bank-statement'
 import { gemini } from '@server/lib/gemini'
 import { geminiTRPCError } from '@server/lib/gemini-errors'
 import { createTRPCRouter, protectedProcedure } from '@server/trpc/init'
-import { csvFormatConfigSchema } from '@shared/csv-format'
+import { csvFormatConfigSchema } from '@shared/transactions/csv-format'
 import { z } from 'zod'
 
 /** Le CSV voyage en texte dans le JSON : un relevé fait quelques centaines de lignes, loin de la

@@ -16,7 +16,7 @@ import {
 } from '@mantine/core'
 import { useDisclosure } from '@mantine/hooks'
 import type { ApartmentKind } from '@server/generated/prisma/enums'
-import { loanSchedule } from '@shared/apartment-loan'
+import { loanSchedule } from '@shared/apartments/loan'
 import { IconChevronDown } from '@tabler/icons-react'
 import { useState } from 'react'
 

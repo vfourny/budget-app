@@ -1,4 +1,4 @@
-import { LOAN_MATCH_TOLERANCE_CENTS } from '@shared/apartment-rules'
+import { LOAN_MATCH_TOLERANCE_CENTS } from '@shared/apartments/rules'
 
 /*
  * Prêt immobilier à taux fixe, sans palier ni différé (R6, hypothèse H3) et rapprochement d'une
