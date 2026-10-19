@@ -1,5 +1,6 @@
 import {
   Button,
+  Card,
   createTheme,
   type CSSVariablesResolver,
   type MantineColorsTuple,
@@ -79,6 +80,16 @@ export const theme = createTheme({
   radius: { xs: '4px', sm: '8px', md: '10px', lg: '16px', xl: '24px' },
   components: {
     Button: Button.extend({ defaultProps: { fw: 700 } }),
+    // Carte découpée en sections (en-tête / tableau / pied) : `Card` + `Card.Section withBorder`.
+    // Sans marge interne (le tableau va bord à bord), même fond que `Paper`, traits de section
+    // aux couleurs de la maquette (Mantine prend `gray-3` / `dark-4` par défaut).
+    Card: Card.extend({
+      defaultProps: { padding: 0, radius: 'lg', withBorder: true },
+      styles: {
+        root: { backgroundColor: 'var(--mantine-color-body)' },
+        section: { '--border-color': 'var(--app-border)' },
+      },
+    }),
   },
 })
 

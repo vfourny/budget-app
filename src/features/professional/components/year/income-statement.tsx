@@ -5,8 +5,6 @@ import { finalOf } from '@/features/professional/final-amount'
 import { formatEurosRounded, shortMonthName } from '@/lib/format'
 import { fr } from '@/lib/i18n/fr'
 
-import classes from './income-statement.module.css'
-
 type RowKey = keyof typeof fr.professional.year.statement.rows
 
 /** Une ligne : valeur d'un mois (finale, sauf le prévu d'origine) et couleur éventuelle. */
@@ -72,7 +70,8 @@ export function IncomeStatement({
       </Text>
       <Table.ScrollContainer minWidth={1100}>
         <Table
-          className={classes.table}
+          className="nowrap"
+          fz="xs"
           horizontalSpacing="xs"
           verticalSpacing="xs"
         >

@@ -13,3 +13,9 @@ body {
   --input-height-md: calc(2.75rem * var(--mantine-scale));
   --button-height-md: calc(2.75rem * var(--mantine-scale));
 }
+
+/* Utilitaire (pas de prop Mantine pour `white-space`) : dates et montants des tableaux ne passent
+   jamais à la ligne, c'est le libellé qui s'adapte. `className="nowrap"` sur un `Table.Td` / `Table`. */
+.nowrap {
+  white-space: nowrap;
+}

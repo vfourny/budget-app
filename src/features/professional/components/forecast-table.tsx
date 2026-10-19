@@ -6,8 +6,6 @@ import type { GaugeGoal } from '@/components/target-gauge'
 import { formatCents } from '@/lib/format'
 import { fr } from '@/lib/i18n/fr'
 
-import classes from './forecast-table.module.css'
-
 /** `detail` : ligne « dont … » grisée ; `memo` : pour info (hors total) ; `total` : ligne de total. */
 type ForecastRowTone = 'normal' | 'detail' | 'memo' | 'total'
 
@@ -91,12 +89,12 @@ function Row({ row }: { row: ForecastRow }) {
           </Text>
         )}
       </Table.Th>
-      <Table.Td c="dimmed" className={classes.number} fw={bold} ta="right">
+      <Table.Td c="dimmed" className="nowrap" fw={bold} ta="right">
         {formatCents(amount.forecast)}
       </Table.Td>
       <Table.Td
         c={muted ? 'dimmed' : undefined}
-        className={classes.number}
+        className="nowrap"
         fw={bold ?? 600}
         ta="right"
       >
@@ -110,7 +108,7 @@ function Row({ row }: { row: ForecastRow }) {
               ? 'teal.4'
               : 'red.4'
         }
-        className={classes.number}
+        className="nowrap"
         fw={bold}
         ta="right"
       >

@@ -1,7 +1,7 @@
 import {
   Badge,
+  Card,
   Group,
-  Paper,
   SegmentedControl,
   Table,
   Text,
@@ -123,14 +123,8 @@ export function TransactionsTable({
   }
 
   return (
-    <Paper
-      className={classes.card}
-      component="section"
-      id="transactions"
-      radius="lg"
-      withBorder
-    >
-      <div className={classes.header}>
+    <Card className={classes.card} component="section" id="transactions">
+      <Card.Section px={24} py={20} withBorder>
         <Group align="baseline" gap={8} justify="space-between">
           <Text fw={600}>{fr.transactions.title}</Text>
           {transactions.length > 0 && (
@@ -156,7 +150,7 @@ export function TransactionsTable({
             value={filter}
           />
         )}
-      </div>
+      </Card.Section>
       {rows.length === 0 ? (
         <Text c="dimmed" p={28}>
           {transactions.length === 0
@@ -192,7 +186,7 @@ export function TransactionsTable({
             <Table.Tbody>
               {rows.map((row) => (
                 <Table.Tr key={row.id}>
-                  <Table.Td c="dimmed" className={classes.nowrap}>
+                  <Table.Td c="dimmed" className="nowrap">
                     {formatDate(row.date)}
                   </Table.Td>
                   <Table.Td>{row.label}</Table.Td>
@@ -218,7 +212,7 @@ export function TransactionsTable({
                   </Table.Td>
                   <Table.Td
                     c={row.amountCents > 0 ? 'teal.4' : undefined}
-                    className={classes.nowrap}
+                    className="nowrap"
                     fw={600}
                     ta="right"
                   >
@@ -232,6 +226,6 @@ export function TransactionsTable({
           </Table>
         </Table.ScrollContainer>
       )}
-    </Paper>
+    </Card>
   )
 }

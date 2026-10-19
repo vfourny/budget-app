@@ -1,4 +1,13 @@
-import { Group, Paper, SimpleGrid, Stack, Text, Tooltip } from '@mantine/core'
+import {
+  Divider,
+  Group,
+  Paper,
+  Progress,
+  SimpleGrid,
+  Stack,
+  Text,
+  Tooltip,
+} from '@mantine/core'
 import type {
   ForecastActual,
   ProfessionalMonth,
@@ -8,8 +17,6 @@ import { InfoTip } from '@/components/info-tip'
 import { AmountFigure } from '@/features/professional/components/amount-figure'
 import { formatBp, formatCents } from '@/lib/format'
 import { fr } from '@/lib/i18n/fr'
-
-import classes from './profit-card.module.css'
 
 /**
  * Carte « Bénéfice » : équation CA HT − charges − salaires − cotisations = bénéfice, barre de
@@ -25,25 +32,25 @@ export function ProfitCard({ month }: { month: ProfessionalMonth }) {
       key: 'charges',
       label: text.charges,
       amount: month.charges.total,
-      className: classes.charges,
+      color: 'blue.3',
     },
     {
       key: 'salary',
       label: text.salary,
       amount: month.remuneration.grossSalary,
-      className: classes.salary,
+      color: 'var(--mantine-color-dimmed)',
     },
     {
       key: 'employer',
       label: text.employer,
       amount: month.remuneration.employerContributions,
-      className: classes.employer,
+      color: 'var(--mantine-color-text)',
     },
     {
       key: 'profit',
       label: fr.professional.profit.title,
       amount: month.profit,
-      className: classes.profit,
+      color: 'gold.6',
     },
   ]
   const total = Math.max(
@@ -107,54 +114,60 @@ export function ProfitCard({ month }: { month: ProfessionalMonth }) {
           />
         </SimpleGrid>
 
-        <div aria-label={text.splitAria} className={classes.split} role="img">
+        {/* Barre empilée : un `Progress.Section` par poste (≈ plusieurs segments dans une jauge). */}
+        <Progress.Root
+          aria-label={text.splitAria}
+          bg="var(--app-hover)"
+          radius={5}
+          role="img"
+          size={10}
+        >
           {segments.map((segment) => (
             <Tooltip
               key={segment.key}
               label={`${segment.label} : ${formatCents(shown(segment.amount))}`}
             >
-              <div
-                className={`${classes.segment} ${segment.className}`}
-                data-forecast={segment.amount.actual === null || undefined}
-                style={{
-                  width: `${(Math.max(0, shown(segment.amount)) / total) * 100}%`,
-                }}
+              <Progress.Section
+                color={segment.color}
+                // Poste encore prévisionnel (pas de réel) : segment estompé.
+                opacity={segment.amount.actual === null ? 0.45 : undefined}
+                value={(Math.max(0, shown(segment.amount)) / total) * 100}
+                withAria={false}
               />
             </Tooltip>
           ))}
-        </div>
+        </Progress.Root>
 
-        <SimpleGrid
-          className={classes.after}
-          cols={{ base: 1, sm: 3 }}
-          spacing={16}
-        >
-          <AmountFigure
-            amount={month.remuneration.bncWithdrawal}
-            label={text.bnc}
-            tip={text.bncTip}
-          />
-          <AmountFigure
-            amount={month.retained}
-            color="teal.4"
-            goal="atLeast"
-            label={text.retained}
-            tip={text.retainedTip}
-          />
-          <Stack gap={2}>
+        <Stack gap={16}>
+          <Divider color="var(--app-border)" />
+          <SimpleGrid cols={{ base: 1, sm: 3 }} spacing={16}>
             <AmountFigure
-              amount={month.profitSocialCharges}
-              color="red.4"
-              label={text.socialCharges}
-              tip={text.socialChargesTip}
+              amount={month.remuneration.bncWithdrawal}
+              label={text.bnc}
+              tip={text.bncTip}
             />
-            <Text c="dimmed" size="xs">
-              {text.socialChargesSub(
-                formatBp(month.settings.profitSocialChargesBp),
-              )}
-            </Text>
-          </Stack>
-        </SimpleGrid>
+            <AmountFigure
+              amount={month.retained}
+              color="teal.4"
+              goal="atLeast"
+              label={text.retained}
+              tip={text.retainedTip}
+            />
+            <Stack gap={2}>
+              <AmountFigure
+                amount={month.profitSocialCharges}
+                color="red.4"
+                label={text.socialCharges}
+                tip={text.socialChargesTip}
+              />
+              <Text c="dimmed" size="xs">
+                {text.socialChargesSub(
+                  formatBp(month.settings.profitSocialChargesBp),
+                )}
+              </Text>
+            </Stack>
+          </SimpleGrid>
+        </Stack>
       </Stack>
     </Paper>
   )
