@@ -1,5 +1,9 @@
 import { TransactionCategory } from '@server/generated/prisma/enums'
 import { appError } from '@server/lib/app-error.util'
+import {
+  findEditableTransaction,
+  findOwnedApartment,
+} from '@server/lib/ownership.service'
 import { createTRPCRouter, protectedProcedure } from '@server/trpc/trpc.config'
 import { isCategoryOf } from '@shared/transactions/categories.rules'
 import { z } from 'zod'
@@ -18,20 +22,11 @@ export const transactionRouter = createTRPCRouter({
       }),
     )
     .mutation(async ({ ctx, input }) => {
-      // Filtré sur l'utilisateur : la transaction d'un autre compte = « introuvable ».
-      const transaction = await ctx.db.transaction.findFirst({
-        where: { id: input.id, userId: ctx.session.user.id },
-        select: {
-          accountType: true,
-          importBatch: { select: { status: true } },
-        },
-      })
-      if (!transaction) {
-        throw appError('NOT_FOUND', 'TRANSACTION_NOT_FOUND')
-      }
-      if (transaction.importBatch?.status === 'VALIDATED') {
-        throw appError('BAD_REQUEST', 'IMPORT_ALREADY_VALIDATED')
-      }
+      const transaction = await findEditableTransaction(
+        ctx.db,
+        ctx.session.user.id,
+        input.id,
+      )
       // Une catégorie pro sur une ligne perso (ou l'inverse) fausserait les deux dashboards.
       if (!isCategoryOf(transaction.accountType, input.category)) {
         throw appError('BAD_REQUEST', 'CATEGORY_NOT_ALLOWED')
@@ -51,25 +46,19 @@ export const transactionRouter = createTRPCRouter({
     .input(z.object({ id: z.string().min(1), apartmentId: z.string().min(1) }))
     .mutation(async ({ ctx, input }) => {
       const userId = ctx.session.user.id
-      const transaction = await ctx.db.transaction.findFirst({
-        where: { id: input.id, userId },
-        select: {
-          accountType: true,
-          importBatch: { select: { status: true } },
-        },
-      })
-      if (!transaction) throw appError('NOT_FOUND', 'TRANSACTION_NOT_FOUND')
-      if (transaction.importBatch?.status === 'VALIDATED') {
-        throw appError('BAD_REQUEST', 'IMPORT_ALREADY_VALIDATED')
-      }
+      const transaction = await findEditableTransaction(
+        ctx.db,
+        userId,
+        input.id,
+      )
       if (transaction.accountType !== 'APARTMENT') {
         throw appError('BAD_REQUEST', 'APARTMENT_NOT_ALLOWED')
       }
-      const apartment = await ctx.db.apartment.findFirst({
-        where: { id: input.apartmentId, userId },
-        select: { id: true },
-      })
-      if (!apartment) throw appError('NOT_FOUND', 'APARTMENT_NOT_FOUND')
+      const apartment = await findOwnedApartment(
+        ctx.db,
+        userId,
+        input.apartmentId,
+      )
       await ctx.db.transaction.update({
         where: { id: input.id },
         data: { apartmentId: apartment.id },

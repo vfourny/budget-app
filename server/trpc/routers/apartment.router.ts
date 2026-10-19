@@ -1,5 +1,6 @@
 import { ApartmentKind } from '@server/generated/prisma/enums'
 import { appError } from '@server/lib/app-error.util'
+import { findOwnedApartment } from '@server/lib/ownership.service'
 import { createTRPCRouter, protectedProcedure } from '@server/trpc/trpc.config'
 import { yearSchema } from '@shared/common/period.schema'
 import { utcDay } from '@shared/common/year-month.util'
@@ -136,11 +137,7 @@ export const apartmentRouter = createTRPCRouter({
     .input(z.object({ id: z.string().min(1) }))
     .mutation(async ({ ctx, input }) => {
       const userId = ctx.session.user.id
-      const apartment = await ctx.db.apartment.findFirst({
-        where: { id: input.id, userId },
-        select: { id: true },
-      })
-      if (!apartment) throw appError('NOT_FOUND', 'APARTMENT_NOT_FOUND')
+      await findOwnedApartment(ctx.db, userId, input.id)
       const [transactions, imports] = await Promise.all([
         ctx.db.transaction.count({ where: { userId, apartmentId: input.id } }),
         ctx.db.importBatch.count({ where: { userId, apartmentId: input.id } }),

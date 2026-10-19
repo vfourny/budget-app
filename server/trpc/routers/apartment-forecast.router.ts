@@ -2,6 +2,7 @@ import { ApartmentForecastLine } from '@server/generated/prisma/enums'
 import { apartmentYear } from '@server/lib/apartments/build-view.service'
 import { loadApartmentData } from '@server/lib/apartments/load-period.service'
 import { appError } from '@server/lib/app-error.util'
+import { findOwnedApartment } from '@server/lib/ownership.service'
 import { createTRPCRouter, protectedProcedure } from '@server/trpc/trpc.config'
 import { yearMonthSchema } from '@shared/common/period.schema'
 import { currentYearMonth } from '@shared/common/year-month.util'
@@ -83,11 +84,7 @@ export const apartmentForecastRouter = createTRPCRouter({
     .mutation(async ({ ctx, input }) => {
       const userId = ctx.session.user.id
       const { apartmentId, year, month, managementFeeBps, invoice } = input
-      const apartment = await ctx.db.apartment.findFirst({
-        where: { id: apartmentId, userId },
-        select: { managed: true },
-      })
-      if (!apartment) throw appError('NOT_FOUND', 'APARTMENT_NOT_FOUND')
+      const apartment = await findOwnedApartment(ctx.db, userId, apartmentId)
       if (
         !apartment.managed &&
         (managementFeeBps !== undefined || invoice !== undefined)

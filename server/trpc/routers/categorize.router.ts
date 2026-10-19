@@ -1,5 +1,4 @@
 import type { TransactionCategory } from '@server/generated/prisma/enums'
-import { appError } from '@server/lib/app-error.util'
 import {
   type CategorizeExample,
   categorizeTransactions,
@@ -11,6 +10,7 @@ import {
 } from '@server/lib/categorize/normalize-label.util'
 import { geminiTRPCError } from '@server/lib/gemini-error.util'
 import { gemini } from '@server/lib/gemini.client'
+import { findPendingImport } from '@server/lib/ownership.service'
 import { createTRPCRouter, protectedProcedure } from '@server/trpc/trpc.config'
 import { z } from 'zod'
 
@@ -30,13 +30,7 @@ export const categorizeRouter = createTRPCRouter({
     .input(z.object({ batchId: z.string().min(1) }))
     .mutation(async ({ ctx, input }) => {
       const userId = ctx.session.user.id
-      const batch = await ctx.db.importBatch.findFirst({
-        where: { id: input.batchId, userId },
-      })
-      if (!batch) throw appError('NOT_FOUND', 'IMPORT_NOT_FOUND')
-      if (batch.status !== 'PENDING_REVIEW') {
-        throw appError('BAD_REQUEST', 'IMPORT_ALREADY_VALIDATED')
-      }
+      const batch = await findPendingImport(ctx.db, userId, input.batchId)
 
       const transactions = await ctx.db.transaction.findMany({
         where: { importBatchId: batch.id, category: null },
