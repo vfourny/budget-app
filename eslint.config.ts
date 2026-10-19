@@ -6,12 +6,14 @@ import type { Rule } from 'eslint'
 /**
  * Côté front et `shared/`, le serveur ne s'importe qu'en `import type`, et seulement son contrat : le
  * type du routeur tRPC et les types Prisma générés. Prisma, secrets… ne partent jamais dans le bundle.
+ * Exception : `@server/generated/prisma/enums` (des constantes pures) s'importe normalement, pour
+ * parcourir un enum (`Object.values(AccountType)`) sans passer par les clés d'un dictionnaire i18n.
  */
 const SERVER_CONTRACT_TYPES_ONLY = {
   allowTypeImports: true,
   message:
     "Côté front et shared, `server/` ne s'importe qu'en `import type`. Code commun : `shared/` (@shared/…).",
-  regex: '^@server/(trpc/app\\.router|generated/prisma/.+)$',
+  regex: '^@server/(trpc/app\\.router|generated/prisma/(?!enums$).+)$',
 }
 
 /**

@@ -1,9 +1,14 @@
-import { isCategoryOf, isToCheck } from '@shared/transactions/categories.rules'
+import {
+  categoriesOf,
+  isCategoryOf,
+  isToCheck,
+} from '@shared/transactions/categories.rules'
 import { expect, it } from 'vitest'
 
 it('isCategoryOf', () => {
   expect(isCategoryOf('APARTMENT', 'INTERNET')).toBe(true)
   expect(isCategoryOf('PROFESSIONAL', 'INTERNET')).toBe(false)
+  expect(categoriesOf('APARTMENT')[0]).toBe('APT_RENT_RECEIVED')
 })
 
 it.each([

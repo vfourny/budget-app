@@ -12,7 +12,7 @@ import {
   Title,
 } from '@mantine/core'
 import { Dropzone } from '@mantine/dropzone'
-import type { AccountType } from '@server/generated/prisma/enums'
+import { AccountType } from '@server/generated/prisma/enums'
 import type { CsvFormatConfig } from '@shared/transactions/csv-format.schema'
 import {
   IconAlertTriangle,
@@ -22,17 +22,15 @@ import {
 import { type SubmitEvent, useState } from 'react'
 import { Link, useNavigate, useSearchParams } from 'react-router'
 
-import { useApartmentOptions } from '@/features/apartments/hooks/use-apartment-options'
+import { useApartmentOptions } from '@/features/apartments/hooks/use-apartments'
 import { FormatReview } from '@/features/imports/components/format-review'
 import { useDetectCsvFormat } from '@/features/imports/hooks/use-detect-csv-format'
 import { useImportStatement } from '@/features/imports/hooks/use-import-statement'
 import { appErrorCode, csvErrorMessage, errorMessage } from '@/lib/errors'
 import { fr } from '@/lib/i18n/fr'
 
-// Libellés des types de compte (dictionnaire aligné sur l'enum Prisma), pour le `<Select>`.
-const ACCOUNT_TYPE_OPTIONS = (
-  Object.keys(fr.accountTypes) as AccountType[]
-).map((value) => ({
+// Types de compte (ordre de l'enum Prisma) et leurs libellés, pour le `<Select>`.
+const ACCOUNT_TYPE_OPTIONS = Object.values(AccountType).map((value) => ({
   value,
   label: fr.accountTypes[value],
 }))
@@ -223,7 +221,11 @@ export function ImportForm() {
               apartments.data.length === 0 && (
                 <Text c="dimmed" size="sm">
                   {fr.importForm.noApartment}{' '}
-                  <Anchor component={Link} size="sm" to="/settings?tab=apt">
+                  <Anchor
+                    component={Link}
+                    size="sm"
+                    to="/settings?tab=apartments"
+                  >
                     {fr.importForm.addApartment}
                   </Anchor>
                 </Text>

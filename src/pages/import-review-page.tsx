@@ -1,7 +1,7 @@
 import { Alert } from '@mantine/core'
 import { useParams } from 'react-router'
 
-import { ImportReview } from '@/features/review/components/import-review'
+import { ImportReview } from '@/features/imports/components/import-review'
 import { fr } from '@/lib/i18n/fr'
 
 export function ImportReviewPage() {

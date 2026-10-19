@@ -15,7 +15,7 @@ import { useState } from 'react'
 import {
   useEnvelopeShares,
   useSetEnvelopeShares,
-} from '@/features/settings/hooks/use-envelope-shares'
+} from '@/features/personal/hooks/use-envelope-shares'
 import { errorMessage } from '@/lib/errors'
 import { fr } from '@/lib/i18n/fr'
 

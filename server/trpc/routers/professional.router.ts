@@ -1,11 +1,21 @@
-import { validatedTransactions } from '@server/lib/dashboard/scope.service'
 import { loadProfessionalYear } from '@server/lib/professional/load-year.service'
+import { validatedTransactions } from '@server/lib/transactions/scope.service'
+import { professionalForecastRouter } from '@server/trpc/routers/professional-forecast.router'
+import { professionalSettingsRouter } from '@server/trpc/routers/professional-settings.router'
+import { professionalTripRouter } from '@server/trpc/routers/professional-trip.router'
 import { createTRPCRouter, protectedProcedure } from '@server/trpc/trpc.config'
 import { yearMonthSchema, yearSchema } from '@shared/common/period.schema'
 import { currentYearMonth } from '@shared/common/year-month.util'
 import { z } from 'zod'
 
 export const professionalRouter = createTRPCRouter({
+  /** Éditeur du prévisionnel (facturation, charges, salaire, km). */
+  forecast: professionalForecastRouter,
+  /** Réglages › Pro (règles de l'année). */
+  settings: professionalSettingsRouter,
+  /** Journal des trajets (frais kilométriques). */
+  trips: professionalTripRouter,
+
   /**
    * Mois proposés par le sélecteur (du plus récent au plus ancien) : les 12 mois de chaque année qui
    * a des données pro (relevé validé ou facturation) et de l'année en cours. Les mois à venir sont

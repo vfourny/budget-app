@@ -48,7 +48,7 @@ export function useValidateImport(importId: string) {
 /** Relance la catégorisation IA (lignes encore sans catégorie), ex. après un échec de l'appel. */
 export function useRunCategorization(importId: string) {
   return useMutation({
-    ...trpc.categorize.run.mutationOptions(),
+    ...trpc.import.categorize.run.mutationOptions(),
     onSuccess: () =>
       Promise.all([
         queryClient.invalidateQueries(

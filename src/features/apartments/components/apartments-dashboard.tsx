@@ -18,7 +18,7 @@ import { type Period, usePeriodSelection } from '@/hooks/use-period-selection'
 import { capitalizedMonthName } from '@/lib/format'
 import { fr } from '@/lib/i18n/fr'
 
-const SETTINGS_URL = '/settings?tab=apt'
+const SETTINGS_URL = '/settings?tab=apartments'
 
 export function ApartmentsDashboard() {
   const periods = useApartmentPeriods()

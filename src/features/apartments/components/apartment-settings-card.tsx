@@ -15,7 +15,7 @@ import {
   UnstyledButton,
 } from '@mantine/core'
 import { useDisclosure } from '@mantine/hooks'
-import type { ApartmentKind } from '@server/generated/prisma/enums'
+import { ApartmentKind } from '@server/generated/prisma/enums'
 import { loanSchedule } from '@shared/apartments/loan.util'
 import { IconChevronDown } from '@tabler/icons-react'
 import { useState } from 'react'
@@ -25,7 +25,7 @@ import { PercentField } from '@/components/percent-field'
 import {
   useDeleteApartment,
   useSaveApartment,
-} from '@/features/settings/hooks/use-apartments'
+} from '@/features/apartments/hooks/use-apartments'
 import { errorMessage } from '@/lib/errors'
 import { formatCents } from '@/lib/format'
 import { fr } from '@/lib/i18n/fr'
@@ -37,12 +37,10 @@ export type ApartmentValues = Omit<
 >
 type Loan = NonNullable<ApartmentValues['loan']>
 
-const KIND_OPTIONS = (Object.keys(fr.apartmentKinds) as ApartmentKind[]).map(
-  (value) => ({
-    value,
-    label: fr.apartmentKinds[value],
-  }),
-)
+const KIND_OPTIONS = Object.values(ApartmentKind).map((value) => ({
+  value,
+  label: fr.apartmentKinds[value],
+}))
 
 const text = fr.settings.apartments
 

@@ -27,7 +27,7 @@ import { formatCents } from '@/lib/format'
 import { fr } from '@/lib/i18n/fr'
 import type { RouterOutputs } from '@/lib/trpc'
 
-type ForecastInputs = RouterOutputs['apartmentForecast']['inputs']
+type ForecastInputs = RouterOutputs['apartment']['forecast']['inputs']
 type ForecastInput = ForecastInputs['lines'][number]
 type Management = NonNullable<ForecastInputs['management']>
 type Invoice = NonNullable<Management['invoice']>

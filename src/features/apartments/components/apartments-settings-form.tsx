@@ -5,8 +5,8 @@ import { useState } from 'react'
 import {
   ApartmentSettingsCard,
   type ApartmentValues,
-} from '@/features/settings/components/apartment-settings-card'
-import { useApartments } from '@/features/settings/hooks/use-apartments'
+} from '@/features/apartments/components/apartment-settings-card'
+import { useApartments } from '@/features/apartments/hooks/use-apartments'
 import { fr } from '@/lib/i18n/fr'
 
 /** Brouillon d'un nouveau bien : acquisition ce mois-ci, tout à zéro, sans prêt. */

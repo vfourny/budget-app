@@ -6,7 +6,7 @@ import { fr } from '@/lib/i18n/fr'
 import type { RouterOutputs } from '@/lib/trpc'
 
 type Thresholds = NonNullable<
-  RouterOutputs['apartmentDashboard']['year']['thresholds']
+  RouterOutputs['apartment']['dashboard']['year']['thresholds']
 >
 
 /**

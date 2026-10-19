@@ -1,6 +1,8 @@
 import { ApartmentKind } from '@server/generated/prisma/enums'
 import { appError } from '@server/lib/app-error.util'
 import { findOwnedApartment } from '@server/lib/ownership.service'
+import { apartmentDashboardRouter } from '@server/trpc/routers/apartment-dashboard.router'
+import { apartmentForecastRouter } from '@server/trpc/routers/apartment-forecast.router'
 import { createTRPCRouter, protectedProcedure } from '@server/trpc/trpc.config'
 import { yearSchema } from '@shared/common/period.schema'
 import { utcDay } from '@shared/common/year-month.util'
@@ -34,6 +36,11 @@ const saveSchema = z.object({
 })
 
 export const apartmentRouter = createTRPCRouter({
+  /** Dashboard `/apartments` (mois, année, sélecteur de période). */
+  dashboard: apartmentDashboardRouter,
+  /** Éditeur du prévisionnel d'un appartement. */
+  forecast: apartmentForecastRouter,
+
   /** Appartements de l'utilisateur, avec le solde de début d'année de `year` (0 si non saisi). */
   list: protectedProcedure
     .input(z.object({ year: yearSchema }))

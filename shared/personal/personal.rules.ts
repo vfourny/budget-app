@@ -49,6 +49,18 @@ export const ENVELOPE_CATEGORIES = {
 } as const satisfies Record<Envelope, readonly PersonalCategory[]>
 
 /**
+ * Les 5 enveloppes qui reçoivent une part du revenu (méthode des 5 comptes), dans l'ordre
+ * d'affichage (jauges, Réglages).
+ */
+export const BUDGET_ENVELOPES = [
+  'CURRENT_EXPENSES',
+  'LEISURE',
+  'TRAINING',
+  'SAFETY_SAVINGS',
+  'LONG_TERM_SAVINGS',
+] as const satisfies readonly Envelope[]
+
+/**
  * Parts du revenu mensuel recommandées par enveloppe, en % (100 % du revenu affecté). Valeurs
  * utilisées tant que rien n'est configuré dans Réglages, et par le bouton « Valeurs par défaut ».
  */

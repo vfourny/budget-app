@@ -49,32 +49,33 @@ Pourquoi pas Next.js : app mono-utilisateur derrière une auth, sans SEO. SSR et
 
 **Ajouter une route tRPC** :
 
-1. Créer `server/trpc/routers/<domaine>.router.ts` (entrées validées par `.input(zodSchema)`).
-2. L'enregistrer dans `server/trpc/app.router.ts`.
+1. L'ajouter au routeur de son domaine, `server/trpc/routers/<domaine>.router.ts` (entrées validées par `.input(zodSchema)`) ;
+   un écran du domaine avec plusieurs procédures a son sous-routeur `<domaine>-<écran>.router.ts`, imbriqué dans celui du domaine.
+2. Un nouveau domaine s'enregistre dans `server/trpc/app.router.ts`.
 3. Côté front, un hook dans `src/features/<domaine>/hooks/`.
 
-Routeurs actuels (tous en `protectedProcedure`) :
+Routeurs actuels (tous en `protectedProcedure`), un par domaine :
 
 - `import` : `detectFormat` (format CSV inconnu → Gemini), `create` (parse + `ImportBatch` et ses `Transaction` en une
   transaction SQL ; `apartmentId` obligatoire pour un compte appartement), `list`, `get`, `validate` (refusé tant qu'une
   ligne est à vérifier), `delete` (cascade).
-- `categorize` : `run` (catégorie + confiance par Gemini pour les lignes sans catégorie ; `server/lib/categorize/`).
+  - `import.categorize` : `run` (catégorie + confiance par Gemini pour les lignes sans catégorie ; `server/lib/categorize/`).
 - `transaction` : `setCategory` (correction manuelle, confiance repassée à `null` = « Confirmée » ; refusé si l'import
   est validé ou si la catégorie n'est pas du type de compte), `setApartment` (rattachement d'une ligne).
-- `personal` : `periods`, `overview` (agrégation dans `shared/personal/aggregate.calc.ts`).
-- `settings` : `envelopeShares` / `setEnvelopeShares` (défauts `DEFAULT_ENVELOPE_PERCENTS`), `professionalYear` /
-  `professionalYearsConfigured` / `setProfessionalYear` (règles pro par année, héritées de l'année configurée précédente).
-- `professional` : `periods`, `month`, `year` (calcul dans `server/lib/professional/`).
-- `professionalForecast` : facturation (`billingLines`…), charges (`forecasts`…), salaire (`salary`…), km (`mileage`…),
-  chacun avec sa variante `copy…ToFollowingMonths` ; `clients` (noms déjà saisis + dernier TJM).
-- `trip` : `create`, `delete`.
+- `personal` : `periods`, `overview` (agrégation dans `shared/personal/aggregate.calc.ts`), `balance` / `setBalance`,
+  `envelopeShares` / `setEnvelopeShares` (défauts `DEFAULT_ENVELOPE_PERCENTS`).
+- `professional` : `periods`, `month`, `year` (calcul dans `shared/professional/`).
+  - `professional.forecast` : facturation (`billingLines`…), charges (`forecasts`…), salaire (`salary`…), km (`mileage`…),
+    chacun avec sa variante `copy…ToFollowingMonths` ; `clients` (noms déjà saisis + dernier TJM).
+  - `professional.settings` : `year` / `configuredYears` / `setYear` (règles pro par année, héritées de l'année configurée précédente).
+  - `professional.trips` : `create`, `delete`.
 - `apartment` : `list`, `options`, `save` (fiche, prêt et solde de début d'année), `delete`
   (refusé si le bien porte des transactions ou des relevés).
-- `apartmentDashboard` : `periods` (mois clos), `month`, `year` (calculs purs dans `server/lib/apartments/`).
-- `apartmentForecast` : `inputs` / `set` (éditeur du prévisionnel : lignes du mois, et pour un bien géré taux de
-  gérance + facture de gérance du mois).
+  - `apartment.dashboard` : `periods` (mois clos), `month`, `year` (calculs purs dans `shared/apartments/`).
+  - `apartment.forecast` : `inputs` / `set` (éditeur du prévisionnel : lignes du mois, et pour un bien géré taux de
+    gérance + facture de gérance du mois).
 
-Le filtre « transactions validées d'un type de compte » est partagé : `server/lib/dashboard/scope.service.ts`. Une ligne est
+Le filtre « transactions validées d'un type de compte » est partagé : `server/lib/transactions/scope.service.ts`. Une ligne est
 « à vérifier » si elle n'a pas de catégorie ou si sa confiance est sous 0,7 (`server/lib/categorize/needs-review.service.ts`).
 Sans session : `UNAUTHORIZED` / code `NOT_AUTHENTICATED`.
 

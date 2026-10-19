@@ -7,7 +7,7 @@ import { fr } from '@/lib/i18n/fr'
 import type { RouterOutputs } from '@/lib/trpc'
 
 type ApartmentView =
-  RouterOutputs['apartmentDashboard']['month']['apartments'][number]
+  RouterOutputs['apartment']['dashboard']['month']['apartments'][number]
 type Column = ApartmentView['forecast']
 
 /** `+1` : un montant plus élevé est favorable (loyer, solde) ; `-1` : plus bas est favorable (charge, crédit). */

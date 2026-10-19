@@ -71,7 +71,7 @@ src/                   # FRONT — SPA React, tourne uniquement dans le navigate
   main.tsx             # point d'entrée (createRoot + providers : Query, Router, Mantine)
   app.tsx              # table des routes (React Router)
   pages/               # une page = un écran (assemble un header + des composants de feature)
-  features/<domaine>/  # import, review, dashboard… : components/ + hooks/ du domaine
+  features/<domaine>/  # personal, professional, apartments, imports, auth, layout : components/ + hooks/ du domaine (réglages compris)
   components/          # UI partagée entre features (PageHeader, KpiCard…)
   lib/                 # utilitaires front : trpc.ts (client + queryClient), theme.ts (thème Mantine)…
     i18n/fr/           # TOUS les textes de l'UI (dictionnaires typés) + plural.ts (accord en nombre)
@@ -86,7 +86,7 @@ shared/                # code pur partagé front + back, alias @shared/ — rang
 server/                # BACKEND — Nitro, mêmes conventions que le server/ de Nuxt
   api/                 # routes HTTP : server/api/health.ts → GET /api/health
     trpc/[...path].ts  # point d'entrée HTTP de tRPC
-  trpc/                # trpc.config.ts (contexte, procédures), app.router.ts (appRouter), routers/<domaine>.router.ts
+  trpc/                # trpc.config.ts (contexte, procédures), app.router.ts (un routeur par domaine), routers/<domaine>.router.ts + <domaine>-<écran>.router.ts imbriqués
   lib/                 # db.client.ts (PrismaClient singleton), env.config.ts (validation Zod des variables)
     professional/      # dashboard Pro : load-year.service (requêtes, puis calcul de shared/professional/), forecast-values.service
     apartments/        # dashboard Appartements : load-period.service (requêtes) + build-view.service (assemblage, calculs de shared/apartments/)
@@ -125,8 +125,9 @@ nitro.config.ts        # serverDir: ./server
 - **Pattern de lecture** : `useQuery(trpc.<domaine>.<proc>.queryOptions())` avec `trpc` de
   `@/lib/trpc`, encapsulé dans un hook de feature ; gérer `isPending` / `isError` dans le
   composant. Écriture : `useMutation(trpc.x.y.mutationOptions())` + invalidation ciblée.
-- **Nouvelle route tRPC** : `server/trpc/routers/<domaine>.router.ts` + enregistrement dans
-  `server/trpc/app.router.ts`. Entrées validées par `.input(zodSchema)`. **Toujours `protectedProcedure`**
+- **Nouvelle route tRPC** : dans le routeur de son domaine `server/trpc/routers/<domaine>.router.ts` (sous-routeur
+  `<domaine>-<écran>.router.ts` imbriqué pour un écran à plusieurs procédures : `professional.forecast`, `apartment.dashboard`…) ;
+  un nouveau domaine s'enregistre dans `server/trpc/app.router.ts`. Entrées validées par `.input(zodSchema)`. **Toujours `protectedProcedure`**
   (`server/trpc/trpc.config.ts`, 401 sans session) ; `publicProcedure` seulement pour du contenu public.
   Un routeur reste **mince** : il valide l'entrée, vérifie l'accès (`server/lib/ownership.service.ts` : `findOwnedApartment`,
   `findPendingImport`, `findEditableTransaction`) et délègue à un `server/lib/<domaine>/xxx.service.ts` dès que la procédure
@@ -167,6 +168,12 @@ nitro.config.ts        # serverDir: ./server
   bouton Système → Clair → Sombre dans la barre latérale, choix mémorisé par Mantine) : jamais `dark.N` / `--mantine-color-dark-N`
   dans un composant (figé en sombre) ; une couleur qui dépend du thème = une variable dans
   `cssVariablesResolver` (`light` + `dark`).
+- **Découpage par domaine** (`personal`, `professional`, `apartments`, `imports`), pas par écran : un composant ou un hook
+  va dans la feature du domaine qu'il manipule, même s'il s'affiche dans un écran transverse (Réglages : chaque onglet vient
+  de sa feature, `pages/settings-page.tsx` ne fait que les assembler). Pareil côté serveur (`server/lib/<domaine>/`).
+- **Ordre d'affichage** : jamais tiré des clés d'un dictionnaire i18n. Ordre métier = une liste dans `shared/` (`categoriesOf`,
+  `BUDGET_ENVELOPES`…) ; sinon l'ordre de l'enum (`Object.values(AccountType)`, `@server/generated/prisma/enums` s'importe
+  normalement côté front : constantes pures).
 - **Routing** : React Router en mode « library » (`BrowserRouter` + `<Routes>` dans `app.tsx`).
   Une nouvelle page = un fichier dans `src/pages/` + une `<Route>` ; s'il faut l'afficher dans le
   menu, l'ajouter à `MAIN_NAV` (`features/layout/components/app-layout.tsx`).

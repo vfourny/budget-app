@@ -7,6 +7,11 @@ export function useApartments(year: number) {
   return useQuery(trpc.apartment.list.queryOptions({ year }))
 }
 
+/** Id et nom des appartements, pour les sélecteurs (import, relecture). */
+export function useApartmentOptions() {
+  return useQuery(trpc.apartment.options.queryOptions())
+}
+
 /** Crée ou met à jour un appartement (et son solde de début d'année). */
 export function useSaveApartment() {
   return useMutation({

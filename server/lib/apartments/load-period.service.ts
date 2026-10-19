@@ -1,5 +1,5 @@
-import { validatedTransactions } from '@server/lib/dashboard/scope.service'
 import type { db as Db } from '@server/lib/db.client'
+import { validatedTransactions } from '@server/lib/transactions/scope.service'
 import type {
   ApartmentForecastRecord,
   ApartmentRecord,
