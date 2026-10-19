@@ -267,6 +267,12 @@ Hors scope : synchro bancaire auto, multi-utilisateurs, émission de factures.
   prévisionnel (`SalaryForecast`, sans saisie = brut du même mois N-1 ; réel = prévu, le relevé ne montre que le net),
   cotisations calculées depuis les taux de l'année (les prélèvements URSSAF / PAS… ne comptent pas dans les charges) ; clients en texte libre dans la facturation
   (pas de table) ; jours facturés en `Float` par pas de 0,5 (exact en binaire, pas de demi-journées entières) ; encaissé = crédits `CLIENT_PAYMENT` du mois, reste à encaisser = solde cumulé facturé TTC − encaissé ; graphiques en CSS (pas de lib).
+- **Solde du compte perso (2026-10-19)** : pas de solde stocké par mois. On saisit des **repères** (`AccountBalance` :
+  solde réel en fin de mois) et le reste se calcule (`server/lib/dashboard/balance.ts`, pur) : repère le plus récent +
+  transactions validées des mois suivants ; début de mois = fin du mois précédent. Un repère sur un mois l'emporte sur le
+  calcul, qui sert alors à afficher l'écart (import manquant, doublon…). Sans repère : solde « non renseigné ». Le solde
+  courant des CSV (colonne « Solde » BoursoBank) n'est pas exploité. Les appartements gardent leur solde au 1er janvier
+  (`ApartmentYearOpening`).
 - **Appartements (2026-10-07)** : trésorerie seulement (pas de fiscalité). Hypothèses retenues : mois clos = antérieur au mois
   en cours ; prévu des charges mensuelles = réel N-1, sinon moyenne des autres mois clos, sinon 0 ; prêt à taux fixe, assurance
   emprunteur prélevée à part (sauf échéance reconnue avec assurance) ; rendement sur le prix d'achat seul ; « Apport appartement »
