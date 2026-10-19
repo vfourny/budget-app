@@ -1,6 +1,6 @@
 // `import type` : seul le type du routeur traverse la frontière front/back, aucun code serveur
 // n'est embarqué dans le bundle navigateur.
-import type { AppRouter } from '@server/trpc/root'
+import type { AppRouter } from '@server/trpc/app.router'
 import { QueryClient } from '@tanstack/react-query'
 import { createTRPCClient, httpBatchLink } from '@trpc/client'
 import type { inferRouterOutputs } from '@trpc/server'

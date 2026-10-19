@@ -1,5 +1,5 @@
 import { Group, Paper, Text, Title, Tooltip } from '@mantine/core'
-import type { ProfessionalMonth } from '@server/lib/professional/types'
+import type { ProfessionalMonth } from '@server/lib/professional/professional.type'
 
 import { finalOf } from '@/features/professional/final-amount'
 import { formatCents, monthName, shortMonthName } from '@/lib/format'

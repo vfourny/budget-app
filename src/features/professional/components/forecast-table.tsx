@@ -1,5 +1,5 @@
 import { Table, Text } from '@mantine/core'
-import type { ForecastActual } from '@server/lib/professional/types'
+import type { ForecastActual } from '@server/lib/professional/professional.type'
 import { Fragment } from 'react'
 
 import type { GaugeGoal } from '@/components/target-gauge'

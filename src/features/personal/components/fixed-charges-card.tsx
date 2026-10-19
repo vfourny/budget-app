@@ -1,5 +1,5 @@
 import { Group, Paper, Stack, Text, ThemeIcon } from '@mantine/core'
-import type { PeriodTotals } from '@server/lib/dashboard/aggregate'
+import type { PeriodTotals } from '@server/lib/dashboard/aggregate.service'
 import { IconBolt, IconHome, IconPhone, IconWifi } from '@tabler/icons-react'
 import type { ComponentType } from 'react'
 

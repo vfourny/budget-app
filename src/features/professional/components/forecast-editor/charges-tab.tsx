@@ -1,5 +1,5 @@
 import { Group, NumberInput, Paper, Stack, Text } from '@mantine/core'
-import { PROFESSIONAL_CHARGE_CATEGORIES } from '@shared/professional/rules'
+import { PROFESSIONAL_CHARGE_CATEGORIES } from '@shared/professional/professional.rules'
 
 import { ForecastAmountsForm } from '@/features/professional/components/forecast-editor/forecast-amounts-form'
 import type { Period } from '@/hooks/use-period-selection'

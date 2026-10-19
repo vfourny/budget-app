@@ -1,5 +1,5 @@
-import { createTRPCContext } from '@server/trpc/init'
-import { appRouter } from '@server/trpc/root'
+import { appRouter } from '@server/trpc/app.router'
+import { createTRPCContext } from '@server/trpc/trpc.config'
 import { fetchRequestHandler } from '@trpc/server/adapters/fetch'
 import { defineHandler } from 'nitro/h3'
 

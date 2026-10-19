@@ -1,5 +1,5 @@
 import { Group, Paper, Stack, Text, Title } from '@mantine/core'
-import type { ProfessionalMonth } from '@server/lib/professional/types'
+import type { ProfessionalMonth } from '@server/lib/professional/professional.type'
 
 import { TargetGauge } from '@/components/target-gauge'
 import { formatCents } from '@/lib/format'

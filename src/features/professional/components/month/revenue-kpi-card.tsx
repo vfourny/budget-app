@@ -1,6 +1,6 @@
 import { Group, Paper, SimpleGrid, Stack, Text } from '@mantine/core'
-import type { ProfessionalMonth } from '@server/lib/professional/types'
-import { COLLECTED_VAT_BP } from '@shared/professional/rules'
+import type { ProfessionalMonth } from '@server/lib/professional/professional.type'
+import { COLLECTED_VAT_BP } from '@shared/professional/professional.rules'
 
 import { DeltaBadge } from '@/components/delta-badge'
 import { InfoTip } from '@/components/info-tip'

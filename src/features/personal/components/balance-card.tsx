@@ -10,7 +10,7 @@ import {
   Stack,
   Text,
 } from '@mantine/core'
-import type { MonthEndBalance } from '@server/lib/dashboard/balance'
+import type { MonthEndBalance } from '@server/lib/dashboard/balance.service'
 import { IconPencil } from '@tabler/icons-react'
 import { type SubmitEvent, useState } from 'react'
 

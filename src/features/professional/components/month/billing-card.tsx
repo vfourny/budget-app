@@ -10,8 +10,8 @@ import {
 import type {
   ClientBilling,
   ProfessionalMonth,
-} from '@server/lib/professional/types'
-import { averageDailyRate } from '@shared/professional/billing-days'
+} from '@server/lib/professional/professional.type'
+import { averageDailyRate } from '@shared/professional/billing-days.util'
 import type { ReactNode } from 'react'
 
 import { DeltaBadge } from '@/components/delta-badge'

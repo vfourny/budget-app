@@ -8,7 +8,7 @@ import {
   UnstyledButton,
 } from '@mantine/core'
 import type { TransactionCategory } from '@server/generated/prisma/enums'
-import { isToCheck } from '@shared/transactions/categories'
+import { isToCheck } from '@shared/transactions/categories.rules'
 import { useState } from 'react'
 
 import { formatCents, formatDate } from '@/lib/format'

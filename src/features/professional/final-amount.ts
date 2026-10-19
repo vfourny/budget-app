@@ -1,4 +1,4 @@
-import type { ForecastActual } from '@server/lib/professional/types'
+import type { ForecastActual } from '@server/lib/professional/professional.type'
 
 /** Valeur « finale » d'un mois : le réel s'il existe, sinon le prévu (mois à venir). */
 export const finalOf = (amount: ForecastActual): number =>

@@ -1,5 +1,5 @@
 import { Paper, Table, Text, Title } from '@mantine/core'
-import type { ProfessionalMonth } from '@server/lib/professional/types'
+import type { ProfessionalMonth } from '@server/lib/professional/professional.type'
 
 import { finalOf } from '@/features/professional/final-amount'
 import { formatEurosRounded, shortMonthName } from '@/lib/format'

@@ -19,7 +19,7 @@ shared/                # code pur partagé front + back, rangé par domaine (per
 server/                # BACKEND — Nitro, mêmes conventions que le server/ de Nuxt
   api/                 # routes HTTP : server/api/health.ts → GET /api/health
     trpc/[...path].ts  # point d'entrée HTTP de tRPC (/api/trpc/*)
-  trpc/                # init.ts (contexte, procédures), root.ts (appRouter), routers/<domaine>.ts
+  trpc/                # trpc.config.ts (contexte, procédures), app.router.ts (appRouter), routers/<domaine>.router.ts
   lib/                 # db.ts, env.ts, auth.ts, csv/, categorize/, dashboard/, professional/, apartments/, settings/
   generated/prisma/    # client Prisma généré — gitignoré, ne pas éditer
 prisma/                # schema/ (un .prisma par domaine), migrations/, seed.ts + seeds/
@@ -34,7 +34,7 @@ Pourquoi pas Next.js : app mono-utilisateur derrière une auth, sans SEO. SSR et
 - `import type` est **obligatoire** pour les types (`verbatimModuleSyntax`).
 - Alias : `@/…` → `src/`, `@server/…` → `server/`, `@shared/…` → `shared/` (déclarés dans `vite.config.ts` **et** `tsconfig.json`).
 - Vérifié par ESLint (`@typescript-eslint/no-restricted-imports`, `eslint.config.ts`) : `src/` et `shared/` n'importent `@server/…` qu'en `import type` ; `shared/`, `server/`, `prisma/` et `scripts/` n'importent jamais `@/…` (le front).
-- `src/lib/i18n/fr/enums.ts` (libellés des enums), `shared/personal/rules.ts` et `envelopes.ts` importent les types de l'enum Prisma depuis `@server/generated/prisma/enums`, en `import type` uniquement.
+- `src/lib/i18n/fr/enums.ts` (libellés des enums), `shared/personal/personal.rules.ts` et `envelopes.ts` importent les types de l'enum Prisma depuis `@server/generated/prisma/enums`, en `import type` uniquement.
 
 ## API : tRPC + TanStack Query
 
@@ -49,8 +49,8 @@ Pourquoi pas Next.js : app mono-utilisateur derrière une auth, sans SEO. SSR et
 
 **Ajouter une route tRPC** :
 
-1. Créer `server/trpc/routers/<domaine>.ts` (entrées validées par `.input(zodSchema)`).
-2. L'enregistrer dans `server/trpc/root.ts`.
+1. Créer `server/trpc/routers/<domaine>.router.ts` (entrées validées par `.input(zodSchema)`).
+2. L'enregistrer dans `server/trpc/app.router.ts`.
 3. Côté front, un hook dans `src/features/<domaine>/hooks/`.
 
 Routeurs actuels (tous en `protectedProcedure`) :
@@ -61,7 +61,7 @@ Routeurs actuels (tous en `protectedProcedure`) :
 - `categorize` : `run` (catégorie + confiance par Gemini pour les lignes sans catégorie ; `server/lib/categorize/`).
 - `transaction` : `setCategory` (correction manuelle, confiance repassée à `null` = « Confirmée » ; refusé si l'import
   est validé ou si la catégorie n'est pas du type de compte), `setApartment` (rattachement d'une ligne).
-- `personal` : `periods`, `overview` (agrégation dans `server/lib/dashboard/aggregate.ts`).
+- `personal` : `periods`, `overview` (agrégation dans `server/lib/dashboard/aggregate.service.ts`).
 - `settings` : `envelopeShares` / `setEnvelopeShares` (défauts `DEFAULT_ENVELOPE_PERCENTS`), `professionalYear` /
   `professionalYearsConfigured` / `setProfessionalYear` (règles pro par année, héritées de l'année configurée précédente).
 - `professional` : `periods`, `month`, `year` (calcul dans `server/lib/professional/`).
@@ -74,25 +74,25 @@ Routeurs actuels (tous en `protectedProcedure`) :
 - `apartmentForecast` : `inputs` / `set` (éditeur du prévisionnel : lignes du mois, et pour un bien géré taux de
   gérance + facture de gérance du mois).
 
-Le filtre « transactions validées d'un type de compte » est partagé : `server/lib/dashboard/scope.ts`. Une ligne est
-« à vérifier » si elle n'a pas de catégorie ou si sa confiance est sous 0,7 (`server/lib/categorize/needs-review.ts`).
+Le filtre « transactions validées d'un type de compte » est partagé : `server/lib/dashboard/scope.service.ts`. Une ligne est
+« à vérifier » si elle n'a pas de catégorie ou si sa confiance est sous 0,7 (`server/lib/categorize/needs-review.service.ts`).
 Sans session : `UNAUTHORIZED` / code `NOT_AUTHENTICATED`.
 
 **Seed** (`prisma/seed.ts`, un fichier par domaine dans `prisma/seeds/`, `pnpm db:seed`, rejoué par `pnpm db:reset`) :
 crée le compte unique depuis `SEED_USER_EMAIL` / `SEED_USER_PASSWORD` (inscription HTTP désactivée), les formats CSV
-historiques et, pour le dev, des données sur l'année `SEED_YEAR` (2025, `prisma/seeds/seed-year.ts`) : relevés perso,
+historiques et, pour le dev, des données sur l'année `SEED_YEAR` (2025, `prisma/seeds/seed-year.config.ts`) : relevés perso,
 facturation et trajets Pro, appartements et leurs relevés. Idempotent : il ne crée pas de doublon et n'écrase pas les saisies faites dans l'app. Le barème
-de l'IR n'est pas en base : `shared/fiscal/income-tax.ts` (une PR par nouvelle année).
+de l'IR n'est pas en base : `shared/fiscal/income-tax.rules.ts` (une PR par nouvelle année).
 
 ### Calcul du dashboard Pro (`server/lib/professional/`)
 
-- `load-year.ts` : quelques requêtes groupées pour une année (relevés pro et perso validés, facturation, prévisions, trajets, encaissements clients), puis appelle le calcul. Aucune règle métier ici.
-- `compute-month.ts` : **fonction pure** (aucun accès base) → `ProfessionalMonth` (chaque valeur est un `ForecastActual` `{ forecast, actual | null }`). `compute-year.ts` enchaîne les 12 mois (TVA payée = TVA due du mois précédent). La vue année = 12 × le calcul du mois.
+- `load-year.service.ts` : quelques requêtes groupées pour une année (relevés pro et perso validés, facturation, prévisions, trajets, encaissements clients), puis appelle le calcul. Aucune règle métier ici.
+- `compute-month.service.ts` : **fonction pure** (aucun accès base) → `ProfessionalMonth` (chaque valeur est un `ForecastActual` `{ forecast, actual | null }`). `compute-year.service.ts` enchaîne les 12 mois (TVA payée = TVA due du mois précédent). La vue année = 12 × le calcul du mois.
 - `regimes/` : interface `ProfessionalRegime` (rémunération, charges sociales sur bénéfice) ; `sas-ir.ts` est la seule implémentation. Ajouter l'IS ou l'EURL = un fichier + une entrée dans `regimes/index.ts`.
-- Reste à encaisser : `load-year.ts` calcule le solde d'ouverture de l'année (facturé TTC réel − encaissements depuis le premier mois facturé), `compute-year.ts` le reporte de mois en mois (`openingReceivablesCents`), `compute-month.ts` l'applique (plancher à 0).
+- Reste à encaisser : `load-year.service.ts` calcule le solde d'ouverture de l'année (facturé TTC réel − encaissements depuis le premier mois facturé), `compute-year.service.ts` le reporte de mois en mois (`openingReceivablesCents`), `compute-month.service.ts` l'applique (plancher à 0).
 - `allocate-refunds.ts` (remboursements de frais mixtes ligne par ligne), `forecast-values.ts` (valeurs de l'éditeur : saisie, défaut N-1, mois précédent).
-- Jours facturés : `BillingLine.days` en `Float`, limité aux multiples de 0,5 (exacts en binaire, validés par tRPC avec `multipleOf`) ; pas, plafond, montant jours × TJM et TJM moyen dans `shared/professional/billing-days.ts`.
-- Règles modifiables (TVA par charge, frais mixtes, groupes de l'éditeur, répartition des cotisations) : `shared/professional/rules.ts` ; catégories pro : `shared/transactions/categories.ts`.
+- Jours facturés : `BillingLine.days` en `Float`, limité aux multiples de 0,5 (exacts en binaire, validés par tRPC avec `multipleOf`) ; pas, plafond, montant jours × TJM et TJM moyen dans `shared/professional/billing-days.util.ts`.
+- Règles modifiables (TVA par charge, frais mixtes, groupes de l'éditeur, répartition des cotisations) : `shared/professional/professional.rules.ts` ; catégories pro : `shared/transactions/categories.rules.ts`.
 
 ## Interface : Mantine + React Router
 
@@ -105,7 +105,7 @@ de l'IR n'est pas en base : `shared/fiscal/income-tax.ts` (une PR par nouvelle a
 
 - Générateur `prisma-client` (client TS sans moteur Rust) sorti dans `server/generated/prisma/` (gitignoré, régénéré par `postinstall`).
 - **Deux URLs Neon** : `DATABASE_URL` (pooled, host `-pooler`) pour le runtime via `@prisma/adapter-neon`, `DIRECT_URL` (directe) pour la CLI Prisma et les migrations (`prisma.config.ts`).
-- Côté serveur, toujours passer par `db` de `@server/lib/db` (singleton mis en cache sur `globalThis` pour survivre au hot reload).
+- Côté serveur, toujours passer par `db` de `@server/lib/db.client` (singleton mis en cache sur `globalThis` pour survivre au hot reload).
 - **Schéma découpé par domaine** dans `prisma/schema/` (déclaré dans `prisma.config.ts`) : `base` (générateur, datasource), `auth` (Better Auth), `transactions` (imports, formats CSV, transactions, catégories), `personal` (enveloppes), `professional` (Stygma), `apartments`. Prisma les lit comme un seul schéma : une relation peut traverser les fichiers.
 - **Toute modif du schéma s'accompagne d'une migration versionnée** dans `prisma/migrations/` (`pnpm db:migrate`).
 - `prisma.config.ts` n'utilise volontairement pas `env()` : il lèverait une erreur si la variable manque, ce qui casserait `prisma generate` en CI (pas de DB nécessaire).
@@ -128,14 +128,14 @@ de l'IR n'est pas en base : `shared/fiscal/income-tax.ts` (une PR par nouvelle a
 | `ApartmentYearOpening`     | Solde du compte appartement au 1er janvier d'une année                                               |
 | `ManagementInvoice`        | Facture de gérance d'un mois (frais + frais supplémentaires), saisie à la main                       |
 
-Enums : `AccountType` (PERSONAL / PROFESSIONAL / APARTMENT, sur `ImportBatch` et `Transaction`), `Envelope`, `TransactionCategory` (perso + pro + appartement, voir `shared/transactions/categories.ts`), `ImportStatus`, `CompanyRegime`, `BillingKind`, `ApartmentKind`.
+Enums : `AccountType` (PERSONAL / PROFESSIONAL / APARTMENT, sur `ImportBatch` et `Transaction`), `Envelope`, `TransactionCategory` (perso + pro + appartement, voir `shared/transactions/categories.rules.ts`), `ImportStatus`, `CompanyRegime`, `BillingKind`, `ApartmentKind`.
 
 Sans ligne `MonthlyForecast` / `MileageForecast` / `SalaryForecast`, un montant prévu vaut le réel du même mois N-1 (calculé à la lecture, jamais stocké).
 
 Choix à connaître :
 
 - Pas de modèle `BankAccount` : `accountType` est porté directement par `ImportBatch` et `Transaction`. La banque n'est pas stockée : le format CSV est retrouvé par l'empreinte de l'en-tête (`CsvFormat`, voir [import-csv.md](./import-csv.md)).
-- Les catégories sont un **enum figé**, pas une table : libellés dans `src/lib/i18n/fr/enums.ts`, enveloppes dans `shared/personal/rules.ts`.
+- Les catégories sont un **enum figé**, pas une table : libellés dans `src/lib/i18n/fr/enums.ts`, enveloppes dans `shared/personal/personal.rules.ts`.
 - Supprimer un `ImportBatch` supprime ses transactions (`onDelete: Cascade`).
 - Index sur `(year, month)`, `(accountType, year, month)`, `category` et `importBatchId` pour les agrégations dashboards.
 
@@ -148,7 +148,7 @@ Choix à connaître :
 - **State** : fondamentaux uniquement (`useState`, `useReducer`, Context, TanStack Query). **Pas de lib de state management** sans accord explicite.
 - **Validation** : schémas Zod partagés entre tRPC et formulaires.
 - **Langues** : UI en français, code / identifiants / commits en anglais.
-- Variables d'environnement serveur validées au démarrage par Zod (`server/lib/env.ts`). `GEMINI_API_KEY` est obligatoire ; `GEMINI_MODEL` est optionnelle (défaut `gemini-3.5-flash-lite`).
+- Variables d'environnement serveur validées au démarrage par Zod (`server/lib/env.config.ts`). `GEMINI_API_KEY` est obligatoire ; `GEMINI_MODEL` est optionnelle (défaut `gemini-3.5-flash-lite`).
 
 ## Équivalences React ↔ Vue
 

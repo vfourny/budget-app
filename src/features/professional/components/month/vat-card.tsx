@@ -2,7 +2,7 @@ import { Group, Paper, Stack, Table, Text } from '@mantine/core'
 import type {
   ForecastActual,
   ProfessionalMonth,
-} from '@server/lib/professional/types'
+} from '@server/lib/professional/professional.type'
 
 import { InfoTip } from '@/components/info-tip'
 import { formatCents, monthName } from '@/lib/format'
