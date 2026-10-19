@@ -130,6 +130,12 @@ reste des débits sont des **dépenses**.
   au-delà ; l'inverse pour l'épargne), Revenus (détail : Salaire = `SALARY_PAYMENT` + `BNC_PAYMENT`, Vacations,
   Remboursement pro, Autre remboursement, + « Autres » s'il reste des crédits non rangés), Épargne du mois (+ % des
   revenus) ; tableau des transactions triable ; dépenses par catégorie (toutes les catégories de la liste, même à 0 €).
+- **Bandeau Solde du compte** (en haut, mois et année) : solde en **début** et **fin** de période + variation, pour
+  comparer au relevé bancaire. Début de période = fin du mois précédent (vue année : fin décembre N-1 → fin décembre N).
+  Les soldes se calculent depuis le dernier **solde saisi** (badge « saisi », sinon « calculé ») : solde saisi + transactions
+  validées des mois suivants. Sans saisie antérieure : « Non renseigné ». Le crayon saisit le solde réel de ce mois
+  (`AccountBalance`) ; pour démarrer en mars, on saisit le solde de fin février depuis le « Début de mois » de mars. Si un
+  solde saisi ne correspond pas au calcul depuis la saisie précédente, l'**écart** s'affiche (import manquant ou en double).
 - **Ordre des cartes** (mois et année) : Revenus, Dépenses, Épargne.
 - **Vue année** : mêmes totaux sur l'année choisie, sur deux lignes (3 + 2) : plus la dépense moyenne par mois (mois ayant des données) et l'**IR estimé** (barème progressif 1 part de l'année affichée, appliqué au revenu annualisé = cumul / mois avec données × 12, sans abattement ni réductions). Le barème est une donnée du code (`shared/fiscal/income-tax.ts`, `INCOME_TAX_BRACKETS_BY_YEAR`, 2025 et 2026 pour l'instant), pas une saisie : **chaque nouvelle année s'ajoute par une PR**. Si l'année affichée n'a pas de barème, la card affiche « Barème de l'IR <année> non renseigné ».
 
