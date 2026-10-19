@@ -25,6 +25,8 @@ export default mergeConfig(
         enabled: true,
         include: ['shared/**/*.ts'],
         reportsDirectory: 'coverage',
+        // `shared/` (code pur, petit) doit rester couvert à 100 % : la CI casse sinon
+        thresholds: { 'shared/**': { 100: true } },
       },
       projects: [
         {
