@@ -2,7 +2,10 @@ import type {
   ApartmentForecastLine,
   TransactionCategory,
 } from '@server/generated/prisma/enums'
-import type { ApartmentCategory } from '@shared/transactions/categories.rules'
+import {
+  type ApartmentCategory,
+  isCategoryOf,
+} from '@shared/transactions/categories.rules'
 
 /*
  * ✏️ RÈGLES DES APPARTEMENTS (voir `docs/fonctionnel.md` › Appartements, R2, R3, R7) : le seul fichier à
@@ -45,15 +48,9 @@ export type ApartmentLineKey =
 export function apartmentLineOf(
   category: TransactionCategory | null,
 ): ApartmentLineKey {
-  return category !== null && isApartmentLineCategory(category)
+  return category !== null && isCategoryOf('APARTMENT', category)
     ? APARTMENT_CATEGORY_LINES[category]
     : 'other'
-}
-
-function isApartmentLineCategory(
-  category: TransactionCategory,
-): category is ApartmentCategory {
-  return category in APARTMENT_CATEGORY_LINES
 }
 
 /**
