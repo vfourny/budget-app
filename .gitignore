@@ -24,3 +24,6 @@ dist
 
 # claude code (local)
 .claude/settings.local.json
+
+# tests
+coverage
