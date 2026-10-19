@@ -1,4 +1,4 @@
-import type { ParsedTransaction } from '@server/lib/csv/csv.type'
+import type { ParsedTransaction } from '@shared/transactions/csv.type'
 
 /** Identité d'une ligne : même jour, même montant, même libellé. */
 function transactionKey(transaction: {

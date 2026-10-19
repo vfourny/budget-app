@@ -1,6 +1,6 @@
-import type { AppErrorCode } from '@server/lib/app-error.util'
-import type { CsvParseError } from '@server/lib/csv/csv.type'
 import type { AppRouter } from '@server/trpc/app.router'
+import type { AppErrorCode } from '@shared/common/app-error.type'
+import type { CsvParseError } from '@shared/transactions/csv.type'
 import { TRPCClientError } from '@trpc/client'
 
 import { fr } from '@/lib/i18n/fr'

@@ -1,13 +1,13 @@
 import type {
+  AmountColumns,
+  CsvFormatConfig,
+} from '@shared/transactions/csv-format.schema'
+import type {
   CsvLineErrorCode,
   CsvParseError,
   ParsedBankStatement,
   ParsedTransaction,
-} from '@server/lib/csv/csv.type'
-import type {
-  AmountColumns,
-  CsvFormatConfig,
-} from '@shared/transactions/csv-format.schema'
+} from '@shared/transactions/csv.type'
 
 /** Sépare les colonnes d'un libellé composé ("libellé simplifié — informations complémentaires"). */
 const LABEL_SEPARATOR = ' — '

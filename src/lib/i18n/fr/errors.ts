@@ -1,5 +1,8 @@
-import type { AppErrorCode, AppErrorParams } from '@server/lib/app-error.util'
-import type { CsvLineErrorCode } from '@server/lib/csv/csv.type'
+import type {
+  AppErrorCode,
+  AppErrorParams,
+} from '@shared/common/app-error.type'
+import type { CsvLineErrorCode } from '@shared/transactions/csv.type'
 
 import { plural } from '@/lib/i18n/plural'
 

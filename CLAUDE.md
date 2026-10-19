@@ -106,7 +106,9 @@ nitro.config.ts        # serverDir: ./server
   constantes, sans effet de bord ni accès base / réseau (seule dépendance runtime admise : `zod`), importables
   par `src/` et par `server/`. `shared/` n'importe jamais de `src/` ni de `server/` (sauf `import type`).
   **Vérifié par ESLint** (`@typescript-eslint/no-restricted-imports` dans `eslint.config.ts`) : `src/` et `shared/`
-  n'importent `@server/…` qu'en `import type` ; `shared/`, `server/`, `prisma/` et `scripts/` n'importent jamais `@/…`.
+  n'importent du serveur que son **contrat**, en `import type` : `@server/trpc/app.router` (type du routeur) et
+  `@server/generated/prisma/*` ; un type d'API vit dans `shared/` ou se déduit du routeur (`RouterOutputs`, `@/lib/trpc`).
+  `shared/`, `server/`, `prisma/` et `scripts/` n'importent jamais `@/…`.
 - **Règles du budget** (catégories → enveloppes, épargne, catégories de la card « Par catégorie »,
   lignes de revenus, par `key`) : uniquement dans `shared/personal/personal.rules.ts`, jamais en dur ailleurs. Aucun libellé dedans :
   les textes sont dans `@/lib/i18n/fr`. Équivalent pro : `shared/professional/professional.rules.ts` (TVA par charge, frais mixtes, groupes
@@ -175,7 +177,7 @@ nitro.config.ts        # serverDir: ./server
   (`@/lib/i18n/plural`), jamais de `n > 1 ? "s" : ""` à la main. Libellés d'un enum Prisma :
   `as const satisfies Record<Enum, string>` dans `fr/enums.ts` (`tsc` échoue si une valeur manque).
 - **Erreurs serveur** : le serveur n'envoie jamais de texte d'UI, seulement un **code**
-  (`throw appError("NOT_FOUND", "IMPORT_NOT_FOUND")`, `server/lib/app-error.util.ts` ; pour les lignes
+  (`throw appError("NOT_FOUND", "IMPORT_NOT_FOUND")`, `server/lib/app-error.util.ts`, codes dans `shared/common/app-error.type.ts` ; pour les lignes
   CSV écartées, un `CsvLineErrorCode`). Le front le traduit via `fr.errors` / `fr.csvErrors`, avec
   `errorMessage(error)` (`@/lib/errors`). Nouveau code = l'ajouter à `AppErrorCode` **et** à
   `fr/errors.ts` (exhaustif).

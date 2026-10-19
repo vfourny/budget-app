@@ -1,11 +1,14 @@
 import type { GoogleGenAI } from '@google/genai'
-import type { ParsedBankStatement } from '@server/lib/csv/csv.type'
 import { splitCsvLine } from '@server/lib/csv/parse-bank-statement.service'
 import { env } from '@server/lib/env.config'
 import {
   type CsvFormatConfig,
   csvFormatConfigSchema,
 } from '@shared/transactions/csv-format.schema'
+import type {
+  DetectionCheckCode,
+  ParsedBankStatement,
+} from '@shared/transactions/csv.type'
 import { z } from 'zod'
 
 /** En-tête + 8 opérations : de quoi repérer les colonnes sans envoyer tout le relevé à l'IA. */
@@ -185,11 +188,6 @@ export async function detectCsvFormat(
 
   return { bankName: detected.bankName.trim().slice(0, 60), config, columns }
 }
-
-/** Anomalies repérées sur le relevé parsé avec le format détecté : un **code**, traduit côté front
- * (`fr.importForm.formatChecks`). `NO_TRANSACTIONS` empêche de confirmer le format. */
-export type DetectionCheckCode =
-  'NO_TRANSACTIONS' | 'UNREADABLE_LINES' | 'DATES_OUT_OF_RANGE' | 'EMPTY_LABELS'
 
 const MIN_PLAUSIBLE_DATE = Date.UTC(2000, 0, 1)
 const ONE_MONTH_MS = 31 * 24 * 60 * 60 * 1000

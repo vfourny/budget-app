@@ -3,12 +3,25 @@ import path from 'node:path'
 import reactConfig from '@vfourny/node-toolkit/eslint/react'
 import type { Rule } from 'eslint'
 
-/** `server/` (Prisma, secrets…) ne part jamais dans le bundle du front : types uniquement. */
-const SERVER_TYPES_ONLY = {
+/**
+ * Côté front et `shared/`, le serveur ne s'importe qu'en `import type`, et seulement son contrat : le
+ * type du routeur tRPC et les types Prisma générés. Prisma, secrets… ne partent jamais dans le bundle.
+ */
+const SERVER_CONTRACT_TYPES_ONLY = {
   allowTypeImports: true,
-  group: ['@server/*', '**/server/*'],
   message:
     "Côté front et shared, `server/` ne s'importe qu'en `import type`. Code commun : `shared/` (@shared/…).",
+  regex: '^@server/(trpc/app\\.router|generated/prisma/.+)$',
+}
+
+/**
+ * Le reste du serveur, même en `import type` : un type d'API (code d'erreur, résultat d'un calcul…) se
+ * range dans `shared/`, ou se déduit du routeur (`RouterOutputs`, `@/lib/trpc`).
+ */
+const SERVER_INTERNALS = {
+  message:
+    "Contrat d'API seulement : `@server/trpc/app.router` ou `@server/generated/prisma/*` (en `import type`). Type partagé : `shared/` ; réponse d'une route : `RouterOutputs`.",
+  regex: '^(@server/(?!trpc/app\\.router$|generated/prisma/)|.*/server/)',
 }
 
 /** Le front (React, i18n…) ne s'importe ni côté serveur ni dans `shared/`. */
@@ -88,7 +101,7 @@ export default [
     rules: {
       '@typescript-eslint/no-restricted-imports': [
         'error',
-        { patterns: [SERVER_TYPES_ONLY] },
+        { patterns: [SERVER_CONTRACT_TYPES_ONLY, SERVER_INTERNALS] },
       ],
     },
   },
@@ -97,7 +110,7 @@ export default [
     rules: {
       '@typescript-eslint/no-restricted-imports': [
         'error',
-        { patterns: [SERVER_TYPES_ONLY, NO_FRONT] },
+        { patterns: [SERVER_CONTRACT_TYPES_ONLY, SERVER_INTERNALS, NO_FRONT] },
       ],
     },
   },

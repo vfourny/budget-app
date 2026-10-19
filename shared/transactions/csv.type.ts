@@ -29,3 +29,8 @@ export interface ParsedBankStatement {
   errors: CsvParseError[]
   transactions: ParsedTransaction[]
 }
+
+/** Anomalies repérées sur le relevé parsé avec le format détecté : un **code**, traduit côté front
+ * (`fr.importForm.formatChecks`). `NO_TRANSACTIONS` empêche de confirmer le format. */
+export type DetectionCheckCode =
+  'NO_TRANSACTIONS' | 'UNREADABLE_LINES' | 'DATES_OUT_OF_RANGE' | 'EMPTY_LABELS'

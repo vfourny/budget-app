@@ -1,5 +1,5 @@
-import type { DetectionCheckCode } from '@server/lib/csv/detect-format.service'
 import type { CsvFormatConfig } from '@shared/transactions/csv-format.schema'
+import type { DetectionCheckCode } from '@shared/transactions/csv.type'
 
 import { plural, pluralize } from '@/lib/i18n/plural'
 
