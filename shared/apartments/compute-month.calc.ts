@@ -1,14 +1,5 @@
 import type { ApartmentForecastLine } from '@server/generated/prisma/enums'
 import {
-  type ApartmentColumn,
-  type ApartmentForecastRecord,
-  type ApartmentLines,
-  type ApartmentRecord,
-  type ApartmentTransaction,
-  type ManagementInvoiceRecord,
-  ZERO_LINES,
-} from '@server/lib/apartments/apartment.type'
-import {
   APARTMENT_CHARGE_LINES,
   APARTMENT_FORECAST_LINES,
   apartmentLineOf,
@@ -16,6 +7,15 @@ import {
   CFE_MONTH,
   PROPERTY_TAX_MONTH,
 } from '@shared/apartments/apartment.rules'
+import {
+  type ApartmentColumn,
+  type ApartmentForecastRecord,
+  type ApartmentLines,
+  type ApartmentRecord,
+  type ApartmentTransaction,
+  type ManagementInvoiceRecord,
+  ZERO_LINES,
+} from '@shared/apartments/apartment.type'
 import {
   type LoanInstallment,
   splitLoanPayment,

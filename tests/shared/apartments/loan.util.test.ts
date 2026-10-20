@@ -1,5 +1,10 @@
 import type { LoanInstallment } from '@shared/apartments/loan.util'
-import { loanSchedule, splitLoanPayment } from '@shared/apartments/loan.util'
+import {
+  capitalRepaid,
+  loanSchedule,
+  matchLoanTransaction,
+  splitLoanPayment,
+} from '@shared/apartments/loan.util'
 import { describe, expect, it } from 'vitest'
 
 describe('loanSchedule', () => {
@@ -59,5 +64,52 @@ describe('splitLoanPayment', () => {
       ...expected,
       interestCents: 10_000,
     })
+  })
+})
+
+describe('matchLoanTransaction / capitalRepaid', () => {
+  const apartment = {
+    loanPrincipalCents: 30_000,
+    loanRateBps: 0,
+    loanTermMonths: 3,
+    loanFirstDueDate: new Date(Date.UTC(2026, 0, 5)),
+    creditInsuranceCents: 0,
+  }
+
+  it('recognizes the installment of the month (R7)', () => {
+    expect(
+      matchLoanTransaction(apartment, {
+        year: 2026,
+        month: 2,
+        amountCents: -10_000,
+      }),
+    ).toEqual({ recognized: true, expectedCents: 10_000 })
+    expect(
+      matchLoanTransaction(apartment, {
+        year: 2027,
+        month: 1,
+        amountCents: -10_000,
+      }),
+    ).toBeNull()
+    expect(
+      matchLoanTransaction(
+        { ...apartment, loanPrincipalCents: null },
+        { year: 2026, month: 2, amountCents: -10_000 },
+      ),
+    ).toBeNull()
+  })
+
+  it('sums the capital repaid through a month (R6)', () => {
+    const loan = {
+      principalCents: 30_000,
+      rateBps: 0,
+      termMonths: 3,
+      firstDueDate: new Date(Date.UTC(2026, 0, 5)),
+    }
+    expect(capitalRepaid(loan, { year: 2026, month: 2 })).toEqual({
+      repaidCents: 20_000,
+      principalCents: 30_000,
+    })
+    expect(capitalRepaid(null, { year: 2026, month: 2 })).toBeNull()
   })
 })

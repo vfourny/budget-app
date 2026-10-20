@@ -1,14 +1,14 @@
-import type { ApartmentRecord } from '@server/lib/apartments/apartment.type'
-import type { MonthResult } from '@server/lib/apartments/compute-month.service'
+import type { LoadedApartmentData } from '@server/lib/apartments/load-period.service'
+import type { ApartmentRecord } from '@shared/apartments/apartment.type'
+import type { MonthResult } from '@shared/apartments/compute-month.calc'
 import {
   type ApartmentPeriodColumns,
   computeApartmentYear,
   periodColumns,
   yieldsBps,
-} from '@server/lib/apartments/compute-period.service'
-import type { LoadedApartmentData } from '@server/lib/apartments/load-period.service'
-import { capitalRepaid } from '@server/lib/apartments/loan.service'
-import { computeThresholds } from '@server/lib/apartments/thresholds.service'
+} from '@shared/apartments/compute-period.calc'
+import { capitalRepaid } from '@shared/apartments/loan.util'
+import { computeThresholds } from '@shared/apartments/thresholds.calc'
 import {
   currentYearMonth,
   type YearMonth,

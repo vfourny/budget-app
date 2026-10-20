@@ -1,5 +1,5 @@
 import { Table, Text } from '@mantine/core'
-import type { ApartmentLines } from '@server/lib/apartments/apartment.type'
+import type { ApartmentLines } from '@shared/apartments/apartment.type'
 import { Fragment } from 'react'
 
 import { formatCents } from '@/lib/format'

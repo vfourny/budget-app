@@ -1,11 +1,11 @@
+import { validatedTransactions } from '@server/lib/dashboard/scope.service'
+import type { db as Db } from '@server/lib/db.client'
 import type {
   ApartmentForecastRecord,
   ApartmentRecord,
   ApartmentTransaction,
   ManagementInvoiceRecord,
-} from '@server/lib/apartments/apartment.type'
-import { validatedTransactions } from '@server/lib/dashboard/scope.service'
-import type { db as Db } from '@server/lib/db.client'
+} from '@shared/apartments/apartment.type'
 
 export interface LoadedApartmentData {
   apartments: ApartmentRecord[]

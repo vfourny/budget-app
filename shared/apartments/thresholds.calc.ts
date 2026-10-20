@@ -1,5 +1,5 @@
-import type { ApartmentRecord } from '@server/lib/apartments/apartment.type'
-import type { ApartmentPeriodColumns } from '@server/lib/apartments/compute-period.service'
+import type { ApartmentRecord } from '@shared/apartments/apartment.type'
+import type { ApartmentPeriodColumns } from '@shared/apartments/compute-period.calc'
 import {
   LMP_THRESHOLD_CENTS,
   microBicCeilingCents,

@@ -79,9 +79,9 @@ src/                   # FRONT — SPA React, tourne uniquement dans le navigate
 shared/                # code pur partagé front + back, alias @shared/ — rangé par domaine comme server/lib et src/features
   common/              # year-month.util.ts (YearMonth, mois précédent / suivant, mois en cours UTC), period.schema.ts (Zod année / mois)
   transactions/        # categories.rules.ts (catégories par type de compte, « À vérifier »), csv-format.schema.ts (schéma Zod CsvFormat)
-  personal/            # personal.rules.ts (enveloppes, cards, lignes de revenus)
+  personal/            # personal.rules.ts (enveloppes, cards, lignes de revenus), aggregate.calc.ts (totaux d'une période), balance.calc.ts (solde)
   professional/        # professional.rules.ts (TVA, frais mixtes, prévisionnel), billing-days.util.ts, compute-month / compute-year.calc.ts (calcul pur du dashboard), amounts.util.ts, regimes/
-  apartments/          # apartment.rules.ts (lignes du tableau, tolérances), loan.util.ts (amortissement)
+  apartments/          # apartment.rules.ts (lignes du tableau, tolérances), loan.util.ts (amortissement, rapprochement), compute-month / compute-period / thresholds.calc.ts
   fiscal/              # données légales annuelles : income-tax.rules.ts (barème IR), lmnp.rules.ts (micro-BIC, LMP)
 server/                # BACKEND — Nitro, mêmes conventions que le server/ de Nuxt
   api/                 # routes HTTP : server/api/health.ts → GET /api/health
@@ -89,7 +89,7 @@ server/                # BACKEND — Nitro, mêmes conventions que le server/ de
   trpc/                # trpc.config.ts (contexte, procédures), app.router.ts (appRouter), routers/<domaine>.router.ts
   lib/                 # db.client.ts (PrismaClient singleton), env.config.ts (validation Zod des variables)
     professional/      # dashboard Pro : load-year.service (requêtes, puis calcul de shared/professional/), forecast-values.service
-    apartments/        # dashboard Appartements : load-period (requêtes) + compute-month / compute-period / thresholds (purs) + loan
+    apartments/        # dashboard Appartements : load-period.service (requêtes) + build-view.service (assemblage, calculs de shared/apartments/)
   generated/prisma/    # client Prisma généré — gitignoré, ne pas éditer
 prisma/                # schema/ (un .prisma par domaine), migrations/, seed.ts + seeds/ (un fichier par domaine)
 prisma.config.ts       # config CLI Prisma 7 (URL directe pour les migrations)
@@ -111,8 +111,8 @@ nitro.config.ts        # serverDir: ./server
   lignes de revenus, par `key`) : uniquement dans `shared/personal/personal.rules.ts`, jamais en dur ailleurs. Aucun libellé dedans :
   les textes sont dans `@/lib/i18n/fr`. Équivalent pro : `shared/professional/professional.rules.ts` (TVA par charge, frais mixtes, groupes
   du prévisionnel) et `shared/transactions/categories.rules.ts` (catégories proposées par type de compte).
-- **Calculs du dashboard Appartements** : même principe, dans `server/lib/apartments/` (purs : `compute-month.service`, `compute-period.service`,
-  `thresholds.service`) ; requêtes dans `load-period.service.ts`, assemblage dans `build-view.service.ts`. Règles (catégorie → ligne du tableau,
+- **Calculs du dashboard Appartements** : même principe, purs et testés dans `shared/apartments/` (`compute-month.calc`, `compute-period.calc`,
+  `thresholds.calc`, `period.util`, `loan.util`) ; requêtes dans `server/lib/apartments/load-period.service.ts`, assemblage dans `build-view.service.ts`. Règles (catégorie → ligne du tableau,
   tolérance de rapprochement) dans `shared/apartments/apartment.rules.ts`, seuils LMNP dans `shared/fiscal/lmnp.rules.ts` ; prêt dans `shared/apartments/loan.util.ts`. Référence métier :
   `docs/fonctionnel.md` › Appartements (R1 à R12).
 - **Calculs du dashboard Pro** : fonctions **pures** dans `shared/professional/` (`compute-month.calc.ts`, `compute-year.calc.ts`,
@@ -287,7 +287,7 @@ Hors scope : synchro bancaire auto, multi-utilisateurs, émission de factures.
   cotisations calculées depuis les taux de l'année (les prélèvements URSSAF / PAS… ne comptent pas dans les charges) ; clients en texte libre dans la facturation
   (pas de table) ; jours facturés en `Float` par pas de 0,5 (exact en binaire, pas de demi-journées entières) ; encaissé = crédits `CLIENT_PAYMENT` du mois, reste à encaisser = solde cumulé facturé TTC − encaissé ; graphiques en CSS (pas de lib).
 - **Solde du compte perso (2026-10-19)** : pas de solde stocké par mois. On saisit des **repères** (`AccountBalance` :
-  solde réel en fin de mois) et le reste se calcule (`server/lib/dashboard/balance.service.ts`, pur) : repère le plus récent +
+  solde réel en fin de mois) et le reste se calcule (`shared/personal/balance.calc.ts`, pur) : repère le plus récent +
   transactions validées des mois suivants ; début de mois = fin du mois précédent. Un repère sur un mois l'emporte sur le
   calcul, qui sert alors à afficher l'écart (import manquant, doublon…). Sans repère : solde « non renseigné ». Le solde
   courant des CSV (colonne « Solde » BoursoBank) n'est pas exploité. Les appartements gardent leur solde au 1er janvier
