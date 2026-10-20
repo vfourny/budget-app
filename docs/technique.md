@@ -6,25 +6,7 @@ Ce que l'on doit savoir avant de toucher au code. Les règles métier sont dans 
 
 **SPA React + backend Nitro dans le même projet**, un seul serveur en dev (`pnpm dev` → `http://localhost:5173`, API sous `/api`).
 
-```
-src/                   # FRONT — SPA React, tourne uniquement dans le navigateur
-  main.tsx             # point d'entrée (createRoot + providers : Query, Router, Mantine)
-  app.tsx              # table des routes (React Router)
-  pages/               # une page = un écran
-  features/<domaine>/  # components/ + hooks/ propres à un domaine (import, review, dashboard…)
-  components/          # UI partagée entre features
-  lib/                 # utilitaires front : trpc.ts, theme.ts, envelopes.ts, errors.ts, i18n/fr/…
-  styles/global.css    # règles CSS globales
-shared/                # code pur partagé front + back, rangé par domaine (personal/, professional/, apartments/, transactions/, fiscal/)
-server/                # BACKEND — Nitro, mêmes conventions que le server/ de Nuxt
-  api/                 # routes HTTP : server/api/health.ts → GET /api/health
-    trpc/[...path].ts  # point d'entrée HTTP de tRPC (/api/trpc/*)
-  trpc/                # trpc.config.ts (contexte, procédures), app.router.ts (appRouter), routers/<domaine>.router.ts
-  lib/                 # db.ts, env.ts, auth.ts, csv/, categorize/, dashboard/, professional/, apartments/, settings/
-  generated/prisma/    # client Prisma généré — gitignoré, ne pas éditer
-prisma/                # schema/ (un .prisma par domaine), migrations/, seed.ts + seeds/
-prisma.config.ts       # config CLI Prisma 7
-```
+Carte du code (dossiers et rôle de chaque fichier clé) : `CLAUDE.md` › Architecture, tenue à jour à un seul endroit.
 
 Pourquoi pas Next.js : app mono-utilisateur derrière une auth, sans SEO. SSR et Server Components n'apportent rien et ajoutent des concepts. Nitro (le moteur serveur de Nuxt) se déploie sur Vercel sans config.
 
@@ -76,7 +58,7 @@ Routeurs actuels (tous en `protectedProcedure`), un par domaine :
     gérance + facture de gérance du mois).
 
 Le filtre « transactions validées d'un type de compte » est partagé : `server/lib/transactions/scope.service.ts`. Une ligne est
-« à vérifier » si elle n'a pas de catégorie ou si sa confiance est sous 0,7 (`server/lib/categorize/needs-review.service.ts`).
+« à vérifier » si elle n'a pas de catégorie ou si sa confiance est sous 0,7 (`needsReview`, `shared/transactions/categories.rules.ts`).
 Sans session : `UNAUTHORIZED` / code `NOT_AUTHENTICATED`.
 
 **Seed** (`prisma/seed.ts`, un fichier par domaine dans `prisma/seeds/`, `pnpm db:seed`, rejoué par `pnpm db:reset`) :

@@ -64,7 +64,8 @@ src/                   # FRONT — SPA React, tourne uniquement dans le navigate
   styles/global.css    # règles CSS globales (le thème, lui, est dans lib/theme.ts)
 shared/                # code pur partagé front + back, alias @shared/ — comme server/lib : transverse à la racine, métier par domaine
   year-month.util.ts   # YearMonth, mois précédent / suivant, mois en cours UTC ; period.schema.ts (Zod année / mois) ; app-error.type.ts (codes d'erreur)
-  transactions/        # categories.rules.ts (catégories par type de compte, « À vérifier »), csv-format.schema.ts (schéma Zod CsvFormat)
+  transactions/        # categories.rules.ts (catégories par type de compte, « À vérifier », needsReview), csv-format.schema.ts (schéma Zod CsvFormat),
+                       # parse-bank-statement / dedupe / statement-checks.calc.ts (import CSV, pur), normalize-label.util.ts
   personal/            # personal.rules.ts (enveloppes, cards, lignes de revenus), aggregate.calc.ts (totaux d'une période), balance.calc.ts (solde)
   professional/        # professional.rules.ts (TVA, frais mixtes, prévisionnel), billing-days.util.ts, compute-month / compute-year.calc.ts (calcul pur du dashboard), amounts.util.ts, regimes/
   apartments/          # apartment.rules.ts (lignes du tableau, tolérances), loan.util.ts (amortissement, rapprochement), compute-month / compute-period / thresholds.calc.ts
@@ -75,6 +76,7 @@ server/                # BACKEND — Nitro, mêmes conventions que le server/ de
   trpc/                # trpc.config.ts (contexte, procédures), app.router.ts (un routeur par domaine), routers/<domaine>.router.ts + <domaine>-<écran>.router.ts imbriqués
   lib/                 # db.client.ts (PrismaClient singleton), env.config.ts (validation Zod des variables)
     professional/      # dashboard Pro : load-year.service (requêtes, puis calcul de shared/professional/), forecast-values.service
+    csv/               # import CSV : find-format.service (format connu en base), detect-format.service (Gemini), fingerprint.util
     apartments/        # dashboard Appartements : load-period.service (requêtes) + build-view.service (assemblage, calculs de shared/apartments/)
   generated/prisma/    # client Prisma généré — gitignoré, ne pas éditer
 prisma/                # schema/ (un .prisma par domaine), migrations/, seed.ts + seeds/ (un fichier par domaine)

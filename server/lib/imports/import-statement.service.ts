@@ -1,12 +1,12 @@
 import { AccountType } from '@server/generated/prisma/enums'
 import { appError } from '@server/lib/app-error.util'
-import { removeAlreadyImported } from '@server/lib/csv/dedupe.service'
 import { findCsvFormat } from '@server/lib/csv/find-format.service'
 import { csvFingerprint } from '@server/lib/csv/fingerprint.util'
-import { parseBankStatement } from '@server/lib/csv/parse-bank-statement.service'
 import type { db as Db } from '@server/lib/db.client'
 import { findOwnedApartment } from '@server/lib/ownership.service'
 import { csvFormatConfigSchema } from '@shared/transactions/csv-format.schema'
+import { removeAlreadyImported } from '@shared/transactions/dedupe.calc'
+import { parseBankStatement } from '@shared/transactions/parse-bank-statement.calc'
 import { z } from 'zod'
 
 /** Le CSV voyage en texte dans le JSON : un relevé fait quelques centaines de lignes, loin de la
