@@ -1,4 +1,4 @@
-import { removeAlreadyImported } from '@shared/transactions/dedupe.calc'
+import { removeAlreadyImported } from '@shared/transactions/dedupe.util'
 import { expect, it } from 'vitest'
 
 const line = (label: string, amountCents = -500) => ({

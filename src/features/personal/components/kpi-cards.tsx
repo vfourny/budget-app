@@ -4,7 +4,7 @@ import {
   estimateIncomeTaxCents,
   incomeTaxBrackets,
 } from '@shared/fiscal/income-tax.rules'
-import type { PeriodTotals } from '@shared/personal/aggregate.calc'
+import type { PeriodTotals } from '@shared/personal/aggregate.util'
 import {
   BUDGET_ENVELOPES,
   ENVELOPE_CATEGORIES,

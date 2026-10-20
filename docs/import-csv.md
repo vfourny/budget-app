@@ -6,9 +6,9 @@ Le parsing est **pur** (aucun accès base ni réseau) et vit dans `shared/transa
 
 - `shared/transactions/csv-format.schema.ts` : schéma Zod + type `CsvFormatConfig` (délimiteur, date, colonnes…)
 - `shared/transactions/csv.type.ts` : `ParsedTransaction`, erreurs de ligne, codes de contrôle
-- `shared/transactions/parse-bank-statement.calc.ts` : `parseBankStatement(csvText, config)`, `splitCsvLine`
-- `shared/transactions/dedupe.calc.ts` : `removeAlreadyImported` (relevés qui se chevauchent)
-- `shared/transactions/statement-checks.calc.ts` : `checkParsedStatement` (cohérence d'un format détecté)
+- `shared/transactions/parse-bank-statement.util.ts` : `parseBankStatement(csvText, config)`, `splitCsvLine`
+- `shared/transactions/dedupe.util.ts` : `removeAlreadyImported` (relevés qui se chevauchent)
+- `shared/transactions/statement-checks.util.ts` : `checkParsedStatement` (cohérence d'un format détecté)
 - `server/lib/csv/fingerprint.util.ts` : `csvFingerprint(csvText)`, SHA-256 de la 1re ligne (`node:crypto`, donc côté serveur)
 - `server/lib/csv/find-format.service.ts` : `findCsvFormat(userId, csvText, db)`, format connu ou `null`
 - `server/lib/csv/detect-format.service.ts` : détection d'un format inconnu par Gemini

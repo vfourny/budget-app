@@ -1,4 +1,4 @@
-import { computeMonth } from '@shared/professional/compute-month.calc'
+import { computeMonth } from '@shared/professional/compute-month.util'
 import { DEFAULT_PROFESSIONAL_YEAR_SETTINGS } from '@shared/professional/professional.rules'
 import type { ProfessionalMonthInput } from '@shared/professional/professional.type'
 import { describe, expect, it } from 'vitest'

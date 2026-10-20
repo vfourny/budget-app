@@ -11,8 +11,8 @@ import {
 import { findPendingImport } from '@server/lib/ownership.service'
 import { importCategorizeRouter } from '@server/trpc/routers/import-categorize.router'
 import { createTRPCRouter, protectedProcedure } from '@server/trpc/trpc.config'
-import { parseBankStatement } from '@shared/transactions/parse-bank-statement.calc'
-import { checkParsedStatement } from '@shared/transactions/statement-checks.calc'
+import { parseBankStatement } from '@shared/transactions/parse-bank-statement.util'
+import { checkParsedStatement } from '@shared/transactions/statement-checks.util'
 import { z } from 'zod'
 
 /** Nombre de lignes montrées dans l'aperçu du format détecté. */

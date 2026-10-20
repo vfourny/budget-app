@@ -6,7 +6,7 @@ import {
 } from '@server/lib/transactions/scope.service'
 import { createTRPCRouter, protectedProcedure } from '@server/trpc/trpc.config'
 import { monthSchema, yearMonthSchema, yearSchema } from '@shared/period.schema'
-import { aggregatePeriod } from '@shared/personal/aggregate.calc'
+import { aggregatePeriod } from '@shared/personal/aggregate.util'
 import {
   BUDGET_ENVELOPES,
   DEFAULT_ENVELOPE_PERCENTS,

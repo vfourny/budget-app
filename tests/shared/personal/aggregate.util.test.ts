@@ -1,4 +1,4 @@
-import { aggregatePeriod } from '@shared/personal/aggregate.calc'
+import { aggregatePeriod } from '@shared/personal/aggregate.util'
 import { expect, it } from 'vitest'
 
 it('splits credits into revenue lines and debits into envelopes', () => {

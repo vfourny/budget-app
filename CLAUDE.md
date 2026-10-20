@@ -65,10 +65,10 @@ src/                   # FRONT — SPA React, tourne uniquement dans le navigate
 shared/                # code pur partagé front + back, alias @shared/ — comme server/lib : transverse à la racine, métier par domaine
   year-month.util.ts   # YearMonth, mois précédent / suivant, mois en cours UTC ; period.schema.ts (Zod année / mois) ; app-error.type.ts (codes d'erreur)
   transactions/        # categories.rules.ts (catégories par type de compte, « À vérifier », needsReview), csv-format.schema.ts (schéma Zod CsvFormat),
-                       # parse-bank-statement / dedupe / statement-checks.calc.ts (import CSV, pur), normalize-label.util.ts
-  personal/            # personal.rules.ts (enveloppes, cards, lignes de revenus), aggregate.calc.ts (totaux d'une période), balance.calc.ts (solde)
-  professional/        # professional.rules.ts (TVA, frais mixtes, prévisionnel), billing-days.util.ts, compute-month / compute-year.calc.ts (calcul pur du dashboard), amounts.util.ts, regimes/
-  apartments/          # apartment.rules.ts (lignes du tableau, tolérances), loan.util.ts (amortissement, rapprochement), compute-month / compute-period / thresholds.calc.ts
+                       # parse-bank-statement / dedupe / statement-checks.util.ts (import CSV, pur), normalize-label.util.ts
+  personal/            # personal.rules.ts (enveloppes, cards, lignes de revenus), aggregate.util.ts (totaux d'une période), balance.util.ts (solde)
+  professional/        # professional.rules.ts (TVA, frais mixtes, prévisionnel), billing-days.util.ts, compute-month / compute-year.util.ts (calcul pur du dashboard), amounts.util.ts, regimes/
+  apartments/          # apartment.rules.ts (lignes du tableau, tolérances), loan.util.ts (amortissement, rapprochement), compute-month / compute-period / thresholds.util.ts
   fiscal/              # données légales annuelles : income-tax.rules.ts (barème IR), lmnp.rules.ts (micro-BIC, LMP)
 server/                # BACKEND — Nitro, mêmes conventions que le server/ de Nuxt
   api/                 # routes HTTP : server/api/health.ts → GET /api/health
@@ -101,11 +101,11 @@ nitro.config.ts        # serverDir: ./server
   lignes de revenus, par `key`) : uniquement dans `shared/personal/personal.rules.ts`, jamais en dur ailleurs. Aucun libellé dedans :
   les textes sont dans `@/lib/i18n/fr`. Équivalent pro : `shared/professional/professional.rules.ts` (TVA par charge, frais mixtes, groupes
   du prévisionnel) et `shared/transactions/categories.rules.ts` (catégories proposées par type de compte).
-- **Calculs du dashboard Appartements** : même principe, purs et testés dans `shared/apartments/` (`compute-month.calc`, `compute-period.calc`,
-  `thresholds.calc`, `period.util`, `loan.util`) ; requêtes dans `server/lib/apartments/load-period.service.ts`, assemblage dans `build-view.service.ts`. Règles (catégorie → ligne du tableau,
+- **Calculs du dashboard Appartements** : même principe, purs et testés dans `shared/apartments/` (`compute-month.util`, `compute-period.util`,
+  `thresholds.util`, `period.util`, `loan.util`) ; requêtes dans `server/lib/apartments/load-period.service.ts`, assemblage dans `build-view.service.ts`. Règles (catégorie → ligne du tableau,
   tolérance de rapprochement) dans `shared/apartments/apartment.rules.ts`, seuils LMNP dans `shared/fiscal/lmnp.rules.ts` ; prêt dans `shared/apartments/loan.util.ts`. Référence métier :
   `docs/fonctionnel.md` › Appartements (R1 à R12).
-- **Calculs du dashboard Pro** : fonctions **pures** dans `shared/professional/` (`compute-month.calc.ts`, `compute-year.calc.ts`,
+- **Calculs du dashboard Pro** : fonctions **pures** dans `shared/professional/` (`compute-month.util.ts`, `compute-year.util.ts`,
   `amounts.util.ts`), donc testées à 100 % ; les requêtes restent dans `server/lib/professional/load-year.service.ts`. Un statut
   juridique = un `ProfessionalRegime` (`shared/professional/regimes/`).
 - **Données** : toujours via tRPC + TanStack Query. **Pas de `fetch` dans un `useEffect`.**
@@ -180,10 +180,11 @@ nitro.config.ts        # serverDir: ./server
   `errorMessage(error)` (`@/lib/errors`). Nouveau code = l'ajouter à `AppErrorCode` **et** à
   `fr/errors.ts` (exhaustif).
 - **Suffixes de rôle** (nom en kebab-case + suffixe, le rôle se lit sans ouvrir le fichier) : `.router.ts` (routeur tRPC),
-  `.service.ts` (logique métier : calculs, requêtes, appels Gemini), `.util.ts` (petit helper pur et générique), `.type.ts`
+  `.service.ts` (logique métier : calculs, requêtes, appels Gemini), `.util.ts` (fonction pure : helper ou calcul métier), `.type.ts`
   (types seuls), `.rules.ts` (règles et données métier : catégories, barèmes…), `.schema.ts` (schéma Zod), `.client.ts`
-  (client externe : Prisma, Gemini), `.config.ts` (config / instance : env, Better Auth, init tRPC), `.regime.ts`
-  (un `ProfessionalRegime`), `.calc.ts` (calcul métier pur : un mois du dashboard…), `.seed.ts`. Dans `shared/` (pur, voir plus haut) : seulement `.rules`, `.util`, `.schema`, `.type`, `.calc`, `.regime` ; `.service` reste au serveur (requêtes, appels externes). Obligatoire dans `server/lib/`, `server/trpc/`, `shared/` et `prisma/seeds/`
+  (client externe : Prisma, Gemini), `.config.ts` (config / instance : env, Better Auth, init tRPC),
+  `.seed.ts`. Dans `shared/` (pur, voir plus haut) : seulement `.type`, `.schema`, `.rules` (une **donnée** : constantes, barèmes, un `ProfessionalRegime`)
+  et `.util` (une **fonction**) ; `.service` reste au serveur (requêtes, appels externes). Obligatoire dans `server/lib/`, `server/trpc/`, `shared/` et `prisma/seeds/`
   (`index.ts` exempté), **vérifié par ESLint** (`local/file-suffix` dans `eslint.config.ts`). Pas de suffixe là où le dossier
   dit déjà le rôle : `src/` (`components/`, `hooks/use-xxx.ts`, `pages/xxx-page.tsx`) et `server/api/` (le nom = l'URL Nitro).
 - Imports : `@/…` pour `src/`, `@server/…` pour `server/`, `@shared/…` pour `shared/`. `import type` obligatoire pour les

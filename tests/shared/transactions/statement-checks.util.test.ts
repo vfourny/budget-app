@@ -1,4 +1,4 @@
-import { checkParsedStatement } from '@shared/transactions/statement-checks.calc'
+import { checkParsedStatement } from '@shared/transactions/statement-checks.util'
 import { expect, it } from 'vitest'
 
 const at = (iso: string, label = 'X') => ({

@@ -1,4 +1,4 @@
-import { computeMonth } from '@shared/professional/compute-month.calc'
+import { computeMonth } from '@shared/professional/compute-month.util'
 import type {
   ProfessionalMonth,
   ProfessionalMonthInput,

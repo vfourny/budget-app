@@ -1,4 +1,4 @@
-import { computeYear } from '@shared/professional/compute-year.calc'
+import { computeYear } from '@shared/professional/compute-year.util'
 import { DEFAULT_PROFESSIONAL_YEAR_SETTINGS } from '@shared/professional/professional.rules'
 import { expect, it } from 'vitest'
 

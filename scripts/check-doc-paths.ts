@@ -1,6 +1,6 @@
 /**
  * Vérifie que chaque chemin cité entre backticks dans la doc et les commentaires existe encore
- * (`shared/professional/compute-month.calc.ts`, `@server/lib/db.client`, `load-year.service.ts`…).
+ * (`shared/professional/compute-month.util.ts`, `@server/lib/db.client`, `load-year.service.ts`…).
  * Un renommage qui oublie la doc casse `pnpm check` et la CI au lieu de laisser une référence morte.
  *
  * - Chemin avec `/` : doit exister depuis la racine, ou être la fin d'un chemin existant
