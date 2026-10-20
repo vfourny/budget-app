@@ -20,11 +20,7 @@ import {
   type LoanInstallment,
   splitLoanPayment,
 } from '@shared/apartments/loan.util'
-import {
-  compareMonths,
-  isBefore,
-  isSameMonth,
-} from '@shared/common/year-month.util'
+import { compareMonths, isBefore, isSameMonth } from '@shared/year-month.util'
 
 /**
  * Lignes de charges mensuelles dont le prévu vient de l'historique (R3, H2) : électricité,

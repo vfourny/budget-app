@@ -1,6 +1,6 @@
 import type { Apartment } from '@server/generated/prisma/client'
 import { LOAN_MATCH_TOLERANCE_CENTS } from '@shared/apartments/apartment.rules'
-import { isBefore, type YearMonth } from '@shared/common/year-month.util'
+import { isBefore, type YearMonth } from '@shared/year-month.util'
 
 /*
  * Prêt immobilier à taux fixe, sans palier ni différé (R6, hypothèse H3) et rapprochement d'une

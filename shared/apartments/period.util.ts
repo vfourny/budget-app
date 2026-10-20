@@ -1,8 +1,4 @@
-import {
-  isBefore,
-  type YearMonth,
-  yearMonthOf,
-} from '@shared/common/year-month.util'
+import { isBefore, type YearMonth, yearMonthOf } from '@shared/year-month.util'
 
 /** Un mois est « clos » quand il est antérieur au mois en cours (R1, hypothèse H1). */
 export function isMonthClosed(period: YearMonth, now: YearMonth): boolean {

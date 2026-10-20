@@ -1,7 +1,7 @@
 import type { db as Db } from '@server/lib/db.client'
 import { validatedTransactions } from '@server/lib/transactions/scope.service'
-import { previousMonth } from '@shared/common/year-month.util'
 import { balanceAtEndOf } from '@shared/personal/balance.calc'
+import { previousMonth } from '@shared/year-month.util'
 
 /**
  * Solde du compte perso en début et fin de période (mois, ou année si `month` est absent) : calculé

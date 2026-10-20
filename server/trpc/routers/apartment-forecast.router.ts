@@ -4,8 +4,8 @@ import { loadApartmentData } from '@server/lib/apartments/load-period.service'
 import { appError } from '@server/lib/app-error.util'
 import { findOwnedApartment } from '@server/lib/ownership.service'
 import { createTRPCRouter, protectedProcedure } from '@server/trpc/trpc.config'
-import { yearMonthSchema } from '@shared/common/period.schema'
-import { currentYearMonth } from '@shared/common/year-month.util'
+import { yearMonthSchema } from '@shared/period.schema'
+import { currentYearMonth } from '@shared/year-month.util'
 import { z } from 'zod'
 
 const cents = z.number().int().min(0).max(1_000_000_00)

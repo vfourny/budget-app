@@ -9,10 +9,7 @@ import {
 } from '@shared/apartments/compute-period.calc'
 import { capitalRepaid } from '@shared/apartments/loan.util'
 import { computeThresholds } from '@shared/apartments/thresholds.calc'
-import {
-  currentYearMonth,
-  type YearMonth,
-} from '@shared/common/year-month.util'
+import { currentYearMonth, type YearMonth } from '@shared/year-month.util'
 
 interface ViewParams {
   /** Pastille : un seul appartement (`null` = tous). Les seuils LMNP ignorent ce filtre. */

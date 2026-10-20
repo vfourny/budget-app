@@ -5,8 +5,7 @@ import {
 import { appError } from '@server/lib/app-error.util'
 import { forecastValues } from '@server/lib/professional/forecast-values.service'
 import { createTRPCRouter, protectedProcedure } from '@server/trpc/trpc.config'
-import { yearMonthSchema } from '@shared/common/period.schema'
-import { followingMonthsOfYear } from '@shared/common/year-month.util'
+import { yearMonthSchema } from '@shared/period.schema'
 import {
   DAY_STEP,
   MAX_BILLED_DAYS,
@@ -15,6 +14,7 @@ import {
   FORECAST_GROUPS,
   type ForecastGroup,
 } from '@shared/professional/professional.rules'
+import { followingMonthsOfYear } from '@shared/year-month.util'
 import { z } from 'zod'
 
 const billingLineSchema = z.object({

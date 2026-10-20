@@ -20,7 +20,7 @@ import {
   loanSchedule,
 } from '@shared/apartments/loan.util'
 import { isActiveIn, isMonthClosed } from '@shared/apartments/period.util'
-import type { YearMonth } from '@shared/common/year-month.util'
+import type { YearMonth } from '@shared/year-month.util'
 
 const monthKey = (year: number, month: number) => `${year}-${month}`
 
