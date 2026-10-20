@@ -53,7 +53,7 @@ export const envelopes = {
 
 /**
  * Libellé de chaque catégorie ; l'ordre des clés = ordre d'affichage (colonnes du Google Sheet,
- * listes de choix). Rattachement aux enveloppes : `@shared/personal/rules`.
+ * listes de choix). Rattachement aux enveloppes : `@shared/personal/personal.rules`.
  */
 export const categories = {
   RENT_PAID: 'Loyer versé',

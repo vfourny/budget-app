@@ -63,7 +63,7 @@ Pourquoi release-please et pas semantic-release (pourtant fourni par `@vfourny/n
 
 Workflows réutilisables de [`vfourny/.github`](https://github.com/vfourny/.github), figés sur le SHA d'une release (Renovate propose les montées de version) :
 
-- `.github/workflows/pr.yml` (chaque PR et push sur `main`) → `build.yml` : install (`--frozen-lockfile`) → format:check → lint → knip → ts:check → build. Chaque script est lancé s'il existe dans `package.json` (`--if-present`) ; pas de script `test` pour l'instant, l'étape est sautée.
+- `.github/workflows/pr.yml` (chaque PR et push sur `main`) → `build.yml` : install (`--frozen-lockfile`) → format:check → lint (ESLint puis `docs:check`, les chemins cités dans la doc) → knip → ts:check → build → test (Vitest, couverture 100 % sur `shared/`). Chaque script est lancé s'il existe dans `package.json` (`--if-present`).
 - `.github/workflows/pr-title.yml` (PR ouverte, titre modifié…) → `pr-checks.yml` : titre de PR vérifié par commitlint.
 - `.github/workflows/pr.yml` → `prisma-check.yml` : rejoue les migrations sur un Postgres vide (service du job, jamais Neon) puis `prisma migrate diff --exit-code` contre `prisma/schema/` ; échoue si le schéma a changé sans migration (`pnpm db:migrate` oublié). Lancé sur chaque PR, sans filtre `paths`, pour pouvoir être un check obligatoire.
 
@@ -71,7 +71,7 @@ Node vient de l'input `node_version` (aligné sur `.nvmrc`), pnpm du champ `pack
 
 ## Renovate
 
-`renovate.json` étend le preset partagé `github>vfourny/.github` (actions figées sur un SHA, 3 jours d'attente avant de proposer une version, majeures relues à la main). Surcharges locales : une fusion sur `main` part en prod à la release suivante, sans tests, donc les `dependencies` (runtime) et Nitro (beta épinglée) ne sont **jamais** fusionnées automatiquement ; seules les patch/minor des `devDependencies` le sont (lundi 0 h–4 h). `prisma`, `@prisma/client` et `@prisma/adapter-neon` montent ensemble. L'app GitHub Renovate doit être installée sur le repo.
+`renovate.json` étend le preset partagé `github>vfourny/.github` (actions figées sur un SHA, 3 jours d'attente avant de proposer une version, majeures relues à la main). Surcharges locales : une fusion sur `main` part en prod à la release suivante, avec des tests limités au code pur de `shared/`, donc les `dependencies` (runtime) et Nitro (beta épinglée) ne sont **jamais** fusionnées automatiquement ; seules les patch/minor des `devDependencies` le sont (lundi 0 h–4 h). `prisma`, `@prisma/client` et `@prisma/adapter-neon` montent ensemble. L'app GitHub Renovate doit être installée sur le repo.
 
 ## Premier setup et migrations
 

@@ -2,7 +2,7 @@
 // Modèles imposés par Better Auth (adapter Prisma) : ne pas renommer les champs. Les données
 // métier (`EnvelopeShare`, `ImportBatch`, `Transaction`) portent un `userId` : chaque requête
 // tRPC filtre sur `ctx.session.user.id`. Aujourd'hui un seul `User`, créé par le seed
-// (`prisma/seeds/user.ts`, inscription publique désactivée).
+// (`prisma/seeds/user.seed.ts`, inscription publique désactivée).
 
 model User {
   id                       String                     @id

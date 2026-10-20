@@ -22,7 +22,7 @@ const STYLE = {
 
 /**
  * Bandeau « Charges fixes » (loyer, énergie, télécom, internet) : débits de la période pour les catégories
- * de `FIXED_CHARGES_CATEGORIES` (`shared/personal/rules.ts`), + leur total. Mois ou année selon la vue choisie.
+ * de `FIXED_CHARGES_CATEGORIES` (`shared/personal/personal.rules.ts`), + leur total. Mois ou année selon la vue choisie.
  */
 export function FixedChargesCard({
   fixedCharges,

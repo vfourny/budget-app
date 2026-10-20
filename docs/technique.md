@@ -34,7 +34,7 @@ Pourquoi pas Next.js : app mono-utilisateur derrière une auth, sans SEO. SSR et
 - `import type` est **obligatoire** pour les types (`verbatimModuleSyntax`).
 - Alias : `@/…` → `src/`, `@server/…` → `server/`, `@shared/…` → `shared/` (déclarés dans `vite.config.ts` **et** `tsconfig.json`).
 - Vérifié par ESLint (`@typescript-eslint/no-restricted-imports`, `eslint.config.ts`) : `src/` et `shared/` n'importent du serveur que le type du routeur et les types Prisma, en `import type` ; `shared/`, `server/`, `prisma/` et `scripts/` n'importent jamais `@/…` (le front).
-- `src/lib/i18n/fr/enums.ts` (libellés des enums), `shared/personal/personal.rules.ts` et `envelopes.ts` importent les types de l'enum Prisma depuis `@server/generated/prisma/enums`, en `import type` uniquement.
+- `src/lib/i18n/fr/enums.ts` (libellés des enums), `shared/personal/personal.rules.ts`… importent les types de l'enum Prisma depuis `@server/generated/prisma/enums`, en `import type` uniquement.
 
 ## API : tRPC + TanStack Query
 

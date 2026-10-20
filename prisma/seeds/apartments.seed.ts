@@ -15,7 +15,7 @@ import { SEED_YEAR } from './seed-year.config'
  * 1 137,73 € (capital 602,98 € + intérêts 534,75 € pour l'échéance du 30/08/2026), assurance
  * emprunteur Kereis 14,21 €/mois, loyer net 735,31 €. Le prêt (capital, taux, durée) est
  * reconstitué pour retomber sur ces chiffres : à remplacer par ceux du tableau d'amortissement
- * réel. Le prix d'achat est une estimation. Ses relevés 2025 sont dans `apartment-statements-2025.ts`.
+ * réel. Le prix d'achat est une estimation. Ses relevés 2025 sont dans `apartment-statements-2025.seed.ts`.
  */
 const APARTMENTS_SEED = [
   {

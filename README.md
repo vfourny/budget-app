@@ -55,11 +55,24 @@ Tout est dans [`docs/`](./docs) :
 - [Spécificités techniques](./docs/technique.md) — architecture, conventions, pièges à connaître.
 - [Import CSV](./docs/import-csv.md) — parseur générique, formats BoursoBank / Banque Populaire, ajouter une banque.
 - [Environnements & déploiement](./docs/environnements.md) — branches Neon, variables, Vercel, CI.
+- [Décisions](./docs/decisions.md) — choix d'architecture et métier, avec leurs raisons.
 
 Les conventions de travail (workflow PR, consignes pour Claude Code) sont dans [`CLAUDE.md`](./CLAUDE.md).
 
 ## État d'avancement
 
-Fait : scaffold, Prisma/Neon + schéma, tRPC + TanStack Query, parseur CSV générique avec mapping par banque.
-En place : import et relecture, dashboard Perso et dashboard Pro Stygma (mois / année, prévisionnel vs réel). Détails : `docs/fonctionnel.md`.
-Hors scope v1 : synchro bancaire automatique, multi-utilisateurs, facturation / TVA.
+1. Scaffold (Vite + Nitro + CI + CLAUDE.md) → Prisma/Neon + schéma + seed → tRPC + TanStack Query (fait)
+2. Thème obsidian/platine + routing client (fait : Mantine + React Router, menu latéral de la maquette)
+3. Upload CSV (parser générique piloté par `CsvFormat`, formats en base) (fait)
+4. Route tRPC `categorize` (Gemini, few-shot sur transactions validées, JSON `category` (valeur de l'enum) + `confidence`) (fait)
+5. Écran de relecture : historique, tableau de correction, « Valider », suppression d'un import (fait)
+6. Dashboard Perso mois / année : totaux, transactions, par catégorie (fait) ; parts recommandées par enveloppe dans Réglages + jauges réel vs recommandé (fait) ; abonnements, IR (à faire)
+7. Partie pro Stygma (fait, voir `docs/fonctionnel.md`) : catégories pro, règles par année dans Réglages,
+   dashboard mois / année (CA, TVA, bénéfice, facturation & encaissements, catégories, frais mixtes, km), éditeur du
+   prévisionnel ; à venir : régimes IS / EURL, TVA à l'encaissement
+
+8. Appartements (fait, voir `docs/fonctionnel.md`) : type de compte `APARTMENT`, Réglages (bien + prêt), import / relecture
+   avec rattachement, dashboard `/apartments` mois / année (prévu / réalisé / écart, KPI, rendements, seuils LMNP) ; hors
+   périmètre : fiscalité, rappels
+
+Hors scope : synchro bancaire auto, multi-utilisateurs, émission de factures.

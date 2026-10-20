@@ -73,7 +73,7 @@ interface TransactionsTableProps {
 
 /**
  * Tableau « Transactions du mois », identique en Perso et en Pro : résumé (nombre, crédits,
- * débits), filtres avec compteurs, tri par colonne, badge « À vérifier » (`isToCheck`, `shared/transactions/categories.ts`).
+ * débits), filtres avec compteurs, tri par colonne, badge « À vérifier » (`isToCheck`, `shared/transactions/categories.rules.ts`).
  * `id="transactions"` : cible de l'ancre « Transactions (N) » de l'en-tête Pro.
  */
 export function TransactionsTable({

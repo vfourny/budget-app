@@ -10,7 +10,7 @@ import {
 /*
  * ✏️ RÈGLES DES APPARTEMENTS (voir `docs/fonctionnel.md` › Appartements, R2, R3, R7) : le seul fichier à
  * modifier pour changer ce qui est cumulé dans une ligne du tableau ou les tolérances. Les seuils
- * légaux du LMNP (R10), données annuelles, sont dans `@shared/fiscal/lmnp`.
+ * légaux du LMNP (R10), données annuelles, sont dans `@shared/fiscal/lmnp.rules`.
  *
  * Partagé front + serveur (fichier pur, sans dépendance runtime). Montants en centimes, taux en
  * points de base. Aucun texte affiché ici : les libellés vivent dans `@/lib/i18n/fr`.
