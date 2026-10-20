@@ -7,6 +7,16 @@ depuis les relevés bancaires. L'historique mois / année est central.
 Flux cible : upload d'un relevé CSV → catégorisation par l'IA (Gemini) → relecture/correction
 → validation → écriture en base → dashboards mois/année.
 
+## À lire selon la tâche
+
+- `docs/fonctionnel.md` : règles métier (enveloppes, Pro, Appartements R1-R12). **Avant** de toucher à un calcul.
+- `docs/technique.md` : stack, API, calculs, base, pièges connus.
+- `docs/decisions.md` : décisions et leurs raisons. **Avant** de remettre un choix en cause ; une nouvelle décision durable s'y ajoute.
+- `docs/import-csv.md`, `docs/environnements.md` : import des relevés, déploiement / CI / release.
+
+Ce fichier ne garde que les consignes et la carte du code : une info ne vit qu'à un endroit, le reste renvoie au bon doc.
+`pnpm docs:check` (lancé par `pnpm lint`) casse si un chemin cité entre backticks n'existe plus.
+
 ## Le développeur
 
 Valentin est expérimenté en **Vue/Nuxt** et **débutant en React**. Il fait ce projet en React
@@ -23,46 +33,22 @@ pour apprendre.
 
 ## Stack
 
-Choix délibéré : **le plus simple possible**. SPA React (pas de SSR, pas de Server Components)
-
-- un backend Nitro dans le même projet.
-
-| Couche      | Choix                                                                                |
-| ----------- | ------------------------------------------------------------------------------------ |
-| Front       | React 19 (SPA) + Vite 8, TypeScript 6                                                |
-| Backend     | Nitro 3 via `nitro/vite` (le moteur serveur de Nuxt) — dossier `server/`             |
-| API         | tRPC 11 + Zod 4, TanStack Query 5 (`@trpc/tanstack-react-query`)                     |
-| DB          | Prisma 7 + PostgreSQL Neon (driver adapter `@prisma/adapter-neon`)                   |
-| UI          | Mantine 9 + React Router 8, thème « obsidian / platine » clair + sombre, accent doré |
-| Auth        | Better Auth (email + mot de passe, mono-utilisateur, sessions en base)               |
-| IA          | API Gemini (Google AI Studio) pour catégoriser les lignes de relevé                  |
-| Hébergement | Vercel (Hobby, détection Nitro automatique) + Neon (Free)                            |
-| Qualité     | ESLint, Prettier, `tsc`, commitlint (configs `@vfourny/node-toolkit`)                |
+Choix délibéré : **le plus simple possible**. SPA React 19 + Vite (pas de SSR) et backend Nitro dans le même projet,
+tRPC + TanStack Query, Prisma + Neon, Mantine, Better Auth, Gemini. Versions : `docs/technique.md` › Stack ; raisons :
+`docs/decisions.md`.
 
 ## Commandes
 
-```bash
-pnpm dev            # front + API sur un seul serveur (http://localhost:5173, API sous /api)
-pnpm check          # lint + ts:check + format:check + knip + test (à lancer avant toute PR)
-pnpm test           # tests unitaires Vitest + couverture (rapport HTML dans coverage/)
-pnpm test:watch     # Vitest en watch avec l'interface web (Vitest UI, onglet Coverage)
-pnpm build          # build de prod (fait aussi en CI) → .output/ (ou .vercel/output sur Vercel)
-pnpm preview        # sert le build de prod localement
-pnpm lint:fix       # autofix ESLint
-pnpm format         # prettier --write
+Toutes les commandes et le premier setup : `README.md`. Celles qui comptent pour travailler ici :
 
-pnpm db:migrate     # prisma migrate dev (crée + applique une migration, régénère le client)
-pnpm db:studio      # Prisma Studio
-pnpm db:reset       # reset complet de la base dev (supprime tout, rejoue les migrations)
+```bash
+pnpm check          # lint (+ docs:check) + ts:check + format:check + knip + test (à lancer avant toute PR)
+pnpm build          # build de prod (fait aussi en CI)
+pnpm db:migrate     # toute modif de prisma/schema/ : crée + applique la migration
 ```
 
-Premier setup : `cp .env.example .env` (URLs Neon), `pnpm install` (génère le client Prisma),
-`pnpm db:deploy`.
-
-Déploiement Vercel : le script `vercel-build` applique les migrations (`prisma migrate deploy`)
-avant `vite build` → `DATABASE_URL` **et** `DIRECT_URL` doivent être définies sur Vercel.
-La prod ne se déploie **pas** au merge sur `main` : elle part quand on merge la PR de release
-(release-please), voir `docs/environnements.md` › Release.
+Déploiement, environnements, release (la prod part au merge de la PR de release, pas au merge sur `main`) :
+`docs/environnements.md`.
 
 ## Architecture
 
@@ -235,79 +221,4 @@ nitro.config.ts        # serverDir: ./server
 Créer une nouvelle commande dès qu'un pattern se répète 2-3 fois (ex. ajout d'une route tRPC +
 schéma Zod + modèle Prisma, ajout d'un widget dashboard).
 
-## Roadmap MVP
-
-1. Scaffold (Vite + Nitro + CI + CLAUDE.md) → Prisma/Neon + schéma + seed → tRPC + TanStack Query (fait)
-2. Thème obsidian/platine + routing client (fait : Mantine + React Router, menu latéral de la maquette)
-3. Upload CSV (parser générique piloté par `CsvFormat`, formats en base) (fait)
-4. Route tRPC `categorize` (Gemini, few-shot sur transactions validées, JSON `category` (valeur de l'enum) + `confidence`) (fait)
-5. Écran de relecture : historique, tableau de correction, « Valider », suppression d'un import (fait)
-6. Dashboard Perso mois / année : totaux, transactions, par catégorie (fait) ; parts recommandées par enveloppe dans Réglages + jauges réel vs recommandé (fait) ; abonnements, IR (à faire)
-7. Partie pro Stygma (fait, voir `docs/fonctionnel.md`) : catégories pro, règles par année dans Réglages,
-   dashboard mois / année (CA, TVA, bénéfice, facturation & encaissements, catégories, frais mixtes, km), éditeur du
-   prévisionnel ; à venir : régimes IS / EURL, TVA à l'encaissement
-
-8. Appartements (fait, voir `docs/fonctionnel.md`) : type de compte `APARTMENT`, Réglages (bien + prêt), import / relecture
-   avec rattachement, dashboard `/apartments` mois / année (prévu / réalisé / écart, KPI, rendements, seuils LMNP) ; hors
-   périmètre : fiscalité, rappels
-
-Hors scope : synchro bancaire auto, multi-utilisateurs, émission de factures.
-
-## Décisions
-
-- **SPA Vite + Nitro plutôt que Next.js** : app mono-utilisateur derrière une auth, sans SEO ;
-  le SSR / les Server Components n'apportent rien ici et ajoutent des concepts. Nitro garde
-  les conventions `server/` de Nuxt et se déploie sur Vercel sans config.
-- Nitro 3 est encore en **beta** (version épinglée exactement dans `package.json`) ; c'est
-  l'approche recommandée par Vercel pour ajouter une API à un projet Vite.
-- Neon : `DATABASE_URL` = URL pooled (runtime, adapter `@prisma/adapter-neon`),
-  `DIRECT_URL` = URL directe (CLI Prisma / migrations, lue dans `prisma.config.ts`).
-- **Pas de modèle `BankAccount`** : seul compte le type **PERSONAL / PROFESSIONAL** (enum `AccountType`, porté par
-  `ImportBatch` et `Transaction`). La banque n'est jamais stockée ni codée : le format des colonnes d'un CSV est une
-  donnée (`CsvFormat`, `shared/transactions/csv-format.schema.ts`), retrouvée par l'empreinte de l'en-tête du fichier (`server/lib/csv/`),
-  donc changer de banque ne demande aucun développement. Les appartements ont leur propre type de compte `APARTMENT` ;
-  le rattachement à un bien passe par `apartmentId` (sur `ImportBatch`, défaut de l'import, et sur `Transaction`,
-  modifiable ligne par ligne à la relecture), pas par un compte bancaire. Supprimer un `ImportBatch` supprime ses
-  transactions.
-- **Mantine plutôt que PrimeReact** (décidé le 2026-10-01) : PrimeReact 11 est devenu sans style et
-  sous licence PrimeUI (clé à renouveler), la 10 (MIT) n'est plus qu'en maintenance et a des
-  couleurs codées en dur à écraser composant par composant. Mantine (MIT) se thématise par un
-  objet de thème, fournit AppShell, Select, Dropzone, et `mantine-datatable` pour le tableau
-  éditable de la relecture.
-- **React Router** (mode library, pas de framework mode) pour le routing client : le plus
-  répandu, équivalent direct de Vue Router.
-- Prisma 7 stable (la 8 est en RC).
-- **Suffixes de rôle sur les fichiers (2026-10-19)** : `.service.ts` plutôt que `.compute.ts` pour la logique métier (couvre
-  calculs purs et requêtes) ; règle ESLint locale plutôt qu'`eslint-plugin-check-file` (une vingtaine de lignes, aucune dépendance).
-- **Calculs purs dans `shared/` (2026-10-20)** : un calcul métier sans accès base va dans `shared/<domaine>/xxx.calc.ts` plutôt que
-  dans un `.service.ts` serveur : il tombe sous le seuil de couverture de 100 % et le front peut le réutiliser. `.service` = I/O.
-- **Configs partagées** : `tsconfig.json` étend `@vfourny/node-toolkit/tsconfig/react` (strict + `noUncheckedIndexedAccess`,
-  `noEmit`, tout le projet inclus) ; seules les options propres au projet (cible, `types`, alias, `exclude`) restent en local.
-  Prettier = config du toolkit telle quelle (guillemets simples, sans point-virgule, 80 colonnes). ESLint =
-  `@vfourny/node-toolkit/eslint/react` (tri des imports, props JSX et interfaces, `interface` plutôt que `type`, pas de `!`) ;
-  surcharges locales dans `eslint.config.ts` uniquement (routes Nitro en export par défaut, fonctions utilisables avant leur
-  déclaration).
-- pnpm, une seule app (pas de monorepo).
-- **Release (2026-10-16)** : release-please plutôt que semantic-release (config du toolkit) : semantic-release publie
-  à chaque push sur `main`, alors qu'on veut choisir le moment du déploiement prod (merge de la PR de release).
-  Local + Preview sur la branche Neon `develop`, prod sur `production` ; pas de Docker.
-- TypeScript 6.0 (comme le template Vite). **ESLint plutôt qu'oxlint** (décidé le 2026-10-12) : pour partager la config
-  du toolkit entre projets ; oxlint était plus rapide mais sans tri des imports ni config partagée.
-- **Pro (2026-10-06)** : catégories pro dans l'enum `TransactionCategory` (filtrées par type de compte) plutôt qu'un
-  2e enum ; prévisionnel sans saisie = réel du même mois N-1 ; salaire brut prévu mois par mois dans l'éditeur du
-  prévisionnel (`SalaryForecast`, sans saisie = brut du même mois N-1 ; réel = prévu, le relevé ne montre que le net),
-  cotisations calculées depuis les taux de l'année (les prélèvements URSSAF / PAS… ne comptent pas dans les charges) ; clients en texte libre dans la facturation
-  (pas de table) ; jours facturés en `Float` par pas de 0,5 (exact en binaire, pas de demi-journées entières) ; encaissé = crédits `CLIENT_PAYMENT` du mois, reste à encaisser = solde cumulé facturé TTC − encaissé ; graphiques en CSS (pas de lib).
-- **Solde du compte perso (2026-10-19)** : pas de solde stocké par mois. On saisit des **repères** (`AccountBalance` :
-  solde réel en fin de mois) et le reste se calcule (`shared/personal/balance.calc.ts`, pur) : repère le plus récent +
-  transactions validées des mois suivants ; début de mois = fin du mois précédent. Un repère sur un mois l'emporte sur le
-  calcul, qui sert alors à afficher l'écart (import manquant, doublon…). Sans repère : solde « non renseigné ». Le solde
-  courant des CSV (colonne « Solde » BoursoBank) n'est pas exploité. Les appartements gardent leur solde au 1er janvier
-  (`ApartmentYearOpening`).
-- **Appartements (2026-10-07)** : trésorerie seulement (pas de fiscalité). Hypothèses retenues : mois clos = antérieur au mois
-  en cours ; prévu des charges mensuelles = réel N-1, sinon moyenne des autres mois clos, sinon 0 ; prêt à taux fixe, assurance
-  emprunteur prélevée à part (sauf échéance reconnue avec assurance) ; rendement sur le prix d'achat seul ; « Apport appartement »
-  (perso) dans l'enveloppe épargne long terme. Le loyer arrive net : les frais viennent de la facture de gérance saisie à la
-  main (`ManagementInvoice`), sans effet sur le solde. Une échéance de prêt prélevée est ventilée (intérêts du tableau, capital =
-  le reste) pour que le solde calculé reste égal au solde bancaire. Un appartement ne se supprime pas tant qu'il porte des
-  transactions ou des relevés (`onDelete: Restrict`).
+Avancement et périmètre : `README.md` › État d'avancement. Décisions : `docs/decisions.md`.

@@ -13,7 +13,7 @@ interface CategoryBreakdownProps {
 
 /**
  * Débits par catégorie, le plus gros en premier ; la barre est relative au plus gros, le % au
- * total affiché. Toutes les catégories de `CATEGORY_CARD_CATEGORIES` (`shared/personal/rules.ts`) sont
+ * total affiché. Toutes les catégories de `CATEGORY_CARD_CATEGORIES` (`shared/personal/personal.rules.ts`) sont
  * affichées, même à 0 € (elles restent alors dans l'ordre de la liste, en fin de tableau).
  */
 export function CategoryBreakdown({ overview }: CategoryBreakdownProps) {

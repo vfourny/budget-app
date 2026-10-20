@@ -35,7 +35,7 @@ export interface PeriodTotals {
 
 /**
  * Totaux d'une période. Toutes les règles (enveloppe d'une catégorie, épargne ou dépense, lignes
- * de revenus) viennent de `@shared/personal/rules`. Hypothèse V1 : tout crédit est un revenu.
+ * de revenus) viennent de `@shared/personal/personal.rules`. Hypothèse V1 : tout crédit est un revenu.
  * Que des entiers en centimes.
  */
 export function aggregatePeriod(rows: readonly AggregatedRow[]): PeriodTotals {
