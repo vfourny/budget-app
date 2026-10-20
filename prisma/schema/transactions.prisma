@@ -147,17 +147,3 @@ model Transaction {
   @@index([userId, apartmentId, year, month])
 }
 
-/// Solde réel d'un compte en **fin de mois**, saisi à la main (repère). Les soldes des autres mois se
-/// calculent depuis le repère le plus récent : repère + transactions validées des mois suivants. Sert à
-/// démarrer en cours d'année (solde fin février pour commencer en mars) et à recaler le calcul.
-model AccountBalance {
-  userId       String
-  user         User        @relation(fields: [userId], references: [id], onDelete: Cascade)
-  accountType  AccountType
-  year         Int         @db.SmallInt
-  month        Int         @db.SmallInt
-  /// Centimes, signé.
-  balanceCents Int
-
-  @@id([userId, accountType, year, month])
-}
