@@ -80,7 +80,6 @@ function PeriodContent({ view, period }: { view: PeriodView; period: Period }) {
   if (overview.isError)
     return <Alert color="red" title={fr.personal.loadPeriodFailed} />
 
-
   return (
     <>
       <KpiCards overview={overview.data} view={view} year={period.year} />
@@ -88,9 +87,7 @@ function PeriodContent({ view, period }: { view: PeriodView; period: Period }) {
       <Grid gap={16} mt={16}>
         {view === 'month' && (
           <Grid.Col span={{ base: 12, lg: 8 }}>
-            <TransactionsTable
-              transactions={overview.data.transactions}
-            />
+            <TransactionsTable transactions={overview.data.transactions} />
           </Grid.Col>
         )}
         <Grid.Col span={{ base: 12, lg: view === 'month' ? 4 : 12 }}>
