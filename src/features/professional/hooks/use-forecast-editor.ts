@@ -7,13 +7,13 @@ import { queryClient, trpc } from '@/lib/trpc'
 /** Une saisie du prévisionnel change le dashboard Pro et les autres saisies : on rafraîchit les deux. */
 const invalidate = () =>
   Promise.all([
-    queryClient.invalidateQueries(trpc.professionalForecast.pathFilter()),
+    queryClient.invalidateQueries(trpc.professional.forecast.pathFilter()),
     queryClient.invalidateQueries(trpc.professional.pathFilter()),
   ])
 
 /** Clients déjà saisis (autocomplétion) avec leur dernier TJM. */
 export function useBillingClients() {
-  return useQuery(trpc.professionalForecast.clients.queryOptions())
+  return useQuery(trpc.professional.forecast.clients.queryOptions())
 }
 
 export function useBillingLines(
@@ -22,20 +22,20 @@ export function useBillingLines(
   kind: BillingKind,
 ) {
   return useQuery(
-    trpc.professionalForecast.billingLines.queryOptions({ year, month, kind }),
+    trpc.professional.forecast.billingLines.queryOptions({ year, month, kind }),
   )
 }
 
 export function useSetBillingLines() {
   return useMutation({
-    ...trpc.professionalForecast.setBillingLines.mutationOptions(),
+    ...trpc.professional.forecast.setBillingLines.mutationOptions(),
     onSuccess: invalidate,
   })
 }
 
 export function useCopyBillingToFollowingMonths() {
   return useMutation({
-    ...trpc.professionalForecast.copyBillingToFollowingMonths.mutationOptions(),
+    ...trpc.professional.forecast.copyBillingToFollowingMonths.mutationOptions(),
     onSuccess: invalidate,
   })
 }
@@ -47,20 +47,20 @@ export function useForecasts(
   group: ForecastGroup,
 ) {
   return useQuery(
-    trpc.professionalForecast.forecasts.queryOptions({ year, month, group }),
+    trpc.professional.forecast.forecasts.queryOptions({ year, month, group }),
   )
 }
 
 export function useSetForecasts() {
   return useMutation({
-    ...trpc.professionalForecast.setForecasts.mutationOptions(),
+    ...trpc.professional.forecast.setForecasts.mutationOptions(),
     onSuccess: invalidate,
   })
 }
 
 export function useCopyForecastsToFollowingMonths() {
   return useMutation({
-    ...trpc.professionalForecast.copyForecastsToFollowingMonths.mutationOptions(),
+    ...trpc.professional.forecast.copyForecastsToFollowingMonths.mutationOptions(),
     onSuccess: invalidate,
   })
 }
@@ -68,20 +68,20 @@ export function useCopyForecastsToFollowingMonths() {
 /** Salaire brut prévu d'un mois (saisie) et brut du même mois N-1. */
 export function useSalaryForecast(year: number, month: number) {
   return useQuery(
-    trpc.professionalForecast.salary.queryOptions({ year, month }),
+    trpc.professional.forecast.salary.queryOptions({ year, month }),
   )
 }
 
 export function useSetSalary() {
   return useMutation({
-    ...trpc.professionalForecast.setSalary.mutationOptions(),
+    ...trpc.professional.forecast.setSalary.mutationOptions(),
     onSuccess: invalidate,
   })
 }
 
 export function useCopySalaryToFollowingMonths() {
   return useMutation({
-    ...trpc.professionalForecast.copySalaryToFollowingMonths.mutationOptions(),
+    ...trpc.professional.forecast.copySalaryToFollowingMonths.mutationOptions(),
     onSuccess: invalidate,
   })
 }
@@ -89,20 +89,20 @@ export function useCopySalaryToFollowingMonths() {
 /** Km prévus d'un mois (saisie) et km réels du même mois N-1. */
 export function useMileageForecast(year: number, month: number) {
   return useQuery(
-    trpc.professionalForecast.mileage.queryOptions({ year, month }),
+    trpc.professional.forecast.mileage.queryOptions({ year, month }),
   )
 }
 
 export function useSetMileage() {
   return useMutation({
-    ...trpc.professionalForecast.setMileage.mutationOptions(),
+    ...trpc.professional.forecast.setMileage.mutationOptions(),
     onSuccess: invalidate,
   })
 }
 
 export function useCopyMileageToFollowingMonths() {
   return useMutation({
-    ...trpc.professionalForecast.copyMileageToFollowingMonths.mutationOptions(),
+    ...trpc.professional.forecast.copyMileageToFollowingMonths.mutationOptions(),
     onSuccess: invalidate,
   })
 }

@@ -17,7 +17,7 @@ import { fr } from '@/lib/i18n/fr'
 import type { RouterOutputs } from '@/lib/trpc'
 
 type ApartmentView =
-  RouterOutputs['apartmentDashboard']['month']['apartments'][number]
+  RouterOutputs['apartment']['dashboard']['month']['apartments'][number]
 
 interface ApartmentCardProps {
   apartment: ApartmentView
@@ -92,7 +92,7 @@ export function ApartmentCard({ apartment, period }: ApartmentCardProps) {
             <Button
               component={Link}
               size="compact-sm"
-              to="/settings?tab=apt"
+              to="/settings?tab=apartments"
               variant="default"
             >
               {fr.apartments.settings}

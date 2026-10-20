@@ -20,7 +20,7 @@ import { z } from 'zod'
  */
 const MAX_EXAMPLES = 300
 
-export const categorizeRouter = createTRPCRouter({
+export const importCategorizeRouter = createTRPCRouter({
   /**
    * Propose une catégorie (+ confiance) pour les transactions sans catégorie d'un import en
    * attente de relecture. Relançable : seules les lignes encore sans catégorie sont traitées, et

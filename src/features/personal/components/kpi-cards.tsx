@@ -6,21 +6,22 @@ import {
 } from '@shared/fiscal/income-tax.rules'
 import type { PeriodTotals } from '@shared/personal/aggregate.calc'
 import {
+  BUDGET_ENVELOPES,
+  ENVELOPE_CATEGORIES,
   isSavingsEnvelope,
   SAVINGS_ENVELOPES,
 } from '@shared/personal/personal.rules'
 
 import { KpiCard, KpiLine } from '@/components/kpi-card'
 import { EnvelopeGauge } from '@/features/personal/components/envelope-gauge'
-import { useEnvelopeShares } from '@/features/settings/hooks/use-envelope-shares'
-import { ENVELOPE_ORDER, envelopeSourceText } from '@/lib/envelopes'
+import { useEnvelopeShares } from '@/features/personal/hooks/use-envelope-shares'
 import { formatCents } from '@/lib/format'
 import { fr } from '@/lib/i18n/fr'
 
 type Overview = PeriodTotals & { monthsWithData: number }
 
-/** Enveloppes de dépense = toutes sauf l'épargne (voir `SAVINGS_ENVELOPES` dans `shared/personal/rules.ts`). */
-const EXPENSE_ENVELOPES = ENVELOPE_ORDER.filter(
+/** Enveloppes de dépense = toutes sauf l'épargne (voir `SAVINGS_ENVELOPES` dans `shared/personal/personal.rules.ts`). */
+const EXPENSE_ENVELOPES = BUDGET_ENVELOPES.filter(
   (envelope) => !isSavingsEnvelope(envelope),
 )
 
@@ -153,4 +154,19 @@ export function KpiCards({
       )}
     </Grid>
   )
+}
+
+/**
+ * Explication de la somme « réelle » d'une enveloppe (tooltip des jauges), déduite de
+ * `ENVELOPE_CATEGORIES` (`shared/personal/personal.rules.ts`) : si on déplace une catégorie, le texte suit.
+ */
+function envelopeSourceText(envelope: Envelope): string {
+  const labels = ENVELOPE_CATEGORIES[envelope].map(
+    (category) => fr.categories[category],
+  )
+  const text = fr.personal.envelopeSource
+  if (labels.length === 0) return text.empty
+  return isSavingsEnvelope(envelope)
+    ? text.savings(labels)
+    : text.expenses(labels)
 }

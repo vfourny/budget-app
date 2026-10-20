@@ -1,6 +1,6 @@
 import type { TransactionCategory } from '@server/generated/prisma/enums'
-import { validatedTransactions } from '@server/lib/dashboard/scope.service'
 import type { db as Db } from '@server/lib/db.client'
+import { validatedTransactions } from '@server/lib/transactions/scope.service'
 import { htFromTtc } from '@shared/professional/amounts.util'
 import {
   FORECAST_GROUPS,

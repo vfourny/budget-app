@@ -4,7 +4,7 @@ import { queryClient, trpc } from '@/lib/trpc'
 
 /** Mois clos proposés par le sélecteur (du plus récent au plus ancien). */
 export function useApartmentPeriods() {
-  return useQuery(trpc.apartmentDashboard.periods.queryOptions())
+  return useQuery(trpc.apartment.dashboard.periods.queryOptions())
 }
 
 /** Un mois : colonnes de chaque appartement actif, KPI et transactions rattachées. `apartmentId` = pastille. */
@@ -14,14 +14,14 @@ export function useApartmentsMonth(
   apartmentId: string | null,
 ) {
   return useQuery(
-    trpc.apartmentDashboard.month.queryOptions({ year, month, apartmentId }),
+    trpc.apartment.dashboard.month.queryOptions({ year, month, apartmentId }),
   )
 }
 
 /** Une année : colonnes sur les mois clos, rendements et seuils LMNP. */
 export function useApartmentsYear(year: number, apartmentId: string | null) {
   return useQuery(
-    trpc.apartmentDashboard.year.queryOptions({ year, apartmentId }),
+    trpc.apartment.dashboard.year.queryOptions({ year, apartmentId }),
   )
 }
 
@@ -32,7 +32,7 @@ export function useApartmentForecastInputs(
   month: number,
 ) {
   return useQuery(
-    trpc.apartmentForecast.inputs.queryOptions({ apartmentId, year, month }),
+    trpc.apartment.forecast.inputs.queryOptions({ apartmentId, year, month }),
   )
 }
 
@@ -42,11 +42,11 @@ export function useApartmentForecastInputs(
  */
 export function useSetApartmentForecast() {
   return useMutation({
-    ...trpc.apartmentForecast.set.mutationOptions(),
+    ...trpc.apartment.forecast.set.mutationOptions(),
     onSuccess: () =>
       Promise.all([
-        queryClient.invalidateQueries(trpc.apartmentForecast.pathFilter()),
-        queryClient.invalidateQueries(trpc.apartmentDashboard.pathFilter()),
+        queryClient.invalidateQueries(trpc.apartment.forecast.pathFilter()),
+        queryClient.invalidateQueries(trpc.apartment.dashboard.pathFilter()),
       ]),
   })
 }

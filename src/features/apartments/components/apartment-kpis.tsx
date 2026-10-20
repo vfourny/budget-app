@@ -7,7 +7,7 @@ import { formatBp, formatCents } from '@/lib/format'
 import { fr } from '@/lib/i18n/fr'
 import type { RouterOutputs } from '@/lib/trpc'
 
-type Kpis = RouterOutputs['apartmentDashboard']['month']['kpis']
+type Kpis = RouterOutputs['apartment']['dashboard']['month']['kpis']
 
 /**
  * Les deux KPI de l'écran (R8) : loyers nets perçus (jauge perçus bruts / dus) et effort d'épargne

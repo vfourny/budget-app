@@ -12,11 +12,11 @@ import {
   Text,
   Tooltip,
 } from '@mantine/core'
-import type {
+import {
   AccountType,
-  TransactionCategory,
+  type TransactionCategory,
 } from '@server/generated/prisma/enums'
-import { isCategoryOf } from '@shared/transactions/categories.rules'
+import { categoriesOf } from '@shared/transactions/categories.rules'
 import {
   IconAlertTriangle,
   IconArrowLeft,
@@ -26,7 +26,7 @@ import { useState } from 'react'
 import { Link, useNavigate } from 'react-router'
 
 import { PageHeader } from '@/components/page-header'
-import { useApartmentOptions } from '@/features/apartments/hooks/use-apartment-options'
+import { useApartmentOptions } from '@/features/apartments/hooks/use-apartments'
 import { DeleteImportButton } from '@/features/imports/components/delete-import-button'
 import {
   useImportReview,
@@ -34,7 +34,7 @@ import {
   useSetApartment,
   useSetCategory,
   useValidateImport,
-} from '@/features/review/hooks/use-import-review'
+} from '@/features/imports/hooks/use-import-review'
 import { errorMessage } from '@/lib/errors'
 import { formatCents, formatDate } from '@/lib/format'
 import { fr } from '@/lib/i18n/fr'
@@ -43,14 +43,15 @@ import classes from './import-review.module.css'
 
 type Filter = 'all' | 'review'
 
-// Options du sélecteur par type de compte : un relevé pro ne propose que les catégories pro.
-// Ordre des options = ordre des clés de `fr.categories` (colonnes du Google Sheet).
+// Options du sélecteur par type de compte : un relevé pro ne propose que les catégories pro, dans
+// l'ordre de `categoriesOf` (`shared/transactions/categories.rules.ts`).
 const CATEGORY_OPTIONS = Object.fromEntries(
-  (Object.keys(fr.accountTypes) as AccountType[]).map((accountType) => [
+  Object.values(AccountType).map((accountType) => [
     accountType,
-    (Object.keys(fr.categories) as TransactionCategory[])
-      .filter((category) => isCategoryOf(accountType, category))
-      .map((category) => ({ value: category, label: fr.categories[category] })),
+    categoriesOf(accountType).map((category: TransactionCategory) => ({
+      value: category,
+      label: fr.categories[category],
+    })),
   ]),
 ) as Record<AccountType, { value: TransactionCategory; label: string }[]>
 

@@ -26,7 +26,9 @@ export function useImportStatement() {
 
       let categorizationError: string | null = null
       try {
-        await trpcClient.categorize.run.mutate({ batchId: created.batchId })
+        await trpcClient.import.categorize.run.mutate({
+          batchId: created.batchId,
+        })
       } catch (error) {
         categorizationError = errorMessage(error)
       }

@@ -13,6 +13,7 @@ import {
   importStatement,
 } from '@server/lib/imports/import-statement.service'
 import { findPendingImport } from '@server/lib/ownership.service'
+import { importCategorizeRouter } from '@server/trpc/routers/import-categorize.router'
 import { createTRPCRouter, protectedProcedure } from '@server/trpc/trpc.config'
 import { z } from 'zod'
 
@@ -20,6 +21,9 @@ import { z } from 'zod'
 const PREVIEW_LINES = 5
 
 export const importRouter = createTRPCRouter({
+  /** Catégorisation IA des lignes d'un import en relecture. */
+  categorize: importCategorizeRouter,
+
   /**
    * Format d'un CSV inconnu : l'IA désigne les colonnes (date, libellé, montant) à partir de
    * l'en-tête et de quelques lignes, puis le fichier est parsé avec ce mapping pour fournir un

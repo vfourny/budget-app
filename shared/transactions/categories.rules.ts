@@ -5,8 +5,8 @@ import type {
 
 /*
  * Catégories proposées selon le type de compte : une seule liste en base (`TransactionCategory`),
- * et une liste par type de compte (`ACCOUNT_CATEGORIES`). Sert au sélecteur de la relecture, au
- * prompt Gemini et à la validation de `setCategory`.
+ * et une liste par type de compte (`ACCOUNT_CATEGORIES`), **dans l'ordre d'affichage** (colonnes du Google Sheet).
+ * Sert au sélecteur de la relecture, au prompt Gemini et à la validation de `setCategory`.
  *
  * Une catégorie peut figurer dans plusieurs comptes. Ajouter un type de compte :
  * l'ajouter à l'enum `AccountType`, `tsc` impose alors sa liste ici.
@@ -21,6 +21,7 @@ const ACCOUNT_CATEGORIES = {
     'GROCERIES',
     'NIGHTLIFE',
     'LEISURE',
+    'TRAINING',
     'CLOTHING_CARE',
     'HEALTH',
     'TRANSPORT',
@@ -30,14 +31,13 @@ const ACCOUNT_CATEGORIES = {
     'TELECOM',
     'INTERNET',
     'OTHER',
+    'SHORT_TERM_SAVINGS',
     'LONG_TERM_SAVINGS',
     'SALARY_PAYMENT',
     'BNC_PAYMENT',
     'VACATION_PAYMENT',
     'REFUND',
     'PROFESSIONAL_REFUND',
-    'TRAINING',
-    'SHORT_TERM_SAVINGS',
     'APARTMENT_CONTRIBUTION',
   ],
   PROFESSIONAL: [
@@ -94,6 +94,13 @@ type AssertNever<T extends never> = T
 export type EveryCategoryIsAssigned = AssertNever<
   Exclude<TransactionCategory, AccountCategory<AccountType>>
 >
+
+/** Catégories proposées pour un type de compte, dans l'ordre d'affichage (sélecteurs, prompt). */
+export function categoriesOf<T extends AccountType>(
+  accountType: T,
+): (typeof ACCOUNT_CATEGORIES)[T] {
+  return ACCOUNT_CATEGORIES[accountType]
+}
 
 /**
  * La catégorie peut-elle être choisie pour une transaction de ce type de compte ? Type guard : après

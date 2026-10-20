@@ -1,7 +1,7 @@
 import type { TransactionCategory } from '@server/generated/prisma/enums'
-import { validatedTransactions } from '@server/lib/dashboard/scope.service'
 import type { db as Db } from '@server/lib/db.client'
-import { resolveProfessionalYearSettings } from '@server/lib/settings/professional-year-settings.service'
+import { resolveProfessionalYearSettings } from '@server/lib/professional/year-settings.service'
+import { validatedTransactions } from '@server/lib/transactions/scope.service'
 import {
   isBefore,
   monthIndex,

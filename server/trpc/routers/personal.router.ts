@@ -1,8 +1,9 @@
+import type { Envelope } from '@server/generated/prisma/enums'
+import { loadPersonalBalance } from '@server/lib/personal/balance.service'
 import {
   periodsWithData,
   validatedTransactions,
-} from '@server/lib/dashboard/scope.service'
-import { loadPersonalBalance } from '@server/lib/personal/balance.service'
+} from '@server/lib/transactions/scope.service'
 import { createTRPCRouter, protectedProcedure } from '@server/trpc/trpc.config'
 import {
   monthSchema,
@@ -10,6 +11,10 @@ import {
   yearSchema,
 } from '@shared/common/period.schema'
 import { aggregatePeriod } from '@shared/personal/aggregate.calc'
+import {
+  BUDGET_ENVELOPES,
+  DEFAULT_ENVELOPE_PERCENTS,
+} from '@shared/personal/personal.rules'
 import { z } from 'zod'
 
 /** Un mois, ou l'année entière si `month` est absent. */
@@ -17,6 +22,23 @@ const periodSchema = z.object({
   year: yearSchema,
   month: monthSchema.optional(),
 })
+
+const envelopeSharesSchema = z
+  .object(
+    Object.fromEntries(
+      BUDGET_ENVELOPES.map((envelope) => [
+        envelope,
+        z.number().int().min(0).max(100),
+      ]),
+    ) as Record<Envelope, z.ZodNumber>,
+  )
+  .refine(
+    (shares) =>
+      Object.values(shares).reduce((sum, percent) => sum + percent, 0) === 100,
+    {
+      message: 'Envelope shares must sum to exactly 100.',
+    },
+  )
 
 export const personalRouter = createTRPCRouter({
   /** Mois ayant des données (du plus récent au plus ancien) : alimente le sélecteur de période. */
@@ -91,5 +113,34 @@ export const personalRouter = createTRPCRouter({
         create: { ...key, balanceCents: input.balanceCents },
         update: { balanceCents: input.balanceCents },
       })
+    }),
+
+  /** Part du revenu recommandée par enveloppe (valeurs par défaut si jamais configurée). */
+  envelopeShares: protectedProcedure.query(async ({ ctx }) => {
+    const rows = await ctx.db.envelopeShare.findMany({
+      where: { userId: ctx.session.user.id },
+    })
+    const shares: Record<Envelope, number> = { ...DEFAULT_ENVELOPE_PERCENTS }
+    for (const row of rows) {
+      if (row.envelope in shares) shares[row.envelope] = row.percent
+    }
+    return shares
+  }),
+
+  /** Enregistre les 5 parts d'un coup (une seule transaction SQL). */
+  setEnvelopeShares: protectedProcedure
+    .input(envelopeSharesSchema)
+    .mutation(async ({ ctx, input }) => {
+      const userId = ctx.session.user.id
+      await ctx.db.$transaction(
+        BUDGET_ENVELOPES.map((envelope) =>
+          ctx.db.envelopeShare.upsert({
+            where: { userId_envelope: { userId, envelope } },
+            create: { userId, envelope, percent: input[envelope] },
+            update: { percent: input[envelope] },
+          }),
+        ),
+      )
+      return input
     }),
 })

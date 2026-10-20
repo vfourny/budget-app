@@ -5,7 +5,10 @@ import {
 } from '@server/generated/prisma/enums'
 import { CATEGORY_HINTS } from '@server/lib/categorize/category-hints.rules'
 import { env } from '@server/lib/env.config'
-import { isCategoryOf } from '@shared/transactions/categories.rules'
+import {
+  categoriesOf,
+  isCategoryOf,
+} from '@shared/transactions/categories.rules'
 import { z } from 'zod'
 
 /** Nombre de lignes envoyées par appel : peu d'appels par import (quota de requêtes par minute du
@@ -14,13 +17,6 @@ const CHUNK_SIZE = 200
 
 /** En dessous de cette confiance, la ligne sera proposée dans « À vérifier » à la relecture. */
 export const LOW_CONFIDENCE_THRESHOLD = 0.7
-
-/** Catégories proposées à l'IA selon le type de compte (perso / pro). */
-function categoriesOf(accountType: AccountType): TransactionCategory[] {
-  return Object.values(TransactionCategory).filter((category) =>
-    isCategoryOf(accountType, category),
-  )
-}
 
 export interface CategorizeInput {
   /** Centimes, signé : négatif = débit. */

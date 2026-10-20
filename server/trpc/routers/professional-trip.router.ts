@@ -3,7 +3,7 @@ import { createTRPCRouter, protectedProcedure } from '@server/trpc/trpc.config'
 import { utcDay, yearMonthOf } from '@shared/common/year-month.util'
 import { z } from 'zod'
 
-export const tripRouter = createTRPCRouter({
+export const professionalTripRouter = createTRPCRouter({
   /** Ajoute un trajet au journal des frais kilométriques (km réels de son mois). */
   create: protectedProcedure
     .input(

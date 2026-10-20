@@ -7,20 +7,20 @@ const invalidate = () =>
   Promise.all([
     queryClient.invalidateQueries(trpc.professional.pathFilter()),
     queryClient.invalidateQueries(
-      trpc.professionalForecast.mileage.queryFilter(),
+      trpc.professional.forecast.mileage.queryFilter(),
     ),
   ])
 
 export function useCreateTrip() {
   return useMutation({
-    ...trpc.trip.create.mutationOptions(),
+    ...trpc.professional.trips.create.mutationOptions(),
     onSuccess: invalidate,
   })
 }
 
 export function useDeleteTrip() {
   return useMutation({
-    ...trpc.trip.delete.mutationOptions(),
+    ...trpc.professional.trips.delete.mutationOptions(),
     onSuccess: invalidate,
   })
 }

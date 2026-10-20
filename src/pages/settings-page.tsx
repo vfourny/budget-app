@@ -2,12 +2,12 @@ import { Paper, Tabs } from '@mantine/core'
 import { useSearchParams } from 'react-router'
 
 import { PageHeader } from '@/components/page-header'
-import { ApartmentsSettingsForm } from '@/features/settings/components/apartments-settings-form'
-import { EnvelopeSharesForm } from '@/features/settings/components/envelope-shares-form'
-import { ProfessionalYearSettingsForm } from '@/features/settings/components/professional-year-settings-form'
+import { ApartmentsSettingsForm } from '@/features/apartments/components/apartments-settings-form'
+import { EnvelopeSharesForm } from '@/features/personal/components/envelope-shares-form'
+import { ProfessionalYearSettingsForm } from '@/features/professional/components/professional-year-settings-form'
 import { fr } from '@/lib/i18n/fr'
 
-const TABS = ['personal', 'professional', 'apt'] as const
+const TABS = ['personal', 'professional', 'apartments'] as const
 type SettingsTab = (typeof TABS)[number]
 
 export function SettingsPage() {
@@ -33,7 +33,7 @@ export function SettingsPage() {
           <Tabs.Tab value="professional">
             {fr.settings.tabs.professional}
           </Tabs.Tab>
-          <Tabs.Tab value="apt">{fr.settings.tabs.apartments}</Tabs.Tab>
+          <Tabs.Tab value="apartments">{fr.settings.tabs.apartments}</Tabs.Tab>
         </Tabs.List>
         <Tabs.Panel value="personal">
           <Paper p={28} radius="lg" withBorder>
@@ -45,7 +45,7 @@ export function SettingsPage() {
             <ProfessionalYearSettingsForm />
           </Paper>
         </Tabs.Panel>
-        <Tabs.Panel value="apt">
+        <Tabs.Panel value="apartments">
           <ApartmentsSettingsForm />
         </Tabs.Panel>
       </Tabs>
