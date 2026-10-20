@@ -7,7 +7,7 @@ import { fr } from '@/lib/i18n/fr'
 
 /**
  * Message à afficher pour une erreur d'appel tRPC : le serveur renvoie un **code** (`appError` dans
- * `error.data`, voir `server/lib/app-error.util.ts`), traduit ici via `fr.errors`. Validation Zod ou
+ * `error.data`, voir `server/utils/app-error.util.ts`), traduit ici via `fr.errors`. Validation Zod ou
  * erreur réseau : message générique.
  */
 export function errorMessage(error: unknown): string {

@@ -1,9 +1,9 @@
-import type { db as Db } from '@server/lib/db.client'
 import {
   followingMonthsScope,
   type ForecastScope,
   sameMonthLastYear,
-} from '@server/lib/professional/forecast-scope.util'
+} from '@server/services/professional/forecast-scope.util'
+import type { db as Db } from '@server/utils/db.client'
 
 /** Km prévus d'un mois : saisie (`null` = défaut) et km réels (trajets) du même mois N-1. */
 export async function mileageForecast(db: typeof Db, scope: ForecastScope) {

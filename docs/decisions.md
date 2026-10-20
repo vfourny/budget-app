@@ -44,7 +44,7 @@ Pourquoi le projet est fait comme ça. Une décision qui change : la mettre à j
   car il distingue la donnée de la fonction ; un régime (`sas-ir.rules.ts`) est une config légale par statut.
 - **Contrat d'API (2026-10-20)** : le front et `shared/` ne voient du serveur que le type du routeur tRPC et le client Prisma
   généré (types, enums). Un type d'API vit dans `shared/` ou se déduit du routeur (`RouterOutputs`) ; vérifié par ESLint.
-- **Découpage par domaine (2026-10-20)** : `personal`, `professional`, `apartments`, `imports`, partout (features, `server/lib`,
+- **Découpage par domaine (2026-10-20)** : `personal`, `professional`, `apartments`, `imports`, partout (features, `server/services`,
   routeurs tRPC imbriqués), plutôt que par écran (`settings`, `review`, `dashboard`). Un écran transverse (Réglages) assemble
   les composants de chaque domaine.
 - **Une info à un seul endroit (2026-10-20)** : consignes et carte du code dans `CLAUDE.md`, explications techniques dans
@@ -55,7 +55,7 @@ Pourquoi le projet est fait comme ça. Une décision qui change : la mettre à j
 
 - **Pas de modèle `BankAccount`** : seul compte le type **PERSONAL / PROFESSIONAL / APARTMENT** (enum `AccountType`, porté par
   `ImportBatch` et `Transaction`). La banque n'est jamais stockée ni codée : le format des colonnes d'un CSV est une
-  donnée (`CsvFormat`, `shared/transactions/csv-format.schema.ts`), retrouvée par l'empreinte de l'en-tête du fichier (`server/lib/csv/`),
+  donnée (`CsvFormat`, `shared/transactions/csv-format.schema.ts`), retrouvée par l'empreinte de l'en-tête du fichier (`server/services/csv/`),
   donc changer de banque ne demande aucun développement. Le rattachement à un appartement passe par `apartmentId` (sur
   `ImportBatch`, défaut de l'import, et sur `Transaction`, modifiable ligne par ligne à la relecture), pas par un compte
   bancaire. Supprimer un `ImportBatch` supprime ses transactions.
@@ -74,7 +74,7 @@ Pourquoi le projet est fait comme ça. Une décision qui change : la mettre à j
   le reste) pour que le solde calculé reste égal au solde bancaire. Un appartement ne se supprime pas tant qu'il porte des
   transactions ou des relevés (`onDelete: Restrict`).
 - **Solde du compte perso (2026-10-19)** : pas de solde stocké par mois. On saisit des **repères** (`AccountBalance` :
-  solde réel en fin de mois) et le reste se calcule (`shared/personal/balance.util.ts`, pur) : repère le plus récent +
+  solde réel en fin de mois) et le reste se calcule : repère le plus récent +
   transactions validées des mois suivants ; début de mois = fin du mois précédent. Un repère sur un mois l'emporte sur le
   calcul, qui sert alors à afficher l'écart (import manquant, doublon…). Sans repère : solde « non renseigné ». Le solde
   courant des CSV (colonne « Solde » BoursoBank) n'est pas exploité. Les appartements gardent leur solde au 1er janvier

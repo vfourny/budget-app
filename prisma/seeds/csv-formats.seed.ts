@@ -1,5 +1,5 @@
-import { csvFingerprint } from '@server/lib/csv/fingerprint.util'
-import { db } from '@server/lib/db.client'
+import { csvFingerprint } from '@server/services/csv/fingerprint.util'
+import { db } from '@server/utils/db.client'
 import type { CsvFormatConfig } from '@shared/transactions/csv-format.schema'
 
 // Les deux formats d'export historiques (validés sur de vrais relevés). Un nouveau format n'a plus

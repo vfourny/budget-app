@@ -1,6 +1,6 @@
 import { PrismaNeon } from '@prisma/adapter-neon'
 import { PrismaClient } from '@server/generated/prisma/client'
-import { env } from '@server/lib/env.config'
+import { env } from '@server/utils/env.config'
 
 // Driver adapter Neon : passe par le driver serverless de Neon (WebSocket) au lieu d'une
 // connexion TCP longue durée, adapté aux Functions Vercel éphémères. DATABASE_URL doit être

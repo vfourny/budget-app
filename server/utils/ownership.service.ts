@@ -1,5 +1,5 @@
-import { appError } from '@server/lib/app-error.util'
-import type { db as Db } from '@server/lib/db.client'
+import { appError } from '@server/utils/app-error.util'
+import type { db as Db } from '@server/utils/db.client'
 
 /*
  * Accès aux données d'un utilisateur : une donnée d'un autre compte est « introuvable », jamais

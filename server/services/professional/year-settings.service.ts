@@ -1,4 +1,4 @@
-import type { db as Db } from '@server/lib/db.client'
+import type { db as Db } from '@server/utils/db.client'
 import {
   DEFAULT_PROFESSIONAL_YEAR_SETTINGS,
   type ProfessionalYearSettingsValues,

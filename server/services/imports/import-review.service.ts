@@ -1,5 +1,5 @@
-import { appError } from '@server/lib/app-error.util'
-import type { db as Db } from '@server/lib/db.client'
+import { appError } from '@server/utils/app-error.util'
+import type { db as Db } from '@server/utils/db.client'
 import { matchLoanTransaction } from '@shared/apartments/loan.util'
 import { needsReview } from '@shared/transactions/categories.rules'
 

@@ -1,5 +1,5 @@
-import { loadProfessionalYear } from '@server/lib/professional/load-year.service'
-import { validatedTransactions } from '@server/lib/transactions/scope.service'
+import { loadProfessionalYear } from '@server/services/professional/load-year.service'
+import { validatedTransactions } from '@server/services/transactions/scope.service'
 import { professionalForecastRouter } from '@server/trpc/routers/professional-forecast.router'
 import { professionalSettingsRouter } from '@server/trpc/routers/professional-settings.router'
 import { professionalTripRouter } from '@server/trpc/routers/professional-trip.router'

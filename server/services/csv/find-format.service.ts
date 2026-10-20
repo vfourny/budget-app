@@ -1,5 +1,5 @@
-import { csvFingerprint } from '@server/lib/csv/fingerprint.util'
-import type { db } from '@server/lib/db.client'
+import { csvFingerprint } from '@server/services/csv/fingerprint.util'
+import type { db } from '@server/utils/db.client'
 import {
   type CsvFormatConfig,
   csvFormatConfigSchema,

@@ -16,7 +16,7 @@ Modèle : `.env.example` (`cp .env.example .env`). Le fichier `.env` n'est jamai
 | `SEED_USER_PASSWORD` | Mot de passe de ce compte (12 caractères minimum)                                           | oui pour le seed |
 | `SEED_USER_NAME`     | Nom affiché du compte                                                                       | non              |
 
-Les variables serveur sont validées au démarrage par Zod (`server/lib/env.config.ts`). Si `DIRECT_URL` est absente, la CLI Prisma retombe sur `DATABASE_URL`, mais les migrations exigent une connexion directe : toujours définir les deux.
+Les variables serveur sont validées au démarrage par Zod (`server/utils/env.config.ts`). Si `DIRECT_URL` est absente, la CLI Prisma retombe sur `DATABASE_URL`, mais les migrations exigent une connexion directe : toujours définir les deux.
 
 ## Bases de données
 

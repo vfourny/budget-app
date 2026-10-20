@@ -4,7 +4,6 @@ import { Link } from 'react-router'
 import { PageHeader, PageTitleAccent } from '@/components/page-header'
 import { PeriodPicker } from '@/components/period-picker'
 import { TransactionsTable } from '@/components/transactions-table'
-import { BalanceCard } from '@/features/personal/components/balance-card'
 import { CategoryBreakdown } from '@/features/personal/components/category-breakdown'
 import { FixedChargesCard } from '@/features/personal/components/fixed-charges-card'
 import { KpiCards } from '@/features/personal/components/kpi-cards'
@@ -83,7 +82,6 @@ function PeriodContent({ view, period }: { view: PeriodView; period: Period }) {
 
   return (
     <>
-      <BalanceCard month={period.month} view={view} year={period.year} />
       <KpiCards overview={overview.data} view={view} year={period.year} />
       <FixedChargesCard fixedCharges={overview.data.fixedCharges} />
       <Grid gap={16} mt={16}>

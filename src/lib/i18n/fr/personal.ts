@@ -36,30 +36,6 @@ export const personal = {
     savings: (labels: readonly string[]) =>
       `Total des virements d'épargne des catégories : ${labels.join(', ')}.`,
   },
-  balance: {
-    title: 'Solde du compte',
-    openingMonth: 'Début de mois',
-    closingMonth: 'Fin de mois',
-    openingYear: "Début d'année",
-    closingYear: "Fin d'année",
-    variation: 'Variation',
-    /** Date du solde affiché, ex. « fin février 2026 ». */
-    endOf: (monthName: string, year: number) => `Fin ${monthName} ${year}`,
-    anchored: 'saisi',
-    computed: 'calculé',
-    notSet: 'Non renseigné',
-    edit: (label: string) => `Corriger : ${label}`,
-    drift: (amount: string) =>
-      `Écart de ${amount} avec le calcul : import manquant ou en double ?`,
-    modal: {
-      title: (monthName: string, year: number) =>
-        `Solde réel fin ${monthName} ${year}`,
-      help: 'Le solde indiqué sur ton relevé à cette date. Les mois suivants se calculent à partir de cette valeur.',
-      amount: 'Solde (€)',
-      clear: 'Effacer la saisie',
-      failed: 'Enregistrement impossible',
-    },
-  },
   fixedCharges: {
     title: 'Charges fixes',
     total: 'Total',

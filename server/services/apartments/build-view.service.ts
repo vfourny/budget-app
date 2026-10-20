@@ -1,4 +1,4 @@
-import type { LoadedApartmentData } from '@server/lib/apartments/load-period.service'
+import type { LoadedApartmentData } from '@server/services/apartments/load-period.service'
 import type { ApartmentRecord } from '@shared/apartments/apartment.type'
 import type { MonthResult } from '@shared/apartments/compute-month.util'
 import {

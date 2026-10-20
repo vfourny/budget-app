@@ -1,5 +1,5 @@
-import { db } from '@server/lib/db.client'
-import { env } from '@server/lib/env.config'
+import { db } from '@server/utils/db.client'
+import { env } from '@server/utils/env.config'
 import { betterAuth } from 'better-auth'
 import { prismaAdapter } from 'better-auth/adapters/prisma'
 

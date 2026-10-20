@@ -1,10 +1,10 @@
 import { TransactionCategory } from '@server/generated/prisma/enums'
-import { appError } from '@server/lib/app-error.util'
+import { createTRPCRouter, protectedProcedure } from '@server/trpc/trpc.config'
+import { appError } from '@server/utils/app-error.util'
 import {
   findEditableTransaction,
   findOwnedApartment,
-} from '@server/lib/ownership.service'
-import { createTRPCRouter, protectedProcedure } from '@server/trpc/trpc.config'
+} from '@server/utils/ownership.service'
 import { isCategoryOf } from '@shared/transactions/categories.rules'
 import { z } from 'zod'
 
