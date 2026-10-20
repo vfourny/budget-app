@@ -79,10 +79,10 @@ const SERVER_LIB_SUFFIXES = [
 ]
 
 /**
- * `shared/` est pur (ni base ni réseau) : pas de `.service`. `.calc` = calcul métier pur (dashboard
- * d'un mois…), `.regime` = un `ProfessionalRegime`.
+ * `shared/` est pur (ni base ni réseau) : pas de `.service`. Donnée (constantes, barèmes, régimes) = `.rules`,
+ * fonction (helper ou calcul métier) = `.util`.
  */
-const SHARED_SUFFIXES = ['rules', 'util', 'schema', 'type', 'calc', 'regime']
+const SHARED_SUFFIXES = ['type', 'schema', 'rules', 'util']
 
 export default [
   ...reactConfig,

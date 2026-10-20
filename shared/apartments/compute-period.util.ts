@@ -14,7 +14,7 @@ import {
   MONTHLY_CHARGE_LINES,
   type MonthlyChargeBasis,
   type MonthResult,
-} from '@shared/apartments/compute-month.calc'
+} from '@shared/apartments/compute-month.util'
 import {
   type LoanInstallment,
   loanSchedule,

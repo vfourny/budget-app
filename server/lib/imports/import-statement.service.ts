@@ -5,8 +5,8 @@ import { csvFingerprint } from '@server/lib/csv/fingerprint.util'
 import type { db as Db } from '@server/lib/db.client'
 import { findOwnedApartment } from '@server/lib/ownership.service'
 import { csvFormatConfigSchema } from '@shared/transactions/csv-format.schema'
-import { removeAlreadyImported } from '@shared/transactions/dedupe.calc'
-import { parseBankStatement } from '@shared/transactions/parse-bank-statement.calc'
+import { removeAlreadyImported } from '@shared/transactions/dedupe.util'
+import { parseBankStatement } from '@shared/transactions/parse-bank-statement.util'
 import { z } from 'zod'
 
 /** Le CSV voyage en texte dans le JSON : un relevé fait quelques centaines de lignes, loin de la

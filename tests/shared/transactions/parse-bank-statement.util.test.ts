@@ -2,7 +2,7 @@ import type { CsvFormatConfig } from '@shared/transactions/csv-format.schema'
 import {
   parseBankStatement,
   splitCsvLine,
-} from '@shared/transactions/parse-bank-statement.calc'
+} from '@shared/transactions/parse-bank-statement.util'
 import { describe, expect, it } from 'vitest'
 
 /** Formats réels (`prisma/seeds/csv-formats.seed.ts`). */

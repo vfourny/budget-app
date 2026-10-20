@@ -4,8 +4,8 @@ import { resolveProfessionalYearSettings } from '@server/lib/professional/year-s
 import { validatedTransactions } from '@server/lib/transactions/scope.service'
 import { applyBp } from '@shared/professional/amounts.util'
 import { billingAmount } from '@shared/professional/billing-days.util'
-import { computeMonth } from '@shared/professional/compute-month.calc'
-import { computeYear } from '@shared/professional/compute-year.calc'
+import { computeMonth } from '@shared/professional/compute-month.util'
+import { computeYear } from '@shared/professional/compute-year.util'
 import {
   COLLECTED_VAT_BP,
   MIXED_COSTS,

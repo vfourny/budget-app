@@ -4,7 +4,7 @@ import {
   type CsvFormatConfig,
   csvFormatConfigSchema,
 } from '@shared/transactions/csv-format.schema'
-import { splitCsvLine } from '@shared/transactions/parse-bank-statement.calc'
+import { splitCsvLine } from '@shared/transactions/parse-bank-statement.util'
 import { z } from 'zod'
 
 /** En-tête + 8 opérations : de quoi repérer les colonnes sans envoyer tout le relevé à l'IA. */

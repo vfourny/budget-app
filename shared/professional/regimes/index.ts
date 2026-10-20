@@ -1,6 +1,6 @@
 import type { CompanyRegime } from '@server/generated/prisma/enums'
 import type { ProfessionalRegime } from '@shared/professional/regimes/regime.type'
-import { sasIrRegime } from '@shared/professional/regimes/sas-ir.regime'
+import { sasIrRegime } from '@shared/professional/regimes/sas-ir.rules'
 
 /** Statuts calculés (voir `SUPPORTED_REGIMES` dans `shared/professional/professional.rules.ts`). */
 const REGIMES: Partial<Record<CompanyRegime, ProfessionalRegime>> = {

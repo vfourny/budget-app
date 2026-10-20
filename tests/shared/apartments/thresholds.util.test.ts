@@ -1,6 +1,6 @@
 import type { ApartmentRecord } from '@shared/apartments/apartment.type'
-import { periodColumns } from '@shared/apartments/compute-period.calc'
-import { computeThresholds } from '@shared/apartments/thresholds.calc'
+import { periodColumns } from '@shared/apartments/compute-period.util'
+import { computeThresholds } from '@shared/apartments/thresholds.util'
 import { expect, it } from 'vitest'
 
 const apartment = { kind: 'FURNISHED' } as ApartmentRecord

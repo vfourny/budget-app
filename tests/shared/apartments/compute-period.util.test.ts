@@ -6,7 +6,7 @@ import {
   computeApartmentYear,
   periodColumns,
   yieldsBps,
-} from '@shared/apartments/compute-period.calc'
+} from '@shared/apartments/compute-period.util'
 import { describe, expect, it } from 'vitest'
 
 /**

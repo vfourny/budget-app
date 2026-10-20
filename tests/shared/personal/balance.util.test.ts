@@ -1,4 +1,4 @@
-import { balanceAtEndOf } from '@shared/personal/balance.calc'
+import { balanceAtEndOf } from '@shared/personal/balance.util'
 import { expect, it } from 'vitest'
 
 const anchors = [

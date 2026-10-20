@@ -1,6 +1,6 @@
 import { DEFAULT_PROFESSIONAL_YEAR_SETTINGS } from '@shared/professional/professional.rules'
 import { regimeOf } from '@shared/professional/regimes'
-import { sasIrRegime } from '@shared/professional/regimes/sas-ir.regime'
+import { sasIrRegime } from '@shared/professional/regimes/sas-ir.rules'
 import { expect, it } from 'vitest'
 
 it('falls back to SAS à l’IR for a regime not computed yet', () => {
