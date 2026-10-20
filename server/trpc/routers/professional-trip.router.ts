@@ -1,5 +1,5 @@
-import { appError } from '@server/utils/app-error.util'
 import { createTRPCRouter, protectedProcedure } from '@server/trpc/trpc.config'
+import { appError } from '@server/utils/app-error.util'
 import { utcDay, yearMonthOf } from '@shared/year-month.util'
 import { z } from 'zod'
 

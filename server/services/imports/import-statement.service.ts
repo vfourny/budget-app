@@ -1,7 +1,7 @@
 import { AccountType } from '@server/generated/prisma/enums'
-import { appError } from '@server/utils/app-error.util'
 import { findCsvFormat } from '@server/services/csv/find-format.service'
 import { csvFingerprint } from '@server/services/csv/fingerprint.util'
+import { appError } from '@server/utils/app-error.util'
 import type { db as Db } from '@server/utils/db.client'
 import { findOwnedApartment } from '@server/utils/ownership.service'
 import { csvFormatConfigSchema } from '@shared/transactions/csv-format.schema'

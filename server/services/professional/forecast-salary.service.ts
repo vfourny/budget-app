@@ -1,9 +1,9 @@
-import type { db as Db } from '@server/utils/db.client'
 import {
   followingMonthsScope,
   type ForecastScope,
   sameMonthLastYear,
 } from '@server/services/professional/forecast-scope.util'
+import type { db as Db } from '@server/utils/db.client'
 
 /** Salaire brut prévu d'un mois : saisie (`null` = défaut) et brut du même mois N-1. */
 export async function salaryForecast(db: typeof Db, scope: ForecastScope) {

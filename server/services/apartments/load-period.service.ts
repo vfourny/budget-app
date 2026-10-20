@@ -1,5 +1,5 @@
-import type { db as Db } from '@server/utils/db.client'
 import { validatedTransactions } from '@server/services/transactions/scope.service'
+import type { db as Db } from '@server/utils/db.client'
 import type {
   ApartmentForecastRecord,
   ApartmentRecord,
