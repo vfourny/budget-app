@@ -75,7 +75,7 @@ server/                # BACKEND — Nitro, mêmes conventions que le server/ de
     trpc/[...path].ts  # point d'entrée HTTP de tRPC
   trpc/                # trpc.config.ts (contexte, procédures), app.router.ts (un routeur par domaine), routers/<domaine>.router.ts + <domaine>-<écran>.router.ts imbriqués
   lib/                 # db.client.ts (PrismaClient singleton), env.config.ts (validation Zod des variables)
-    professional/      # dashboard Pro : load-year.service (requêtes, puis calcul de shared/professional/), forecast-values.service
+    professional/      # dashboard Pro : load-year.service (requêtes, puis calcul de shared/professional/), forecast-*.service (éditeur du prévisionnel, un fichier par onglet)
     csv/               # import CSV : find-format.service (format connu en base), detect-format.service (Gemini), fingerprint.util
     apartments/        # dashboard Appartements : load-period.service (requêtes) + build-view.service (assemblage, calculs de shared/apartments/)
   generated/prisma/    # client Prisma généré — gitignoré, ne pas éditer

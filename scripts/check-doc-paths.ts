@@ -43,8 +43,12 @@ const NOT_IN_REPO = new Set([
   'tests/src/',
 ])
 
-/** Fichiers suivis par git (le généré et les migrations ne sont pas relus). */
-const files = execFileSync('git', ['ls-files'], { encoding: 'utf8' })
+/** Fichiers du repo, nouveaux compris (suivis + non ignorés) ; le généré et les migrations ne sont pas relus. */
+const files = execFileSync(
+  'git',
+  ['ls-files', '--cached', '--others', '--exclude-standard'],
+  { encoding: 'utf8' },
+)
   .split('\n')
   .filter(Boolean)
 const dirs = new Set(
