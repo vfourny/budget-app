@@ -1,4 +1,4 @@
-import { auth } from '@server/lib/auth.config'
+import { auth } from '@server/utils/auth.config'
 
 /**
  * Crée l'unique compte de l'app (l'inscription HTTP est désactivée) depuis `SEED_USER_*` dans

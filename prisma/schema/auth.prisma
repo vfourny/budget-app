@@ -28,7 +28,6 @@ model User {
   apartmentYearOpenings    ApartmentYearOpening[]
   apartmentForecasts       ApartmentForecast[]
   managementInvoices       ManagementInvoice[]
-  accountBalances          AccountBalance[]
 }
 
 model Session {

@@ -1,20 +1,18 @@
-import { appError } from '@server/lib/app-error.util'
-import { NEEDS_REVIEW_WHERE } from '@server/lib/categorize/needs-review.service'
-import {
-  checkParsedStatement,
-  detectCsvFormat,
-} from '@server/lib/csv/detect-format.service'
-import { parseBankStatement } from '@server/lib/csv/parse-bank-statement.service'
-import { geminiTRPCError } from '@server/lib/gemini-error.util'
-import { gemini } from '@server/lib/gemini.client'
-import { loadImportReview } from '@server/lib/imports/import-review.service'
+import { NEEDS_REVIEW_WHERE } from '@server/services/categorize/needs-review.service'
+import { detectCsvFormat } from '@server/services/csv/detect-format.service'
+import { loadImportReview } from '@server/services/imports/import-review.service'
 import {
   createImportInputSchema,
   importStatement,
-} from '@server/lib/imports/import-statement.service'
-import { findPendingImport } from '@server/lib/ownership.service'
+} from '@server/services/imports/import-statement.service'
 import { importCategorizeRouter } from '@server/trpc/routers/import-categorize.router'
 import { createTRPCRouter, protectedProcedure } from '@server/trpc/trpc.config'
+import { appError } from '@server/utils/app-error.util'
+import { geminiTRPCError } from '@server/utils/gemini-error.util'
+import { gemini } from '@server/utils/gemini.client'
+import { findPendingImport } from '@server/utils/ownership.service'
+import { parseBankStatement } from '@shared/transactions/parse-bank-statement.util'
+import { checkParsedStatement } from '@shared/transactions/statement-checks.util'
 import { z } from 'zod'
 
 /** Nombre de lignes montrées dans l'aperçu du format détecté. */

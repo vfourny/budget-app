@@ -1,16 +1,11 @@
 import type { Envelope } from '@server/generated/prisma/enums'
-import { loadPersonalBalance } from '@server/lib/personal/balance.service'
 import {
   periodsWithData,
   validatedTransactions,
-} from '@server/lib/transactions/scope.service'
+} from '@server/services/transactions/scope.service'
 import { createTRPCRouter, protectedProcedure } from '@server/trpc/trpc.config'
-import {
-  monthSchema,
-  yearMonthSchema,
-  yearSchema,
-} from '@shared/common/period.schema'
-import { aggregatePeriod } from '@shared/personal/aggregate.calc'
+import { monthSchema, yearSchema } from '@shared/period.schema'
+import { aggregatePeriod } from '@shared/personal/aggregate.util'
 import {
   BUDGET_ENVELOPES,
   DEFAULT_ENVELOPE_PERCENTS,
@@ -78,41 +73,6 @@ export const personalRouter = createTRPCRouter({
         monthsWithData,
         transactions: input.month !== undefined ? rows : [],
       }
-    }),
-
-  /**
-   * Solde du compte perso en début et fin de période (mois, ou année si `month` est absent) :
-   * calculé depuis le repère saisi le plus récent (`AccountBalance`), `null` sans repère.
-   */
-  balance: protectedProcedure
-    .input(periodSchema)
-    .query(({ ctx, input }) =>
-      loadPersonalBalance(ctx.db, ctx.session.user.id, input),
-    ),
-
-  /** Saisit (ou efface avec `null`) le solde réel du compte perso en fin de mois. */
-  setBalance: protectedProcedure
-    .input(
-      yearMonthSchema.extend({
-        balanceCents: z.number().int().nullable(),
-      }),
-    )
-    .mutation(async ({ ctx, input }) => {
-      const key = {
-        userId: ctx.session.user.id,
-        accountType: 'PERSONAL' as const,
-        year: input.year,
-        month: input.month,
-      }
-      if (input.balanceCents === null) {
-        await ctx.db.accountBalance.deleteMany({ where: key })
-        return
-      }
-      await ctx.db.accountBalance.upsert({
-        where: { userId_accountType_year_month: key },
-        create: { ...key, balanceCents: input.balanceCents },
-        update: { balanceCents: input.balanceCents },
-      })
     }),
 
   /** Part du revenu recommandée par enveloppe (valeurs par défaut si jamais configurée). */

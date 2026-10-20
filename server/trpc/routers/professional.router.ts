@@ -1,11 +1,11 @@
-import { loadProfessionalYear } from '@server/lib/professional/load-year.service'
-import { validatedTransactions } from '@server/lib/transactions/scope.service'
+import { loadProfessionalYear } from '@server/services/professional/load-year.service'
+import { validatedTransactions } from '@server/services/transactions/scope.service'
 import { professionalForecastRouter } from '@server/trpc/routers/professional-forecast.router'
 import { professionalSettingsRouter } from '@server/trpc/routers/professional-settings.router'
 import { professionalTripRouter } from '@server/trpc/routers/professional-trip.router'
 import { createTRPCRouter, protectedProcedure } from '@server/trpc/trpc.config'
-import { yearMonthSchema, yearSchema } from '@shared/common/period.schema'
-import { currentYearMonth } from '@shared/common/year-month.util'
+import { yearMonthSchema, yearSchema } from '@shared/period.schema'
+import { currentYearMonth } from '@shared/year-month.util'
 import { z } from 'zod'
 
 export const professionalRouter = createTRPCRouter({

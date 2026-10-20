@@ -4,7 +4,7 @@ import {
   isBefore,
   type YearMonth,
   yearMonthOf,
-} from '@shared/common/year-month.util'
+} from '@shared/year-month.util'
 import { useState } from 'react'
 import { Link } from 'react-router'
 

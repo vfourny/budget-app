@@ -1,6 +1,6 @@
 import 'dotenv/config'
 
-import { db } from '@server/lib/db.client'
+import { db } from '@server/utils/db.client'
 
 import {
   seedApartments,

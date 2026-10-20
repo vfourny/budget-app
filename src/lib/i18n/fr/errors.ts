@@ -1,7 +1,4 @@
-import type {
-  AppErrorCode,
-  AppErrorParams,
-} from '@shared/common/app-error.type'
+import type { AppErrorCode, AppErrorParams } from '@shared/app-error.type'
 import type { CsvLineErrorCode } from '@shared/transactions/csv.type'
 
 import { plural } from '@/lib/i18n/plural'
@@ -14,7 +11,7 @@ type ErrorMessages = {
 }
 
 /**
- * Erreurs métier du serveur (codes de `server/lib/app-error.util.ts`) + deux cas gérés côté front.
+ * Erreurs métier du serveur (codes de `server/utils/app-error.util.ts`) + deux cas gérés côté front.
  * `satisfies` : `tsc` échoue si un code serveur n'a pas de traduction.
  */
 export const errors = {

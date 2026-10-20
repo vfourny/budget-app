@@ -1,13 +1,13 @@
-import { buildApartmentsView } from '@server/lib/apartments/build-view.service'
-import { loadApartmentData } from '@server/lib/apartments/load-period.service'
+import { buildApartmentsView } from '@server/services/apartments/build-view.service'
+import { loadApartmentData } from '@server/services/apartments/load-period.service'
 import { createTRPCRouter, protectedProcedure } from '@server/trpc/trpc.config'
-import { yearMonthSchema, yearSchema } from '@shared/common/period.schema'
+import { yearMonthSchema, yearSchema } from '@shared/period.schema'
 import {
   currentYearMonth,
   monthsBetween,
   previousMonth,
   yearMonthOf,
-} from '@shared/common/year-month.util'
+} from '@shared/year-month.util'
 import { z } from 'zod'
 
 const apartmentFilter = z.string().min(1).nullish()

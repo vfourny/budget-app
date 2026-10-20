@@ -1,6 +1,6 @@
 /**
  * Vérifie que chaque chemin cité entre backticks dans la doc et les commentaires existe encore
- * (`shared/professional/compute-month.calc.ts`, `@server/lib/db.client`, `load-year.service.ts`…).
+ * (`shared/professional/compute-month.util.ts`, `@server/utils/db.client`, `load-year.service.ts`…).
  * Un renommage qui oublie la doc casse `pnpm check` et la CI au lieu de laisser une référence morte.
  *
  * - Chemin avec `/` : doit exister depuis la racine, ou être la fin d'un chemin existant
@@ -43,8 +43,12 @@ const NOT_IN_REPO = new Set([
   'tests/src/',
 ])
 
-/** Fichiers suivis par git (le généré et les migrations ne sont pas relus). */
-const files = execFileSync('git', ['ls-files'], { encoding: 'utf8' })
+/** Fichiers du repo, nouveaux compris (suivis + non ignorés) ; le généré et les migrations ne sont pas relus. */
+const files = execFileSync(
+  'git',
+  ['ls-files', '--cached', '--others', '--exclude-standard'],
+  { encoding: 'utf8' },
+)
   .split('\n')
   .filter(Boolean)
 const dirs = new Set(

@@ -1,16 +1,18 @@
 # Import CSV
 
-Le parseur transforme un relevé bancaire CSV en transactions normalisées. Il vit dans `server/lib/csv/` et est **générique** : il ne connaît aucune banque. Le format des colonnes d'un export est une donnée (`CsvFormat`, en base), retrouvée par l'**empreinte de l'en-tête** du fichier.
+Le parseur transforme un relevé bancaire CSV en transactions normalisées. Il est **générique** : il ne connaît aucune banque. Le format des colonnes d'un export est une donnée (`CsvFormat`, en base), retrouvée par l'**empreinte de l'en-tête** du fichier.
 
-```
-shared/transactions/csv-format.schema.ts          # schéma Zod + type CsvFormatConfig (délimiteur, date, colonnes…)
-server/lib/csv/
-  types.ts                    # ParsedTransaction, erreurs de ligne
-  fingerprint.ts              # csvFingerprint(csvText) : SHA-256 de la 1re ligne
-  find-format.ts              # findCsvFormat(userId, csvText) : format connu ou null
-  parse-bank-statement.ts     # parseBankStatement(csvText, config)
-prisma/seeds/csv-formats.seed.ts   # BoursoBank et Banque Populaire (formats historiques)
-```
+Le parsing est **pur** (aucun accès base ni réseau) et vit dans `shared/transactions/`, testé à 100 % ; seuls l'accès base et l'IA restent dans `server/services/csv/`.
+
+- `shared/transactions/csv-format.schema.ts` : schéma Zod + type `CsvFormatConfig` (délimiteur, date, colonnes…)
+- `shared/transactions/csv.type.ts` : `ParsedTransaction`, erreurs de ligne, codes de contrôle
+- `shared/transactions/parse-bank-statement.util.ts` : `parseBankStatement(csvText, config)`, `splitCsvLine`
+- `shared/transactions/dedupe.util.ts` : `removeAlreadyImported` (relevés qui se chevauchent)
+- `shared/transactions/statement-checks.util.ts` : `checkParsedStatement` (cohérence d'un format détecté)
+- `server/services/csv/fingerprint.util.ts` : `csvFingerprint(csvText)`, SHA-256 de la 1re ligne (`node:crypto`, donc côté serveur)
+- `server/services/csv/find-format.service.ts` : `findCsvFormat(userId, csvText, db)`, format connu ou `null`
+- `server/services/csv/detect-format.service.ts` : détection d'un format inconnu par Gemini
+- `prisma/seeds/csv-formats.seed.ts` : BoursoBank et Banque Populaire (formats historiques)
 
 ## Utilisation
 
@@ -77,7 +79,7 @@ Export « Relevé de compte » : débit et crédit sont deux colonnes séparées
 
 Un fichier dont l'empreinte n'est pas en base fait échouer `import.create` avec `UNKNOWN_CSV_FORMAT`. L'écran d'import enchaîne alors :
 
-1. `import.detectFormat` (`server/lib/csv/detect-format.service.ts`) : le délimiteur est deviné en code (séparateur le plus fréquent de la 1re ligne) ; Gemini ne reçoit que l'en-tête et 8 lignes, **déjà découpées et numérotées** (`[0] valeur | [1] valeur…`, pour gérer les noms de colonnes en double), et désigne les colonnes (date, libellés, montant signé ou débit/crédit), le format de date, le séparateur décimal et le nom de la banque. La réponse est validée par `csvFormatConfigSchema` ; une colonne hors du fichier est rejetée. Le parsing des montants reste du code déterministe.
+1. `import.detectFormat` (`server/services/csv/detect-format.service.ts`) : le délimiteur est deviné en code (séparateur le plus fréquent de la 1re ligne) ; Gemini ne reçoit que l'en-tête et 8 lignes, **déjà découpées et numérotées** (`[0] valeur | [1] valeur…`, pour gérer les noms de colonnes en double), et désigne les colonnes (date, libellés, montant signé ou débit/crédit), le format de date, le séparateur décimal et le nom de la banque. La réponse est validée par `csvFormatConfigSchema` ; une colonne hors du fichier est rejetée. Le parsing des montants reste du code déterministe.
 2. Le fichier complet est parsé avec ce mapping : aperçu des 5 premières lignes + contrôles (`checkParsedStatement`) : aucune ligne lisible (bloque la confirmation), lignes illisibles, dates avant 2000 ou dans le futur, libellés vides.
 3. L'utilisateur confirme (nom du format modifiable) : `import.create` reçoit `format`, importe, puis enregistre le `CsvFormat` (upsert sur l'empreinte). Les fichiers suivants de la même banque ne passent plus par l'IA.
 

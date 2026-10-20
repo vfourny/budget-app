@@ -13,7 +13,7 @@ import {
   Title,
 } from '@mantine/core'
 import type { ApartmentForecastLine } from '@server/generated/prisma/enums'
-import { type YearMonth, yearMonthOf } from '@shared/common/year-month.util'
+import { type YearMonth, yearMonthOf } from '@shared/year-month.util'
 import { useState } from 'react'
 
 import { EuroField } from '@/components/euro-field'

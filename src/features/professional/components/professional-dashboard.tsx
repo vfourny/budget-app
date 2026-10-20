@@ -8,7 +8,7 @@ import {
   Stack,
   Tooltip,
 } from '@mantine/core'
-import { currentYearMonth } from '@shared/common/year-month.util'
+import { currentYearMonth } from '@shared/year-month.util'
 import {
   IconCalendarEvent,
   IconEdit,
