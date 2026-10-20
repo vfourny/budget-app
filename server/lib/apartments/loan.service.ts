@@ -4,6 +4,7 @@ import {
   type LoanTerms,
   splitLoanPayment,
 } from '@shared/apartments/loan.util'
+import { isBefore, type YearMonth } from '@shared/common/year-month.util'
 
 /** Champs d'un appartement utiles au prêt (un sous-ensemble du modèle Prisma). */
 type LoanApartment = Pick<
@@ -65,13 +66,11 @@ export function matchLoanTransaction(
  */
 export function capitalRepaid(
   loan: LoanTerms | null,
-  through: { year: number; month: number },
+  through: YearMonth,
 ): { repaidCents: number; principalCents: number } | null {
   if (!loan) return null
   const repaidCents = loanSchedule(loan)
-    .filter(
-      (row) => row.year * 12 + row.month <= through.year * 12 + through.month,
-    )
+    .filter((row) => !isBefore(through, row))
     .reduce((sum, row) => sum + row.capitalCents, 0)
   return { repaidCents, principalCents: loan.principalCents }
 }

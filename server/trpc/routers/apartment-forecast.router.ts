@@ -1,17 +1,16 @@
 import { ApartmentForecastLine } from '@server/generated/prisma/enums'
 import { apartmentYear } from '@server/lib/apartments/build-view.service'
 import { loadApartmentData } from '@server/lib/apartments/load-period.service'
-import { currentYearMonth } from '@server/lib/apartments/period.util'
 import { appError } from '@server/lib/app-error.util'
 import { createTRPCRouter, protectedProcedure } from '@server/trpc/trpc.config'
+import { yearMonthSchema } from '@shared/common/period.schema'
+import { currentYearMonth } from '@shared/common/year-month.util'
 import { z } from 'zod'
 
 const cents = z.number().int().min(0).max(1_000_000_00)
 
-const periodSchema = z.object({
+const periodSchema = yearMonthSchema.extend({
   apartmentId: z.string().min(1),
-  year: z.number().int().min(2000).max(2100),
-  month: z.number().int().min(1).max(12),
 })
 
 /**

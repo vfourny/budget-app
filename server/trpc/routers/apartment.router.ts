@@ -1,6 +1,8 @@
 import { ApartmentKind } from '@server/generated/prisma/enums'
 import { appError } from '@server/lib/app-error.util'
 import { createTRPCRouter, protectedProcedure } from '@server/trpc/trpc.config'
+import { yearSchema } from '@shared/common/period.schema'
+import { utcDay } from '@shared/common/year-month.util'
 import { z } from 'zod'
 
 const cents = z.number().int().min(0).max(2_000_000_000)
@@ -26,21 +28,14 @@ const saveSchema = z.object({
   creditInsuranceCents: cents,
   loan: loanSchema.nullable(),
   /** Solde réel du compte appartement au 1er janvier de `openingYear` (R5). */
-  openingYear: z.number().int().min(2000).max(2100),
+  openingYear: yearSchema,
   openingBalanceCents: z.number().int().min(-2_000_000_000).max(2_000_000_000),
 })
-
-/** Jour civil en UTC (minuit), comme `@db.Date`. */
-function utcDay(date: Date) {
-  return new Date(
-    Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate()),
-  )
-}
 
 export const apartmentRouter = createTRPCRouter({
   /** Appartements de l'utilisateur, avec le solde de début d'année de `year` (0 si non saisi). */
   list: protectedProcedure
-    .input(z.object({ year: z.number().int().min(2000).max(2100) }))
+    .input(z.object({ year: yearSchema }))
     .query(async ({ ctx, input }) => {
       const userId = ctx.session.user.id
       const rows = await ctx.db.apartment.findMany({

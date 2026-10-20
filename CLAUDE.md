@@ -77,6 +77,7 @@ src/                   # FRONT — SPA React, tourne uniquement dans le navigate
     i18n/fr/           # TOUS les textes de l'UI (dictionnaires typés) + plural.ts (accord en nombre)
   styles/global.css    # règles CSS globales (le thème, lui, est dans lib/theme.ts)
 shared/                # code pur partagé front + back, alias @shared/ — rangé par domaine comme server/lib et src/features
+  common/              # year-month.util.ts (YearMonth, mois précédent / suivant, mois en cours UTC), period.schema.ts (Zod année / mois)
   transactions/        # categories.rules.ts (catégories par type de compte, « À vérifier »), csv-format.schema.ts (schéma Zod CsvFormat)
   personal/            # personal.rules.ts (enveloppes, cards, lignes de revenus)
   professional/        # professional.rules.ts (TVA, frais mixtes, prévisionnel), billing-days.util.ts

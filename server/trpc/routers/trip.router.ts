@@ -1,5 +1,6 @@
 import { appError } from '@server/lib/app-error.util'
 import { createTRPCRouter, protectedProcedure } from '@server/trpc/trpc.config'
+import { utcDay, yearMonthOf } from '@shared/common/year-month.util'
 import { z } from 'zod'
 
 export const tripRouter = createTRPCRouter({
@@ -16,19 +17,12 @@ export const tripRouter = createTRPCRouter({
     )
     .mutation(({ ctx, input }) => {
       // Comme pour les transactions : jour civil en UTC, mois / année dénormalisés.
-      const date = new Date(
-        Date.UTC(
-          input.date.getUTCFullYear(),
-          input.date.getUTCMonth(),
-          input.date.getUTCDate(),
-        ),
-      )
+      const date = utcDay(input.date)
       return ctx.db.trip.create({
         data: {
           ...input,
           date,
-          year: date.getUTCFullYear(),
-          month: date.getUTCMonth() + 1,
+          ...yearMonthOf(date),
           userId: ctx.session.user.id,
         },
         select: { id: true },

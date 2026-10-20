@@ -5,6 +5,8 @@ import {
 import { appError } from '@server/lib/app-error.util'
 import { forecastValues } from '@server/lib/professional/forecast-values.service'
 import { createTRPCRouter, protectedProcedure } from '@server/trpc/trpc.config'
+import { yearMonthSchema } from '@shared/common/period.schema'
+import { followingMonthsOfYear } from '@shared/common/year-month.util'
 import {
   DAY_STEP,
   MAX_BILLED_DAYS,
@@ -14,11 +16,6 @@ import {
   type ForecastGroup,
 } from '@shared/professional/professional.rules'
 import { z } from 'zod'
-
-const periodSchema = z.object({
-  year: z.number().int().min(2000).max(2100),
-  month: z.number().int().min(1).max(12),
-})
 
 const billingLineSchema = z.object({
   /** Nom du client, en texte libre. */
@@ -37,10 +34,6 @@ const groupSchema = z.enum(
 /** La catégorie fait-elle partie du groupe (charges, frais mixtes) ? */
 const inGroup = (group: ForecastGroup, category: TransactionCategory) =>
   FORECAST_GROUPS[group].categories.some((value) => value === category)
-
-/** Mois suivants de l'année (`month + 1` → 12). */
-const followingMonths = (month: number) =>
-  Array.from({ length: 12 - month }, (_, index) => month + 1 + index)
 
 export const professionalForecastRouter = createTRPCRouter({
   /**
@@ -64,7 +57,7 @@ export const professionalForecastRouter = createTRPCRouter({
 
   /** Lignes de facturation d'un mois, prévues (`FORECAST`) ou réelles (`ACTUAL`). */
   billingLines: protectedProcedure
-    .input(periodSchema.extend({ kind: z.enum(BillingKind) }))
+    .input(yearMonthSchema.extend({ kind: z.enum(BillingKind) }))
     .query(({ ctx, input }) =>
       ctx.db.billingLine.findMany({
         where: { userId: ctx.session.user.id, ...input },
@@ -81,7 +74,7 @@ export const professionalForecastRouter = createTRPCRouter({
   /** Remplace les lignes d'un mois (prévues ou réelles) en une seule transaction SQL. */
   setBillingLines: protectedProcedure
     .input(
-      periodSchema.extend({
+      yearMonthSchema.extend({
         kind: z.enum(BillingKind),
         lines: z.array(billingLineSchema).max(50),
       }),
@@ -101,10 +94,10 @@ export const professionalForecastRouter = createTRPCRouter({
 
   /** « Appliquer aux mois suivants » : copie la facturation prévue du mois sur la fin de l'année. */
   copyBillingToFollowingMonths: protectedProcedure
-    .input(periodSchema)
+    .input(yearMonthSchema)
     .mutation(async ({ ctx, input }) => {
       const userId = ctx.session.user.id
-      const months = followingMonths(input.month)
+      const months = followingMonthsOfYear(input.month)
       const source = await ctx.db.billingLine.findMany({
         where: {
           userId,
@@ -143,7 +136,7 @@ export const professionalForecastRouter = createTRPCRouter({
    * mois, valeur par défaut (réel N-1) et réel du mois précédent.
    */
   forecasts: protectedProcedure
-    .input(periodSchema.extend({ group: groupSchema }))
+    .input(yearMonthSchema.extend({ group: groupSchema }))
     .query(({ ctx, input }) =>
       forecastValues(
         ctx.db,
@@ -157,7 +150,7 @@ export const professionalForecastRouter = createTRPCRouter({
   /** Enregistre les montants d'un groupe ; `null` = revenir à la valeur par défaut (N-1). */
   setForecasts: protectedProcedure
     .input(
-      periodSchema.extend({
+      yearMonthSchema.extend({
         group: groupSchema,
         values: z
           .array(
@@ -198,7 +191,7 @@ export const professionalForecastRouter = createTRPCRouter({
    * la fin de l'année, en saisie (modifiable ensuite mois par mois).
    */
   copyForecastsToFollowingMonths: protectedProcedure
-    .input(periodSchema.extend({ group: groupSchema }))
+    .input(yearMonthSchema.extend({ group: groupSchema }))
     .mutation(async ({ ctx, input }) => {
       const userId = ctx.session.user.id
       const values = await forecastValues(
@@ -208,7 +201,7 @@ export const professionalForecastRouter = createTRPCRouter({
         input.year,
         input.month,
       )
-      const months = followingMonths(input.month)
+      const months = followingMonthsOfYear(input.month)
       const categories = values.map((value) => value.category)
       await ctx.db.$transaction([
         ctx.db.monthlyForecast.deleteMany({
@@ -236,7 +229,7 @@ export const professionalForecastRouter = createTRPCRouter({
 
   /** Salaire brut prévu d'un mois : saisie (`null` = défaut) et brut du même mois N-1. */
   salary: protectedProcedure
-    .input(periodSchema)
+    .input(yearMonthSchema)
     .query(async ({ ctx, input }) => {
       const userId = ctx.session.user.id
       const [override, lastYear] = await Promise.all([
@@ -262,7 +255,7 @@ export const professionalForecastRouter = createTRPCRouter({
   /** Enregistre le salaire brut prévu d'un mois ; `null` = revenir au brut N-1. */
   setSalary: protectedProcedure
     .input(
-      periodSchema.extend({ grossSalaryCents: grossSalaryCents.nullable() }),
+      yearMonthSchema.extend({ grossSalaryCents: grossSalaryCents.nullable() }),
     )
     .mutation(async ({ ctx, input }) => {
       const userId = ctx.session.user.id
@@ -283,10 +276,10 @@ export const professionalForecastRouter = createTRPCRouter({
 
   /** « Appliquer aux mois suivants » : recopie le salaire brut du mois sur la fin de l'année. */
   copySalaryToFollowingMonths: protectedProcedure
-    .input(periodSchema.extend({ grossSalaryCents }))
+    .input(yearMonthSchema.extend({ grossSalaryCents }))
     .mutation(async ({ ctx, input }) => {
       const userId = ctx.session.user.id
-      const months = followingMonths(input.month)
+      const months = followingMonthsOfYear(input.month)
       await ctx.db.$transaction([
         ctx.db.salaryForecast.deleteMany({
           where: { userId, year: input.year, month: { in: months } },
@@ -305,7 +298,7 @@ export const professionalForecastRouter = createTRPCRouter({
 
   /** Km prévus d'un mois : saisie (`null` = défaut) et km réels (trajets) du même mois N-1. */
   mileage: protectedProcedure
-    .input(periodSchema)
+    .input(yearMonthSchema)
     .query(async ({ ctx, input }) => {
       const userId = ctx.session.user.id
       const [override, lastYear] = await Promise.all([
@@ -326,7 +319,7 @@ export const professionalForecastRouter = createTRPCRouter({
   /** Enregistre les km prévus d'un mois ; `null` = revenir aux km N-1. */
   setMileage: protectedProcedure
     .input(
-      periodSchema.extend({
+      yearMonthSchema.extend({
         km: z.number().int().min(0).max(100_000).nullable(),
       }),
     )
@@ -349,10 +342,10 @@ export const professionalForecastRouter = createTRPCRouter({
 
   /** « Appliquer aux mois suivants » : recopie les km prévus du mois sur la fin de l'année. */
   copyMileageToFollowingMonths: protectedProcedure
-    .input(periodSchema.extend({ km: z.number().int().min(0).max(100_000) }))
+    .input(yearMonthSchema.extend({ km: z.number().int().min(0).max(100_000) }))
     .mutation(async ({ ctx, input }) => {
       const userId = ctx.session.user.id
-      const months = followingMonths(input.month)
+      const months = followingMonthsOfYear(input.month)
       await ctx.db.$transaction([
         ctx.db.mileageForecast.deleteMany({
           where: { userId, year: input.year, month: { in: months } },

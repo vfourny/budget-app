@@ -1,8 +1,4 @@
-/** Un mois (1-12) d'une année. */
-export interface YearMonth {
-  month: number
-  year: number
-}
+import { monthIndex, type YearMonth } from '@shared/common/year-month.util'
 
 /** Solde réel saisi en fin de mois (`AccountBalance`). */
 export interface BalanceAnchor extends YearMonth {
@@ -26,16 +22,6 @@ export interface MonthEndBalance extends YearMonth {
   isAnchor: boolean
 }
 
-/** Rang d'un mois sur une échelle continue : comparer / itérer sans gérer le passage d'année. */
-const indexOf = ({ year, month }: YearMonth) => year * 12 + month - 1
-
-/** Mois précédent (décembre N-1 pour janvier N). */
-export function previousMonth({ year, month }: YearMonth): YearMonth {
-  return month === 1
-    ? { year: year - 1, month: 12 }
-    : { year, month: month - 1 }
-}
-
 /**
  * Solde en fin de mois, calcul pur : repère le plus récent à ce mois ou avant + transactions des
  * mois qui suivent le repère, jusqu'au mois demandé inclus. Un repère sur le mois même l'emporte
@@ -46,22 +32,22 @@ export function balanceAtEndOf(
   anchors: readonly BalanceAnchor[],
   monthNets: readonly MonthNet[],
 ): MonthEndBalance {
-  const targetIndex = indexOf(target)
+  const targetIndex = monthIndex(target)
   const sorted = anchors
-    .filter((anchor) => indexOf(anchor) <= targetIndex)
-    .sort((a, b) => indexOf(b) - indexOf(a))
+    .filter((anchor) => monthIndex(anchor) <= targetIndex)
+    .sort((a, b) => monthIndex(b) - monthIndex(a))
   const [latest, previous] = sorted
 
   function computedFrom(anchor: BalanceAnchor | undefined): number | null {
     if (!anchor) return null
-    const from = indexOf(anchor)
+    const from = monthIndex(anchor)
     return monthNets.reduce((sum, net) => {
-      const index = indexOf(net)
+      const index = monthIndex(net)
       return index > from && index <= targetIndex ? sum + net.cents : sum
     }, anchor.balanceCents)
   }
 
-  if (latest && indexOf(latest) === targetIndex) {
+  if (latest && monthIndex(latest) === targetIndex) {
     const computed = computedFrom(previous)
     return {
       ...target,

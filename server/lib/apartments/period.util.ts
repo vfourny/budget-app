@@ -1,26 +1,15 @@
-/** Mois civil (1-12). */
-export interface YearMonth {
-  month: number
-  year: number
-}
+import {
+  isBefore,
+  type YearMonth,
+  yearMonthOf,
+} from '@shared/common/year-month.util'
 
-/** Mois en cours (UTC) : un mois est « clos » quand il lui est antérieur (R1, hypothèse H1). */
-export function currentYearMonth(date = new Date()): YearMonth {
-  return { year: date.getUTCFullYear(), month: date.getUTCMonth() + 1 }
-}
-
-const index = ({ year, month }: YearMonth) => year * 12 + month
-
+/** Un mois est « clos » quand il est antérieur au mois en cours (R1, hypothèse H1). */
 export function isMonthClosed(period: YearMonth, now: YearMonth): boolean {
-  return index(period) < index(now)
+  return isBefore(period, now)
 }
 
 /** Un appartement est actif à partir de son mois d'acquisition, mois inclus (R1). */
 export function isActiveIn(acquiredAt: Date, period: YearMonth): boolean {
-  return (
-    index({
-      year: acquiredAt.getUTCFullYear(),
-      month: acquiredAt.getUTCMonth() + 1,
-    }) <= index(period)
-  )
+  return !isBefore(period, yearMonthOf(acquiredAt))
 }
