@@ -1,7 +1,4 @@
-import type {
-  AppErrorCode,
-  AppErrorParams,
-} from '@shared/common/app-error.type'
+import type { AppErrorCode, AppErrorParams } from '@shared/app-error.type'
 import { TRPCError } from '@trpc/server'
 
 /** Portée par `TRPCError.cause` ; l'`errorFormatter` (init.ts) l'expose au client. */

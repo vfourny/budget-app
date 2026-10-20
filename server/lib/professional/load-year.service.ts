@@ -2,11 +2,6 @@ import type { TransactionCategory } from '@server/generated/prisma/enums'
 import type { db as Db } from '@server/lib/db.client'
 import { resolveProfessionalYearSettings } from '@server/lib/professional/year-settings.service'
 import { validatedTransactions } from '@server/lib/transactions/scope.service'
-import {
-  isBefore,
-  monthIndex,
-  yearMonthOf,
-} from '@shared/common/year-month.util'
 import { applyBp } from '@shared/professional/amounts.util'
 import { billingAmount } from '@shared/professional/billing-days.util'
 import { computeMonth } from '@shared/professional/compute-month.calc'
@@ -22,6 +17,7 @@ import type {
   ProfessionalMonth,
   ProfessionalMonthInput,
 } from '@shared/professional/professional.type'
+import { isBefore, monthIndex, yearMonthOf } from '@shared/year-month.util'
 
 const MIXED_CATEGORIES = MIXED_COSTS.map((cost) => cost.category)
 

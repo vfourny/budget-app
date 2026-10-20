@@ -1,7 +1,4 @@
-import type {
-  AppErrorCode,
-  AppErrorParams,
-} from '@shared/common/app-error.type'
+import type { AppErrorCode, AppErrorParams } from '@shared/app-error.type'
 import type { CsvLineErrorCode } from '@shared/transactions/csv.type'
 
 import { plural } from '@/lib/i18n/plural'

@@ -5,11 +5,7 @@ import {
   validatedTransactions,
 } from '@server/lib/transactions/scope.service'
 import { createTRPCRouter, protectedProcedure } from '@server/trpc/trpc.config'
-import {
-  monthSchema,
-  yearMonthSchema,
-  yearSchema,
-} from '@shared/common/period.schema'
+import { monthSchema, yearMonthSchema, yearSchema } from '@shared/period.schema'
 import { aggregatePeriod } from '@shared/personal/aggregate.calc'
 import {
   BUDGET_ENVELOPES,

@@ -13,12 +13,12 @@ import {
   Title,
 } from '@mantine/core'
 import { CompanyRegime } from '@server/generated/prisma/enums'
-import { currentYearMonth } from '@shared/common/year-month.util'
 import {
   DEFAULT_PROFESSIONAL_YEAR_SETTINGS,
   type ProfessionalYearSettingsValues,
   SUPPORTED_REGIMES,
 } from '@shared/professional/professional.rules'
+import { currentYearMonth } from '@shared/year-month.util'
 import { useState } from 'react'
 
 import {

@@ -1,6 +1,6 @@
 import { appError } from '@server/lib/app-error.util'
 import { createTRPCRouter, protectedProcedure } from '@server/trpc/trpc.config'
-import { utcDay, yearMonthOf } from '@shared/common/year-month.util'
+import { utcDay, yearMonthOf } from '@shared/year-month.util'
 import { z } from 'zod'
 
 export const professionalTripRouter = createTRPCRouter({

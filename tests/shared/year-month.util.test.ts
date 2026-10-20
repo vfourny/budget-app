@@ -10,7 +10,7 @@ import {
   previousMonth,
   utcDay,
   yearMonthOf,
-} from '@shared/common/year-month.util'
+} from '@shared/year-month.util'
 import { describe, expect, it } from 'vitest'
 
 describe('year-month.util', () => {

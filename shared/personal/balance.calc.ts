@@ -1,4 +1,4 @@
-import { monthIndex, type YearMonth } from '@shared/common/year-month.util'
+import { monthIndex, type YearMonth } from '@shared/year-month.util'
 
 /** Solde réel saisi en fin de mois (`AccountBalance`). */
 export interface BalanceAnchor extends YearMonth {

@@ -4,8 +4,8 @@ import { findOwnedApartment } from '@server/lib/ownership.service'
 import { apartmentDashboardRouter } from '@server/trpc/routers/apartment-dashboard.router'
 import { apartmentForecastRouter } from '@server/trpc/routers/apartment-forecast.router'
 import { createTRPCRouter, protectedProcedure } from '@server/trpc/trpc.config'
-import { yearSchema } from '@shared/common/period.schema'
-import { utcDay } from '@shared/common/year-month.util'
+import { yearSchema } from '@shared/period.schema'
+import { utcDay } from '@shared/year-month.util'
 import { z } from 'zod'
 
 const cents = z.number().int().min(0).max(2_000_000_000)

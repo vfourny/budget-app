@@ -1,4 +1,4 @@
-import { yearMonthSchema } from '@shared/common/period.schema'
+import { yearMonthSchema } from '@shared/period.schema'
 import { describe, expect, it } from 'vitest'
 
 describe('period.schema', () => {

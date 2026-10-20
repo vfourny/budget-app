@@ -4,8 +4,8 @@ import { professionalForecastRouter } from '@server/trpc/routers/professional-fo
 import { professionalSettingsRouter } from '@server/trpc/routers/professional-settings.router'
 import { professionalTripRouter } from '@server/trpc/routers/professional-trip.router'
 import { createTRPCRouter, protectedProcedure } from '@server/trpc/trpc.config'
-import { yearMonthSchema, yearSchema } from '@shared/common/period.schema'
-import { currentYearMonth } from '@shared/common/year-month.util'
+import { yearMonthSchema, yearSchema } from '@shared/period.schema'
+import { currentYearMonth } from '@shared/year-month.util'
 import { z } from 'zod'
 
 export const professionalRouter = createTRPCRouter({

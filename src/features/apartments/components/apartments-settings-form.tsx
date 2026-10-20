@@ -1,5 +1,5 @@
 import { Alert, Button, Loader, Stack, Text, Title } from '@mantine/core'
-import { currentYearMonth } from '@shared/common/year-month.util'
+import { currentYearMonth } from '@shared/year-month.util'
 import { useState } from 'react'
 
 import {

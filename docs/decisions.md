@@ -77,4 +77,4 @@ Pourquoi le projet est fait comme ça. Une décision qui change : la mettre à j
   courant des CSV (colonne « Solde » BoursoBank) n'est pas exploité. Les appartements gardent leur solde au 1er janvier
   (`ApartmentYearOpening`).
 - **Mois en cours en UTC (2026-10-20)** : front et serveur prennent le mois en cours en UTC (`currentYearMonth`,
-  `shared/common/year-month.util.ts`), comme les dates métier (`@db.Date`).
+  `shared/year-month.util.ts`), comme les dates métier (`@db.Date`).

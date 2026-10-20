@@ -1,7 +1,7 @@
 import { CompanyRegime } from '@server/generated/prisma/enums'
 import { resolveProfessionalYearSettings } from '@server/lib/professional/year-settings.service'
 import { createTRPCRouter, protectedProcedure } from '@server/trpc/trpc.config'
-import { yearSchema } from '@shared/common/period.schema'
+import { yearSchema } from '@shared/period.schema'
 import { z } from 'zod'
 
 const basisPoints = z.number().int().min(0).max(100_00)
