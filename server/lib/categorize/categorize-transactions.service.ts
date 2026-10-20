@@ -15,9 +15,6 @@ import { z } from 'zod'
  * palier gratuit Gemini), les appels d'un même import partent en parallèle. */
 const CHUNK_SIZE = 200
 
-/** En dessous de cette confiance, la ligne sera proposée dans « À vérifier » à la relecture. */
-export const LOW_CONFIDENCE_THRESHOLD = 0.7
-
 export interface CategorizeInput {
   /** Centimes, signé : négatif = débit. */
   amountCents: number

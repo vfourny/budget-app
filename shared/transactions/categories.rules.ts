@@ -132,3 +132,21 @@ export function isToCheck(category: TransactionCategory | null): boolean {
     TO_CHECK_CATEGORIES.some((toCheck) => toCheck === category)
   )
 }
+
+/** En dessous de cette confiance, une catégorie proposée par l'IA est « À vérifier » à la relecture. */
+export const LOW_CONFIDENCE_THRESHOLD = 0.7
+
+/**
+ * Ligne « à vérifier » : sans catégorie, ou proposée par l'IA avec une confiance faible. Une catégorie
+ * choisie à la main a `categoryConfidence = null` : « Confirmée ».
+ */
+export function needsReview(transaction: {
+  category: unknown
+  categoryConfidence: number | null
+}): boolean {
+  return (
+    transaction.category === null ||
+    (transaction.categoryConfidence !== null &&
+      transaction.categoryConfidence < LOW_CONFIDENCE_THRESHOLD)
+  )
+}

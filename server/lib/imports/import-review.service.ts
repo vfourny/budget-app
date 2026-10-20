@@ -1,7 +1,7 @@
 import { appError } from '@server/lib/app-error.util'
-import { needsReview } from '@server/lib/categorize/needs-review.service'
 import type { db as Db } from '@server/lib/db.client'
 import { matchLoanTransaction } from '@shared/apartments/loan.util'
+import { needsReview } from '@shared/transactions/categories.rules'
 
 /**
  * Un import et ses lignes (ordre du relevé), pour l'écran de relecture : « à vérifier » par ligne et,

@@ -1,16 +1,18 @@
 # Import CSV
 
-Le parseur transforme un relevé bancaire CSV en transactions normalisées. Il vit dans `server/lib/csv/` et est **générique** : il ne connaît aucune banque. Le format des colonnes d'un export est une donnée (`CsvFormat`, en base), retrouvée par l'**empreinte de l'en-tête** du fichier.
+Le parseur transforme un relevé bancaire CSV en transactions normalisées. Il est **générique** : il ne connaît aucune banque. Le format des colonnes d'un export est une donnée (`CsvFormat`, en base), retrouvée par l'**empreinte de l'en-tête** du fichier.
 
-```
-shared/transactions/csv-format.schema.ts          # schéma Zod + type CsvFormatConfig (délimiteur, date, colonnes…)
-server/lib/csv/
-  types.ts                    # ParsedTransaction, erreurs de ligne
-  fingerprint.ts              # csvFingerprint(csvText) : SHA-256 de la 1re ligne
-  find-format.ts              # findCsvFormat(userId, csvText) : format connu ou null
-  parse-bank-statement.ts     # parseBankStatement(csvText, config)
-prisma/seeds/csv-formats.seed.ts   # BoursoBank et Banque Populaire (formats historiques)
-```
+Le parsing est **pur** (aucun accès base ni réseau) et vit dans `shared/transactions/`, testé à 100 % ; seuls l'accès base et l'IA restent dans `server/lib/csv/`.
+
+- `shared/transactions/csv-format.schema.ts` : schéma Zod + type `CsvFormatConfig` (délimiteur, date, colonnes…)
+- `shared/transactions/csv.type.ts` : `ParsedTransaction`, erreurs de ligne, codes de contrôle
+- `shared/transactions/parse-bank-statement.calc.ts` : `parseBankStatement(csvText, config)`, `splitCsvLine`
+- `shared/transactions/dedupe.calc.ts` : `removeAlreadyImported` (relevés qui se chevauchent)
+- `shared/transactions/statement-checks.calc.ts` : `checkParsedStatement` (cohérence d'un format détecté)
+- `server/lib/csv/fingerprint.util.ts` : `csvFingerprint(csvText)`, SHA-256 de la 1re ligne (`node:crypto`, donc côté serveur)
+- `server/lib/csv/find-format.service.ts` : `findCsvFormat(userId, csvText, db)`, format connu ou `null`
+- `server/lib/csv/detect-format.service.ts` : détection d'un format inconnu par Gemini
+- `prisma/seeds/csv-formats.seed.ts` : BoursoBank et Banque Populaire (formats historiques)
 
 ## Utilisation
 
