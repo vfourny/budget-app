@@ -1,3 +1,10 @@
+/** Abréviation du mois (3 lettres, sans point final). */
+function monthShort(month: number): string {
+  return new Intl.DateTimeFormat('fr', { month: 'short' }).format(
+    new Date(2000, month - 1, 1),
+  )
+}
+
 /** Dashboard Perso. */
 export const personal = {
   eyebrow: 'Budget perso',
@@ -35,30 +42,6 @@ export const personal = {
       `Total des dépenses des catégories : ${labels.join(', ')}.`,
     savings: (labels: readonly string[]) =>
       `Total des virements d'épargne des catégories : ${labels.join(', ')}.`,
-  },
-  balance: {
-    title: 'Solde du compte',
-    openingMonth: 'Début de mois',
-    closingMonth: 'Fin de mois',
-    openingYear: "Début d'année",
-    closingYear: "Fin d'année",
-    variation: 'Variation',
-    /** Date du solde affiché, ex. « fin février 2026 ». */
-    endOf: (monthName: string, year: number) => `Fin ${monthName} ${year}`,
-    anchored: 'saisi',
-    computed: 'calculé',
-    notSet: 'Non renseigné',
-    edit: (label: string) => `Corriger : ${label}`,
-    drift: (amount: string) =>
-      `Écart de ${amount} avec le calcul : import manquant ou en double ?`,
-    modal: {
-      title: (monthName: string, year: number) =>
-        `Solde réel fin ${monthName} ${year}`,
-      help: 'Le solde indiqué sur ton relevé à cette date. Les mois suivants se calculent à partir de cette valeur.',
-      amount: 'Solde (€)',
-      clear: 'Effacer la saisie',
-      failed: 'Enregistrement impossible',
-    },
   },
   fixedCharges: {
     title: 'Charges fixes',

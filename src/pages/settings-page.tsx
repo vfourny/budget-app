@@ -36,9 +36,9 @@ export function SettingsPage() {
           <Tabs.Tab value="apartments">{fr.settings.tabs.apartments}</Tabs.Tab>
         </Tabs.List>
         <Tabs.Panel value="personal">
-          <Paper p={28} radius="lg" withBorder>
-            <EnvelopeSharesForm />
-          </Paper>
+            <Paper p={28} radius="lg" withBorder>
+              <EnvelopeSharesForm />
+            </Paper>
         </Tabs.Panel>
         <Tabs.Panel value="professional">
           <Paper p={28} radius="lg" withBorder>
