@@ -2,15 +2,14 @@ import {
   periodsWithData,
   validatedTransactions,
 } from '@server/lib/dashboard/scope.service'
+import { loadPersonalBalance } from '@server/lib/personal/balance.service'
 import { createTRPCRouter, protectedProcedure } from '@server/trpc/trpc.config'
 import {
   monthSchema,
   yearMonthSchema,
   yearSchema,
 } from '@shared/common/period.schema'
-import { previousMonth } from '@shared/common/year-month.util'
 import { aggregatePeriod } from '@shared/personal/aggregate.calc'
-import { balanceAtEndOf } from '@shared/personal/balance.calc'
 import { z } from 'zod'
 
 /** Un mois, ou l'année entière si `month` est absent. */
@@ -65,33 +64,9 @@ export const personalRouter = createTRPCRouter({
    */
   balance: protectedProcedure
     .input(periodSchema)
-    .query(async ({ ctx, input }) => {
-      const userId = ctx.session.user.id
-      const [anchors, nets] = await Promise.all([
-        ctx.db.accountBalance.findMany({
-          where: { userId, accountType: 'PERSONAL' },
-          select: { year: true, month: true, balanceCents: true },
-        }),
-        ctx.db.transaction.groupBy({
-          by: ['year', 'month'],
-          where: validatedTransactions(userId, 'PERSONAL'),
-          _sum: { amountCents: true },
-        }),
-      ])
-      const monthNets = nets.map((net) => ({
-        year: net.year,
-        month: net.month,
-        cents: net._sum.amountCents ?? 0,
-      }))
-      const first = { year: input.year, month: input.month ?? 1 }
-      const last = { year: input.year, month: input.month ?? 12 }
-
-      return {
-        /** Début de période = fin du mois précédent (c'est ce repère qu'on corrige). */
-        opening: balanceAtEndOf(previousMonth(first), anchors, monthNets),
-        closing: balanceAtEndOf(last, anchors, monthNets),
-      }
-    }),
+    .query(({ ctx, input }) =>
+      loadPersonalBalance(ctx.db, ctx.session.user.id, input),
+    ),
 
   /** Saisit (ou efface avec `null`) le solde réel du compte perso en fin de mois. */
   setBalance: protectedProcedure
