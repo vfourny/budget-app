@@ -1,5 +1,5 @@
 import type { GoogleGenAI } from '@google/genai'
-import { env } from '@server/lib/env.config'
+import { env } from '@server/utils/env.config'
 import {
   type CsvFormatConfig,
   csvFormatConfigSchema,

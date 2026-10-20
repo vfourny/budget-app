@@ -41,7 +41,7 @@ Routeurs actuels (tous en `protectedProcedure`), un par domaine :
 - `import` : `detectFormat` (format CSV inconnu → Gemini), `create` (parse + `ImportBatch` et ses `Transaction` en une
   transaction SQL ; `apartmentId` obligatoire pour un compte appartement), `list`, `get`, `validate` (refusé tant qu'une
   ligne est à vérifier), `delete` (cascade).
-  - `import.categorize` : `run` (catégorie + confiance par Gemini pour les lignes sans catégorie ; `server/lib/categorize/`).
+  - `import.categorize` : `run` (catégorie + confiance par Gemini pour les lignes sans catégorie ; `server/services/categorize/`).
 - `transaction` : `setCategory` (correction manuelle, confiance repassée à `null` = « Confirmée » ; refusé si l'import
   est validé ou si la catégorie n'est pas du type de compte), `setApartment` (rattachement d'une ligne).
 - `personal` : `periods`, `overview` (agrégation dans `shared/personal/aggregate.util.ts`), `balance` / `setBalance`,
@@ -57,7 +57,7 @@ Routeurs actuels (tous en `protectedProcedure`), un par domaine :
   - `apartment.forecast` : `inputs` / `set` (éditeur du prévisionnel : lignes du mois, et pour un bien géré taux de
     gérance + facture de gérance du mois).
 
-Le filtre « transactions validées d'un type de compte » est partagé : `server/lib/transactions/scope.service.ts`. Une ligne est
+Le filtre « transactions validées d'un type de compte » est partagé : `server/services/transactions/scope.service.ts`. Une ligne est
 « à vérifier » si elle n'a pas de catégorie ou si sa confiance est sous 0,7 (`needsReview`, `shared/transactions/categories.rules.ts`).
 Sans session : `UNAUTHORIZED` / code `NOT_AUTHENTICATED`.
 
@@ -67,13 +67,13 @@ historiques et, pour le dev, des données sur l'année `SEED_YEAR` (2025, `prism
 facturation et trajets Pro, appartements et leurs relevés. Idempotent : il ne crée pas de doublon et n'écrase pas les saisies faites dans l'app. Le barème
 de l'IR n'est pas en base : `shared/fiscal/income-tax.rules.ts` (une PR par nouvelle année).
 
-### Calcul du dashboard Pro (`shared/professional/` + `server/lib/professional/`)
+### Calcul du dashboard Pro (`shared/professional/` + `server/services/professional/`)
 
-- `server/lib/professional/load-year.service.ts` : quelques requêtes groupées pour une année (relevés pro et perso validés, facturation, prévisions, trajets, encaissements clients), puis appelle le calcul. Aucune règle métier ici.
+- `server/services/professional/load-year.service.ts` : quelques requêtes groupées pour une année (relevés pro et perso validés, facturation, prévisions, trajets, encaissements clients), puis appelle le calcul. Aucune règle métier ici.
 - `shared/professional/compute-month.util.ts` : **fonction pure** (aucun accès base, testée) → `ProfessionalMonth` (chaque valeur est un `ForecastActual` `{ forecast, actual | null }`). `compute-year.util.ts` enchaîne les 12 mois (TVA payée = TVA due du mois précédent). La vue année = 12 × le calcul du mois.
 - `shared/professional/regimes/` : interface `ProfessionalRegime` (rémunération, charges sociales sur bénéfice) ; `sas-ir.rules.ts` est la seule implémentation. Ajouter l'IS ou l'EURL = un fichier + une entrée dans `regimes/index.ts`.
 - Reste à encaisser : `load-year.service.ts` calcule le solde d'ouverture de l'année (facturé TTC réel − encaissements depuis le premier mois facturé), `compute-year.util.ts` le reporte de mois en mois (`openingReceivablesCents`), `compute-month.util.ts` l'applique (plancher à 0).
-- `shared/professional/allocate-refunds.util.ts` (remboursements de frais mixtes ligne par ligne), `amounts.util.ts` (opérations sur `ForecastActual`, valeur finale), éditeur du prévisionnel : un service par onglet (`forecast-billing.service.ts`, `forecast-amounts.service.ts`, `forecast-salary.service.ts`, `forecast-mileage.service.ts` dans `server/lib/professional/`), clé commune et mois suivants dans `forecast-scope.util.ts`. Chaque saisie vide = réel du même mois N-1.
+- `shared/professional/allocate-refunds.util.ts` (remboursements de frais mixtes ligne par ligne), `amounts.util.ts` (opérations sur `ForecastActual`, valeur finale), éditeur du prévisionnel : un service par onglet (`forecast-billing.service.ts`, `forecast-amounts.service.ts`, `forecast-salary.service.ts`, `forecast-mileage.service.ts` dans `server/services/professional/`), clé commune et mois suivants dans `forecast-scope.util.ts`. Chaque saisie vide = réel du même mois N-1.
 - Jours facturés : `BillingLine.days` en `Float`, limité aux multiples de 0,5 (exacts en binaire, validés par tRPC avec `multipleOf`) ; pas, plafond, montant jours × TJM et TJM moyen dans `shared/professional/billing-days.util.ts`.
 - Règles modifiables (TVA par charge, frais mixtes, groupes de l'éditeur, répartition des cotisations) : `shared/professional/professional.rules.ts` ; catégories pro : `shared/transactions/categories.rules.ts`.
 
@@ -88,7 +88,7 @@ de l'IR n'est pas en base : `shared/fiscal/income-tax.rules.ts` (une PR par nouv
 
 - Générateur `prisma-client` (client TS sans moteur Rust) sorti dans `server/generated/prisma/` (gitignoré, régénéré par `postinstall`).
 - **Deux URLs Neon** : `DATABASE_URL` (pooled, host `-pooler`) pour le runtime via `@prisma/adapter-neon`, `DIRECT_URL` (directe) pour la CLI Prisma et les migrations (`prisma.config.ts`).
-- Côté serveur, toujours passer par `db` de `@server/lib/db.client` (singleton mis en cache sur `globalThis` pour survivre au hot reload).
+- Côté serveur, toujours passer par `db` de `@server/utils/db.client` (singleton mis en cache sur `globalThis` pour survivre au hot reload).
 - **Schéma découpé par domaine** dans `prisma/schema/` (déclaré dans `prisma.config.ts`) : `base` (générateur, datasource), `auth` (Better Auth), `transactions` (imports, formats CSV, transactions, catégories), `personal` (enveloppes), `professional` (Stygma), `apartments`. Prisma les lit comme un seul schéma : une relation peut traverser les fichiers.
 - **Toute modif du schéma s'accompagne d'une migration versionnée** dans `prisma/migrations/` (`pnpm db:migrate`).
 - `prisma.config.ts` n'utilise volontairement pas `env()` : il lèverait une erreur si la variable manque, ce qui casserait `prisma generate` en CI (pas de DB nécessaire).
@@ -131,7 +131,7 @@ Choix à connaître :
 - **State** : fondamentaux uniquement (`useState`, `useReducer`, Context, TanStack Query). **Pas de lib de state management** sans accord explicite.
 - **Validation** : schémas Zod partagés entre tRPC et formulaires.
 - **Langues** : UI en français, code / identifiants / commits en anglais.
-- Variables d'environnement serveur validées au démarrage par Zod (`server/lib/env.config.ts`). `GEMINI_API_KEY` est obligatoire ; `GEMINI_MODEL` est optionnelle (défaut `gemini-3.5-flash-lite`).
+- Variables d'environnement serveur validées au démarrage par Zod (`server/utils/env.config.ts`). `GEMINI_API_KEY` est obligatoire ; `GEMINI_MODEL` est optionnelle (défaut `gemini-3.5-flash-lite`).
 
 ## Équivalences React ↔ Vue
 

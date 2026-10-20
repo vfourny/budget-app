@@ -1,5 +1,5 @@
 import { CompanyRegime } from '@server/generated/prisma/enums'
-import { resolveProfessionalYearSettings } from '@server/lib/professional/year-settings.service'
+import { resolveProfessionalYearSettings } from '@server/services/professional/year-settings.service'
 import { createTRPCRouter, protectedProcedure } from '@server/trpc/trpc.config'
 import { yearSchema } from '@shared/period.schema'
 import { z } from 'zod'

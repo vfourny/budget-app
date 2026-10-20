@@ -3,8 +3,8 @@ import {
   type AccountType,
   TransactionCategory,
 } from '@server/generated/prisma/enums'
-import { CATEGORY_HINTS } from '@server/lib/categorize/category-hints.rules'
-import { env } from '@server/lib/env.config'
+import { CATEGORY_HINTS } from '@server/services/categorize/category-hints.rules'
+import { env } from '@server/utils/env.config'
 import {
   categoriesOf,
   isCategoryOf,

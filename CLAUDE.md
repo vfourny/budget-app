@@ -62,7 +62,7 @@ src/                   # FRONT — SPA React, tourne uniquement dans le navigate
   lib/                 # utilitaires front : trpc.ts (client + queryClient), theme.ts (thème Mantine)…
     i18n/fr/           # TOUS les textes de l'UI (dictionnaires typés) + plural.ts (accord en nombre)
   styles/global.css    # règles CSS globales (le thème, lui, est dans lib/theme.ts)
-shared/                # code pur partagé front + back, alias @shared/ — comme server/lib : transverse à la racine, métier par domaine
+shared/                # code pur partagé front + back, alias @shared/ — transverse à la racine, métier par domaine
   year-month.util.ts   # YearMonth, mois précédent / suivant, mois en cours UTC ; period.schema.ts (Zod année / mois) ; app-error.type.ts (codes d'erreur)
   transactions/        # categories.rules.ts (catégories par type de compte, « À vérifier », needsReview), csv-format.schema.ts (schéma Zod CsvFormat),
                        # parse-bank-statement / dedupe / statement-checks.util.ts (import CSV, pur), normalize-label.util.ts
@@ -74,8 +74,9 @@ server/                # BACKEND — Nitro, mêmes conventions que le server/ de
   api/                 # routes HTTP : server/api/health.ts → GET /api/health
     trpc/[...path].ts  # point d'entrée HTTP de tRPC
   trpc/                # trpc.config.ts (contexte, procédures), app.router.ts (un routeur par domaine), routers/<domaine>.router.ts + <domaine>-<écran>.router.ts imbriqués
-  lib/                 # db.client.ts (PrismaClient singleton), env.config.ts (validation Zod des variables)
-    professional/      # dashboard Pro : load-year.service (requêtes, puis calcul de shared/professional/), forecast-*.service (éditeur du prévisionnel, un fichier par onglet)
+  utils/              # clients et configs : db.client.ts (PrismaClient singleton), env.config.ts (Zod), auth.config.ts, gemini.client.ts, app-error.util.ts, ownership.service.ts
+  services/           # logique métier par domaine
+    professional/      # dashboard Pro : load-year.service (requêtes), forecast-*.service (prévisionnel, un fichier par onglet)
     csv/               # import CSV : find-format.service (format connu en base), detect-format.service (Gemini), fingerprint.util
     apartments/        # dashboard Appartements : load-period.service (requêtes) + build-view.service (assemblage, calculs de shared/apartments/)
   generated/prisma/    # client Prisma généré — gitignoré, ne pas éditer
@@ -117,10 +118,10 @@ nitro.config.ts        # serverDir: ./server
   `<domaine>-<écran>.router.ts` imbriqué pour un écran à plusieurs procédures : `professional.forecast`, `apartment.dashboard`…) ;
   un nouveau domaine s'enregistre dans `server/trpc/app.router.ts`. Entrées validées par `.input(zodSchema)`. **Toujours `protectedProcedure`**
   (`server/trpc/trpc.config.ts`, 401 sans session) ; `publicProcedure` seulement pour du contenu public.
-  Un routeur reste **mince** : il valide l'entrée, vérifie l'accès (`server/lib/ownership.service.ts` : `findOwnedApartment`,
-  `findPendingImport`, `findEditableTransaction`) et délègue à un `server/lib/<domaine>/xxx.service.ts` dès que la procédure
+  Un routeur reste **mince** : il valide l'entrée, vérifie l'accès (`server/utils/ownership.service.ts` : `findOwnedApartment`,
+  `findPendingImport`, `findEditableTransaction`) et délègue à un `server/services/<domaine>/xxx.service.ts` dès que la procédure
   dépasse une requête simple (orchestration, plusieurs requêtes, calcul).
-- **Auth** : Better Auth (`server/lib/auth.config.ts`, monté sur `/api/auth/*`). Inscription publique
+- **Auth** : Better Auth (`server/utils/auth.config.ts`, monté sur `/api/auth/*`). Inscription publique
   **désactivée** ; l'unique compte est créé par le seed (`pnpm db:seed`, rejoué par `pnpm db:reset`) depuis `SEED_USER_EMAIL` / `SEED_USER_PASSWORD`. Front : `authClient`
   (`@/lib/auth-client`), routes privées sous `RequireAuth` dans `app.tsx`. Les données métier
   (`EnvelopeShare`, `ImportBatch`, `Transaction`) portent un `userId` : **toute requête tRPC filtre sur
@@ -137,7 +138,7 @@ nitro.config.ts        # serverDir: ./server
   réutilisée ou alourdit un composant (≈ composable Vue).
 - **Montants** : entiers en **centimes**, signés (négatif = débit). Jamais de float pour de
   l'argent.
-- **Prisma** : côté serveur, toujours passer par `db` de `@server/lib/db.client`. Toute modif de
+- **Prisma** : côté serveur, toujours passer par `db` de `@server/utils/db.client`. Toute modif de
   schéma (`prisma/schema/*.prisma`, un fichier par domaine : base, auth, transactions, personal, professional, apartments) s'accompagne d'une migration versionnée dans `prisma/migrations/`.
 - **Dates** : `Transaction.date` en `@db.Date` ; `month` (1-12) et `year` dénormalisés pour les
   agrégations.
@@ -158,7 +159,7 @@ nitro.config.ts        # serverDir: ./server
   `cssVariablesResolver` (`light` + `dark`).
 - **Découpage par domaine** (`personal`, `professional`, `apartments`, `imports`), pas par écran : un composant ou un hook
   va dans la feature du domaine qu'il manipule, même s'il s'affiche dans un écran transverse (Réglages : chaque onglet vient
-  de sa feature, `pages/settings-page.tsx` ne fait que les assembler). Pareil côté serveur (`server/lib/<domaine>/`).
+  de sa feature, `pages/settings-page.tsx` ne fait que les assembler). Pareil côté serveur (`server/services/<domaine>/`).
 - **Ordre d'affichage** : jamais tiré des clés d'un dictionnaire i18n. Ordre métier = une liste dans `shared/` (`categoriesOf`,
   `BUDGET_ENVELOPES`…) ; sinon l'ordre de l'enum (`Object.values(AccountType)`, `@server/generated/prisma/enums` s'importe
   normalement côté front : constantes pures).
@@ -175,7 +176,7 @@ nitro.config.ts        # serverDir: ./server
   (`@/lib/i18n/plural`), jamais de `n > 1 ? "s" : ""` à la main. Libellés d'un enum Prisma :
   `as const satisfies Record<Enum, string>` dans `fr/enums.ts` (`tsc` échoue si une valeur manque).
 - **Erreurs serveur** : le serveur n'envoie jamais de texte d'UI, seulement un **code**
-  (`throw appError("NOT_FOUND", "IMPORT_NOT_FOUND")`, `server/lib/app-error.util.ts`, codes dans `shared/app-error.type.ts` ; pour les lignes
+  (`throw appError("NOT_FOUND", "IMPORT_NOT_FOUND")`, `server/utils/app-error.util.ts`, codes dans `shared/app-error.type.ts` ; pour les lignes
   CSV écartées, un `CsvLineErrorCode`). Le front le traduit via `fr.errors` / `fr.csvErrors`, avec
   `errorMessage(error)` (`@/lib/errors`). Nouveau code = l'ajouter à `AppErrorCode` **et** à
   `fr/errors.ts` (exhaustif).
@@ -184,7 +185,7 @@ nitro.config.ts        # serverDir: ./server
   (types seuls), `.rules.ts` (règles et données métier : catégories, barèmes…), `.schema.ts` (schéma Zod), `.client.ts`
   (client externe : Prisma, Gemini), `.config.ts` (config / instance : env, Better Auth, init tRPC),
   `.seed.ts`. Dans `shared/` (pur, voir plus haut) : seulement `.type`, `.schema`, `.rules` (une **donnée** : constantes, barèmes, un `ProfessionalRegime`)
-  et `.util` (une **fonction**) ; `.service` reste au serveur (requêtes, appels externes). Obligatoire dans `server/lib/`, `server/trpc/`, `shared/` et `prisma/seeds/`
+  et `.util` (une **fonction**) ; `.service` reste au serveur (requêtes, appels externes). Obligatoire dans `server/utils/`, `server/services/`, `server/trpc/`, `shared/` et `prisma/seeds/`
   (`index.ts` exempté), **vérifié par ESLint** (`local/file-suffix` dans `eslint.config.ts`). Pas de suffixe là où le dossier
   dit déjà le rôle : `src/` (`components/`, `hooks/use-xxx.ts`, `pages/xxx-page.tsx`) et `server/api/` (le nom = l'URL Nitro).
 - Imports : `@/…` pour `src/`, `@server/…` pour `server/`, `@shared/…` pour `shared/`. `import type` obligatoire pour les

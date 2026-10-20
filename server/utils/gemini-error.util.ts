@@ -1,5 +1,5 @@
 import { ApiError } from '@google/genai'
-import { appError } from '@server/lib/app-error.util'
+import { appError } from '@server/utils/app-error.util'
 
 /** Code précis selon l'erreur Gemini : inutile de « réessayer » une clé refusée. `fallback` est le
  * code de l'opération qui a échoué (catégorisation, détection de format…) pour les autres erreurs. */

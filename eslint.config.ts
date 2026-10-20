@@ -140,7 +140,7 @@ export default [
     plugins: { local: { rules: { 'file-suffix': fileSuffixRule } } },
   },
   {
-    files: ['server/lib/**/*.ts'],
+    files: ['server/utils/**/*.ts', 'server/services/**/*.ts'],
     rules: {
       'local/file-suffix': ['error', { suffixes: SERVER_LIB_SUFFIXES }],
     },

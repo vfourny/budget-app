@@ -1,5 +1,5 @@
 import type { AccountType } from '@server/generated/prisma/enums'
-import type { db as Db } from '@server/lib/db.client'
+import type { db as Db } from '@server/utils/db.client'
 
 /**
  * Filtre Prisma des transactions qui comptent dans un dashboard : celles de l'utilisateur, du type

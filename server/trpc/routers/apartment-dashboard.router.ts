@@ -1,5 +1,5 @@
-import { buildApartmentsView } from '@server/lib/apartments/build-view.service'
-import { loadApartmentData } from '@server/lib/apartments/load-period.service'
+import { buildApartmentsView } from '@server/services/apartments/build-view.service'
+import { loadApartmentData } from '@server/services/apartments/load-period.service'
 import { createTRPCRouter, protectedProcedure } from '@server/trpc/trpc.config'
 import { yearMonthSchema, yearSchema } from '@shared/period.schema'
 import {

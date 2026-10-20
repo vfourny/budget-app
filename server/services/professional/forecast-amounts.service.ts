@@ -1,12 +1,12 @@
 import type { TransactionCategory } from '@server/generated/prisma/enums'
-import { appError } from '@server/lib/app-error.util'
-import type { db as Db } from '@server/lib/db.client'
+import { appError } from '@server/utils/app-error.util'
+import type { db as Db } from '@server/utils/db.client'
 import {
   followingMonthsScope,
   type ForecastScope,
   sameMonthLastYear,
-} from '@server/lib/professional/forecast-scope.util'
-import { validatedTransactions } from '@server/lib/transactions/scope.service'
+} from '@server/services/professional/forecast-scope.util'
+import { validatedTransactions } from '@server/services/transactions/scope.service'
 import { htFromTtc } from '@shared/professional/amounts.util'
 import {
   FORECAST_GROUPS,

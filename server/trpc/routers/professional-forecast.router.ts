@@ -6,23 +6,23 @@ import {
   copyForecastAmountsToFollowingMonths,
   forecastAmounts,
   setForecastAmounts,
-} from '@server/lib/professional/forecast-amounts.service'
+} from '@server/services/professional/forecast-amounts.service'
 import {
   billingClients,
   copyBillingToFollowingMonths,
   setBillingLines,
-} from '@server/lib/professional/forecast-billing.service'
+} from '@server/services/professional/forecast-billing.service'
 import {
   copyMileageToFollowingMonths,
   mileageForecast,
   setMileageForecast,
-} from '@server/lib/professional/forecast-mileage.service'
+} from '@server/services/professional/forecast-mileage.service'
 import {
   copySalaryToFollowingMonths,
   salaryForecast,
   setSalaryForecast,
-} from '@server/lib/professional/forecast-salary.service'
-import type { ForecastScope } from '@server/lib/professional/forecast-scope.util'
+} from '@server/services/professional/forecast-salary.service'
+import type { ForecastScope } from '@server/services/professional/forecast-scope.util'
 import { createTRPCRouter, protectedProcedure } from '@server/trpc/trpc.config'
 import { yearMonthSchema } from '@shared/period.schema'
 import {

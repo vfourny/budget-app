@@ -64,7 +64,7 @@ Points d'attention :
   vérité est ce fichier.
 - La catégorie d'une transaction est **optionnelle** (`null` tant qu'elle n'est pas catégorisée / relue).
 - Ajouter ou renommer une catégorie = modifier l'enum Prisma **+ une migration
-  versionnée + `src/lib/i18n/fr/enums.ts` + `server/lib/categorize/category-hints.rules.ts`**, puis la ranger dans
+  versionnée + `src/lib/i18n/fr/enums.ts` + `server/services/categorize/category-hints.rules.ts`**, puis la ranger dans
   `shared/personal/personal.rules.ts` (le typage `Record<TransactionCategory, …>` fait échouer `tsc` si l'un des deux est oublié).
 
 ## Type de compte
@@ -228,7 +228,7 @@ de l'année.
 
 Suivi de **trésorerie** des biens en location (comme l'onglet « Toulouse » de l'ancien tableur), sans fiscalité ni
 rappels (déclaration = comptable). Les règles ci-dessous (R1 à R12, hypothèses H1 à H6) sont citées dans le code
-(`server/lib/apartments/`, `shared/apartments/`, seuils LMNP dans `shared/fiscal/lmnp.rules.ts`).
+(`server/services/apartments/`, `shared/apartments/`, seuils LMNP dans `shared/fiscal/lmnp.rules.ts`).
 
 - **Réglages › Appartements** (`/settings?tab=apt`) : par bien, régime (étiquette), gérance (interrupteur, désactivé = en direct), mois
   d'acquisition, prix, assurance emprunteur, solde du compte au 1er janvier, prêt à taux fixe (synthèse :

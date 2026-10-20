@@ -1,9 +1,9 @@
 import type { Envelope } from '@server/generated/prisma/enums'
-import { loadPersonalBalance } from '@server/lib/personal/balance.service'
+import { loadPersonalBalance } from '@server/services/personal/balance.service'
 import {
   periodsWithData,
   validatedTransactions,
-} from '@server/lib/transactions/scope.service'
+} from '@server/services/transactions/scope.service'
 import { createTRPCRouter, protectedProcedure } from '@server/trpc/trpc.config'
 import { monthSchema, yearMonthSchema, yearSchema } from '@shared/period.schema'
 import { aggregatePeriod } from '@shared/personal/aggregate.util'

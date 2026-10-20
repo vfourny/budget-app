@@ -1,5 +1,5 @@
-import type { db as Db } from '@server/lib/db.client'
-import { validatedTransactions } from '@server/lib/transactions/scope.service'
+import type { db as Db } from '@server/utils/db.client'
+import { validatedTransactions } from '@server/services/transactions/scope.service'
 import { balanceAtEndOf } from '@shared/personal/balance.util'
 import { previousMonth } from '@shared/year-month.util'
 

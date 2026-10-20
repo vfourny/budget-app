@@ -2,10 +2,10 @@ import type { TransactionCategory } from '@server/generated/prisma/enums'
 import {
   type CategorizeExample,
   categorizeTransactions,
-} from '@server/lib/categorize/categorize-transactions.service'
-import { geminiTRPCError } from '@server/lib/gemini-error.util'
-import { gemini } from '@server/lib/gemini.client'
-import { findPendingImport } from '@server/lib/ownership.service'
+} from '@server/services/categorize/categorize-transactions.service'
+import { geminiTRPCError } from '@server/utils/gemini-error.util'
+import { gemini } from '@server/utils/gemini.client'
+import { findPendingImport } from '@server/utils/ownership.service'
 import { createTRPCRouter, protectedProcedure } from '@server/trpc/trpc.config'
 import { LOW_CONFIDENCE_THRESHOLD } from '@shared/transactions/categories.rules'
 import {

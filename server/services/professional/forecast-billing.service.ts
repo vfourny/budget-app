@@ -1,9 +1,9 @@
 import type { BillingKind } from '@server/generated/prisma/enums'
-import type { db as Db } from '@server/lib/db.client'
+import type { db as Db } from '@server/utils/db.client'
 import {
   followingMonthsScope,
   type ForecastScope,
-} from '@server/lib/professional/forecast-scope.util'
+} from '@server/services/professional/forecast-scope.util'
 
 export interface BillingLineInput {
   clientName: string

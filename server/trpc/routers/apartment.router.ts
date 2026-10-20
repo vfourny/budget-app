@@ -1,6 +1,6 @@
 import { ApartmentKind } from '@server/generated/prisma/enums'
-import { appError } from '@server/lib/app-error.util'
-import { findOwnedApartment } from '@server/lib/ownership.service'
+import { appError } from '@server/utils/app-error.util'
+import { findOwnedApartment } from '@server/utils/ownership.service'
 import { apartmentDashboardRouter } from '@server/trpc/routers/apartment-dashboard.router'
 import { apartmentForecastRouter } from '@server/trpc/routers/apartment-forecast.router'
 import { createTRPCRouter, protectedProcedure } from '@server/trpc/trpc.config'
