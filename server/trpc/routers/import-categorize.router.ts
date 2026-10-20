@@ -2,16 +2,16 @@ import type { TransactionCategory } from '@server/generated/prisma/enums'
 import {
   type CategorizeExample,
   categorizeTransactions,
-  LOW_CONFIDENCE_THRESHOLD,
 } from '@server/lib/categorize/categorize-transactions.service'
-import {
-  labelKey,
-  normalizeLabel,
-} from '@server/lib/categorize/normalize-label.util'
 import { geminiTRPCError } from '@server/lib/gemini-error.util'
 import { gemini } from '@server/lib/gemini.client'
 import { findPendingImport } from '@server/lib/ownership.service'
 import { createTRPCRouter, protectedProcedure } from '@server/trpc/trpc.config'
+import { LOW_CONFIDENCE_THRESHOLD } from '@shared/transactions/categories.rules'
+import {
+  labelKey,
+  normalizeLabel,
+} from '@shared/transactions/normalize-label.util'
 import { z } from 'zod'
 
 /**

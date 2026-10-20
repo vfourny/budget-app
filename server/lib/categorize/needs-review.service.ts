@@ -1,9 +1,9 @@
 import type { Prisma } from '@server/generated/prisma/client'
-import { LOW_CONFIDENCE_THRESHOLD } from '@server/lib/categorize/categorize-transactions.service'
+import { LOW_CONFIDENCE_THRESHOLD } from '@shared/transactions/categories.rules'
 
 /**
- * Filtre Prisma des lignes « à vérifier » : sans catégorie, ou proposée par l'IA avec une
- * confiance faible. Une catégorie choisie à la main a `categoryConfidence = null` : « Confirmée ».
+ * Filtre Prisma des lignes « à vérifier » : même règle que `needsReview`
+ * (`shared/transactions/categories.rules.ts`), appliquée en base.
  */
 export const NEEDS_REVIEW_WHERE = {
   OR: [
@@ -11,14 +11,3 @@ export const NEEDS_REVIEW_WHERE = {
     { categoryConfidence: { lt: LOW_CONFIDENCE_THRESHOLD } },
   ],
 } as const satisfies Prisma.TransactionWhereInput
-
-export function needsReview(transaction: {
-  category: unknown
-  categoryConfidence: number | null
-}): boolean {
-  return (
-    transaction.category === null ||
-    (transaction.categoryConfidence !== null &&
-      transaction.categoryConfidence < LOW_CONFIDENCE_THRESHOLD)
-  )
-}
