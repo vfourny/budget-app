@@ -30,7 +30,7 @@ import { regimeOf } from '@shared/professional/regimes'
 
 /**
  * Calcul d'un mois du dashboard Pro : prévisionnel et réel côte à côte. Fonction **pure** (aucun
- * accès base) : toutes les données arrivent dans `input` (voir `server/lib/professional/load-year.service.ts`), ce qui la rend
+ * accès base) : toutes les données arrivent dans `input` (voir `server/services/professional/load-year.service.ts`), ce qui la rend
  * testable et réutilisable (vue année = 12 appels).
  */
 export function computeMonth(input: ProfessionalMonthInput): ProfessionalMonth {

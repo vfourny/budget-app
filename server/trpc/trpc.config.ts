@@ -23,7 +23,7 @@ const t = initTRPC.context<typeof createTRPCContext>().create({
         // Erreurs de validation Zod exposées champ par champ (pour les formulaires).
         zodError:
           error.cause instanceof ZodError ? z.flattenError(error.cause) : null,
-        // Erreur métier : code + paramètres, traduits côté front (voir `server/lib/app-error.util.ts`).
+        // Erreur métier : code + paramètres, traduits côté front (voir `server/utils/app-error.util.ts`).
         appError:
           error.cause instanceof AppErrorCause
             ? { code: error.cause.code, params: error.cause.params }

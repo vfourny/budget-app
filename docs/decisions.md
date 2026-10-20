@@ -74,7 +74,7 @@ Pourquoi le projet est fait comme ça. Une décision qui change : la mettre à j
   le reste) pour que le solde calculé reste égal au solde bancaire. Un appartement ne se supprime pas tant qu'il porte des
   transactions ou des relevés (`onDelete: Restrict`).
 - **Solde du compte perso (2026-10-19)** : pas de solde stocké par mois. On saisit des **repères** (`AccountBalance` :
-  solde réel en fin de mois) et le reste se calcule (`shared/personal/balance.util.ts`, pur) : repère le plus récent +
+  solde réel en fin de mois) et le reste se calcule : repère le plus récent +
   transactions validées des mois suivants ; début de mois = fin du mois précédent. Un repère sur un mois l'emporte sur le
   calcul, qui sert alors à afficher l'écart (import manquant, doublon…). Sans repère : solde « non renseigné ». Le solde
   courant des CSV (colonne « Solde » BoursoBank) n'est pas exploité. Les appartements gardent leur solde au 1er janvier

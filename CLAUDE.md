@@ -103,11 +103,11 @@ nitro.config.ts        # serverDir: ./server
   les textes sont dans `@/lib/i18n/fr`. Équivalent pro : `shared/professional/professional.rules.ts` (TVA par charge, frais mixtes, groupes
   du prévisionnel) et `shared/transactions/categories.rules.ts` (catégories proposées par type de compte).
 - **Calculs du dashboard Appartements** : même principe, purs et testés dans `shared/apartments/` (`compute-month.util`, `compute-period.util`,
-  `thresholds.util`, `period.util`, `loan.util`) ; requêtes dans `server/lib/apartments/load-period.service.ts`, assemblage dans `build-view.service.ts`. Règles (catégorie → ligne du tableau,
+  `thresholds.util`, `period.util`, `loan.util`) ; requêtes dans `server/services/apartments/load-period.service.ts`, assemblage dans `build-view.service.ts`. Règles (catégorie → ligne du tableau,
   tolérance de rapprochement) dans `shared/apartments/apartment.rules.ts`, seuils LMNP dans `shared/fiscal/lmnp.rules.ts` ; prêt dans `shared/apartments/loan.util.ts`. Référence métier :
   `docs/fonctionnel.md` › Appartements (R1 à R12).
 - **Calculs du dashboard Pro** : fonctions **pures** dans `shared/professional/` (`compute-month.util.ts`, `compute-year.util.ts`,
-  `amounts.util.ts`), donc testées à 100 % ; les requêtes restent dans `server/lib/professional/load-year.service.ts`. Un statut
+  `amounts.util.ts`), donc testées à 100 % ; les requêtes restent dans `server/services/professional/load-year.service.ts`. Un statut
   juridique = un `ProfessionalRegime` (`shared/professional/regimes/`).
 - **Données** : toujours via tRPC + TanStack Query. **Pas de `fetch` dans un `useEffect`.**
   `useEffect` est réservé à la synchro avec un système externe (ESLint le signale sinon).
