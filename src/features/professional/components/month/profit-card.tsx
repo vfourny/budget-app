@@ -11,7 +11,7 @@ import {
 import type {
   ForecastActual,
   ProfessionalMonth,
-} from '@server/lib/professional/professional.type'
+} from '@shared/professional/professional.type'
 
 import { InfoTip } from '@/components/info-tip'
 import { AmountFigure } from '@/features/professional/components/amount-figure'

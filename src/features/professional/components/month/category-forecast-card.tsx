@@ -1,6 +1,6 @@
 import { Paper, Title } from '@mantine/core'
 import type { TransactionCategory } from '@server/generated/prisma/enums'
-import type { ProfessionalMonth } from '@server/lib/professional/professional.type'
+import type { ProfessionalMonth } from '@shared/professional/professional.type'
 
 import {
   ForecastTable,

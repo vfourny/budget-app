@@ -1,5 +1,5 @@
 import { Paper, SimpleGrid, Text, Title, Tooltip } from '@mantine/core'
-import type { ProfessionalMonth } from '@server/lib/professional/professional.type'
+import type { ProfessionalMonth } from '@shared/professional/professional.type'
 
 import { formatCents, monthName, shortMonthName } from '@/lib/format'
 import { fr, LOCALE } from '@/lib/i18n/fr'

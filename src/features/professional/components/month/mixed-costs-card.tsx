@@ -1,9 +1,9 @@
 import { Badge, Group, Paper, Stack, Text, Title } from '@mantine/core'
+import { MIXED_COSTS_RATIO } from '@shared/professional/professional.rules'
 import type {
   MixedCostRow,
   ProfessionalMonth,
-} from '@server/lib/professional/professional.type'
-import { MIXED_COSTS_RATIO } from '@shared/professional/professional.rules'
+} from '@shared/professional/professional.type'
 
 import { InfoTip } from '@/components/info-tip'
 import { TargetGauge } from '@/components/target-gauge'
