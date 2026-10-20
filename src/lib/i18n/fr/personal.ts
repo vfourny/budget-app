@@ -1,10 +1,3 @@
-/** Abréviation du mois (3 lettres, sans point final). */
-function monthShort(month: number): string {
-  return new Intl.DateTimeFormat('fr', { month: 'short' }).format(
-    new Date(2000, month - 1, 1),
-  )
-}
-
 /** Dashboard Perso. */
 export const personal = {
   eyebrow: 'Budget perso',
