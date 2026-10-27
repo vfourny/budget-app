@@ -1,5 +1,17 @@
 # Changelog
 
+## [0.4.0](https://github.com/vfourny/budget-app/compare/v0.3.0...v0.4.0) (2026-10-27)
+
+
+### Features
+
+* **professional:** include next year ([#131](https://github.com/vfourny/budget-app/issues/131)) ([90f3200](https://github.com/vfourny/budget-app/commit/90f320023f39f749c5feeb0c7338b87b6f53d41d))
+
+
+### Bug Fixes
+
+* **professional:** include forecast in yearly VAT KPI ([#133](https://github.com/vfourny/budget-app/issues/133)) ([5cbbb16](https://github.com/vfourny/budget-app/commit/5cbbb16a0e6a33df5d0f431b3936192d775913c5))
+
 ## [0.3.0](https://github.com/vfourny/budget-app/compare/v0.2.0...v0.3.0) (2026-10-27)
 
 
