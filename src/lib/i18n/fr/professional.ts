@@ -276,15 +276,23 @@ export const professional = {
   year: {
     kpis: {
       revenue: 'CA HT final (réel + prévu restant)',
+      revenueTip:
+        "CA HT final = réel encaissé à ce jour + prévisionnel des mois restants. Les mois passés comptent le réel (ou le prévu s'il n'y a pas encore de réel), les mois futurs comptent le prévu.",
       revenueSub: (actual: string, forecast: string) =>
         `Réel à ce jour ${actual} · prévu d'origine ${forecast}`,
       profit: 'Bénéfice final',
+      profitTip:
+        "Bénéfice = CA HT − charges pro − salaires bruts − cotisations patronales, cumulé sur l'année. « Final » = réel des mois passés + prévisionnel des mois à venir. Avant IR des associés.",
       profitSub: 'Avant IR des associés',
       vat: 'TVA à reverser (réel + prévu)',
+      vatTip:
+        "TVA cumulée à reverser sur l'année : réel des mois importés + prévisionnel des mois restants. Rappel : la TVA d'un mois se déclare le mois suivant.",
       vatSub: (from: string, to: string) => `réel ${from} → ${to}`,
       vatForecast: 'Prévisionnel — pas encore de réel',
       noActual: 'Pas encore de réel',
       mileage: 'Frais km à déclarer',
+      mileageTip:
+        "Total des frais kilométriques à déclarer sur l'année (km × barème). Montant à déclarer, pas une transaction bancaire. Le solde des frais mixtes encore dus par Stygma est indiqué en dessous.",
       mileageSub: (km: string, left: string) =>
         `${km} km sur l'année · frais mixtes restant dus : ${left}`,
     },
@@ -325,7 +333,8 @@ export const professional = {
         forecastRevenue: "CA HT · prévu d'origine",
         revenue: 'CA HT · final',
         charges: 'Charges pro',
-        payroll: 'Salaires + cotisations patronales',
+        grossSalary: 'Salaires bruts',
+        employerContributions: 'Cotisations patronales',
         socialCharges: 'Charges sociales sur bénéfice',
         profit: 'Bénéfice',
         bnc: 'Revenus BNC prélevés',

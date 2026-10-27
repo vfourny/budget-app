@@ -1,7 +1,8 @@
-import { Grid } from '@mantine/core'
+import { Grid, Group } from '@mantine/core'
 import { sumFinal } from '@shared/professional/amounts.util'
 import type { ProfessionalMonth } from '@shared/professional/professional.type'
 
+import { InfoTip } from '@/components/info-tip'
 import { KpiCard } from '@/components/kpi-card'
 import { formatCents, monthName } from '@/lib/format'
 import { fr, LOCALE } from '@/lib/i18n/fr'
@@ -26,6 +27,7 @@ export function YearKpis({ months }: { months: readonly ProfessionalMonth[] }) {
   const cards = [
     {
       label: text.revenue,
+      tip: text.revenueTip,
       value: formatCents(sumFinal(months.map((month) => month.revenue))),
       color: 'gold.6',
       hint: text.revenueSub(
@@ -42,11 +44,13 @@ export function YearKpis({ months }: { months: readonly ProfessionalMonth[] }) {
     },
     {
       label: text.profit,
+      tip: text.profitTip,
       value: formatCents(sumFinal(months.map((month) => month.profit))),
       hint: text.profitSub,
     },
     {
       label: text.vat,
+      tip: text.vatTip,
       value: formatCents(sumFinal(months.map((month) => month.vat.due))),
       color: 'blue.3',
       hint: lastActual
@@ -55,6 +59,7 @@ export function YearKpis({ months }: { months: readonly ProfessionalMonth[] }) {
     },
     {
       label: text.mileage,
+      tip: text.mileageTip,
       value: formatCents(sumFinal(months.map((month) => month.mileage.amount))),
       hint: text.mileageSub(kmFormat.format(km), formatCents(mixedLeft)),
     },
@@ -67,7 +72,15 @@ export function YearKpis({ months }: { months: readonly ProfessionalMonth[] }) {
           <KpiCard
             color={card.color}
             hint={card.hint}
-            label={card.label}
+            label={
+              <Group gap={4}>
+                {card.label}
+                <InfoTip
+                  ariaLabel={fr.professional.howComputed(card.label)}
+                  label={card.tip}
+                />
+              </Group>
+            }
             value={card.value}
           />
         </Grid.Col>
