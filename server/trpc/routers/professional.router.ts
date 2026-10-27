@@ -32,6 +32,7 @@ export const professionalRouter = createTRPCRouter({
     ])
     const years = new Set([
       currentYearMonth().year,
+      currentYearMonth().year + 1,
       ...transactionYears.map((row) => row.year),
       ...billingYears.map((row) => row.year),
     ])
