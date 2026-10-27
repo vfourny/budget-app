@@ -280,8 +280,9 @@ export const professional = {
         `Réel à ce jour ${actual} · prévu d'origine ${forecast}`,
       profit: 'Bénéfice final',
       profitSub: 'Avant IR des associés',
-      vat: 'TVA à reverser (réel cumulé)',
-      vatSub: (from: string, to: string) => `${from} → ${to}`,
+      vat: 'TVA à reverser (réel + prévu)',
+      vatSub: (from: string, to: string) => `réel ${from} → ${to}`,
+      vatForecast: 'Prévisionnel — pas encore de réel',
       noActual: 'Pas encore de réel',
       mileage: 'Frais km à déclarer',
       mileageSub: (km: string, left: string) =>
