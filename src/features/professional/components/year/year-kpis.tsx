@@ -1,5 +1,5 @@
 import { Grid } from '@mantine/core'
-import { finalOf, sumFinal } from '@shared/professional/amounts.util'
+import { sumFinal } from '@shared/professional/amounts.util'
 import type { ProfessionalMonth } from '@shared/professional/professional.type'
 
 import { KpiCard } from '@/components/kpi-card'
@@ -47,16 +47,11 @@ export function YearKpis({ months }: { months: readonly ProfessionalMonth[] }) {
     },
     {
       label: text.vat,
-      value: formatCents(
-        actualMonths.reduce(
-          (total, month) => total + finalOf(month.vat.due),
-          0,
-        ),
-      ),
+      value: formatCents(sumFinal(months.map((month) => month.vat.due))),
       color: 'blue.3',
       hint: lastActual
         ? text.vatSub(monthName(1), monthName(lastActual.month))
-        : text.noActual,
+        : text.vatForecast,
     },
     {
       label: text.mileage,
