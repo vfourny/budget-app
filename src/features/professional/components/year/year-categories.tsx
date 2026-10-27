@@ -10,7 +10,7 @@ import {
   ForecastTable,
   type ForecastTableGroup,
 } from '@/features/professional/components/forecast-table'
-import { formatCents, monthName } from '@/lib/format'
+import { monthName } from '@/lib/format'
 import { fr } from '@/lib/i18n/fr'
 
 const EMPTY_AMOUNT: ForecastActual = { forecast: 0, actual: null }
@@ -25,10 +25,7 @@ function cumulate(
 ) {
   const actualMonths = months.filter((month) => month.hasActual)
   const amount: ForecastActual = {
-    forecast: actualMonths.reduce(
-      (total, month) => total + pick(month).forecast,
-      0,
-    ),
+    forecast: months.reduce((total, month) => total + pick(month).forecast, 0),
     actual:
       actualMonths.length > 0
         ? actualMonths.reduce(
@@ -37,16 +34,7 @@ function cumulate(
           )
         : null,
   }
-  const yearForecast = months.reduce(
-    (total, month) => total + pick(month).forecast,
-    0,
-  )
-  return {
-    amount,
-    sub: fr.professional.year.categories.yearForecast(
-      formatCents(yearForecast),
-    ),
-  }
+  return { amount }
 }
 
 function row(

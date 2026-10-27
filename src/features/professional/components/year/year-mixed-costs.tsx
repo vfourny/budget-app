@@ -26,16 +26,22 @@ export function YearMixedCosts({
       }, 0)
     const due = sum(actualMonths, (row) => row.due.actual ?? 0)
     const paid = sum(actualMonths, (row) => row.paidCents ?? 0)
+    const dueForecast = sum(months, (row) => row.due.forecast)
     return {
       category,
-      yearForecast: sum(months, (row) => row.due.actual ?? row.due.forecast),
+      yearForecast: sum(months, (row) => row.due.forecast),
       spent: sum(actualMonths, (row) => row.spent.actual ?? 0),
       due,
       paid,
       left: Math.max(0, due - paid),
+      leftForecast: Math.max(0, dueForecast - paid),
     }
   })
   const left = lines.reduce((total, line) => total + line.left, 0)
+  const leftForecast = lines.reduce(
+    (total, line) => total + line.leftForecast,
+    0,
+  )
 
   return (
     <Paper
@@ -71,6 +77,9 @@ export function YearMixedCosts({
             <Text c={line.left > 0 ? 'red.4' : 'teal.4'} mb={4} size="sm">
               {text.paid(formatCents(line.paid), formatCents(line.left))}
             </Text>
+            <Text c="dimmed" size="xs">
+              {text.leftForecast(formatCents(line.leftForecast))}
+            </Text>
             <TargetGauge
               ariaLabel={fr.professional.mixedCosts.gaugeAria(
                 fr.categories[line.category],
@@ -84,19 +93,26 @@ export function YearMixedCosts({
           </div>
         ))}
       </Stack>
-      <Group
-        justify="space-between"
+      <Stack
+        gap={4}
         mt={20}
         pt={12}
         style={{ borderTop: '1px solid var(--app-border)' }}
       >
-        <Text c="dimmed" size="sm">
-          {text.left}
-        </Text>
-        <Text c={left > 0 ? 'red.4' : 'teal.4'} fw={700}>
-          {formatCents(left)}
-        </Text>
-      </Group>
+        <Group justify="space-between">
+          <Text c="dimmed" size="sm">
+            {text.left}
+          </Text>
+          <Text c={left > 0 ? 'red.4' : 'teal.4'} fw={700}>
+            {formatCents(left)}
+          </Text>
+        </Group>
+        <Group justify="space-between">
+          <Text c="dimmed" size="xs">
+            {text.leftForecast(formatCents(leftForecast))}
+          </Text>
+        </Group>
+      </Stack>
     </Paper>
   )
 }

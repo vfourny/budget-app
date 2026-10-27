@@ -302,7 +302,9 @@ export const professional = {
       yearForecast: (amount: string) => `Prévu année : ${amount}`,
       spent: (amount: string) => `Payé en perso : ${amount}`,
       due: (amount: string) => `Dû : ${amount}`,
-      paid: (paid: string, left: string) => `${paid} remboursé · reste ${left}`,
+      paid: (paid: string, left: string) =>
+        `${paid} remboursé · reste réel ${left}`,
+      leftForecast: (amount: string) => `Reste prévisionnel : ${amount}`,
       left: 'Reste à rembourser (année)',
     },
     mileage: {
@@ -317,7 +319,7 @@ export const professional = {
       subtitle:
         'en € HT · mois à venir = prévisionnel (italique) · « Final » = réel + prévisionnel restant',
       line: 'Poste',
-      final: 'Final',
+      final: 'Total',
       rows: {
         forecastRevenue: "CA HT · prévu d'origine",
         revenue: 'CA HT · final',
