@@ -27,10 +27,12 @@ const ROWS: {
   },
   { key: 'charges', value: (month) => finalOf(month.charges.total) },
   {
-    key: 'payroll',
-    value: (month) =>
-      finalOf(month.remuneration.grossSalary) +
-      finalOf(month.remuneration.employerContributions),
+    key: 'grossSalary',
+    value: (month) => finalOf(month.remuneration.grossSalary),
+  },
+  {
+    key: 'employerContributions',
+    value: (month) => finalOf(month.remuneration.employerContributions),
   },
   {
     key: 'socialCharges',
