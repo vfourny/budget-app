@@ -18,8 +18,8 @@ export const professionalRouter = createTRPCRouter({
 
   /**
    * Mois proposés par le sélecteur (du plus récent au plus ancien) : les 12 mois de chaque année qui
-   * a des données pro (relevé validé ou facturation) et de l'année en cours. Les mois à venir sont
-   * inclus : ils affichent le prévisionnel.
+   * a des données pro (relevé validé ou facturation), de l'année en cours et de la suivante (pour
+   * préparer le prévisionnel). Les mois à venir sont inclus : ils affichent le prévisionnel.
    */
   periods: protectedProcedure.query(async ({ ctx }) => {
     const userId = ctx.session.user.id
@@ -32,6 +32,7 @@ export const professionalRouter = createTRPCRouter({
     ])
     const years = new Set([
       currentYearMonth().year,
+      currentYearMonth().year + 1,
       ...transactionYears.map((row) => row.year),
       ...billingYears.map((row) => row.year),
     ])
