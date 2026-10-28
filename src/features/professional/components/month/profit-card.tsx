@@ -141,18 +141,6 @@ export function ProfitCard({ month }: { month: ProfessionalMonth }) {
         <Stack gap={16}>
           <Divider color="var(--app-border)" />
           <SimpleGrid cols={{ base: 1, sm: 3 }} spacing={16}>
-            <AmountFigure
-              amount={month.remuneration.bncWithdrawal}
-              label={text.bnc}
-              tip={text.bncTip}
-            />
-            <AmountFigure
-              amount={month.retained}
-              color="teal.4"
-              goal="atLeast"
-              label={text.retained}
-              tip={text.retainedTip}
-            />
             <Stack gap={2}>
               <AmountFigure
                 amount={month.profitSocialCharges}
@@ -166,6 +154,18 @@ export function ProfitCard({ month }: { month: ProfessionalMonth }) {
                 )}
               </Text>
             </Stack>
+            <AmountFigure
+              amount={month.remuneration.bncWithdrawal}
+              label={text.bnc}
+              tip={text.bncTip}
+            />
+            <AmountFigure
+              amount={month.retained}
+              color="teal.4"
+              goal="atLeast"
+              label={text.retained}
+              tip={text.retainedTip}
+            />
           </SimpleGrid>
         </Stack>
       </Stack>
