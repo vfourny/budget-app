@@ -14,38 +14,52 @@ const ROWS: {
   color?: string
   strong?: boolean
 }[] = [
+  // Revenus (vert)
   {
     key: 'forecastRevenue',
     value: (month) => month.revenue.forecast,
-    color: 'dimmed',
+    color: 'teal.5',
   },
   {
     key: 'revenue',
     value: (month) => finalOf(month.revenue),
-    color: 'gold.6',
+    color: 'teal.5',
     strong: true,
   },
-  { key: 'charges', value: (month) => finalOf(month.charges.total) },
+  // Charges liées à la structure (rouge)
+  {
+    key: 'charges',
+    value: (month) => finalOf(month.charges.total),
+    color: 'red.4',
+  },
   {
     key: 'grossSalary',
     value: (month) => finalOf(month.remuneration.grossSalary),
+    color: 'red.4',
   },
   {
     key: 'employerContributions',
     value: (month) => finalOf(month.remuneration.employerContributions),
+    color: 'red.4',
   },
   {
     key: 'socialCharges',
     value: (month) => finalOf(month.profitSocialCharges),
     color: 'red.4',
   },
+  // Résultat / revenus perso (vert)
   {
     key: 'profit',
     value: (month) => finalOf(month.profit),
-    color: 'gold.6',
+    color: 'teal.5',
     strong: true,
   },
-  { key: 'bnc', value: (month) => finalOf(month.remuneration.bncWithdrawal) },
+  {
+    key: 'bnc',
+    value: (month) => finalOf(month.remuneration.bncWithdrawal),
+    color: 'teal.5',
+  },
+  // Neutres
   { key: 'vat', value: (month) => finalOf(month.vat.due), color: 'blue.3' },
   { key: 'mileage', value: (month) => finalOf(month.mileage.amount) },
 ]
