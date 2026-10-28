@@ -298,6 +298,7 @@ export const professional = {
     },
     categories: {
       title: "Catégories · prévu vs réel sur l'année",
+      tip: "Cumul de chaque poste sur les mois ayant un réel importé. Prévu = somme des prévus de toute l'année. Réel = somme des réels des mois importés. Écart = réel − prévu (vert si favorable, rouge si défavorable).",
       subtitle: (from: string, to: string) =>
         `Prévu et réel cumulés sur les mois avec réel (${from} → ${to})`,
       noActual:
@@ -325,8 +326,9 @@ export const professional = {
     },
     statement: {
       title: 'Compte de résultat simplifié',
+      tip: "Tableau récapitulatif de l'année : une colonne par mois + une colonne « Total ». Mois passés = réel (valeurs normales), mois à venir = prévisionnel (italique estompé). « Total » = réel des mois passés + prévisionnel des mois restants.",
       subtitle:
-        'en € HT · mois à venir = prévisionnel (italique) · « Final » = réel + prévisionnel restant',
+        'en € HT · mois à venir = prévisionnel (italique) · « Total » = réel + prévisionnel restant',
       line: 'Poste',
       final: 'Total',
       rows: {
@@ -340,6 +342,26 @@ export const professional = {
         bnc: 'Revenus BNC prélevés',
         vat: 'TVA à reverser',
         mileage: 'Frais km à déclarer',
+      },
+      rowTips: {
+        forecastRevenue:
+          "CA HT prévu au moment de la saisie du prévisionnel. Sert de référence fixe pour mesurer l'écart avec le réel.",
+        revenue:
+          "CA HT final = réel des mois passés + prévisionnel des mois à venir. C'est le chiffre d'affaires hors taxes, avant TVA.",
+        charges:
+          'Total des charges pro (hors salaires, cotisations et TVA) : RC Pro, comptable, logiciels, frais bancaires, matériel, restauration, déplacements, frais mixtes remboursés.',
+        grossSalary:
+          "Salaire brut que Stygma te verse en tant que président. C'est une charge de la société (avant retenues salariales et prélèvement à la source).",
+        employerContributions:
+          'Part employeur des cotisations sociales, en plus du salaire brut. Réparties entre URSSAF, retraite complémentaire, complémentaire santé et prévoyance.',
+        socialCharges:
+          'Taux × bénéfice (Réglages › Pro). Base = ta quote-part du bénéfice, retirée ou non. À mettre de côté : se règle en perso.',
+        profit:
+          "CA HT − charges pro − salaires bruts − cotisations patronales. C'est ce sur quoi tu es imposé (quote-part de bénéfice).",
+        bnc: 'Virements de Stygma vers ton compte perso (catégorie « BNC »). Prélèvement sur le bénéfice, pas une charge : ne change pas le bénéfice, seulement la trésorerie.',
+        vat: "TVA collectée − TVA déductible. Pour des prestations de services, exigible à l'encaissement (pas à la facturation). Se déclare le mois suivant.",
+        mileage:
+          'Kilomètres × barème kilométrique (Réglages › Pro). Montant à déclarer, pas une transaction bancaire.',
       },
     },
     chart: {

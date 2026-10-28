@@ -1,10 +1,11 @@
-import { Paper, Text, Title } from '@mantine/core'
+import { Group, Paper, Text, Title } from '@mantine/core'
 import type { TransactionCategory } from '@server/generated/prisma/enums'
 import type {
   ForecastActual,
   ProfessionalMonth,
 } from '@shared/professional/professional.type'
 
+import { InfoTip } from '@/components/info-tip'
 import {
   type ForecastRow,
   ForecastTable,
@@ -161,7 +162,13 @@ export function YearCategories({
       radius="lg"
       withBorder
     >
-      <Title order={2}>{text.title}</Title>
+      <Group gap={8} mb={4}>
+        <Title order={2}>{text.title}</Title>
+        <InfoTip
+          ariaLabel={fr.professional.howComputed(text.title)}
+          label={text.tip}
+        />
+      </Group>
       <Text c="dimmed" mb={8} size="xs">
         {last
           ? text.subtitle(monthName(1), monthName(last.month))

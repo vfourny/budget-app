@@ -1,7 +1,8 @@
-import { Paper, Table, Text, Title } from '@mantine/core'
+import { Group, Paper, Table, Text, Title } from '@mantine/core'
 import { finalOf } from '@shared/professional/amounts.util'
 import type { ProfessionalMonth } from '@shared/professional/professional.type'
 
+import { InfoTip } from '@/components/info-tip'
 import { formatEurosRounded, shortMonthName } from '@/lib/format'
 import { fr } from '@/lib/i18n/fr'
 
@@ -80,7 +81,13 @@ export function IncomeStatement({
       radius="lg"
       withBorder
     >
-      <Title order={2}>{text.title}</Title>
+      <Group gap={8} mb={4}>
+        <Title order={2}>{text.title}</Title>
+        <InfoTip
+          ariaLabel={fr.professional.howComputed(text.title)}
+          label={text.tip}
+        />
+      </Group>
       <Text c="dimmed" mb={16} size="xs">
         {text.subtitle}
       </Text>
@@ -106,7 +113,15 @@ export function IncomeStatement({
             {ROWS.map((row) => (
               <Table.Tr key={row.key}>
                 <Table.Th c={row.color} fw={row.strong ? 700 : 500} scope="row">
-                  {text.rows[row.key]}
+                  <Group gap={4} wrap="nowrap">
+                    {text.rows[row.key]}
+                    <InfoTip
+                      ariaLabel={fr.professional.howComputed(
+                        text.rows[row.key],
+                      )}
+                      label={text.rowTips[row.key]}
+                    />
+                  </Group>
                 </Table.Th>
                 {months.map((month) => (
                   <Table.Td
