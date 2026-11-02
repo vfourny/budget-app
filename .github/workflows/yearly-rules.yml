@@ -126,7 +126,7 @@ jobs:
       - name: Fill the missing year with Gemini
         if: steps.existing.outputs.open == 'false'
         id: gemini
-        uses: google-github-actions/run-gemini-cli@v0.1.9
+        uses: google-github-actions/run-gemini-cli@f77273f4c914e4bf38440cf36a0369cb64a37489 # v0.1.22
         with:
           gemini_api_key: ${{ secrets.GEMINI_API_KEY }}
           # Outils limités : lire, éditer un fichier existant, chercher sur le web. Pas de shell.
