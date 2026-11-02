@@ -29,11 +29,11 @@ jobs:
       year: ${{ steps.check.outputs.year }}
       issue: ${{ steps.issue.outputs.number }}
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5
 
-      - uses: pnpm/action-setup@v4
+      - uses: pnpm/action-setup@b906affcce14559ad1aafd4ab0e942779e9f58b1 # v4
 
-      - uses: actions/setup-node@v5
+      - uses: actions/setup-node@a0853c24544627f65ddf259abe73b1d18a591444 # v5
         with:
           node-version-file: .nvmrc
           cache: pnpm
@@ -91,7 +91,7 @@ jobs:
       BRANCH: chore/yearly-rules-${{ needs.check.outputs.year }}
       GH_TOKEN: ${{ github.token }}
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5
 
       - name: Skip if a PR is already open
         id: existing
@@ -99,10 +99,10 @@ jobs:
           count=$(gh pr list --head "$BRANCH" --state open --json number --jq 'length')
           echo "open=$([ "$count" -gt 0 ] && echo true || echo false)" >> "$GITHUB_OUTPUT"
 
-      - uses: pnpm/action-setup@v4
+      - uses: pnpm/action-setup@b906affcce14559ad1aafd4ab0e942779e9f58b1 # v4
         if: steps.existing.outputs.open == 'false'
 
-      - uses: actions/setup-node@v5
+      - uses: actions/setup-node@a0853c24544627f65ddf259abe73b1d18a591444 # v5
         if: steps.existing.outputs.open == 'false'
         with:
           node-version-file: .nvmrc
@@ -126,7 +126,7 @@ jobs:
       - name: Fill the missing year with Gemini
         if: steps.existing.outputs.open == 'false'
         id: gemini
-        uses: google-github-actions/run-gemini-cli@v0.1.9
+        uses: google-github-actions/run-gemini-cli@e061df3d60a224aed843cdac838189d1f6bff576 # v0.1.9
         with:
           gemini_api_key: ${{ secrets.GEMINI_API_KEY }}
           # Outils limités : lire, éditer un fichier existant, chercher sur le web. Pas de shell.
